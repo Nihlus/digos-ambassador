@@ -82,12 +82,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                     newRoleplayName
                 );
 
-                if (!result.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(result);
-                }
-
-                return new ConfirmationMessage("Roleplay name set.");
+                return !result.IsSuccess
+                    ? Result<UserMessage>.FromError(result)
+                    : new ConfirmationMessage("Roleplay name set.");
             }
 
             /// <summary>
@@ -107,12 +104,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             )
             {
                 var result = await _discordRoleplays.SetRoleplaySummaryAsync(roleplay, newRoleplaySummary);
-                if (!result.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(result);
-                }
 
-                return new ConfirmationMessage("Roleplay summary set.");
+                return !result.IsSuccess
+                    ? Result<UserMessage>.FromError(result)
+                    : new ConfirmationMessage("Roleplay summary set.");
             }
 
             /// <summary>
@@ -133,12 +128,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             )
             {
                 var result = await _discordRoleplays.SetRoleplayIsNSFWAsync(roleplay, isNSFW);
-                if (!result.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(result);
-                }
 
-                return new ConfirmationMessage($"Roleplay set to {(isNSFW ? "NSFW" : "SFW")}");
+                return !result.IsSuccess
+                    ? Result<UserMessage>.FromError(result)
+                    : new ConfirmationMessage($"Roleplay set to {(isNSFW ? "NSFW" : "SFW")}");
             }
 
             /// <summary>

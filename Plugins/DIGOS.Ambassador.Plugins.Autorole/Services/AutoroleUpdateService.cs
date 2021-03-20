@@ -94,12 +94,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             {
                 // If the role can't be found any longer, we disable it
                 var disableAutoroleAsync = await _autoroles.DisableAutoroleAsync(autorole, ct);
-                if (!disableAutoroleAsync.IsSuccess)
-                {
-                    return Result<AutoroleUpdateStatus>.FromError(disableAutoroleAsync);
-                }
 
-                return Disabled;
+                return !disableAutoroleAsync.IsSuccess
+                    ? Result<AutoroleUpdateStatus>.FromError(disableAutoroleAsync)
+                    : Disabled;
             }
 
             var getIsUserQualified = await _autoroles.IsUserQualifiedForAutoroleAsync(autorole, userID, ct);
@@ -155,12 +153,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 // Remove any existing affirmation
                 var confirmation = getConfirmation.Entity;
                 var removeConfirmation = await _autoroles.RemoveAutoroleConfirmationAsync(confirmation, ct);
-                if (!removeConfirmation.IsSuccess)
-                {
-                    return Result<AutoroleUpdateStatus>.FromError(removeConfirmation);
-                }
 
-                return Removed;
+                return !removeConfirmation.IsSuccess
+                    ? Result<AutoroleUpdateStatus>.FromError(removeConfirmation)
+                    : Removed;
             }
 
             // At this point, the user doesn't have the role, and either is or is not qualified.
@@ -193,12 +189,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             var addRole = await _guildAPI.AddGuildMemberRoleAsync(guildID, userID, autorole.DiscordRoleID, ct);
-            if (!addRole.IsSuccess)
-            {
-                return Result<AutoroleUpdateStatus>.FromError(addRole);
-            }
 
-            return Applied;
+            return !addRole.IsSuccess
+                ? Result<AutoroleUpdateStatus>.FromError(addRole)
+                : Applied;
         }
     }
 }

@@ -164,12 +164,9 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
             Server server
         )
         {
-            if (server.Description.IsNullOrWhitespace())
-            {
-                return new GenericError("No description set.");
-            }
-
-            return Result<string>.FromSuccess(server.Description);
+            return server.Description.IsNullOrWhitespace()
+                ? new GenericError("No description set.")
+                : Result<string>.FromSuccess(server.Description);
         }
 
         /// <summary>
@@ -227,12 +224,9 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
             Server server
         )
         {
-            if (server.JoinMessage.IsNullOrWhitespace())
-            {
-                return new GenericError("No join message set.");
-            }
-
-            return Result<string>.FromSuccess(server.JoinMessage);
+            return server.JoinMessage.IsNullOrWhitespace()
+                ? new GenericError("No join message set.")
+                : Result<string>.FromSuccess(server.JoinMessage);
         }
 
         /// <summary>

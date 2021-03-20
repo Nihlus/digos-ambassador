@@ -454,12 +454,9 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
                 hasPermission = requiredPermission.IsGrantedByDefaultTo(target);
             }
 
-            if (hasPermission)
-            {
-                return Result.FromSuccess();
-            }
-
-            return new GenericError("Permission denied.");
+            return hasPermission
+                ? Result.FromSuccess()
+                : new GenericError("Permission denied.");
         }
 
         /// <summary>

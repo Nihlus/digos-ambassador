@@ -143,12 +143,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         public async Task<Result<UserMessage>> EnableAutoroleAsync(AutoroleConfiguration autorole)
         {
             var enableAutorole = await _autoroles.EnableAutoroleAsync(autorole);
-            if (!enableAutorole.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(enableAutorole);
-            }
 
-            return new ConfirmationMessage("Autorole enabled.");
+            return !enableAutorole.IsSuccess
+                ? Result<UserMessage>.FromError(enableAutorole)
+                : new ConfirmationMessage("Autorole enabled.");
         }
 
         /// <summary>
@@ -163,12 +161,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         public async Task<Result<UserMessage>> DisableAutoroleAsync(AutoroleConfiguration autorole)
         {
             var disableAutorole = await _autoroles.DisableAutoroleAsync(autorole);
-            if (!disableAutorole.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(disableAutorole);
-            }
 
-            return new ConfirmationMessage("Autorole disabled.");
+            return !disableAutorole.IsSuccess
+                ? Result<UserMessage>.FromError(disableAutorole)
+                : new ConfirmationMessage("Autorole disabled.");
         }
 
         /// <summary>
@@ -277,12 +273,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         )
         {
             var confirmResult = await _autoroles.ConfirmAutoroleAsync(autorole, user.ID);
-            if (!confirmResult.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(confirmResult);
-            }
 
-            return new ConfirmationMessage("Qualification affirmed.");
+            return !confirmResult.IsSuccess
+                ? Result<UserMessage>.FromError(confirmResult)
+                : new ConfirmationMessage("Qualification affirmed.");
         }
 
         /// <summary>
@@ -297,12 +291,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         public async Task<Result<UserMessage>> AffirmAutoroleForAllAsync(AutoroleConfiguration autorole)
         {
             var affirmResult = await _autoroles.AffirmAutoroleForAllAsync(autorole);
-            if (!affirmResult.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(affirmResult);
-            }
 
-            return new ConfirmationMessage("Qualifications confirmed.");
+            return !affirmResult.IsSuccess
+                ? Result<UserMessage>.FromError(affirmResult)
+                : new ConfirmationMessage("Qualifications confirmed.");
         }
 
         /// <summary>
@@ -322,12 +314,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         )
         {
             var denyResult = await _autoroles.DenyAutoroleAsync(autorole, user.ID);
-            if (!denyResult.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(denyResult);
-            }
 
-            return new ConfirmationMessage("Qualification denied.");
+            return !denyResult.IsSuccess
+                ? Result<UserMessage>.FromError(denyResult)
+                : new ConfirmationMessage("Qualification denied.");
         }
 
         /// <summary>

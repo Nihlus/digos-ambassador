@@ -219,17 +219,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return updateNickname;
             }
 
-            var updateRoles = await _characterRoles.UpdateUserRolesAsync
-            (
-                guildID, userID, getCurrentCharacter.Entity, ct
-            );
-
-            if (!updateRoles.IsSuccess)
-            {
-                return updateRoles;
-            }
-
-            return Result.FromSuccess();
+            return await _characterRoles.UpdateUserRolesAsync(guildID, userID, getCurrentCharacter.Entity, ct);
         }
 
         /// <summary>
@@ -708,13 +698,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             var originalCharacter = getOriginalCharacter.IsSuccess ? getOriginalCharacter.Entity : null;
-            var updateRoles = await _characterRoles.UpdateUserRolesAsync(guildID, userID, originalCharacter, ct);
-            if (!updateRoles.IsSuccess)
-            {
-                return updateRoles;
-            }
-
-            return Result.FromSuccess();
+            return await _characterRoles.UpdateUserRolesAsync(guildID, userID, originalCharacter, ct);
         }
 
         /// <summary>
@@ -794,12 +778,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                     );
                 }
 
-                if (rre.DiscordError.Code is not DiscordError.MissingPermission)
-                {
-                    return modifyNickname;
-                }
-
-                return new UserError("I don't have permission to set the user's nickname.");
+                return rre.DiscordError.Code is not DiscordError.MissingPermission
+                    ? modifyNickname
+                    : new UserError("I don't have permission to set the user's nickname.");
             }
 
             return modifyNickname;

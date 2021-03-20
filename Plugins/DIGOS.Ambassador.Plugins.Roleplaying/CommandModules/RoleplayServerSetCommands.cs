@@ -60,12 +60,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                     category.ID
                 );
 
-                if (!result.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(result);
-                }
-
-                return new ConfirmationMessage("Dedicated channel category set.");
+                return !result.IsSuccess
+                    ? Result<UserMessage>.FromError(result)
+                    : new ConfirmationMessage("Dedicated channel category set.");
             }
 
             /// <summary>
@@ -85,12 +82,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                     channel.ID
                 );
 
-                if (!result.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(result);
-                }
-
-                return new ConfirmationMessage("Archive channel set.");
+                return !result.IsSuccess
+                    ? Result<UserMessage>.FromError(result)
+                    : new ConfirmationMessage("Archive channel set.");
             }
 
             /// <summary>
@@ -110,12 +104,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                     role.ID
                 );
 
-                if (!result.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(result);
-                }
-
-                return new ConfirmationMessage("Default user role set.");
+                return !result.IsSuccess
+                    ? Result<UserMessage>.FromError(result)
+                    : new ConfirmationMessage("Default user role set.");
             }
         }
     }

@@ -190,12 +190,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                     this.CancellationToken
                 );
 
-                if (!createRoleResult.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(createRoleResult);
-                }
-
-                return new ConfirmationMessage("Character role created.");
+                return !createRoleResult.IsSuccess
+                    ? Result<UserMessage>.FromError(createRoleResult)
+                    : new ConfirmationMessage("Character role created.");
             }
 
             /// <summary>
@@ -227,12 +224,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                     this.CancellationToken
                 );
 
-                if (!deleteRoleResult.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(deleteRoleResult);
-                }
-
-                return new ConfirmationMessage("Character role deleted.");
+                return !deleteRoleResult.IsSuccess
+                    ? Result<UserMessage>.FromError(deleteRoleResult)
+                    : new ConfirmationMessage("Character role deleted.");
             }
 
             /// <summary>
@@ -266,12 +260,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                     this.CancellationToken
                 );
 
-                if (!setRoleAccessResult.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(setRoleAccessResult);
-                }
-
-                return new ConfirmationMessage("Character role access conditions set.");
+                return !setRoleAccessResult.IsSuccess
+                    ? Result<UserMessage>.FromError(setRoleAccessResult)
+                    : new ConfirmationMessage("Character role access conditions set.");
             }
 
             /// <summary>
@@ -297,12 +288,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                     this.CancellationToken
                 );
 
-                if (!result.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(result);
-                }
-
-                return new ConfirmationMessage("Character role cleared.");
+                return !result.IsSuccess
+                    ? Result<UserMessage>.FromError(result)
+                    : new ConfirmationMessage("Character role cleared.");
             }
         }
     }

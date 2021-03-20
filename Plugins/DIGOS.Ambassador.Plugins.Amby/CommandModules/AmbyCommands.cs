@@ -128,12 +128,10 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
             );
 
             var sendPrivate = await _feedback.SendPrivateEmbedAsync(discordUser.ID, eb);
-            if (!sendPrivate.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(sendPrivate);
-            }
 
-            return new ConfirmationMessage("User contacted.");
+            return !sendPrivate.IsSuccess
+                ? Result<UserMessage>.FromError(sendPrivate)
+                : new ConfirmationMessage("User contacted.");
         }
 
         /// <summary>

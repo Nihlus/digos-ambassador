@@ -104,12 +104,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Model
                 return true;
             }
 
-            if (obj.GetType() != this.GetType())
-            {
-                return false;
-            }
-
-            return Equals((Kink)obj);
+            return obj.GetType() == this.GetType() && Equals((Kink)obj);
         }
 
         /// <inheritdoc />

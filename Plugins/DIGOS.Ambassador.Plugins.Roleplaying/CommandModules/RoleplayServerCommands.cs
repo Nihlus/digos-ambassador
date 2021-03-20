@@ -78,12 +78,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             {
                 var result = await _serverSettings.SetDedicatedChannelCategoryAsync(_context.GuildID.Value, null);
 
-                if (!result.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(result);
-                }
-
-                return new ConfirmationMessage("Dedicated channel category cleared.");
+                return !result.IsSuccess
+                    ? Result<UserMessage>.FromError(result)
+                    : new ConfirmationMessage("Dedicated channel category cleared.");
             }
 
             /// <summary>
@@ -102,12 +99,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                     null
                 );
 
-                if (!result.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(result);
-                }
-
-                return new ConfirmationMessage("Default user role cleared.");
+                return !result.IsSuccess
+                    ? Result<UserMessage>.FromError(result)
+                    : new ConfirmationMessage("Default user role cleared.");
             }
         }
     }

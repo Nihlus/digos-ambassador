@@ -41,12 +41,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
                 return string.Empty;
             }
 
-            if (component.Chirality == Chirality.Center)
-            {
-                return string.Empty;
-            }
-
-            return component.Chirality.Humanize().Transform(To.LowerCase);
+            return component.Chirality == Chirality.Center
+                ? string.Empty
+                : component.Chirality.Humanize().Transform(To.LowerCase);
         }
 
         /// <inheritdoc />

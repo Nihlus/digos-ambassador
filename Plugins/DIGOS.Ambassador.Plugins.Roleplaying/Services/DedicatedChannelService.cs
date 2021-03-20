@@ -375,13 +375,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             }
 
             // Finally, set up permission overrides for participants
-            var updateParticipants = await UpdateParticipantPermissionsAsync(roleplay);
-            if (!updateParticipants.IsSuccess)
-            {
-                return updateParticipants;
-            }
-
-            return Result.FromSuccess();
+            return await UpdateParticipantPermissionsAsync(roleplay);
         }
 
         /// <summary>
@@ -570,19 +564,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             }
 
             // Also override @everyone so it can't see anything
-            var setEveryoneRolePermissions = await _channelAPI.EditChannelPermissionsAsync
+            return await _channelAPI.EditChannelPermissionsAsync
             (
                 channelID,
                 guildID,
                 deny: deny
             );
-
-            if (!setEveryoneRolePermissions.IsSuccess)
-            {
-                return setEveryoneRolePermissions;
-            }
-
-            return Result.FromSuccess();
         }
     }
 }

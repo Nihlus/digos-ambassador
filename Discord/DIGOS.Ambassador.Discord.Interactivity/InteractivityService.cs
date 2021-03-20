@@ -160,12 +160,9 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         /// <returns>A result which may or may not have succeeded.</returns>
         public Result TrackMessage(IInteractiveMessage message)
         {
-            if (!_trackedMessages.TryAdd(message.Nonce, message))
-            {
-                return new GenericError("A message with that ID is already tracked.");
-            }
-
-            return Result.FromSuccess();
+            return _trackedMessages.TryAdd(message.Nonce, message)
+                ? Result.FromSuccess()
+                : new GenericError("A message with that ID is already tracked.");
         }
 
         /// <summary>

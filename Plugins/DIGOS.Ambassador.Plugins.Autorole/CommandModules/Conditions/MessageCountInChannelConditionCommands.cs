@@ -65,12 +65,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                                 ?? throw new InvalidOperationException();
 
                 var addCondition = await _autoroles.AddConditionAsync(autorole, condition);
-                if (!addCondition.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(addCondition);
-                }
 
-                return new ConfirmationMessage("Condition added.");
+                return !addCondition.IsSuccess
+                    ? Result<UserMessage>.FromError(addCondition)
+                    : new ConfirmationMessage("Condition added.");
             }
 
             /// <summary>
@@ -115,12 +113,9 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                     }
                 );
 
-                if (!modifyResult.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(modifyResult);
-                }
-
-                return new ConfirmationMessage("Condition updated.");
+                return !modifyResult.IsSuccess
+                    ? Result<UserMessage>.FromError(modifyResult)
+                    : new ConfirmationMessage("Condition updated.");
             }
         }
     }

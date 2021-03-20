@@ -42,12 +42,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
         /// <inheritdoc />
         public object? ReadYaml(IParser parser, Type type)
         {
-            if (!parser.TryConsume<Scalar>(out var speciesName))
-            {
-                return null;
-            }
-
-            return new Species(speciesName.Value, "Dummy", "dummy");
+            return !parser.TryConsume<Scalar>(out var speciesName)
+                ? null
+                : new Species(speciesName.Value, "Dummy", "dummy");
         }
 
         /// <inheritdoc />

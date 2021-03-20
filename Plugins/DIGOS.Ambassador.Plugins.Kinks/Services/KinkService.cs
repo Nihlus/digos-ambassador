@@ -249,12 +249,10 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
 
             var kink = getKink.Entity;
             var addKinkResult = await AddUserKinkAsync(discordUser, kink, ct);
-            if (!addKinkResult.IsSuccess)
-            {
-                return Result<UserKink>.FromError(addKinkResult);
-            }
 
-            return Result<UserKink>.FromSuccess(addKinkResult.Entity);
+            return addKinkResult.IsSuccess
+                ? Result<UserKink>.FromSuccess(addKinkResult.Entity)
+                : Result<UserKink>.FromError(addKinkResult);
         }
 
         /// <summary>
@@ -487,12 +485,10 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         )
         {
             var getKinksResult = await GetKinksByCategoryAsync(category, ct);
-            if (!getKinksResult.IsSuccess)
-            {
-                return Result<Kink>.FromError(getKinksResult);
-            }
 
-            return Result<Kink>.FromSuccess(getKinksResult.Entity.First());
+            return getKinksResult.IsSuccess
+                ? Result<Kink>.FromSuccess(getKinksResult.Entity[0])
+                : Result<Kink>.FromError(getKinksResult);
         }
 
         /// <summary>
@@ -524,12 +520,9 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
             var group = getKinksResult.Entity;
             var nextKink = group.SkipUntil(k => k.FListID == precedingFListID).FirstOrDefault();
 
-            if (nextKink is null)
-            {
-                return new UserError("The current kink was the last one in the category.");
-            }
-
-            return Result<Kink>.FromSuccess(nextKink);
+            return nextKink is null
+                ? new UserError("The current kink was the last one in the category.")
+                : Result<Kink>.FromSuccess(nextKink);
         }
 
         /// <summary>

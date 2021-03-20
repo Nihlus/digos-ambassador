@@ -123,12 +123,9 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                     _context.GuildID.Value
                 );
 
-                if (!clearResult.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(clearResult);
-                }
-
-                return new ConfirmationMessage("Channel cleared.");
+                return !clearResult.IsSuccess
+                    ? Result<UserMessage>.FromError(clearResult)
+                    : new ConfirmationMessage("Channel cleared.");
             }
 
             /// <summary>
@@ -153,12 +150,9 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                     channel.ID
                 );
 
-                if (!setResult.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(setResult);
-                }
-
-                return new ConfirmationMessage("Channel set.");
+                return !setResult.IsSuccess
+                    ? Result<UserMessage>.FromError(setResult)
+                    : new ConfirmationMessage("Channel set.");
             }
         }
     }

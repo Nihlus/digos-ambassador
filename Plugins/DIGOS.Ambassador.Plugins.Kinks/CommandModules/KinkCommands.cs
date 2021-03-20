@@ -232,12 +232,10 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
 
             var userKink = getUserKinkResult.Entity;
             var setKinkPreferenceResult = await _kinks.SetKinkPreferenceAsync(userKink, preference);
-            if (!setKinkPreferenceResult.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(setKinkPreferenceResult);
-            }
 
-            return new ConfirmationMessage("Preference set.");
+            return setKinkPreferenceResult.IsSuccess
+                ? new ConfirmationMessage("Preference set.")
+                : Result<UserMessage>.FromError(setKinkPreferenceResult);
         }
 
         /// <summary>
@@ -337,12 +335,9 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         public async Task<Result<UserMessage>> ResetKinksAsync()
         {
             var resetResult = await _kinks.ResetUserKinksAsync(_context.User.ID);
-            if (!resetResult.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(resetResult);
-            }
-
-            return new ConfirmationMessage("Preferences reset.");
+            return resetResult.IsSuccess
+                ? new ConfirmationMessage("Preferences reset.")
+                : Result<UserMessage>.FromError(resetResult);
         }
     }
 }

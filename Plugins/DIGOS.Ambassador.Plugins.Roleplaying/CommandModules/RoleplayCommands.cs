@@ -260,12 +260,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 isPublic
             );
 
-            if (!result.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(result);
-            }
-
-            return new ConfirmationMessage($"Roleplay \"{result.Entity.Name}\" created.");
+            return !result.IsSuccess
+                ? Result<UserMessage>.FromError(result)
+                : new ConfirmationMessage($"Roleplay \"{result.Entity.Name}\" created.");
         }
 
         /// <summary>
@@ -540,12 +537,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         )
         {
             var stopRoleplayAsync = await _discordRoleplays.StopRoleplayAsync(roleplay);
-            if (!stopRoleplayAsync.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(stopRoleplayAsync);
-            }
 
-            return new ConfirmationMessage($"The roleplay \"{roleplay.Name}\" has been stopped.");
+            return !stopRoleplayAsync.IsSuccess
+                ? Result<UserMessage>.FromError(stopRoleplayAsync)
+                : new ConfirmationMessage($"The roleplay \"{roleplay.Name}\" has been stopped.");
         }
 
         /// <summary>
@@ -565,12 +560,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         )
         {
             var transferResult = await _discordRoleplays.TransferRoleplayOwnershipAsync(newOwner.ID, roleplay);
-            if (!transferResult.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(transferResult);
-            }
 
-            return new ConfirmationMessage("Roleplay ownership transferred.");
+            return !transferResult.IsSuccess
+                ? Result<UserMessage>.FromError(transferResult)
+                : new ConfirmationMessage("Roleplay ownership transferred.");
         }
 
         /// <summary>
@@ -708,12 +701,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 false
             );
 
-            if (!setVisibility.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(setVisibility);
-            }
-
-            return new ConfirmationMessage("Roleplay hidden.");
+            return !setVisibility.IsSuccess
+                ? Result<UserMessage>.FromError(setVisibility)
+                : new ConfirmationMessage("Roleplay hidden.");
         }
 
         /// <summary>
@@ -769,12 +759,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             }
 
             var refreshResult = await _discordRoleplays.RefreshRoleplayAsync(roleplay);
-            if (!refreshResult.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(refreshResult);
-            }
 
-            return new ConfirmationMessage("Timeout refreshed.");
+            return !refreshResult.IsSuccess
+                ? Result<UserMessage>.FromError(refreshResult)
+                : new ConfirmationMessage("Timeout refreshed.");
         }
 
         /// <summary>

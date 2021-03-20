@@ -159,12 +159,9 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
                 );
             }
 
-            if (commandNames.Any(entityName.Contains))
-            {
-                return new GenericError("Names may not be the same as a command.");
-            }
-
-            return Result.FromSuccess();
+            return commandNames.Any(entityName.Contains)
+                ? new GenericError("Names may not be the same as a command.")
+                : Result.FromSuccess();
         }
     }
 }

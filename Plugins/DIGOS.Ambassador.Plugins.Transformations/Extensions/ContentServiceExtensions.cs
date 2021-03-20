@@ -95,12 +95,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
             );
 
             var content = reader.ReadToEnd();
-            if (!TransformationText.TryDeserialize(content, out var text))
-            {
-                return new ParsingError<TransformationText>("Failed to parse the messages.");
-            }
-
-            return Result<TransformationText>.FromSuccess(text);
+            return TransformationText.TryDeserialize(content, out var text)
+                ? Result<TransformationText>.FromSuccess(text)
+                : new ParsingError<TransformationText>("Failed to parse the messages.");
         }
 
         /// <summary>

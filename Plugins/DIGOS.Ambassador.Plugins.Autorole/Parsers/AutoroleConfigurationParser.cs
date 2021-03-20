@@ -56,12 +56,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Parsers
             }
 
             var getAutorole = await _autoroles.GetAutoroleAsync(roleID.Value, ct);
-            if (!getAutorole.IsSuccess)
-            {
-                return Result<AutoroleConfiguration>.FromError(getAutorole);
-            }
 
-            return getAutorole.Entity;
+            return !getAutorole.IsSuccess
+                ? Result<AutoroleConfiguration>.FromError(getAutorole)
+                : getAutorole.Entity;
         }
     }
 }

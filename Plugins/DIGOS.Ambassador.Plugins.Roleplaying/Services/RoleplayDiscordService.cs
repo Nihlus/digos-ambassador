@@ -171,13 +171,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 }
             }
 
-            var deleteRoleplay = await _roleplays.DeleteRoleplayAsync(roleplay);
-            if (!deleteRoleplay.IsSuccess)
-            {
-                return deleteRoleplay;
-            }
-
-            return Result.FromSuccess();
+            return await _roleplays.DeleteRoleplayAsync(roleplay);
         }
 
         /// <summary>
@@ -231,12 +225,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             }
 
             var updatePermissions = await _dedicatedChannels.UpdateParticipantPermissionsAsync(roleplay);
-            if (!updatePermissions.IsSuccess)
-            {
-                return Result<RoleplayParticipant>.FromError(updatePermissions);
-            }
 
-            return addUserAsync;
+            return !updatePermissions.IsSuccess
+                ? Result<RoleplayParticipant>.FromError(updatePermissions)
+                : addUserAsync;
         }
 
         /// <summary>
@@ -470,13 +462,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 return Result.FromSuccess();
             }
 
-            var setChannelSummary = await _dedicatedChannels.UpdateChannelSummaryAsync(roleplay);
-            if (!setChannelSummary.IsSuccess)
-            {
-                return setChannelSummary;
-            }
-
-            return Result.FromSuccess();
+            return await _dedicatedChannels.UpdateChannelSummaryAsync(roleplay);
         }
 
         /// <summary>
@@ -498,13 +484,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 return setNSFW;
             }
 
-            var setChannelNSFW = await _dedicatedChannels.UpdateChannelNSFWStatus(roleplay);
-            if (!setChannelNSFW.IsSuccess)
-            {
-                return setChannelNSFW;
-            }
-
-            return Result.FromSuccess();
+            return await _dedicatedChannels.UpdateChannelNSFWStatus(roleplay);
         }
 
         /// <summary>
@@ -526,13 +506,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 return setPublic;
             }
 
-            var updatePermissions = await _dedicatedChannels.UpdateParticipantPermissionsAsync(roleplay);
-            if (!updatePermissions.IsSuccess)
-            {
-                return updatePermissions;
-            }
-
-            return Result.FromSuccess();
+            return await _dedicatedChannels.UpdateParticipantPermissionsAsync(roleplay);
         }
 
         /// <summary>

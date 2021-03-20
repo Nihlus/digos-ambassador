@@ -113,12 +113,9 @@ namespace DIGOS.Ambassador.Core.Services
             await using var tokenStream = getTokenStream.Entity;
             var token = await AsyncIO.ReadAllTextAsync(tokenStream);
 
-            if (string.IsNullOrEmpty(token))
-            {
-                return new GenericError("The token file did not contain a valid token.");
-            }
-
-            return Result<string>.FromSuccess(token);
+            return string.IsNullOrEmpty(token)
+                ? new GenericError("The token file did not contain a valid token.")
+                : Result<string>.FromSuccess(token);
         }
 
         /// <summary>

@@ -74,12 +74,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             var createSettings = await CreateServerSettingsAsync(guildID, ct);
-            if (!createSettings.IsSuccess)
-            {
-                return Result<ServerModerationSettings>.FromError(createSettings);
-            }
 
-            return createSettings.Entity;
+            return !createSettings.IsSuccess
+                ? Result<ServerModerationSettings>.FromError(createSettings)
+                : createSettings.Entity;
         }
 
         /// <summary>

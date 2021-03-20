@@ -75,12 +75,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
                 (nameof(component), component)
             );
 
-            if (!result.IsSuccess)
-            {
-                return $"[{result.Unwrap().Message}]";
-            }
-
-            return result.Entity;
+            return result.IsSuccess
+                ? result.Entity
+                : $"[{result.Unwrap().Message}]";
         }
 
         /// <inheritdoc />

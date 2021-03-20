@@ -288,12 +288,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
                 chirality
             );
 
-            if (!shiftPartResult.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(shiftPartResult);
-            }
-
-            return new ConfirmationMessage(shiftPartResult.Entity.ShiftMessage);
+            return !shiftPartResult.IsSuccess
+                ? Result<UserMessage>.FromError(shiftPartResult)
+                : new ConfirmationMessage(shiftPartResult.Entity.ShiftMessage);
         }
 
         /// <summary>
@@ -398,12 +395,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
                 chirality
             );
 
-            if (!shiftPartResult.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(shiftPartResult);
-            }
-
-            return new ConfirmationMessage(shiftPartResult.Entity.ShiftMessage);
+            return !shiftPartResult.IsSuccess
+                ? Result<UserMessage>.FromError(shiftPartResult)
+                : new ConfirmationMessage(shiftPartResult.Entity.ShiftMessage);
         }
 
         /// <summary>
@@ -499,12 +493,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
                 chirality
             );
 
-            if (!shiftPartResult.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(shiftPartResult);
-            }
-
-            return new ConfirmationMessage(shiftPartResult.Entity.ShiftMessage);
+            return !shiftPartResult.IsSuccess
+                ? Result<UserMessage>.FromError(shiftPartResult)
+                : new ConfirmationMessage(shiftPartResult.Entity.ShiftMessage);
         }
 
         /// <summary>
@@ -601,12 +592,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
 
             var character = getCurrentCharacterResult.Entity;
             var resetFormResult = await _transformation.ResetCharacterFormAsync(character);
-            if (!resetFormResult.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(resetFormResult);
-            }
 
-            return new ConfirmationMessage("Character form reset.");
+            return !resetFormResult.IsSuccess
+                ? Result<UserMessage>.FromError(resetFormResult)
+                : new ConfirmationMessage("Character form reset.");
         }
 
         /// <summary>
@@ -619,12 +608,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         public async Task<Result<UserMessage>> OptInToTransformationsAsync()
         {
             var optInResult = await _transformation.OptInUserAsync(_context.User.ID, _context.GuildID.Value);
-            if (!optInResult.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(optInResult);
-            }
 
-            return new ConfirmationMessage("Opted into transformations. Have fun!");
+            return !optInResult.IsSuccess
+                ? Result<UserMessage>.FromError(optInResult)
+                : new ConfirmationMessage("Opted into transformations. Have fun!");
         }
 
         /// <summary>
@@ -637,12 +624,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         public async Task<Result<UserMessage>> OptOutOfTransformationsAsync()
         {
             var optOutResult = await _transformation.OptOutUserAsync(_context.User.ID, _context.GuildID.Value);
-            if (!optOutResult.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(optOutResult);
-            }
 
-            return new ConfirmationMessage("Opted out of transformations.");
+            return !optOutResult.IsSuccess
+                ? Result<UserMessage>.FromError(optOutResult)
+                : new ConfirmationMessage("Opted out of transformations.");
         }
 
         /// <summary>
@@ -655,12 +640,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         public async Task<Result<UserMessage>> WhitelistUserAsync(IUser user)
         {
             var whitelistUserResult = await _transformation.WhitelistUserAsync(_context.User.ID, user.ID);
-            if (!whitelistUserResult.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(whitelistUserResult);
-            }
-
-            return new ConfirmationMessage("User whitelisted.");
+            return !whitelistUserResult.IsSuccess
+                ? Result<UserMessage>.FromError(whitelistUserResult)
+                : new ConfirmationMessage("User whitelisted.");
         }
 
         /// <summary>
@@ -673,12 +655,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         public async Task<Result<UserMessage>> BlacklistUserAsync(IUser user)
         {
             var blacklistUserResult = await _transformation.BlacklistUserAsync(_context.User.ID, user.ID);
-            if (!blacklistUserResult.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(blacklistUserResult);
-            }
 
-            return new ConfirmationMessage("User whitelisted.");
+            return !blacklistUserResult.IsSuccess
+                ? Result<UserMessage>.FromError(blacklistUserResult)
+                : new ConfirmationMessage("User whitelisted.");
         }
 
         /// <summary>

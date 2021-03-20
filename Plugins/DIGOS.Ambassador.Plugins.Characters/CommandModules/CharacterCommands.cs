@@ -429,12 +429,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 this.CancellationToken
             );
 
-            if (!deleteResult.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(deleteResult);
-            }
-
-            return new ConfirmationMessage($"Character \"{character.Name}\" deleted.");
+            return !deleteResult.IsSuccess
+                ? Result<UserMessage>.FromError(deleteResult)
+                : new ConfirmationMessage($"Character \"{character.Name}\" deleted.");
         }
 
         /// <summary>
@@ -559,12 +556,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 this.CancellationToken
             );
 
-            if (!result.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(result);
-            }
-
-            return new ConfirmationMessage("Default character cleared.");
+            return !result.IsSuccess
+                ? Result<UserMessage>.FromError(result)
+                : new ConfirmationMessage("Default character cleared.");
         }
 
         /// <summary>
@@ -597,12 +591,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 this.CancellationToken
             );
 
-            if (!result.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(result);
-            }
-
-            return new ConfirmationMessage("Character cleared.");
+            return !result.IsSuccess
+                ? Result<UserMessage>.FromError(result)
+                : new ConfirmationMessage("Character cleared.");
         }
 
         /// <summary>
@@ -750,12 +741,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 isNSFW
             );
 
-            if (!addImageResult.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(addImageResult);
-            }
-
-            return new ConfirmationMessage($"Added \"{imageName}\" to {character.Name}'s gallery.");
+            return !addImageResult.IsSuccess
+                ? Result<UserMessage>.FromError(addImageResult)
+                : new ConfirmationMessage($"Added \"{imageName}\" to {character.Name}'s gallery.");
         }
 
         /// <summary>
@@ -782,12 +770,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             }
 
             var removeImageResult = await _characters.RemoveImageFromCharacterAsync(character, image);
-            if (!removeImageResult.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(removeImageResult);
-            }
 
-            return new ConfirmationMessage("Image removed.");
+            return !removeImageResult.IsSuccess
+                ? Result<UserMessage>.FromError(removeImageResult)
+                : new ConfirmationMessage("Image removed.");
         }
 
         /// <summary>
@@ -815,12 +801,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 this.CancellationToken
             );
 
-            if (!transferResult.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(transferResult);
-            }
-
-            return new ConfirmationMessage("Character ownership transferred.");
+            return !transferResult.IsSuccess
+                ? Result<UserMessage>.FromError(transferResult)
+                : new ConfirmationMessage("Character ownership transferred.");
         }
     }
 }

@@ -272,12 +272,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 $"The warned user now has {warnings.Count} warnings. Consider further action."
             );
 
-            if (!sendAlert.IsSuccess)
-            {
-                return Result<string>.FromError(sendAlert);
-            }
-
-            return Result<string>.FromSuccess($"Warning added (ID {warning.ID}).");
+            return !sendAlert.IsSuccess
+                ? Result<string>.FromError(sendAlert)
+                : Result<string>.FromSuccess($"Warning added (ID {warning.ID}).");
         }
     }
 }

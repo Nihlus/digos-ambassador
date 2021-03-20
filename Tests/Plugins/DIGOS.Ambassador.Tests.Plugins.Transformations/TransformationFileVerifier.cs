@@ -96,18 +96,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             }
 
             var speciesPath = Path.Combine(directory, "Species.yml");
-            if (!File.Exists(speciesPath))
-            {
-                return Result.FromSuccess();
-            }
-
-            var speciesVerificationResult = VerifyFile<Species>(speciesPath);
-            if (!speciesVerificationResult.IsSuccess)
-            {
-                return speciesVerificationResult;
-            }
-
-            return Result.FromSuccess();
+            return !File.Exists(speciesPath)
+                ? Result.FromSuccess()
+                : VerifyFile<Species>(speciesPath);
         }
     }
 }

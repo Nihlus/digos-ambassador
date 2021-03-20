@@ -146,12 +146,10 @@ namespace DIGOS.Ambassador.Plugins.Drone.Services
             }
 
             var becomeCharacterResult = await _characters.MakeCharacterCurrentAsync(guildID, userID, character, ct);
-            if (!becomeCharacterResult.IsSuccess)
-            {
-                return Result<Character>.FromError(becomeCharacterResult);
-            }
 
-            return character;
+            return !becomeCharacterResult.IsSuccess
+                ? Result<Character>.FromError(becomeCharacterResult)
+                : character;
         }
 
         /// <summary>

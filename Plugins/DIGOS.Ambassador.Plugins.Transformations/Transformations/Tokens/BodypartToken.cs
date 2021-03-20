@@ -56,12 +56,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
                 throw new ArgumentNullException(nameof(component));
             }
 
-            if (this.Pluralize)
-            {
-                return component.Bodypart.Humanize().Pluralize().Transform(To.LowerCase);
-            }
-
-            return component.Bodypart.Humanize().Transform(To.LowerCase);
+            return this.Pluralize
+                ? component.Bodypart.Humanize().Pluralize().Transform(To.LowerCase)
+                : component.Bodypart.Humanize().Transform(To.LowerCase);
         }
 
         /// <inheritdoc/>

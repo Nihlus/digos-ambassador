@@ -110,12 +110,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
                                     m => m.Author == p.User
                                 );
 
-                                if (messageByUser is null)
-                                {
-                                    return $"Unknown user ({p.User.DiscordID})";
-                                }
-
-                                return messageByUser.AuthorNickname;
+                                return messageByUser is null
+                                    ? $"Unknown user ({p.User.DiscordID})"
+                                    : messageByUser.AuthorNickname;
                             }
 
                             var participant = getParticipant.Entity;

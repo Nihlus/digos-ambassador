@@ -76,12 +76,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             )
             {
                 var removeCondition = await _autoroles.RemoveConditionAsync(autorole, conditionID);
-                if (!removeCondition.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(removeCondition);
-                }
 
-                return new ConfirmationMessage("Condition removed.");
+                return !removeCondition.IsSuccess
+                    ? Result<UserMessage>.FromError(removeCondition)
+                    : new ConfirmationMessage("Condition removed.");
             }
         }
     }

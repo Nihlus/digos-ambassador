@@ -153,12 +153,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
                             return "This part is considered NSFW.";
                         }
 
-                        if (b.IsComposite())
-                        {
-                            return "This part is composed of smaller parts.";
-                        }
-
-                        return "This is a normal bodypart.";
+                        return b.IsComposite()
+                            ? "This part is composed of smaller parts."
+                            : "This is a normal bodypart.";
                     }
                 );
 

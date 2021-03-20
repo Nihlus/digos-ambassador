@@ -242,20 +242,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
             AppearanceComponent component
         )
         {
-            if
+            return appearanceConfiguration.TryGetAppearanceComponent
             (
-                !appearanceConfiguration.TryGetAppearanceComponent
-                (
-                    component.Bodypart,
-                    component.Chirality.Opposite(),
-                    out var opposingComponent
-                )
-            )
-            {
-                return false;
-            }
-
-            return string.Equals(component.Transformation.Species.Name, opposingComponent.Transformation.Species.Name);
+                component.Bodypart,
+                component.Chirality.Opposite(),
+                out var opposingComponent
+            ) && string.Equals(component.Transformation.Species.Name, opposingComponent.Transformation.Species.Name);
         }
 
         /// <summary>

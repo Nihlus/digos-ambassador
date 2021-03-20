@@ -99,12 +99,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             )
             {
                 var setNameResult = await _characters.SetCharacterNameAsync(character, newCharacterName);
-                if (!setNameResult.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(setNameResult);
-                }
-
-                return new ConfirmationMessage("Character name set.");
+                return !setNameResult.IsSuccess
+                    ? Result<UserMessage>.FromError(setNameResult)
+                    : new ConfirmationMessage("Character name set.");
             }
 
             /// <summary>
@@ -158,12 +155,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                     newCharacterAvatarUrl ?? throw new ArgumentNullException(nameof(newCharacterAvatarUrl))
                 );
 
-                if (!result.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(result);
-                }
-
-                return new ConfirmationMessage("Character avatar set.");
+                return !result.IsSuccess
+                    ? Result<UserMessage>.FromError(result)
+                    : new ConfirmationMessage("Character avatar set.");
             }
 
             /// <summary>
@@ -191,12 +185,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                     newCharacterNickname
                 );
 
-                if (!setNickResult.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(setNickResult);
-                }
-
-                return new ConfirmationMessage("Character nickname set.");
+                return !setNickResult.IsSuccess
+                    ? Result<UserMessage>.FromError(setNickResult)
+                    : new ConfirmationMessage("Character nickname set.");
             }
 
             /// <summary>
@@ -217,12 +208,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             )
             {
                 var setSummaryResult = await _characters.SetCharacterSummaryAsync(character, newCharacterSummary);
-                if (!setSummaryResult.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(setSummaryResult);
-                }
 
-                return new ConfirmationMessage("Character summary set.");
+                return !setSummaryResult.IsSuccess
+                    ? Result<UserMessage>.FromError(setSummaryResult)
+                    : new ConfirmationMessage("Character summary set.");
             }
 
             /// <summary>
@@ -248,12 +237,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                     newCharacterDescription
                 );
 
-                if (!setDescriptionResult.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(setDescriptionResult);
-                }
-
-                return new ConfirmationMessage("Character description set.");
+                return !setDescriptionResult.IsSuccess
+                    ? Result<UserMessage>.FromError(setDescriptionResult)
+                    : new ConfirmationMessage("Character description set.");
             }
 
             /// <summary>
@@ -274,12 +260,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             )
             {
                 var setNSFW = await _characters.SetCharacterIsNSFWAsync(character, isNSFW);
-                if (!setNSFW.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(setNSFW);
-                }
 
-                return new ConfirmationMessage($"Character set to {(isNSFW ? "NSFW" : "SFW")}.");
+                return !setNSFW.IsSuccess
+                    ? Result<UserMessage>.FromError(setNSFW)
+                    : new ConfirmationMessage($"Character set to {(isNSFW ? "NSFW" : "SFW")}.");
             }
 
             /// <summary>
@@ -300,12 +284,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             )
             {
                 var result = await _characters.SetCharacterPronounsAsync(character, pronounFamily);
-                if (!result.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(result);
-                }
 
-                return new ConfirmationMessage("Preferred pronoun set.");
+                return !result.IsSuccess
+                    ? Result<UserMessage>.FromError(result)
+                    : new ConfirmationMessage("Preferred pronoun set.");
             }
 
             /// <summary>
@@ -391,12 +373,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                     this.CancellationToken
                 );
 
-                if (!setRoleResult.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(setRoleResult);
-                }
-
-                return new ConfirmationMessage("Character role set.");
+                return !setRoleResult.IsSuccess
+                    ? Result<UserMessage>.FromError(setRoleResult)
+                    : new ConfirmationMessage("Character role set.");
             }
 
             /// <summary>
@@ -445,12 +424,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                     this.CancellationToken
                 );
 
-                if (!result.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(result);
-                }
-
-                return new ConfirmationMessage("Default character set.");
+                return !result.IsSuccess
+                    ? Result<UserMessage>.FromError(result)
+                    : new ConfirmationMessage("Default character set.");
             }
         }
     }

@@ -410,13 +410,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                     return removeRole;
                 }
 
-                if (rre.DiscordError.Code is not DiscordError.UnknownRole)
-                {
-                    return removeRole;
-                }
-
                 // It's probably already removed; that's fine
-                return Result.FromSuccess();
+                return rre.DiscordError.Code is not DiscordError.UnknownRole
+                    ? removeRole
+                    : Result.FromSuccess();
             }
 
             var newCharacter = getNewCharacter.Entity;

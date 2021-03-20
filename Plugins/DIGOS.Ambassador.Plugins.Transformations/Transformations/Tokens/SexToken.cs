@@ -53,12 +53,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
                 return "herm";
             }
 
-            if (genderedParts.Contains(Penis))
-            {
-                return "male";
-            }
-
-            return "female";
+            return genderedParts.Contains(Penis)
+                ? "male"
+                : "female";
         }
 
         /// <inheritdoc />

@@ -79,12 +79,10 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         {
             var permissionType = typeof(TPermission);
             var registerPermissionResult = RegisterPermission(permissionType, services);
-            if (!registerPermissionResult.IsSuccess)
-            {
-                return Result<TPermission>.FromError(registerPermissionResult);
-            }
 
-            return Result<TPermission>.FromSuccess((TPermission)registerPermissionResult.Entity);
+            return !registerPermissionResult.IsSuccess
+                ? Result<TPermission>.FromError(registerPermissionResult)
+                : Result<TPermission>.FromSuccess((TPermission)registerPermissionResult.Entity);
         }
 
         /// <summary>
@@ -135,12 +133,10 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             where TPermission : class, IPermission
         {
             var result = GetPermission(typeof(TPermission));
-            if (!result.IsSuccess)
-            {
-                return Result<TPermission>.FromError(result);
-            }
 
-            return Result<TPermission>.FromSuccess((TPermission)result.Entity);
+            return !result.IsSuccess
+                ? Result<TPermission>.FromError(result)
+                : Result<TPermission>.FromSuccess((TPermission)result.Entity);
         }
 
         /// <summary>
@@ -150,12 +146,9 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         public Result<IPermission> GetPermission(Type permissionType)
         {
-            if (!_registeredPermissions.TryGetValue(permissionType, out var permission))
-            {
-                return new GenericError("No permission of that type has been registered.");
-            }
-
-            return Result<IPermission>.FromSuccess(permission);
+            return !_registeredPermissions.TryGetValue(permissionType, out var permission)
+                ? new GenericError("No permission of that type has been registered.")
+                : Result<IPermission>.FromSuccess(permission);
         }
 
         /// <summary>
@@ -171,12 +164,9 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
                 p => p.FriendlyName.Equals(permissionName, StringComparison.OrdinalIgnoreCase)
             );
 
-            if (permission is null)
-            {
-                return new GenericError("No permission of that type has been registered.");
-            }
-
-            return Result<IPermission>.FromSuccess(permission);
+            return permission is null
+                ? new GenericError("No permission of that type has been registered.")
+                : Result<IPermission>.FromSuccess(permission);
         }
     }
 }
