@@ -416,14 +416,14 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
                         (
                             "Usage",
                             "Set your preference for this kink by pressing one of the following buttons:" +
-                            $"\n:{wizard.Fave.GetEmojiName()}: : Favourite" +
-                            $"\n:{wizard.Like.GetEmojiName()}: : Like" +
-                            $"\n:{wizard.Maybe.GetEmojiName()}: : Maybe" +
-                            $"\n:{wizard.Never.GetEmojiName()}: : Never" +
-                            $"\n:{wizard.NoPreference.GetEmojiName()}: : No preference\n" +
+                            $"\n{wizard.Fave.GetEmojiName()} : Favourite" +
+                            $"\n{wizard.Like.GetEmojiName()} : Like" +
+                            $"\n{wizard.Maybe.GetEmojiName()} : Maybe" +
+                            $"\n{wizard.Never.GetEmojiName()} : Never" +
+                            $"\n{wizard.NoPreference.GetEmojiName()} : No preference\n" +
                             "\n" +
-                            $"\nPress :{wizard.Back.GetEmojiName()}: to go back to the categories." +
-                            $"\nYou can quit at any point by pressing :{wizard.Exit.GetEmojiName()}:."
+                            $"\nPress {wizard.Back.GetEmojiName()} to go back to the categories." +
+                            $"\nYou can quit at any point by pressing {wizard.Exit.GetEmojiName()}."
                         )
                     };
 

@@ -50,7 +50,7 @@ namespace DIGOS.Ambassador.Discord.Pagination.Extensions
                 throw new InvalidOperationException();
             }
 
-            return emoji.ID.Value.ToString();
+            return $":{emoji.ID.Value.ToString()}:";
         }
     }
 }
