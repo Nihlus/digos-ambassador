@@ -76,7 +76,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
                         return compositeAttribute.ComposingParts;
                     }
 
-                    return new Bodypart[] { };
+                    return Array.Empty<Bodypart>();
                 }
             );
 
