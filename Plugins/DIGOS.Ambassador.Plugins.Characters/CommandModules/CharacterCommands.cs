@@ -688,14 +688,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             }
 
             var attachments = messageContext.Message.Attachments;
-            var hasAtLeastOneAttachment = attachments.HasValue && attachments.Value.Any();
-            if (!hasAtLeastOneAttachment)
+            if (!attachments.HasValue || attachments.Value.Count == 0)
             {
                 return new UserError("You need to attach an image.");
             }
 
             // Check that it's an image
-            var firstAttachment = attachments.Value!.First();
+            var firstAttachment = attachments.Value[0];
             var firstAttachmentIsImage = firstAttachment.Width.HasValue && firstAttachment.Height.HasValue;
 
             if (!firstAttachmentIsImage)

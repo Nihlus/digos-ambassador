@@ -93,7 +93,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
             Assert.Equal(3, tokens.Count);
 
-            Assert.IsType<TargetToken>(tokens.First());
+            Assert.IsType<TargetToken>(tokens[0]);
             Assert.IsType<ColourToken>(tokens[1]);
             Assert.IsType<ColourToken>(tokens[2]);
         }
@@ -107,7 +107,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
             var tokens = tokenizer.GetTokens(SampleText);
 
-            Assert.Equal(12, tokens.First().Start);
+            Assert.Equal(12, tokens[0].Start);
 
             Assert.Equal(28, tokens[1].Start);
 
@@ -123,7 +123,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
             var tokens = tokenizer.GetTokens(SampleText);
 
-            Assert.Equal(9, tokens.First().Length);
+            Assert.Equal(9, tokens[0].Length);
 
             Assert.Equal(9, tokens[1].Length);
 

@@ -81,7 +81,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
                 return Result<ShiftBodypartResult>.FromError(getTFResult);
             }
 
-            var transformation = getTFResult.Entity.First();
+            var transformation = getTFResult.Entity[0];
 
             if (this.Appearance.TryGetAppearanceComponent(bodypart, chirality, out var existingComponent))
             {

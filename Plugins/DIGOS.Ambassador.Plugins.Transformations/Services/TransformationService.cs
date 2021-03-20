@@ -1089,7 +1089,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                         }
 
                         // We just take the first one, since species can't define composite parts individually
-                        var existingTransformation = getExistingTransformation.Entity.First();
+                        var existingTransformation = getExistingTransformation.Entity[0];
 
                         // Override the new data's ID to match the existing one
                         transformation.ID = existingTransformation.ID;
