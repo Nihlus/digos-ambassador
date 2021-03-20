@@ -22,8 +22,7 @@
 
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Tests.Utility;
-using Discord;
+using Remora.Discord.Core;
 using Xunit;
 
 #pragma warning disable SA1600
@@ -36,11 +35,11 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
     {
         public class GrantUserConsentAsync : PrivacyServiceTestBase
         {
-            private readonly IUser _discordUser;
+            private readonly Snowflake _discordUser;
 
             public GrantUserConsentAsync()
             {
-                _discordUser = MockHelper.CreateDiscordUser(0);
+                _discordUser = new Snowflake(0);
             }
 
             [Fact]
@@ -56,10 +55,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             {
                 await this.Privacy.GrantUserConsentAsync(_discordUser);
 
-                var consent = this.Database.UserConsents.FirstOrDefault();
+                var consent = this.Database.UserConsents.First();
 
                 Assert.NotNull(consent);
-                Assert.Equal((long)_discordUser.Id, consent.DiscordID);
+                Assert.Equal(_discordUser, consent.DiscordID);
                 Assert.True(consent.HasConsented);
             }
 
@@ -78,7 +77,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
 
                 Assert.Same(firstConsent, secondConsent);
 
-                Assert.Equal((long)_discordUser.Id, secondConsent.DiscordID);
+                Assert.Equal(_discordUser, secondConsent.DiscordID);
                 Assert.True(secondConsent.HasConsented);
             }
         }

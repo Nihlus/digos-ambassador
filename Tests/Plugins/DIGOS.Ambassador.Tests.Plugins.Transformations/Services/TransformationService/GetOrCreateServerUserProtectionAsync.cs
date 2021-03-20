@@ -28,8 +28,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Transformations.Model;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
-using DIGOS.Ambassador.Tests.Utility;
-using Discord;
+using Remora.Discord.Core;
 using Xunit;
 
 namespace DIGOS.Ambassador.Tests.Plugins.Transformations
@@ -38,8 +37,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
     {
         public class GetOrCreateServerUserProtectionAsync : TransformationServiceTestBase
         {
-            private readonly IUser _user = MockHelper.CreateDiscordUser(0);
-            private readonly IGuild _guild = MockHelper.CreateDiscordGuild(1);
+            private readonly Snowflake _user = new Snowflake(0);
+            private readonly Snowflake _guild = new Snowflake(1);
 
             [Fact]
             public async Task CreatesObjectIfOneDoesNotExist()
@@ -65,7 +64,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _guild
                 );
 
-                Assert.Equal((long)_guild.Id, result.Entity.Server.DiscordID);
+                Assert.Equal(_guild, result.Entity!.Server.DiscordID);
             }
 
             [Fact]
@@ -77,7 +76,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _guild
                 );
 
-                Assert.Equal((long)_user.Id, result.Entity.User.DiscordID);
+                Assert.Equal(_user, result.Entity!.User.DiscordID);
             }
 
             [Fact]
@@ -103,7 +102,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             [Fact]
             public async Task CreatedObjectRespectsGlobalDefaults()
             {
-                var user = (await this.Users.GetOrRegisterUserAsync(_user)).Entity;
+                var user = (await this.Users.GetOrRegisterUserAsync(_user)).Entity!;
 
                 var globalSetting = new GlobalUserProtection(user)
                 {
@@ -120,9 +119,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _guild
                 );
 
-                Assert.Equal(globalSetting.DefaultOptIn, localSetting.Entity.HasOptedIn);
-                Assert.Equal(globalSetting.DefaultType, localSetting.Entity.Type);
-                Assert.Same(globalSetting.User, localSetting.Entity.User);
+                Assert.Equal(globalSetting.DefaultOptIn, localSetting.Entity!.HasOptedIn);
+                Assert.Equal(globalSetting.DefaultType, localSetting.Entity!.Type);
+                Assert.Same(globalSetting.User, localSetting.Entity!.User);
             }
         }
     }

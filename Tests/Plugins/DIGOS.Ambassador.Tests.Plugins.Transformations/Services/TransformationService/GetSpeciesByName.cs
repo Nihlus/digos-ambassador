@@ -38,7 +38,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 var result = this.Transformations.GetSpeciesByName("template");
 
                 Assert.True(result.IsSuccess);
-                Assert.Equal("template", result.Entity.Name);
+                Assert.Equal("template", result.Entity!.Name);
             }
 
             [Fact]
@@ -55,7 +55,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 var result = this.Transformations.GetSpeciesByName("TEMPLATE");
 
                 Assert.True(result.IsSuccess);
-                Assert.Equal("template", result.Entity.Name);
+                Assert.Equal("template", result.Entity!.Name);
             }
         }
     }

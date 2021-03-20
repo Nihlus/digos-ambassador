@@ -24,7 +24,6 @@ using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
-using DIGOS.Ambassador.Tests.Extensions;
 using DIGOS.Ambassador.Tests.TestBases;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -66,7 +65,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
             this.Database = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            this.Database.Database.Create();
+            this.Database.Database.EnsureCreated();
 
             this.Users = serviceProvider.GetRequiredService<UserService>();
         }

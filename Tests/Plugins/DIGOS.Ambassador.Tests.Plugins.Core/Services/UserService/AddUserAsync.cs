@@ -22,9 +22,7 @@
 
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Tests.Utility;
-using Discord;
-using Moq;
+using Remora.Discord.Core;
 using Xunit;
 
 #pragma warning disable SA1600
@@ -37,11 +35,11 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
     {
         public class AddUserAsync : UserServiceTestBase
         {
-            private readonly IUser _discordUser;
+            private readonly Snowflake _discordUser;
 
             public AddUserAsync()
             {
-                _discordUser = MockHelper.CreateDiscordUser(0);
+                _discordUser = new Snowflake(0);
             }
 
             [Fact]
@@ -57,10 +55,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             {
                 await this.Users.AddUserAsync(_discordUser);
 
-                var user = this.Database.Users.FirstOrDefault();
+                var user = this.Database.Users.First();
 
                 Assert.NotNull(user);
-                Assert.Equal((long)_discordUser.Id, user.DiscordID);
+                Assert.Equal(_discordUser, user.DiscordID);
             }
 
             [Fact]
@@ -69,34 +67,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
                 await this.Users.AddUserAsync(_discordUser);
 
                 var result = await this.Users.AddUserAsync(_discordUser);
-
-                Assert.False(result.IsSuccess);
-            }
-
-            [Fact]
-            public async Task ReturnsFalseIfUserIsBot()
-            {
-                var mock = new Mock<IUser>();
-                mock.Setup(u => u.Id).Returns(0);
-                mock.Setup(u => u.IsBot).Returns(true);
-
-                var botUser = mock.Object;
-
-                var result = await this.Users.AddUserAsync(botUser);
-
-                Assert.False(result.IsSuccess);
-            }
-
-            [Fact]
-            public async Task ReturnsFalseIfUserIsWebhook()
-            {
-                var mock = new Mock<IUser>();
-                mock.Setup(u => u.Id).Returns(0);
-                mock.Setup(u => u.IsWebhook).Returns(true);
-
-                var botUser = mock.Object;
-
-                var result = await this.Users.AddUserAsync(botUser);
 
                 Assert.False(result.IsSuccess);
             }

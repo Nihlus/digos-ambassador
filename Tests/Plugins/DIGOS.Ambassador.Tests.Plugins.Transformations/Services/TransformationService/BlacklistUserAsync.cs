@@ -26,8 +26,7 @@
 
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Tests.Utility;
-using Discord;
+using Remora.Discord.Core;
 using Xunit;
 
 namespace DIGOS.Ambassador.Tests.Plugins.Transformations
@@ -36,8 +35,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
     {
         public class BlacklistUserAsync : TransformationServiceTestBase
         {
-            private readonly IUser _user = MockHelper.CreateDiscordUser(0);
-            private readonly IUser _blacklistedUser = MockHelper.CreateDiscordUser(1);
+            private readonly Snowflake _user = new Snowflake(0);
+            private readonly Snowflake _blacklistedUser = new Snowflake(1);
 
             [Fact]
             public async Task CanBlacklistUser()
@@ -45,11 +44,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 var result = await this.Transformations.BlacklistUserAsync(_user, _blacklistedUser);
 
                 Assert.True(result.IsSuccess);
-                Assert.True(result.WasModified);
 
                 Assert.NotEmpty(this.Database.GlobalUserProtections.First().Blacklist);
 
-                Assert.Equal((long)_blacklistedUser.Id, this.Database.GlobalUserProtections.First().Blacklist.First().DiscordID);
+                Assert.Equal(_blacklistedUser, this.Database.GlobalUserProtections.First().Blacklist.First().DiscordID);
             }
 
             [Fact]

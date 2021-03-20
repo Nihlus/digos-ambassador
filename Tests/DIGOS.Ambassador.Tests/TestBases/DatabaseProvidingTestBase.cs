@@ -36,7 +36,7 @@ namespace DIGOS.Ambassador.Tests.TestBases
     [PublicAPI]
     public abstract class DatabaseProvidingTestBase : ServiceProvidingTestBase, IDisposable
     {
-        private readonly SqliteConnection _connection = new SqliteConnection("DataSource=:memory:");
+        private readonly SqliteConnection _connection = new SqliteConnection("DataSource=:memory:?cache=shared");
 
         /// <summary>
         /// Configures the given options builder to use the underlying test database.

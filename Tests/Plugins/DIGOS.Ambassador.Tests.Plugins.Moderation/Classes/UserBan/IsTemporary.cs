@@ -23,6 +23,7 @@
 using System;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
+using Remora.Discord.Core;
 using Xunit;
 
 #pragma warning disable SA1600
@@ -40,13 +41,13 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Classes.UserBan
             {
                 var instance = new Ambassador.Plugins.Moderation.Model.UserBan
                 (
-                    new Server(0),
-                    new User(0),
-                    new User(1),
+                    new Server(new Snowflake(0)),
+                    new User(new Snowflake(0)),
+                    new User(new Snowflake(1)),
                     string.Empty
                 );
 
-                Assert.False(instance.IsTemporary);
+                Assert.False(instance.ExpiresOn.HasValue);
             }
 
             [Fact]
@@ -54,14 +55,14 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Classes.UserBan
             {
                 var instance = new Ambassador.Plugins.Moderation.Model.UserBan
                 (
-                    new Server(0),
-                    new User(0),
-                    new User(1),
+                    new Server(new Snowflake(0)),
+                    new User(new Snowflake(0)),
+                    new User(new Snowflake(1)),
                     string.Empty,
                     expiresOn: DateTime.UtcNow
                 );
 
-                Assert.True(instance.IsTemporary);
+                Assert.True(instance.ExpiresOn.HasValue);
             }
         }
     }

@@ -26,8 +26,7 @@
 
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Tests.Plugins.Moderation.Bases;
-using DIGOS.Ambassador.Tests.Utility;
-using Discord;
+using Remora.Discord.Core;
 using Xunit;
 
 namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
@@ -36,20 +35,16 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
     {
         public class GetWarningAsync : WarningServiceTestBase
         {
-            private readonly IGuild _guild = MockHelper.CreateDiscordGuild(0);
-            private readonly IGuild _otherGuild = MockHelper.CreateDiscordGuild(1);
-            private readonly IGuildUser _guildUser = MockHelper.CreateDiscordEntity<IGuildUser>
-            (
-                0,
-                m => m.Setup(gu => gu.Guild.Id).Returns(0)
-            );
+            private readonly Snowflake _guild = new Snowflake(0);
+            private readonly Snowflake _otherGuild = new Snowflake(1);
+            private readonly Snowflake _user = new Snowflake(2);
 
-            private readonly IUser _author = MockHelper.CreateDiscordUser(1);
+            private readonly Snowflake _author = new Snowflake(3);
 
             [Fact]
             public async Task ReturnsSuccessfulIfWarningExists()
             {
-                var warning = (await this.Warnings.CreateWarningAsync(_author, _guildUser, "Dummy thicc")).Entity;
+                var warning = (await this.Warnings.CreateWarningAsync(_author, _user, _guild, "Dummy thicc")).Entity!;
 
                 var result = await this.Warnings.GetWarningAsync(_guild, warning.ID);
 
@@ -67,7 +62,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
             [Fact]
             public async Task ReturnsUnsuccessfulIfWarningExistsButServerIsWrong()
             {
-                var warning = (await this.Warnings.CreateWarningAsync(_author, _guildUser, "Dummy thicc")).Entity;
+                var warning = (await this.Warnings.CreateWarningAsync(_author, _user, _guild, "Dummy thicc")).Entity!;
 
                 var result = await this.Warnings.GetWarningAsync(_otherGuild, warning.ID);
 
@@ -77,7 +72,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
             [Fact]
             public async Task ActuallyReturnsWarning()
             {
-                var warning = (await this.Warnings.CreateWarningAsync(_author, _guildUser, "Dummy thicc")).Entity;
+                var warning = (await this.Warnings.CreateWarningAsync(_author, _user, _guild, "Dummy thicc")).Entity!;
 
                 var result = await this.Warnings.GetWarningAsync(_guild, warning.ID);
 

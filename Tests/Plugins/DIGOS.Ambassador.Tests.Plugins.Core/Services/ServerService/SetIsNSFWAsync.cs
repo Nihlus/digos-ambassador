@@ -22,7 +22,7 @@
 
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
-using DIGOS.Ambassador.Tests.Utility;
+using Remora.Discord.Core;
 using Xunit;
 
 #pragma warning disable SA1600
@@ -40,8 +40,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
 
             public override async Task InitializeAsync()
             {
-                var serverMock = MockHelper.CreateDiscordGuild(0);
-                _server = (await this.Servers.GetOrRegisterServerAsync(serverMock)).Entity;
+                var serverMock = new Snowflake(0);
+                _server = (await this.Servers.GetOrRegisterServerAsync(serverMock)).Entity!;
             }
 
             [Fact]

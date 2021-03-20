@@ -55,9 +55,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 );
 
                 Assert.True(result.IsSuccess);
-                Assert.Single(result.Entity);
+                Assert.Single(result.Entity!);
 
-                var transformation = result.Entity.First();
+                var transformation = result.Entity!.First();
 
                 Assert.Equal(Bodypart.Face, transformation.Part);
                 Assert.Same(_templateSpecies, transformation.Species);

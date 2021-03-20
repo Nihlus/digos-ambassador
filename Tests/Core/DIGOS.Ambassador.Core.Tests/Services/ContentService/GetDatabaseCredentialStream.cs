@@ -64,7 +64,7 @@ namespace DIGOS.Ambassador.Core.Tests.Services.ContentService
             {
                 var result = this.ContentService.GetDatabaseCredentialStream();
 
-                using var stream = new StreamReader(result.Entity);
+                using var stream = new StreamReader(result.Entity!);
                 var content = stream.ReadToEnd();
 
                 Assert.Equal("DATABASE CREDENTIALS\n", content);

@@ -23,6 +23,7 @@
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
+using Remora.Discord.Core;
 using Xunit;
 
 #pragma warning disable SA1600
@@ -68,7 +69,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             {
                 CreateCharacter
                 (
-                    new User(1),
+                    new User(new Snowflake(1)),
                     this.DefaultServer,
                     CharacterName,
                     string.Empty,

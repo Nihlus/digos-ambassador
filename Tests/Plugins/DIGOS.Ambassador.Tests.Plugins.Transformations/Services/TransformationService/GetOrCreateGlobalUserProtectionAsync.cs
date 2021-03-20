@@ -26,8 +26,7 @@
 
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Tests.Utility;
-using Discord;
+using Remora.Discord.Core;
 using Xunit;
 
 namespace DIGOS.Ambassador.Tests.Plugins.Transformations
@@ -36,7 +35,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
     {
         public class GetOrCreateGlobalUserProtectionAsync : TransformationServiceTestBase
         {
-            private readonly IUser _user = MockHelper.CreateDiscordUser(0);
+            private readonly Snowflake _user = new Snowflake(0);
 
             [Fact]
             public async Task CreatesObjectIfOneDoesNotExist()
@@ -54,7 +53,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             {
                 var result = await this.Transformations.GetOrCreateGlobalUserProtectionAsync(_user);
 
-                Assert.Equal((long)_user.Id, result.Entity.User.DiscordID);
+                Assert.Equal(_user, result.Entity!.User.DiscordID);
             }
 
             [Fact]

@@ -24,8 +24,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
-using Discord;
 using Moq;
+using Remora.Discord.Core;
 using Xunit;
 
 #pragma warning disable SA1600
@@ -39,36 +39,23 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
     {
         public class TransferEntityOwnershipAsync : OwnedEntityServiceTestBase
         {
-            private readonly IUser _originalUser;
-            private readonly IUser _newUser;
+            private readonly Snowflake _originalUser = new Snowflake(0);
+            private readonly Snowflake _newUser = new Snowflake(1);
 
             private User _originalDBUser = null!;
             private User _newDBUser = null!;
-
-            public TransferEntityOwnershipAsync()
-            {
-                // Set up mocked discord users
-                var originalUserMock = new Mock<IUser>();
-                originalUserMock.Setup(u => u.Id).Returns(0);
-
-                var newUserMock = new Mock<IUser>();
-                newUserMock.Setup(u => u.Id).Returns(1);
-
-                _originalUser = originalUserMock.Object;
-                _newUser = newUserMock.Object;
-            }
 
             public override async Task InitializeAsync()
             {
                 await base.InitializeAsync();
 
                 // Set up mocked database users
-                _originalDBUser = (await this.Users.AddUserAsync(_originalUser)).Entity;
-                _newDBUser = (await this.Users.AddUserAsync(_newUser)).Entity;
+                _originalDBUser = (await this.Users.AddUserAsync(_originalUser)).Entity!;
+                _newDBUser = (await this.Users.AddUserAsync(_newUser)).Entity!;
             }
 
             [Fact]
-            public void ReturnsErrorIfUserAlreadyOwnsTheEntity()
+            public async Task ReturnsErrorIfUserAlreadyOwnsTheEntity()
             {
                 // Set up entity owned by the original user
                 var entityMock = new Mock<IOwnedNamedEntity>();
@@ -88,12 +75,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
                 // Set up the list of entities owned by the new owner
                 var collection = new List<IOwnedNamedEntity> { entityMock.Object };
 
-                var result = this.Entities.TransferEntityOwnership(_originalDBUser, collection, entityMock.Object);
+                var result = await this.Entities.TransferEntityOwnershipAsync(_newUser, collection, entityMock.Object);
                 Assert.False(result.IsSuccess);
             }
 
             [Fact]
-            public void ReturnsErrorIfUserAlreadyOwnsAnEntityWithTheSameName()
+            public async Task ReturnsErrorIfUserAlreadyOwnsAnEntityWithTheSameName()
             {
                 // Set up the entities owned by the users
                 var entityOwnedByOriginal = new Mock<IOwnedNamedEntity>();
@@ -107,12 +94,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
                 // Set up the list of entities owned by the new owner
                 var collection = new List<IOwnedNamedEntity> { entityOwnedByNew.Object };
 
-                var result = this.Entities.TransferEntityOwnership(_newDBUser, collection, entityOwnedByOriginal.Object);
+                var result = await this.Entities.TransferEntityOwnershipAsync(_newUser, collection, entityOwnedByOriginal.Object);
                 Assert.False(result.IsSuccess);
             }
 
             [Fact]
-            public void IsSuccessfulIfUserDoesNotOwnTheEntityAndDoesNotOwnAnEntityWithTheSameName()
+            public async Task IsSuccessfulIfUserDoesNotOwnTheEntityAndDoesNotOwnAnEntityWithTheSameName()
             {
                 // Set up the entities owned by the users
                 var entityOwnedByOriginalMock = new Mock<IOwnedNamedEntity>();
@@ -130,10 +117,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
                 // Set up the list of entities owned by the new owner
                 var collection = new List<IOwnedNamedEntity> { entityOwnedByNew };
 
-                var result = this.Entities.TransferEntityOwnership(_newDBUser, collection, entityOwnedByOriginal);
+                var result = await this.Entities.TransferEntityOwnershipAsync(_newUser, collection, entityOwnedByOriginal);
                 Assert.True(result.IsSuccess);
                 Assert.Same(_newDBUser, entityOwnedByOriginal.Owner);
-                Assert.True(result.WasModified);
             }
         }
     }

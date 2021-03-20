@@ -23,8 +23,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
-using DIGOS.Ambassador.Tests.Utility;
 using JetBrains.Annotations;
+using Remora.Discord.Core;
 using Xunit;
 
 #pragma warning disable SA1600
@@ -56,9 +56,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             {
                 await base.InitializeAsync();
 
-                var discordUser = MockHelper.CreateDiscordUser(0);
+                var discordUser = new Snowflake(0);
                 var user = await this.Users.AddUserAsync(discordUser);
-                _user = user.Entity;
+                _user = user.Entity!;
             }
 
             [Theory]

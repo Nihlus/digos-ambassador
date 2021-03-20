@@ -29,8 +29,7 @@ using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
-using DIGOS.Ambassador.Tests.Utility;
-using Discord;
+using Remora.Discord.Core;
 using Xunit;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
@@ -40,7 +39,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
     {
         public class ResetCharacterFormAsync : TransformationServiceTestBase
         {
-            private readonly IUser _user = MockHelper.CreateDiscordUser(0);
+            private readonly Snowflake _user = new Snowflake(0);
             private User _owner = null!;
             private Character _character = null!;
 
@@ -48,12 +47,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
             protected override async Task InitializeTestAsync()
             {
-                _owner = (await this.Users.GetOrRegisterUserAsync(_user)).Entity;
+                _owner = (await this.Users.GetOrRegisterUserAsync(_user)).Entity!;
 
                 _character = new Character
                 (
                     _owner,
-                    new Server(0),
+                    new Server(new Snowflake(0)),
                     string.Empty,
                     string.Empty,
                     string.Empty,
@@ -70,7 +69,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _character
                 );
 
-                _appearance = getAppearanceConfigurationResult.Entity;
+                _appearance = getAppearanceConfigurationResult.Entity!;
             }
 
             [Fact]
@@ -86,7 +85,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 var result = await this.Transformations.ResetCharacterFormAsync(_character);
 
                 Assert.True(result.IsSuccess);
-                Assert.True(result.WasModified);
                 Assert.NotNull(_appearance);
                 Assert.Equal(_appearance.Height, _appearance.Height);
             }

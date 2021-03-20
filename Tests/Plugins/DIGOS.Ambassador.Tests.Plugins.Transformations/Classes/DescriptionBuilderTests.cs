@@ -30,6 +30,7 @@ using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Discord.Core;
 using Xunit;
 
 #pragma warning disable SA1600
@@ -48,8 +49,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
         {
             var character = new Character
             (
-                new User(0),
-                new Server(0),
+                new User(new Snowflake(0)),
+                new Server(new Snowflake(0)),
                 "Amby",
                 string.Empty,
                 string.Empty,

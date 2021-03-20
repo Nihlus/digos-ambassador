@@ -26,8 +26,7 @@
 
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Tests.Utility;
-using Discord;
+using Remora.Discord.Core;
 using Xunit;
 
 namespace DIGOS.Ambassador.Tests.Plugins.Transformations
@@ -36,8 +35,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
     {
         public class WhitelistUserAsync : TransformationServiceTestBase
         {
-            private readonly IUser _user = MockHelper.CreateDiscordUser(0);
-            private readonly IUser _whitelistedUser = MockHelper.CreateDiscordUser(1);
+            private readonly Snowflake _user = new Snowflake(0);
+            private readonly Snowflake _whitelistedUser = new Snowflake(1);
 
             [Fact]
             public async Task CanWhitelistUser()
@@ -45,10 +44,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 var result = await this.Transformations.WhitelistUserAsync(_user, _whitelistedUser);
 
                 Assert.True(result.IsSuccess);
-                Assert.True(result.WasModified);
 
                 Assert.NotEmpty(this.Database.GlobalUserProtections.First().Whitelist);
-                Assert.Equal((long)_whitelistedUser.Id, this.Database.GlobalUserProtections.First().Whitelist.First().DiscordID);
+                Assert.Equal(_whitelistedUser, this.Database.GlobalUserProtections.First().Whitelist.First().DiscordID);
             }
 
             [Fact]

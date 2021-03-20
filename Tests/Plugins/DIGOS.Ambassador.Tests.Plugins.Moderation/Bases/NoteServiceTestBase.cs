@@ -27,9 +27,9 @@ using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
-using DIGOS.Ambassador.Tests.Extensions;
 using DIGOS.Ambassador.Tests.TestBases;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -72,10 +72,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Bases
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
             var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            coreDatabase.Database.Create();
+            coreDatabase.Database.EnsureCreated();
 
             var noteDatabase = serviceProvider.GetRequiredService<ModerationDatabaseContext>();
-            noteDatabase.Database.Create();
+            noteDatabase.Database.EnsureCreated();
 
             this.Database = noteDatabase;
             this.Notes = serviceProvider.GetRequiredService<NoteService>();

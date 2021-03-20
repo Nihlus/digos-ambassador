@@ -32,7 +32,6 @@ using DIGOS.Ambassador.Plugins.Transformations.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Model;
 using DIGOS.Ambassador.Plugins.Transformations.Services;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
-using DIGOS.Ambassador.Tests.Extensions;
 using DIGOS.Ambassador.Tests.TestBases;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -89,7 +88,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 .AddSingleton(s =>
                 {
                     var content = s.GetRequiredService<ContentService>();
-                    return content.GetTransformationMessages().Entity;
+                    return content.GetTransformationMessages().Entity!;
                 })
                 .AddSingleton(FileSystemFactory.CreateContentFileSystem())
                 .AddSingleton<PronounService>()
@@ -106,13 +105,13 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
             this.CoreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            this.CoreDatabase.Database.Create();
+            this.CoreDatabase.Database.EnsureCreated();
 
             this.CharacterDatabase = serviceProvider.GetRequiredService<CharactersDatabaseContext>();
-            this.CharacterDatabase.Database.Create();
+            this.CharacterDatabase.Database.EnsureCreated();
 
             this.Database = serviceProvider.GetRequiredService<TransformationsDatabaseContext>();
-            this.Database.Database.Create();
+            this.Database.Database.EnsureCreated();
 
             this.Transformations = serviceProvider.GetRequiredService<TransformationService>();
             this.Users = serviceProvider.GetRequiredService<UserService>();

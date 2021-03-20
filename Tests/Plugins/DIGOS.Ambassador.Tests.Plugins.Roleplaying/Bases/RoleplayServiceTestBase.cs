@@ -28,13 +28,12 @@ using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
-using DIGOS.Ambassador.Tests.Extensions;
 using DIGOS.Ambassador.Tests.TestBases;
-using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Remora.Commands.Services;
 using Xunit;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
@@ -76,10 +75,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Roleplaying
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
             var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            coreDatabase.Database.Create();
+            coreDatabase.Database.EnsureCreated();
 
             this.Database = serviceProvider.GetRequiredService<RoleplayingDatabaseContext>();
-            this.Database.Database.Create();
+            this.Database.Database.EnsureCreated();
 
             this.Roleplays = serviceProvider.GetRequiredService<RoleplayService>();
         }
