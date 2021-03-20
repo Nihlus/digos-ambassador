@@ -568,12 +568,6 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
         /// <returns>A result which may or may not have succeeded.</returns>
         private async Task<Result> UpdateAsync(KinkWizard wizard, CancellationToken ct = default)
         {
-            var updateButtons = await UpdateReactionButtonsAsync(wizard, ct);
-            if (!updateButtons.IsSuccess)
-            {
-                return updateButtons;
-            }
-
             var getPage = await GetCurrentPageAsync(wizard, ct);
             if (!getPage.IsSuccess)
             {
@@ -590,9 +584,12 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
                 ct: ct
             );
 
-            return modifyMessage.IsSuccess
-                ? Result.FromSuccess()
-                : Result.FromError(modifyMessage);
+            if (!modifyMessage.IsSuccess)
+            {
+                return Result.FromError(modifyMessage);
+            }
+
+            return await UpdateReactionButtonsAsync(wizard, ct);
         }
 
         /// <summary>
