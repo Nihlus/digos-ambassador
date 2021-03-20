@@ -101,7 +101,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Responders
                     gatewayEvent.GuildID,
                     gatewayEvent.User.ID,
                     oldMember.User.Value.Discriminator,
-                    newMember.User.Discriminator
+                    newMember.User.Discriminator,
+                    ct
                 );
             }
 

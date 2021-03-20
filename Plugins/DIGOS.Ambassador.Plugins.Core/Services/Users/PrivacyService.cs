@@ -116,7 +116,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
                 return Result.FromError(sendMessage);
             }
 
-            return await SendPrivacyPolicyAsync(channel.ID);
+            return await SendPrivacyPolicyAsync(channel.ID, ct);
         }
 
         /// <summary>
