@@ -310,7 +310,9 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         {
             var categories = await _database.Kinks.ServersideQueryAsync
             (
-                q => q.Select(k => k.Category),
+                q => q
+                    .Select(k => k.Category)
+                    .Distinct(),
                 ct
             );
 
