@@ -66,6 +66,7 @@ namespace DIGOS.Ambassador.Tests.TestBases
         /// <inheritdoc />
         public void Dispose()
         {
+            GC.SuppressFinalize(this);
             _connection.Dispose();
         }
     }
