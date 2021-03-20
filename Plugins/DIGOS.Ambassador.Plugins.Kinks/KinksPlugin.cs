@@ -37,6 +37,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Remora.Commands.Extensions;
 using Remora.Commands.Parsers;
+using Remora.Discord.API.Abstractions.Gateway.Commands;
+using Remora.Discord.Gateway;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
 using Remora.Results;
@@ -68,6 +70,11 @@ namespace DIGOS.Ambassador.Plugins.Kinks
             serviceCollection.AddCommandGroup<KinkCommands>();
 
             serviceCollection.AddParser<KinkPreference, EnumParser<KinkPreference>>();
+
+            serviceCollection.Configure<DiscordGatewayClientOptions>(o =>
+            {
+                o.Intents |= GatewayIntents.DirectMessages;
+            });
         }
 
         /// <inheritdoc />
