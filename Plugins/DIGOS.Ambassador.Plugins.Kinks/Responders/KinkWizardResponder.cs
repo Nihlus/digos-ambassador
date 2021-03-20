@@ -254,7 +254,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
         )
         {
             var didPageChange = false;
-            if (emoji.Equals(wizard.Back))
+            if (emoji.Equals(wizard.Next))
             {
                 didPageChange = wizard.MoveNext();
             }
