@@ -24,7 +24,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
 using Remora.Commands.Conditions;
-using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;
 
@@ -38,7 +37,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Conditions
         private readonly PermissionService _permissions;
         private readonly PermissionRegistryService _permissionRegistry;
         private readonly ICommandContext _context;
-        private readonly IDiscordRestGuildAPI _guildAPI;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RequirePermissionCondition"/> class.
@@ -46,19 +44,16 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Conditions
         /// <param name="permissions">The permissions service.</param>
         /// <param name="permissionRegistry">The permissions registry.</param>
         /// <param name="context">The command context.</param>
-        /// <param name="guildAPI">The guild API.</param>
         public RequirePermissionCondition
         (
             PermissionService permissions,
             PermissionRegistryService permissionRegistry,
-            ICommandContext context,
-            IDiscordRestGuildAPI guildAPI
+            ICommandContext context
         )
         {
             _permissions = permissions;
             _permissionRegistry = permissionRegistry;
             _context = context;
-            _guildAPI = guildAPI;
         }
 
         /// <inheritdoc />

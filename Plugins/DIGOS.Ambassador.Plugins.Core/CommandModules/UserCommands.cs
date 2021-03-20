@@ -224,17 +224,14 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         public class SetCommands : CommandGroup
         {
             private readonly UserService _users;
-            private readonly ICommandContext _context;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="SetCommands"/> class.
             /// </summary>
             /// <param name="users">The user service.</param>
-            /// <param name="context">The command context.</param>
-            public SetCommands(UserService users, ICommandContext context)
+            public SetCommands(UserService users)
             {
                 _users = users;
-                _context = context;
             }
 
             /// <summary>

@@ -45,24 +45,20 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Responders
         IResponder<IMessageUpdate>
     {
         private readonly RoleplayDiscordService _roleplays;
-        private readonly IDiscordRestChannelAPI _channelAPI;
         private readonly ILogger<RoleplayLoggingResponder> _log;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleplayLoggingResponder"/> class.
         /// </summary>
         /// <param name="roleplays">The roleplay service.</param>
-        /// <param name="channelAPI">The channel API.</param>
         /// <param name="log">The logging instance.</param>
         public RoleplayLoggingResponder
         (
             RoleplayDiscordService roleplays,
-            IDiscordRestChannelAPI channelAPI,
             ILogger<RoleplayLoggingResponder> log
         )
         {
             _roleplays = roleplays;
-            _channelAPI = channelAPI;
             _log = log;
         }
 

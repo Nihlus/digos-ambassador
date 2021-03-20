@@ -47,21 +47,17 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         public class SetCommands : CommandGroup
         {
             private readonly RoleplayDiscordService _discordRoleplays;
-            private readonly DedicatedChannelService _dedicatedChannels;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="SetCommands"/> class.
             /// </summary>
             /// <param name="discordRoleplays">The roleplay service.</param>
-            /// <param name="dedicatedChannels">The dedicated channel service.</param>
             public SetCommands
             (
-                RoleplayDiscordService discordRoleplays,
-                DedicatedChannelService dedicatedChannels
+                RoleplayDiscordService discordRoleplays
             )
             {
                 _discordRoleplays = discordRoleplays;
-                _dedicatedChannels = dedicatedChannels;
             }
 
             /// <summary>
