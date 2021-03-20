@@ -487,18 +487,17 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
 
                     if (wizard.Categories.Any())
                     {
-                        var categories = wizard.Categories.Skip(wizard.CurrentCategoryOffset).Take(3).ToList();
-                        var categoryFields = categories.Select
+                        var visibleCategories = wizard.Categories.Skip(wizard.CurrentCategoryOffset).Take(3).ToList();
+                        var visibleCategoryFields = visibleCategories.Select
                         (
-                            c =>
-                                new EmbedField(c.ToString().Humanize().Transform(To.TitleCase), c.Humanize())
+                            c => new EmbedField(c.ToString().Humanize().Transform(To.TitleCase), c.Humanize())
                         ).ToList();
 
                         var offset = wizard.CurrentCategoryOffset;
                         eb = eb with
                         {
                             Description = "Select from one of the categories below.",
-                            Fields = categoryFields,
+                            Fields = visibleCategoryFields,
                             Footer = new EmbedFooter
                             (
                                 $"Categories {offset}-{offset + categories.Count} / {wizard.Categories.Count}"
