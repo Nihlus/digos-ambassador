@@ -65,7 +65,7 @@ namespace DIGOS.Ambassador.Core.Extensions
         [Pure]
         public static bool Contains([NotNullWhen(true)] this string? @this, string? search, StringComparison comparer)
         {
-            return @this != null && search != null && @this.IndexOf(search, comparer) >= 0;
+            return @this != null && @this != null && search != null && @this.IndexOf(search, comparer) >= 0;
         }
 
         /// <summary>
