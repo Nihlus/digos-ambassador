@@ -118,52 +118,53 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
 
             var userHasRole = member.Roles.Contains(autorole.DiscordRoleID);
 
-            if (isUserQualified && userHasRole)
+            switch (isUserQualified)
             {
-                return Unchanged;
-            }
-
-            if (!isUserQualified && userHasRole)
-            {
-                var removeRole = await _guildAPI.RemoveGuildMemberRoleAsync
-                (
-                    guildID,
-                    userID,
-                    autorole.DiscordRoleID,
-                    ct
-                );
-
-                if (!removeRole.IsSuccess)
+                case true when userHasRole:
                 {
-                    return Result<AutoroleUpdateStatus>.FromError(removeRole);
+                    return Unchanged;
                 }
-
-                var getConfirmation = await _autoroles.GetOrCreateAutoroleConfirmationAsync
-                (
-                    autorole,
-                    userID,
-                    ct
-                );
-
-                if (!getConfirmation.IsSuccess)
+                case false when userHasRole:
                 {
-                    return Removed;
+                    var removeRole = await _guildAPI.RemoveGuildMemberRoleAsync
+                    (
+                        guildID,
+                        userID,
+                        autorole.DiscordRoleID,
+                        ct
+                    );
+
+                    if (!removeRole.IsSuccess)
+                    {
+                        return Result<AutoroleUpdateStatus>.FromError(removeRole);
+                    }
+
+                    var getConfirmation = await _autoroles.GetOrCreateAutoroleConfirmationAsync
+                    (
+                        autorole,
+                        userID,
+                        ct
+                    );
+
+                    if (!getConfirmation.IsSuccess)
+                    {
+                        return Removed;
+                    }
+
+                    // Remove any existing affirmation
+                    var confirmation = getConfirmation.Entity;
+                    var removeConfirmation = await _autoroles.RemoveAutoroleConfirmationAsync(confirmation, ct);
+
+                    return !removeConfirmation.IsSuccess
+                        ? Result<AutoroleUpdateStatus>.FromError(removeConfirmation)
+                        : Removed;
                 }
-
-                // Remove any existing affirmation
-                var confirmation = getConfirmation.Entity;
-                var removeConfirmation = await _autoroles.RemoveAutoroleConfirmationAsync(confirmation, ct);
-
-                return !removeConfirmation.IsSuccess
-                    ? Result<AutoroleUpdateStatus>.FromError(removeConfirmation)
-                    : Removed;
-            }
-
-            // At this point, the user doesn't have the role, and either is or is not qualified.
-            if (!isUserQualified)
-            {
-                // We consider a no-op for an unqualified user a success.
-                return Unqualified;
+                case false:
+                {
+                    // At this point, the user doesn't have the role, and either is or is not qualified.
+                    // We consider a no-op for an unqualified user a success.
+                    return Unqualified;
+                }
             }
 
             if (autorole.RequiresConfirmation)

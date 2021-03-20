@@ -173,30 +173,31 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
                     var leftShift = performLeftShift.Entity;
                     var rightShift = performRightShift.Entity;
 
-                    // There's a couple of cases here for us to deal with.
-                    // 1: both parts were shifted
-                    // 2: one part was shifted
-                    // 3: one part was shifted and one was added
-                    // 4: both parts were added
-                    // 5: no changes were made
-                    if (leftShift.Action == ShiftBodypartAction.Nothing && rightShift.Action == ShiftBodypartAction.Nothing)
+                    switch (leftShift.Action)
                     {
-                        // No change, keep moving
-                        continue;
-                    }
-
-                    if (leftShift.Action == ShiftBodypartAction.Shift && rightShift.Action == ShiftBodypartAction.Shift)
-                    {
-                        var uniformShiftMessage = await GetUniformShiftMessageAsync(composingPart);
-                        InsertShiftMessage(uniformShiftMessage);
-                        continue;
-                    }
-
-                    if (leftShift.Action == ShiftBodypartAction.Add && rightShift.Action == ShiftBodypartAction.Add)
-                    {
-                        var uniformGrowMessage = await GetUniformAddMessageAsync(composingPart);
-                        InsertShiftMessage(uniformGrowMessage);
-                        continue;
+                        // There's a couple of cases here for us to deal with.
+                        // 1: both parts were shifted
+                        // 2: one part was shifted
+                        // 3: one part was shifted and one was added
+                        // 4: both parts were added
+                        // 5: no changes were made
+                        case ShiftBodypartAction.Nothing when rightShift.Action == ShiftBodypartAction.Nothing:
+                        {
+                            // No change, keep moving
+                            continue;
+                        }
+                        case ShiftBodypartAction.Shift when rightShift.Action == ShiftBodypartAction.Shift:
+                        {
+                            var uniformShiftMessage = await GetUniformShiftMessageAsync(composingPart);
+                            InsertShiftMessage(uniformShiftMessage);
+                            continue;
+                        }
+                        case ShiftBodypartAction.Add when rightShift.Action == ShiftBodypartAction.Add:
+                        {
+                            var uniformGrowMessage = await GetUniformAddMessageAsync(composingPart);
+                            InsertShiftMessage(uniformGrowMessage);
+                            continue;
+                        }
                     }
 
                     if (leftShift.Action != ShiftBodypartAction.Nothing)

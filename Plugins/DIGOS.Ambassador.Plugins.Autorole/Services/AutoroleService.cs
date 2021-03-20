@@ -594,14 +594,16 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             CancellationToken ct = default
         )
         {
-            if (autorole.RequiresConfirmation && requireAffirmation)
+            switch (autorole.RequiresConfirmation)
             {
-                return new UserError("The autorole already requires affirmation.");
-            }
-
-            if (!autorole.RequiresConfirmation && !requireAffirmation)
-            {
-                return new UserError("The autorole already doesn't require affirmation.");
+                case true when requireAffirmation:
+                {
+                    return new UserError("The autorole already requires affirmation.");
+                }
+                case false when !requireAffirmation:
+                {
+                    return new UserError("The autorole already doesn't require affirmation.");
+                }
             }
 
             autorole.RequiresConfirmation = requireAffirmation;

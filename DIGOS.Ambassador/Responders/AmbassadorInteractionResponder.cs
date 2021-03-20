@@ -179,42 +179,46 @@ namespace DIGOS.Ambassador.Responders
                 return postExecution;
             }
 
-            if (executeResult.Entity.IsSuccess && executeResult.Entity is Result<UserMessage> messageResult)
+            switch (executeResult.Entity.IsSuccess)
             {
-                // Relay the message to the user
-                var sendMessage = await _userFeedback.SendMessageAsync
-                (
-                    gatewayEvent.ChannelID.Value,
-                    user.ID,
-                    messageResult.Entity!,
-                    ct
-                );
-
-                if (!sendMessage.IsSuccess)
+                case true when executeResult.Entity is Result<UserMessage> messageResult:
                 {
-                    return Result.FromError(sendMessage);
-                }
-            }
+                    // Relay the message to the user
+                    var sendMessage = await _userFeedback.SendMessageAsync
+                    (
+                        gatewayEvent.ChannelID.Value,
+                        user.ID,
+                        messageResult.Entity!,
+                        ct
+                    );
 
-            if (!executeResult.Entity.IsSuccess)
-            {
-                if (executeResult.Entity.Unwrap() is not UserError userError)
+                    if (!sendMessage.IsSuccess)
+                    {
+                        return Result.FromError(sendMessage);
+                    }
+
+                    break;
+                }
+                case false:
                 {
-                    return Result.FromError(executeResult.Entity.Unwrap());
+                    if (executeResult.Entity.Unwrap() is not UserError userError)
+                    {
+                        return Result.FromError(executeResult.Entity.Unwrap());
+                    }
+
+                    // Alert the user, and don't complete the transaction
+                    var sendError = await _userFeedback.SendErrorAsync
+                    (
+                        gatewayEvent.ChannelID.Value,
+                        user.ID,
+                        userError.Message,
+                        ct
+                    );
+
+                    return sendError.IsSuccess
+                        ? Result.FromSuccess()
+                        : Result.FromError(sendError);
                 }
-
-                // Alert the user, and don't complete the transaction
-                var sendError = await _userFeedback.SendErrorAsync
-                (
-                    gatewayEvent.ChannelID.Value,
-                    user.ID,
-                    userError.Message,
-                    ct
-                );
-
-                return sendError.IsSuccess
-                    ? Result.FromSuccess()
-                    : Result.FromError(sendError);
             }
 
             transaction.Complete();

@@ -158,21 +158,23 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
                     var leftShift = performLeftShift.Entity;
                     var rightShift = performRightShift.Entity;
 
-                    // There's a couple of cases here for us to deal with.
-                    // 1: both parts were removed
-                    // 2: one part was removed
-                    // 3: no changes were made
-                    if (leftShift.Action == ShiftBodypartAction.Nothing && rightShift.Action == ShiftBodypartAction.Nothing)
+                    switch (leftShift.Action)
                     {
-                        // No change, keep moving
-                        continue;
-                    }
-
-                    if (leftShift.Action == ShiftBodypartAction.Remove && rightShift.Action == ShiftBodypartAction.Remove)
-                    {
-                        var uniformShiftMessage = await GetUniformRemoveMessageAsync(composingPart);
-                        InsertRemovalMessage(uniformShiftMessage);
-                        continue;
+                        // There's a couple of cases here for us to deal with.
+                        // 1: both parts were removed
+                        // 2: one part was removed
+                        // 3: no changes were made
+                        case ShiftBodypartAction.Nothing when rightShift.Action == ShiftBodypartAction.Nothing:
+                        {
+                            // No change, keep moving
+                            continue;
+                        }
+                        case ShiftBodypartAction.Remove when rightShift.Action == ShiftBodypartAction.Remove:
+                        {
+                            var uniformShiftMessage = await GetUniformRemoveMessageAsync(composingPart);
+                            InsertRemovalMessage(uniformShiftMessage);
+                            continue;
+                        }
                     }
 
                     if (leftShift.Action != ShiftBodypartAction.Nothing)

@@ -196,14 +196,16 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 user = _database.NormalizeReference(user);
             }
 
-            if (user is null && name is null)
+            switch (user)
             {
-                return new UserError("No user and no name specified.");
-            }
-
-            if (user is null)
-            {
-                return await GetCharacterByNameAsync(server, name!, ct);
+                case null when name is null:
+                {
+                    return new UserError("No user and no name specified.");
+                }
+                case null:
+                {
+                    return await GetCharacterByNameAsync(server, name!, ct);
+                }
             }
 
             if (name.IsNullOrWhitespace())

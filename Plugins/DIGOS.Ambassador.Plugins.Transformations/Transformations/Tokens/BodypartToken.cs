@@ -64,15 +64,18 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
         /// <inheritdoc/>
         protected override BodypartToken Initialize(string? data)
         {
-            if (data is null)
+            switch (data)
             {
-                this.Pluralize = false;
-                return this;
-            }
-
-            if (data.Equals("pluralize"))
-            {
-                this.Pluralize = true;
+                case null:
+                {
+                    this.Pluralize = false;
+                    return this;
+                }
+                case "pluralize":
+                {
+                    this.Pluralize = true;
+                    break;
+                }
             }
 
             return this;

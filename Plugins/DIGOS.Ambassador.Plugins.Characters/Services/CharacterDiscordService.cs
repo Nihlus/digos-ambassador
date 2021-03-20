@@ -369,14 +369,16 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             var userCharacters = getUserCharacters.Entity.ToList();
-            if (userCharacters.Count == 0)
+            switch (userCharacters.Count)
             {
-                return new UserError("The user doesn't have any characters.");
-            }
-
-            if (userCharacters.Count == 1)
-            {
-                return new UserError("The user only has one character.");
+                case 0:
+                {
+                    return new UserError("The user doesn't have any characters.");
+                }
+                case 1:
+                {
+                    return new UserError("The user only has one character.");
+                }
             }
 
             var getCurrentCharacter = await GetCurrentCharacterAsync(guildID, userID, ct);
