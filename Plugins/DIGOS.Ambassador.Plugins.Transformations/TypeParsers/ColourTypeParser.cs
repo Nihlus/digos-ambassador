@@ -27,7 +27,7 @@ using Remora.Commands.Parsers;
 using Remora.Commands.Results;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.TypeReaders
+namespace DIGOS.Ambassador.Plugins.Transformations.TypeParsers
 {
     /// <summary>
     /// Reads colours as command arguments.

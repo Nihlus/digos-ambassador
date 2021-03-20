@@ -38,7 +38,7 @@ using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
-namespace DIGOS.Ambassador.Plugins.JumboEmotes.CommandModules
+namespace DIGOS.Ambassador.Plugins.JumboEmotes.Commands
 {
     /// <summary>
     /// Assorted commands that don't really fit anywhere - just for fun, testing, etc.
