@@ -537,15 +537,9 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
             CancellationToken ct = default
         )
         {
-            var alteredKinks = 0;
-            foreach (var kink in newKinks)
-            {
-                var entry = _database.Kinks.Update(kink);
-                if (entry.State != EntityState.Unchanged)
-                {
-                    ++alteredKinks;
-                }
-            }
+            var alteredKinks = newKinks
+                .Select(kink => _database.Kinks.Update(kink))
+                .Count(entry => entry.State != EntityState.Unchanged);
 
             await _database.SaveChangesAsync(ct);
 
