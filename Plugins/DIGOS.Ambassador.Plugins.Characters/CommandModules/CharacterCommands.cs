@@ -398,12 +398,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 ct: this.CancellationToken
             );
 
-            if (!createCharacterResult.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(createCharacterResult);
-            }
-
-            return new ConfirmationMessage($"Character \"{createCharacterResult.Entity.Name}\" created.");
+            return !createCharacterResult.IsSuccess
+                ? Result<UserMessage>.FromError(createCharacterResult)
+                : new ConfirmationMessage($"Character \"{createCharacterResult.Entity.Name}\" created.");
         }
 
         /// <summary>

@@ -147,12 +147,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             var roleplay = createRoleplay.Entity;
 
             var createChannel = await _dedicatedChannels.CreateDedicatedChannelAsync(roleplay);
-            if (!createChannel.IsSuccess)
-            {
-                return Result<Roleplay>.FromError(createChannel);
-            }
 
-            return roleplay;
+            return !createChannel.IsSuccess
+                ? Result<Roleplay>.FromError(createChannel)
+                : roleplay;
         }
 
         /// <summary>
@@ -379,12 +377,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 $"Calling {participantList}!"
             );
 
-            if (!send.IsSuccess)
-            {
-                return Result.FromError(send);
-            }
-
-            return Result.FromSuccess();
+            return !send.IsSuccess
+                ? Result.FromError(send)
+                : Result.FromSuccess();
         }
 
         /// <summary>
@@ -406,13 +401,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 return Result.FromSuccess();
             }
 
-            var enableChannel = await _dedicatedChannels.UpdateParticipantPermissionsAsync(roleplay);
-            if (!enableChannel.IsSuccess)
-            {
-                return enableChannel;
-            }
-
-            return Result.FromSuccess();
+            return await _dedicatedChannels.UpdateParticipantPermissionsAsync(roleplay);
         }
 
         /// <summary>
@@ -434,13 +423,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 return Result.FromSuccess();
             }
 
-            var setChannelName = await _dedicatedChannels.UpdateChannelNameAsync(roleplay);
-            if (!setChannelName.IsSuccess)
-            {
-                return setChannelName;
-            }
-
-            return Result.FromSuccess();
+            return await _dedicatedChannels.UpdateChannelNameAsync(roleplay);
         }
 
         /// <summary>

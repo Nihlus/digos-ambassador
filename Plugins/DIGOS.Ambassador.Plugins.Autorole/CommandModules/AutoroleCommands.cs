@@ -103,12 +103,9 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 this.CancellationToken
             );
 
-            if (!create.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(create);
-            }
-
-            return new ConfirmationMessage("Autorole configuration created.");
+            return !create.IsSuccess
+                ? Result<UserMessage>.FromError(create)
+                : new ConfirmationMessage("Autorole configuration created.");
         }
 
         /// <summary>
@@ -123,12 +120,9 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         public async Task<Result<UserMessage>> DeleteAutoroleAsync(AutoroleConfiguration autorole)
         {
             var deleteAutorole = await _autoroles.DeleteAutoroleAsync(autorole);
-            if (!deleteAutorole.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(deleteAutorole);
-            }
-
-            return new ConfirmationMessage("Autorole configuration deleted.");
+            return !deleteAutorole.IsSuccess
+                ? Result<UserMessage>.FromError(deleteAutorole)
+                : new ConfirmationMessage("Autorole configuration deleted.");
         }
 
         /// <summary>

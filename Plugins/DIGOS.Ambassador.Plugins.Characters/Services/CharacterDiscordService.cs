@@ -646,13 +646,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 ? getOriginalCharacter.Entity
                 : null;
 
-            var updateRoles = await _characterRoles.UpdateUserRolesAsync(guildID, userID, originalCharacter, ct);
-            if (!updateRoles.IsSuccess)
-            {
-                return updateRoles;
-            }
-
-            return Result.FromSuccess();
+            return await _characterRoles.UpdateUserRolesAsync(guildID, userID, originalCharacter, ct);
         }
 
         /// <summary>
