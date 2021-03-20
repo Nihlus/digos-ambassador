@@ -493,14 +493,15 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
                             c => new EmbedField(c.ToString().Humanize().Transform(To.TitleCase), c.Humanize())
                         ).ToList();
 
-                        var offset = wizard.CurrentCategoryOffset;
+                        var offset = wizard.CurrentCategoryOffset + 1;
                         eb = eb with
                         {
                             Description = "Select from one of the categories below.",
                             Fields = visibleCategoryFields,
                             Footer = new EmbedFooter
                             (
-                                $"Categories {offset}-{offset + categories.Count} / {wizard.Categories.Count}"
+                                $"Categories {offset}-{offset + visibleCategories.Count - 1} / " +
+                                $"{wizard.Categories.Count}"
                             )
                         };
                     }
