@@ -24,7 +24,6 @@ using DIGOS.Ambassador.Discord.Interactivity.Extensions;
 using DIGOS.Ambassador.Discord.Pagination.Responders;
 using DIGOS.Ambassador.Plugins.Statistics;
 using DIGOS.Ambassador.Plugins.Statistics.CommandGroups;
-using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Commands.Extensions;
 using Remora.Plugins.Abstractions;

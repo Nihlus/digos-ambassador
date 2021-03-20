@@ -31,9 +31,7 @@ using iTextSharp.text;
 using iTextSharp.text.pdf;
 using Microsoft.Extensions.DependencyInjection;
 using MoreLinq.Extensions;
-using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
-using Remora.Results;
 using Document = iTextSharp.text.Document;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters

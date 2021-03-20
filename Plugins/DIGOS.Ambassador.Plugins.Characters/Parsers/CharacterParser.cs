@@ -26,7 +26,6 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services;
-using JetBrains.Annotations;
 using Remora.Commands.Parsers;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;

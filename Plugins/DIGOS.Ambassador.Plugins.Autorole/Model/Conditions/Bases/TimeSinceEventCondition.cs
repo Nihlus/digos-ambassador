@@ -21,7 +21,6 @@
 //
 
 using System;
-using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
 {

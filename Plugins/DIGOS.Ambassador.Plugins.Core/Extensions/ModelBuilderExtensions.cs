@@ -47,6 +47,10 @@ namespace DIGOS.Ambassador.Plugins.Core.Extensions
                 .Property(s => s.DiscordID)
                 .HasConversion(v => (long)v.Value, v => new Snowflake((ulong)v));
 
+            modelBuilder.Entity<UserConsent>()
+                .Property(s => s.DiscordID)
+                .HasConversion(v => (long)v.Value, v => new Snowflake((ulong)v));
+
             return modelBuilder;
         }
     }

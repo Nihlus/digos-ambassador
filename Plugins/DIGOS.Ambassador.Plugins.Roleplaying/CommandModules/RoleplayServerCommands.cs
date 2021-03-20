@@ -23,7 +23,6 @@
 using System.ComponentModel;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback.Results;
-using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Permissions.Conditions;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
 using DIGOS.Ambassador.Plugins.Roleplaying.Permissions;

@@ -23,7 +23,6 @@
 using DIGOS.Ambassador.Plugins.Quotes;
 using DIGOS.Ambassador.Plugins.Quotes.Responders;
 using DIGOS.Ambassador.Plugins.Quotes.Services;
-using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Discord.Gateway.Extensions;
 using Remora.Plugins.Abstractions;

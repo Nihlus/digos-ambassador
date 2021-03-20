@@ -24,7 +24,6 @@ using System;
 using DIGOS.Ambassador.Plugins.Drone;
 using DIGOS.Ambassador.Plugins.Drone.CommandModules;
 using DIGOS.Ambassador.Plugins.Drone.Services;
-using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Remora.Commands.Extensions;

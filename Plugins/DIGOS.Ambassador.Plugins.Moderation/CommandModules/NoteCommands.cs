@@ -20,13 +20,11 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Plugins.Moderation.Permissions;

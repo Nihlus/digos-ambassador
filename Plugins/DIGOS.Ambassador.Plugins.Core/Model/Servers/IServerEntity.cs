@@ -21,7 +21,6 @@
 //
 
 using DIGOS.Ambassador.Core.Database.Entities;
-using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Core.Model.Servers
 {

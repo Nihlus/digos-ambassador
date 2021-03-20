@@ -23,7 +23,6 @@
 using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Plugins.JumboEmotes;
 using DIGOS.Ambassador.Plugins.JumboEmotes.CommandModules;
-using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Commands.Extensions;
 using Remora.Discord.API.Abstractions.Objects;

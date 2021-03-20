@@ -27,7 +27,6 @@ using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Moderation.Model.Bases;
-using JetBrains.Annotations;
 using Remora.Discord.Core;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.

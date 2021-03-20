@@ -23,7 +23,6 @@
 using DIGOS.Ambassador.Plugins.Amby;
 using DIGOS.Ambassador.Plugins.Amby.CommandModules;
 using DIGOS.Ambassador.Plugins.Amby.Services;
-using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Commands.Extensions;
 using Remora.Plugins.Abstractions;

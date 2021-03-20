@@ -21,7 +21,6 @@
 //
 
 using System.ComponentModel;
-using JetBrains.Annotations;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 

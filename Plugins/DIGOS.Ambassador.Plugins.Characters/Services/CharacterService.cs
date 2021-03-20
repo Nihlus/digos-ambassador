@@ -34,7 +34,6 @@ using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Model.Data;
 using DIGOS.Ambassador.Plugins.Characters.Services.Interfaces;
 using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
-using DIGOS.Ambassador.Plugins.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;

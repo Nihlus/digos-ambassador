@@ -27,7 +27,6 @@ using System.Reflection;
 using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Utility;
-using JetBrains.Annotations;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns

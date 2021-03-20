@@ -25,11 +25,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Discord.Interactivity;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
-using Remora.Discord.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Discord.Pagination

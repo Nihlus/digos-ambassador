@@ -22,10 +22,7 @@
 
 using System;
 using System.Threading;
-using System.Threading.Tasks;
-using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Core;
-using Remora.Results;
 
 namespace DIGOS.Ambassador.Discord.Interactivity.Messages
 {

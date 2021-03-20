@@ -33,7 +33,6 @@ using DIGOS.Ambassador.Plugins.Permissions.Extensions;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
 using Humanizer;
-using JetBrains.Annotations;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;

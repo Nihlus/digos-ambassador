@@ -28,7 +28,6 @@ using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
-using JetBrains.Annotations;
 using Remora.Discord.Core;
 using Image = DIGOS.Ambassador.Plugins.Characters.Model.Data.Image;
 

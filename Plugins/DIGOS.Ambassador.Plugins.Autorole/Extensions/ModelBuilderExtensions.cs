@@ -24,8 +24,6 @@ using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Statistics;
-using DIGOS.Ambassador.Plugins.Core.Model.Servers;
-using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using Microsoft.EntityFrameworkCore;
 using Remora.Discord.Core;
 

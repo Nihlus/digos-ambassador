@@ -21,7 +21,6 @@
 //
 
 using DIGOS.Ambassador.Core.Database.Services;
-using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Remora.EntityFrameworkCore.Modular;

@@ -26,7 +26,6 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
-using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Remora.Discord.Core;
 using Remora.Results;

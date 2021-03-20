@@ -23,7 +23,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
-using JetBrains.Annotations;
 using Remora.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;

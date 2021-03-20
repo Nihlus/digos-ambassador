@@ -22,7 +22,6 @@
 
 using System;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
-using JetBrains.Annotations;
 using Remora.Commands.Conditions;
 
 namespace DIGOS.Ambassador.Plugins.Permissions.Conditions

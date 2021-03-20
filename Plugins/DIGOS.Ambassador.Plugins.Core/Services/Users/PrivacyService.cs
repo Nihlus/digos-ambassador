@@ -172,7 +172,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
             var consent = await _database.UserConsents.ServersideQueryAsync
             (
                 q => q
-                    .Where(uc => uc.DiscordID == (long)discordUser.Value && uc.HasConsented)
+                    .Where(uc => uc.DiscordID == discordUser && uc.HasConsented)
                     .SingleOrDefaultAsync(ct)
             );
 
@@ -194,7 +194,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
             var consent = await _database.UserConsents.ServersideQueryAsync
             (
                 q => q
-                    .Where(uc => uc.DiscordID == (long)discordUser.Value)
+                    .Where(uc => uc.DiscordID == discordUser)
                     .SingleOrDefaultAsync(ct)
             );
 

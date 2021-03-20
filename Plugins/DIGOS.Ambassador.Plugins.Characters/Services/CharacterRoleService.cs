@@ -28,7 +28,6 @@ using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services.Interfaces;
-using DIGOS.Ambassador.Plugins.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using Microsoft.EntityFrameworkCore;

@@ -26,7 +26,6 @@ using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
-using JetBrains.Annotations;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Core;
 

@@ -26,10 +26,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
-using JetBrains.Annotations;
-using Microsoft.Extensions.DependencyInjection;
 using Remora.Commands.Parsers;
-using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;
 

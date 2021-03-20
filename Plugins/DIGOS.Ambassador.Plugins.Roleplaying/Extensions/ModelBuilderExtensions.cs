@@ -22,7 +22,6 @@
 
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using Microsoft.EntityFrameworkCore;
-using Remora.Discord.API.Objects;
 using Remora.Discord.Core;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Extensions

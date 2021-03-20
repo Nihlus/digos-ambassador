@@ -30,7 +30,6 @@ using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
 using Microsoft.EntityFrameworkCore;
-using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Core;
 using Remora.Results;
 

@@ -25,7 +25,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Entities;
-using JetBrains.Annotations;
 using Remora.Discord.Core;
 using Remora.Results;
 

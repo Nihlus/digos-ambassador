@@ -22,7 +22,6 @@
 
 using DIGOS.Ambassador.Plugins.JoinMessages;
 using DIGOS.Ambassador.Plugins.JoinMessages.Responders;
-using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Discord.Gateway.Extensions;
 using Remora.Plugins.Abstractions;

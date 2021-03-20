@@ -21,6 +21,7 @@
 //
 
 using DIGOS.Ambassador.Plugins.Core.Extensions;
+using DIGOS.Ambassador.Plugins.Permissions.Extensions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Remora.EntityFrameworkCore.Modular;

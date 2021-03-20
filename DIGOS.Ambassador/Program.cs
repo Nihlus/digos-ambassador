@@ -43,7 +43,6 @@ using Remora.Commands.Trees.Nodes;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Caching.Extensions;
 using Remora.Discord.Commands.Conditions;
-using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Parsers;
 using Remora.Discord.Commands.Results;
 using Remora.Discord.Commands.Services;

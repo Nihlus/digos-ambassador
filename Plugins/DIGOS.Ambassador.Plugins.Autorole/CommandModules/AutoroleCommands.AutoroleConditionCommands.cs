@@ -31,7 +31,6 @@ using DIGOS.Ambassador.Plugins.Permissions.Model;
 using JetBrains.Annotations;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
-using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;
 

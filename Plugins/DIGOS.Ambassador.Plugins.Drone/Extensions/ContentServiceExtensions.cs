@@ -23,7 +23,6 @@
 using System;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Services;
-using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Drone.Extensions
 {

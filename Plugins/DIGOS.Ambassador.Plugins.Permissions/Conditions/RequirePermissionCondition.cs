@@ -77,15 +77,9 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Conditions
 
             var permission = getPermissionResult.Entity;
 
-            var getGuild = await _guildAPI.GetGuildAsync(_context.GuildID.Value, ct: ct);
-            if (!getGuild.IsSuccess)
-            {
-                return Result.FromError(getGuild);
-            }
-
             return await _permissions.HasPermissionAsync
             (
-                getGuild.Entity,
+                _context.GuildID.Value,
                 _context.User.ID,
                 permission,
                 attribute.Target,

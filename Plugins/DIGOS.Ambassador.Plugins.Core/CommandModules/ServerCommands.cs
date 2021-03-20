@@ -24,7 +24,6 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Core.Extensions;
-using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Permissions;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Permissions.Conditions;

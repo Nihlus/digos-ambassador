@@ -22,7 +22,6 @@
 
 using System;
 using DIGOS.Ambassador.Core.Services;
-using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Characters.Extensions
 {
