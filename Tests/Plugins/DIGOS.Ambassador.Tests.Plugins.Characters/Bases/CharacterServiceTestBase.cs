@@ -156,9 +156,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
         /// <inheritdoc />
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
-            var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            coreDatabase.Database.EnsureCreated();
-
             var charactersDatabase = serviceProvider.GetRequiredService<CharactersDatabaseContext>();
             charactersDatabase.Database.EnsureCreated();
 

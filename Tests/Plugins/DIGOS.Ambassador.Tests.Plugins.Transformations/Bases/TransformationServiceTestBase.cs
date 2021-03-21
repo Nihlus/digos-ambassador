@@ -105,12 +105,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
             this.CoreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            this.CoreDatabase.Database.EnsureCreated();
-
             this.CharacterDatabase = serviceProvider.GetRequiredService<CharactersDatabaseContext>();
-            this.CharacterDatabase.Database.EnsureCreated();
-
             this.Database = serviceProvider.GetRequiredService<TransformationsDatabaseContext>();
+
             this.Database.Database.EnsureCreated();
 
             this.Transformations = serviceProvider.GetRequiredService<TransformationService>();
