@@ -983,6 +983,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             }
 
             var server = getServerResult.Entity;
+            server = _database.NormalizeReference(server);
 
             var getGlobalProtectionResult = await GetOrCreateGlobalUserProtectionAsync(discordUser, ct);
             if (!getGlobalProtectionResult.IsSuccess)
