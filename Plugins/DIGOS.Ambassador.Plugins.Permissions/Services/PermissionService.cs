@@ -544,7 +544,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
 
             var newPermission = _database.CreateProxy<RolePermission>
             (
-                (long)discordRole.Value,
+                discordRole,
                 permission.UniqueIdentifier,
                 target
             );
@@ -602,8 +602,8 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
 
             var newPermission = _database.CreateProxy<UserPermission>
             (
-                (long)discordGuild.Value,
-                (long)discordUser.Value,
+                discordGuild,
+                discordUser,
                 permission.UniqueIdentifier,
                 target
             );

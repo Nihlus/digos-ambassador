@@ -223,7 +223,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
             UserConsent userConsent;
             if (!getConsent.IsSuccess)
             {
-                userConsent = _database.CreateProxy<UserConsent>((long)discordUser.Value);
+                userConsent = _database.CreateProxy<UserConsent>(discordUser);
                 _database.UserConsents.Update(userConsent);
 
                 userConsent.HasConsented = true;
