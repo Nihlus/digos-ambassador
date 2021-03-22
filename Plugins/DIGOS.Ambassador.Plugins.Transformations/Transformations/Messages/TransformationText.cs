@@ -23,6 +23,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using JetBrains.Annotations;
+using Remora.Discord.API.Json;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages
 {
@@ -53,7 +54,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages
             text = null;
             try
             {
-                text = JsonSerializer.Deserialize<TransformationText>(json) ?? throw new JsonException();
+                var jsonOptions = new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = new SnakeCaseNamingPolicy()
+                };
+
+                text = JsonSerializer.Deserialize<TransformationText>(json, jsonOptions) ?? throw new JsonException();
                 return true;
             }
             catch
