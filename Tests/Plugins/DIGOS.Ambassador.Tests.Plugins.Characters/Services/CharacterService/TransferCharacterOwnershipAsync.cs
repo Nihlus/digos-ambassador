@@ -65,7 +65,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 await this.Characters.TransferCharacterOwnershipAsync(_newOwner, this.DefaultServer, _character);
 
                 var character = this.Database.Characters.First();
-                Assert.Equal(_newOwner, character.Owner);
+                Assert.Equal(_newOwner.DiscordID, character.Owner.DiscordID);
             }
         }
     }

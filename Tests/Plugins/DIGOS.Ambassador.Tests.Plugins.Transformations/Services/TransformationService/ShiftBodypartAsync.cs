@@ -31,6 +31,7 @@ using DIGOS.Ambassador.Plugins.Characters.Services;
 using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
+using DIGOS.Ambassador.Plugins.Transformations.Results;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Commands.Services;
@@ -71,13 +72,11 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             protected override async Task InitializeTestAsync()
             {
                 // Ensure owner is opted into transformations
-                var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
+                await this.Transformations.OptInUserAsync
                 (
                     _owner,
                     _guild
                 );
-
-                protection.Entity!.HasOptedIn = true;
 
                 // Create a test character
                 var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity!;
@@ -85,7 +84,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 var character = new Character
                 (
                     owner,
-                    new Server(new Snowflake(0)),
+                    new Server(_guild),
                     string.Empty,
                     string.Empty,
                     string.Empty,
@@ -152,7 +151,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             }
 
             [Fact]
-            public async Task ReturnsUnsuccessfulResultIfBodypartIsAlreadyThatSpecies()
+            public async Task ReturnsSuccessfulResultIfBodypartIsAlreadyThatSpecies()
             {
                 var result = await this.Transformations.ShiftBodypartAsync
                 (
@@ -162,7 +161,21 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     "template"
                 );
 
-                Assert.False(result.IsSuccess);
+                Assert.True(result.IsSuccess);
+            }
+
+            [Fact]
+            public async Task ReturnsNoChangeIfBodypartIsAlreadyThatSpecies()
+            {
+                var result = await this.Transformations.ShiftBodypartAsync
+                (
+                    _invoker,
+                    _character,
+                    Bodypart.Face,
+                    "template"
+                );
+
+                Assert.Equal(ShiftBodypartAction.Nothing, result.Entity!.Action);
             }
 
             [Fact]

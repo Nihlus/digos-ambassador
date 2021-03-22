@@ -30,6 +30,7 @@ using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
+using DIGOS.Ambassador.Plugins.Transformations.Results;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -78,13 +79,11 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             protected override async Task InitializeTestAsync()
             {
                 // Ensure owner is opted into transformations
-                var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
+                await this.Transformations.OptInUserAsync
                 (
                     _owner,
                     _guild
                 );
-
-                protection.Entity!.HasOptedIn = true;
 
                 // Create a test character
                 var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
@@ -174,7 +173,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             }
 
             [Fact]
-            public async Task ReturnsUnsuccessfulResultIfBodypartIsAlreadyThatColour()
+            public async Task ReturnsSuccessfulResultIfBodypartIsAlreadyThatColour()
             {
                 await this.Transformations.ShiftPatternColourAsync
                 (
@@ -192,7 +191,29 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _newPatternColour
                 );
 
-                Assert.False(result.IsSuccess);
+                Assert.True(result.IsSuccess);
+            }
+
+            [Fact]
+            public async Task ReturnsNoChangeIfBodypartIsAlreadyThatColour()
+            {
+                await this.Transformations.ShiftPatternColourAsync
+                (
+                    _invoker,
+                    _character,
+                    Bodypart.Face,
+                    _newPatternColour
+                );
+
+                var result = await this.Transformations.ShiftPatternColourAsync
+                (
+                    _invoker,
+                    _character,
+                    Bodypart.Face,
+                    _newPatternColour
+                );
+
+                Assert.Equal(ShiftBodypartAction.Nothing, result.Entity!.Action);
             }
 
             [Fact]

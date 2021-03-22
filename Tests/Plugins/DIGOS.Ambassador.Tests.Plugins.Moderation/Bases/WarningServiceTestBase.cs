@@ -70,9 +70,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Bases
         /// <inheritdoc />
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
-            var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            coreDatabase.Database.EnsureCreated();
-
             var warningDatabase = serviceProvider.GetRequiredService<ModerationDatabaseContext>();
             warningDatabase.Database.EnsureCreated();
 

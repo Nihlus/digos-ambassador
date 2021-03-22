@@ -30,6 +30,8 @@ using DIGOS.Ambassador.Tests.TestBases;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
+using Remora.Discord.API.Abstractions.Rest;
 using Xunit;
 
 #pragma warning disable SA1648
@@ -57,11 +59,16 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
         {
             serviceCollection.AddDbContext<CoreDatabaseContext>(ConfigureOptions<CoreDatabaseContext>);
 
+            var channelAPIMock = new Mock<IDiscordRestChannelAPI>();
+            var userAPIMock = new Mock<IDiscordRestUserAPI>();
+
             serviceCollection
                 .AddSingleton(FileSystemFactory.CreateContentFileSystem())
                 .AddScoped<ContentService>()
                 .AddScoped<UserFeedbackService>()
                 .AddScoped<PrivacyService>()
+                .AddSingleton(channelAPIMock.Object)
+                .AddSingleton(userAPIMock.Object)
                 .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
         }
 
