@@ -43,6 +43,7 @@ using Remora.Commands.Trees.Nodes;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Caching.Extensions;
 using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Parsers;
 using Remora.Discord.Commands.Results;
 using Remora.Discord.Commands.Services;
@@ -123,6 +124,49 @@ namespace DIGOS.Ambassador
                     services.Configure<AmbassadorCommandResponderOptions>(o => o.Prefix = "!");
 
                     // Custom responders & command services
+                    // Add the helpers used for context injection.
+                    services
+                        .TryAddScoped<ContextInjectionService>();
+
+                    services
+                        .TryAddTransient<ICommandContext>
+                        (
+                            s =>
+                            {
+                                var injectionService = s.GetRequiredService<ContextInjectionService>();
+                                return injectionService.Context ?? throw new InvalidOperationException
+                                (
+                                    "No context has been set for this scope."
+                                );
+                            }
+                        );
+
+                    services
+                        .TryAddTransient
+                        (
+                            s =>
+                            {
+                                var injectionService = s.GetRequiredService<ContextInjectionService>();
+                                return injectionService.Context as MessageContext ?? throw new InvalidOperationException
+                                (
+                                    "No message context has been set for this scope."
+                                );
+                            }
+                        );
+
+                    services
+                        .TryAddTransient
+                        (
+                            s =>
+                            {
+                                var injectionService = s.GetRequiredService<ContextInjectionService>();
+                                return injectionService.Context as InteractionContext ?? throw new InvalidOperationException
+                                (
+                                    "No interaction context has been set for this scope."
+                                );
+                            }
+                        );
+
                     services.AddCondition<RequireContextCondition>();
                     services.AddCondition<RequireOwnerCondition>();
                     services.AddCondition<RequireUserGuildPermissionCondition>();

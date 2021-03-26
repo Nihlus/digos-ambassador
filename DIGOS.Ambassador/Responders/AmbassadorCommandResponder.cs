@@ -54,6 +54,7 @@ namespace DIGOS.Ambassador.Responders
         private readonly ExecutionEventCollectorService _eventCollector;
         private readonly IServiceProvider _services;
         private readonly UserFeedbackService _userFeedback;
+        private readonly ContextInjectionService _contextInjection;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AmbassadorCommandResponder"/> class.
@@ -63,18 +64,21 @@ namespace DIGOS.Ambassador.Responders
         /// <param name="eventCollector">The event collector.</param>
         /// <param name="services">The available services.</param>
         /// <param name="userFeedback">The user feedback service.</param>
+        /// <param name="contextInjection">The context injection service.</param>
         public AmbassadorCommandResponder
         (
             CommandService commandService,
             IOptions<AmbassadorCommandResponderOptions> options,
             ExecutionEventCollectorService eventCollector,
             IServiceProvider services,
-            UserFeedbackService userFeedback
+            UserFeedbackService userFeedback,
+            ContextInjectionService contextInjection
         )
         {
             _commandService = commandService;
             _services = services;
             _userFeedback = userFeedback;
+            _contextInjection = contextInjection;
             _eventCollector = eventCollector;
             _options = options.Value;
         }
@@ -206,6 +210,8 @@ namespace DIGOS.Ambassador.Responders
             CancellationToken ct = default
         )
         {
+            _contextInjection.Context = commandContext;
+
             using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
             // Strip off the prefix
@@ -216,8 +222,6 @@ namespace DIGOS.Ambassador.Responders
                     (content.IndexOf(_options.Prefix, StringComparison.Ordinal) + _options.Prefix.Length)..
                 ];
             }
-
-            var additionalParameters = new object[] { commandContext };
 
             // Run any user-provided pre execution events
             var preExecution = await _eventCollector.RunPreExecutionEvents(commandContext, ct);
@@ -231,7 +235,6 @@ namespace DIGOS.Ambassador.Responders
             (
                 content,
                 _services,
-                additionalParameters,
                 ct: ct
             );
 

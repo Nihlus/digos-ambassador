@@ -27,6 +27,7 @@ using System.Transactions;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Discord.Feedback.Results;
+using DIGOS.Ambassador.Plugins.Core.Services;
 using JetBrains.Annotations;
 using Remora.Commands.Services;
 using Remora.Commands.Trees;
@@ -53,6 +54,9 @@ namespace DIGOS.Ambassador.Responders
         private readonly ExecutionEventCollectorService _eventCollector;
         private readonly IServiceProvider _services;
         private readonly UserFeedbackService _userFeedback;
+        private readonly IDiscordRestWebhookAPI _webhookAPI;
+        private readonly IdentityInformationService _identityInformation;
+        private readonly ContextInjectionService _contextInjection;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AmbassadorInteractionResponder"/> class.
@@ -62,13 +66,19 @@ namespace DIGOS.Ambassador.Responders
         /// <param name="eventCollector">The event collector.</param>
         /// <param name="services">The available services.</param>
         /// <param name="userFeedback">The user feedback service.</param>
+        /// <param name="webhookAPI">The webhook API.</param>
+        /// <param name="identityInformation">The identity information.</param>
+        /// <param name="contextInjection">The context injection service.</param>
         public AmbassadorInteractionResponder
         (
             CommandService commandService,
             IDiscordRestInteractionAPI interactionAPI,
             ExecutionEventCollectorService eventCollector,
             IServiceProvider services,
-            UserFeedbackService userFeedback
+            UserFeedbackService userFeedback,
+            IDiscordRestWebhookAPI webhookAPI,
+            IdentityInformationService identityInformation,
+            ContextInjectionService contextInjection
         )
         {
             _commandService = commandService;
@@ -76,6 +86,9 @@ namespace DIGOS.Ambassador.Responders
             _eventCollector = eventCollector;
             _services = services;
             _userFeedback = userFeedback;
+            _webhookAPI = webhookAPI;
+            _identityInformation = identityInformation;
+            _contextInjection = contextInjection;
         }
 
         /// <inheritdoc />
@@ -115,7 +128,12 @@ namespace DIGOS.Ambassador.Responders
             }
 
             // Signal Discord that we'll be handling this one asynchronously
-            var response = new InteractionResponse(InteractionResponseType.DeferredChannelMessageWithSource);
+            var response = new InteractionResponse
+            (
+                InteractionResponseType.DeferredChannelMessageWithSource,
+                new InteractionApplicationCommandCallbackData(Flags: InteractionCallbackFlags.Ephemeral)
+            );
+
             var interactionResponse = await _interactionAPI.CreateInteractionResponseAsync
             (
                 gatewayEvent.ID,
@@ -142,6 +160,8 @@ namespace DIGOS.Ambassador.Responders
                 gatewayEvent.ID
             );
 
+            _contextInjection.Context = context;
+
             // Run any user-provided pre execution events
             var preExecution = await _eventCollector.RunPreExecutionEvents(context, ct);
             if (!preExecution.IsSuccess)
@@ -156,9 +176,8 @@ namespace DIGOS.Ambassador.Responders
                 command,
                 parameters,
                 _services,
-                new object[] { context },
-                searchOptions,
-                ct
+                searchOptions: searchOptions,
+                ct: ct
             );
 
             if (!executeResult.IsSuccess)
@@ -219,6 +238,20 @@ namespace DIGOS.Ambassador.Responders
                         ? Result.FromSuccess()
                         : Result.FromError(sendError);
                 }
+            }
+
+            // All good? "erase" the original interaction message
+            var editOriginal = await _webhookAPI.EditOriginalInteractionResponseAsync
+            (
+                _identityInformation.ApplicationID,
+                gatewayEvent.Token,
+                "\u200B",
+                ct: ct
+            );
+
+            if (!editOriginal.IsSuccess)
+            {
+                return Result.FromError(editOriginal);
             }
 
             transaction.Complete();
