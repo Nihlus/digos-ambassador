@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -29,6 +30,7 @@ using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Core.Services;
 using JetBrains.Annotations;
+using Remora.Commands.Results;
 using Remora.Commands.Services;
 using Remora.Commands.Trees;
 using Remora.Discord.API.Abstractions.Gateway.Events;
@@ -37,6 +39,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Extensions;
+using Remora.Discord.Commands.Results;
 using Remora.Discord.Commands.Services;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
@@ -130,8 +133,7 @@ namespace DIGOS.Ambassador.Responders
             // Signal Discord that we'll be handling this one asynchronously
             var response = new InteractionResponse
             (
-                InteractionResponseType.DeferredChannelMessageWithSource,
-                new InteractionApplicationCommandCallbackData(Flags: InteractionCallbackFlags.Ephemeral)
+                InteractionResponseType.DeferredChannelMessageWithSource
             );
 
             var interactionResponse = await _interactionAPI.CreateInteractionResponseAsync
@@ -182,7 +184,33 @@ namespace DIGOS.Ambassador.Responders
 
             if (!executeResult.IsSuccess)
             {
-                return Result.FromError(executeResult);
+                switch (executeResult.Unwrap())
+                {
+                    case NoCompatibleCommandFoundError:
+                    {
+                        var showError = await _webhookAPI.EditOriginalInteractionResponseAsync
+                        (
+                            _identityInformation.ApplicationID,
+                            gatewayEvent.Token,
+                            embeds: new[]
+                            {
+                                _userFeedback.CreateEmbedBase(Color.OrangeRed) with
+                                {
+                                    Description = executeResult.Unwrap().Message
+                                }
+                            },
+                            ct: ct
+                        );
+
+                        return showError.IsSuccess
+                            ? Result.FromSuccess()
+                            : Result.FromError(showError);
+                    }
+                    default:
+                    {
+                        return Result.FromError(executeResult);
+                    }
+                }
             }
 
             // Run any user-provided post execution events
@@ -220,38 +248,52 @@ namespace DIGOS.Ambassador.Responders
                 }
                 case false:
                 {
-                    if (executeResult.Entity.Unwrap() is not UserError userError)
+                    var error = executeResult.Entity.Unwrap();
+                    switch (error)
                     {
-                        return Result.FromError(executeResult.Entity.Unwrap());
+                        case ConditionNotSatisfiedError:
+                        case UserError:
+                        case { } when error.GetType().IsGenericType &&
+                                      error.GetType().GetGenericTypeDefinition() == typeof(ParsingError<>):
+                        {
+                            // Alert the user, and don't complete the transaction
+                            var sendError = await _webhookAPI.EditOriginalInteractionResponseAsync
+                            (
+                                _identityInformation.ApplicationID,
+                                gatewayEvent.Token,
+                                embeds: new[]
+                                {
+                                    _userFeedback.CreateEmbedBase(Color.OrangeRed) with
+                                    {
+                                        Description = error.Message
+                                    }
+                                },
+                                ct: ct
+                            );
+
+                            return sendError.IsSuccess
+                                ? Result.FromSuccess()
+                                : Result.FromError(sendError);
+                        }
+                        default:
+                        {
+                            return Result.FromError(executeResult.Entity.Unwrap());
+                        }
                     }
-
-                    // Alert the user, and don't complete the transaction
-                    var sendError = await _userFeedback.SendErrorAsync
-                    (
-                        gatewayEvent.ChannelID.Value,
-                        user.ID,
-                        userError.Message,
-                        ct
-                    );
-
-                    return sendError.IsSuccess
-                        ? Result.FromSuccess()
-                        : Result.FromError(sendError);
                 }
             }
 
-            // All good? "erase" the original interaction message
-            var editOriginal = await _webhookAPI.EditOriginalInteractionResponseAsync
+            // All good? Erase the original interaction message
+            var eraseOriginal = await _webhookAPI.DeleteOriginalInteractionResponseAsync
             (
                 _identityInformation.ApplicationID,
                 gatewayEvent.Token,
-                "\u200B",
-                ct: ct
+                ct
             );
 
-            if (!editOriginal.IsSuccess)
+            if (!eraseOriginal.IsSuccess)
             {
-                return Result.FromError(editOriginal);
+                return eraseOriginal;
             }
 
             transaction.Complete();

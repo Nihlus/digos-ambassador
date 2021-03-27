@@ -30,12 +30,14 @@ using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Discord.Feedback.Results;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Options;
+using Remora.Commands.Results;
 using Remora.Commands.Services;
 using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Responders;
+using Remora.Discord.Commands.Results;
 using Remora.Discord.Commands.Services;
 using Remora.Discord.Core;
 using Remora.Discord.Gateway.Responders;
@@ -278,23 +280,32 @@ namespace DIGOS.Ambassador.Responders
                 }
                 case false:
                 {
-                    if (executeResult.Entity.Unwrap() is not UserError userError)
+                    var error = executeResult.Entity.Unwrap();
+                    switch (error)
                     {
-                        return Result.FromError(executeResult.Entity.Unwrap());
+                        case ConditionNotSatisfiedError:
+                        case UserError:
+                        case { } when error.GetType().IsGenericType &&
+                                      error.GetType().GetGenericTypeDefinition() == typeof(ParsingError<>):
+                        {
+                            // Alert the user, and don't complete the transaction
+                            var sendError = await _userFeedback.SendErrorAsync
+                            (
+                                commandContext.ChannelID,
+                                commandContext.User.ID,
+                                error.Message,
+                                ct
+                            );
+
+                            return sendError.IsSuccess
+                                ? Result.FromSuccess()
+                                : Result.FromError(sendError);
+                        }
+                        default:
+                        {
+                            return Result.FromError(executeResult.Entity.Unwrap());
+                        }
                     }
-
-                    // Alert the user, and don't complete the transaction
-                    var sendError = await _userFeedback.SendErrorAsync
-                    (
-                        commandContext.ChannelID,
-                        commandContext.User.ID,
-                        userError.Message,
-                        ct
-                    );
-
-                    return sendError.IsSuccess
-                        ? Result.FromSuccess()
-                        : Result.FromError(sendError);
                 }
             }
 
