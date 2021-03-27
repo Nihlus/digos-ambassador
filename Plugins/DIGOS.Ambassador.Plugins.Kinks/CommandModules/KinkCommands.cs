@@ -105,25 +105,17 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         }
 
         /// <summary>
-        /// Shows your preference for the named kink.
-        /// </summary>
-        /// <param name="kinkName">The name of the kink.</param>
-        [UsedImplicitly]
-        [Command("show")]
-        [Description("Shows your preference for the named kink.")]
-        public async Task<IResult> ShowKinkPreferenceAsync(string kinkName)
-            => await ShowKinkPreferenceAsync(_context.User, kinkName);
-
-        /// <summary>
         /// Shows the user's preference for the named kink.
         /// </summary>
-        /// <param name="user">The user.</param>
         /// <param name="kinkName">The name of the kink.</param>
+        /// <param name="user">The user.</param>
         [UsedImplicitly]
         [Command("show")]
         [Description("Shows the user's preference for the named kink.")]
-        public async Task<IResult> ShowKinkPreferenceAsync(IUser user, string kinkName)
+        public async Task<IResult> ShowKinkPreferenceAsync(string kinkName, IUser? user = null)
         {
+            user ??= _context.User;
+
             var getUserKinkResult = await _kinks.GetUserKinkByNameAsync(user.ID, kinkName);
             if (!getUserKinkResult.IsSuccess)
             {

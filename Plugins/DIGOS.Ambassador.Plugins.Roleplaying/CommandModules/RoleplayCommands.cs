@@ -47,6 +47,7 @@ using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Core;
@@ -804,6 +805,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Description("Moves an ongoing roleplay outside of the bot's systems into a channel with the given name.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(CreateRoleplay), PermissionTarget.Self)]
+        [ExcludeFromSlashCommands]
         public async Task<Result> MoveRoleplayIntoChannelAsync(string newName, params IUser[] participants)
         {
             var createRoleplayAsync = await _discordRoleplays.CreateRoleplayAsync

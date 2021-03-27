@@ -51,7 +51,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
     /// Transformation-related commands, such as transforming certain body parts or saving transforms as characters.
     /// </summary>
     [Group("tf")]
-    [Description("Transformation-related commands, such as transforming certain body parts or saving transforms as characters.")]
+    [Description("Transformation-related commands, such as transforming body parts or saving appearances.")]
     public partial class TransformationCommands : CommandGroup
     {
         private readonly UserFeedbackService _feedback;
@@ -85,76 +85,26 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         }
 
         /// <summary>
-        /// Transforms the given bodypart into the given species on yourself.
-        /// </summary>
-        /// <param name="chirality">The chirality of the bodypart.</param>
-        /// <param name="bodyPart">The part to transform.</param>
-        /// <param name="species">The species to transform it into.</param>
-        [UsedImplicitly]
-        [Command("species")]
-        [Description("Transforms the given bodypart into the given species on yourself.")]
-        [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> ShiftAsync
-        (
-            Chirality chirality,
-            Bodypart bodyPart,
-            string species
-        )
-        => await ShiftAsync(_context.User, chirality, bodyPart, species);
-
-        /// <summary>
-        /// Transforms the given bodypart into the given species on yourself.
-        /// </summary>
-        /// <param name="bodyPart">The part to transform.</param>
-        /// <param name="species">The species to transform it into.</param>
-        [UsedImplicitly]
-        [Command("species")]
-        [Description("Transforms the given bodypart into the given species on yourself.")]
-        [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> ShiftAsync
-        (
-            Bodypart bodyPart,
-            string species
-        )
-        => await ShiftAsync(_context.User, Chirality.Center, bodyPart, species);
-
-        /// <summary>
         /// Transforms the given bodypart into the given species on the target user.
         /// </summary>
-        /// <param name="target">The user to transform.</param>
         /// <param name="bodyPart">The part to transform.</param>
         /// <param name="species">The species to transform it into.</param>
+        /// <param name="chirality">The chirality of the bodypart.</param>
+        /// <param name="target">The user to transform.</param>
         [UsedImplicitly]
         [Command("species")]
         [Description("Transforms the given bodypart of the target user into the given species.")]
         [RequireContext(ChannelContext.Guild)]
         public async Task<Result<UserMessage>> ShiftAsync
         (
-            IUser target,
             Bodypart bodyPart,
-            string species
-        )
-        => await ShiftAsync(target, Chirality.Center, bodyPart, species);
-
-        /// <summary>
-        /// Transforms the given bodypart into the given species on the target user.
-        /// </summary>
-        /// <param name="target">The user to transform.</param>
-        /// <param name="chirality">The chirality of the bodypart.</param>
-        /// <param name="bodyPart">The part to transform.</param>
-        /// <param name="species">The species to transform it into.</param>
-        [UsedImplicitly]
-        [Command("species")]
-        [Description("Transforms the given bodypart of the target user into the given species.")]
-        [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> ShiftAsync
-        (
-            IUser target,
-            Chirality chirality,
-            Bodypart bodyPart,
-            string species
+            string species,
+            Chirality chirality = Chirality.Center,
+            IUser? target = null
         )
         {
+            target ??= _context.User;
+
             var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync
             (
                 _context.GuildID.Value,
@@ -196,76 +146,26 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         }
 
         /// <summary>
-        /// Transforms the base colour of the given bodypart on yourself into the given colour.
-        /// </summary>
-        /// <param name="chirality">The chirality of the bodypart.</param>
-        /// <param name="bodypart">The part to transform.</param>
-        /// <param name="colour">The colour to transform it into.</param>
-        [UsedImplicitly]
-        [Command("colour")]
-        [Description("Transforms the base colour of the given bodypart on yourself into the given colour.")]
-        [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> ShiftColourAsync
-        (
-            Chirality chirality,
-            Bodypart bodypart,
-            Colour colour
-        )
-        => await ShiftColourAsync(_context.User, chirality, bodypart, colour);
-
-        /// <summary>
-        /// Transforms the base colour of the given bodypart on yourself into the given colour.
-        /// </summary>
-        /// <param name="bodypart">The part to transform.</param>
-        /// <param name="colour">The colour to transform it into.</param>
-        [UsedImplicitly]
-        [Command("colour")]
-        [Description("Transforms the base colour of the given bodypart on yourself into the given colour.")]
-        [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> ShiftColourAsync
-        (
-            Bodypart bodypart,
-            Colour colour
-        )
-        => await ShiftColourAsync(_context.User, Chirality.Center, bodypart, colour);
-
-        /// <summary>
         /// Transforms the base colour of the given bodypart on the target user into the given colour.
         /// </summary>
-        /// <param name="target">The target user.</param>
         /// <param name="bodyPart">The part to transform.</param>
         /// <param name="colour">The colour to transform it into.</param>
+        /// <param name="chirality">The chirality of the bodypart.</param>
+        /// <param name="target">The target user.</param>
         [UsedImplicitly]
         [Description("Transforms the base colour of the given bodypart on the target user into the given colour.")]
         [Command("colour")]
         [RequireContext(ChannelContext.Guild)]
         public async Task<Result<UserMessage>> ShiftColourAsync
         (
-            IUser target,
             Bodypart bodyPart,
-            Colour colour
-        )
-        => await ShiftColourAsync(target, Chirality.Center, bodyPart, colour);
-
-        /// <summary>
-        /// Transforms the base colour of the given bodypart on the target user into the given colour.
-        /// </summary>
-        /// <param name="target">The target user.</param>
-        /// <param name="chirality">The chirality of the bodypart.</param>
-        /// <param name="bodyPart">The part to transform.</param>
-        /// <param name="colour">The colour to transform it into.</param>
-        [UsedImplicitly]
-        [Description("Transforms the base colour of the given bodypart on the target user into the given colour.")]
-        [Command("colour")]
-        [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> ShiftColourAsync
-        (
-            IUser target,
-            Chirality chirality,
-            Bodypart bodyPart,
-            Colour colour
+            Colour colour,
+            Chirality chirality = Chirality.Center,
+            IUser? target = null
         )
         {
+            target ??= _context.User;
+
             var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync
             (
                 _context.GuildID.Value,
@@ -294,84 +194,28 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         }
 
         /// <summary>
-        /// Transforms the pattern on the given bodypart on yourself into the given pattern and secondary colour.
-        /// </summary>
-        /// <param name="bodypart">The part to transform.</param>
-        /// <param name="pattern">The pattern to transform it into.</param>
-        /// <param name="colour">The colour to transform it into.</param>
-        [UsedImplicitly]
-        [Command("pattern")]
-        [Description("Transforms the pattern on the given bodypart on yourself into the given pattern and colour.")]
-        [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> ShiftPatternAsync
-        (
-            Bodypart bodypart,
-            Pattern pattern,
-            Colour colour
-        )
-        => await ShiftPatternAsync(_context.User, Chirality.Center, bodypart, pattern, colour);
-
-        /// <summary>
-        /// Transforms the pattern on the given bodypart on yourself into the given pattern and secondary colour.
-        /// </summary>
-        /// <param name="chirality">The chirality of the bodypart.</param>
-        /// <param name="bodypart">The part to transform.</param>
-        /// <param name="pattern">The pattern to transform it into.</param>
-        /// <param name="colour">The colour to transform it into.</param>
-        [UsedImplicitly]
-        [Command("pattern")]
-        [Description("Transforms the pattern on the given bodypart on yourself into the given pattern and colour.")]
-        [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> ShiftPatternAsync
-        (
-            Chirality chirality,
-            Bodypart bodypart,
-            Pattern pattern,
-            Colour colour
-        )
-        => await ShiftPatternAsync(_context.User, chirality, bodypart, pattern, colour);
-
-        /// <summary>
         /// Transforms the pattern on the given bodypart on the target user into the given pattern and secondary colour.
         /// </summary>
-        /// <param name="target">The target user.</param>
         /// <param name="bodyPart">The part to transform.</param>
         /// <param name="pattern">The pattern to transform it into.</param>
         /// <param name="colour">The colour to transform it into.</param>
-        [UsedImplicitly]
-        [Command("pattern")]
-        [Description("Transforms the pattern on the given bodypart on the target user into the given pattern and colour.")]
-        [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> ShiftPatternAsync
-        (
-            IUser target,
-            Bodypart bodyPart,
-            Pattern pattern,
-            Colour colour
-        )
-        => await ShiftPatternAsync(target, Chirality.Center, bodyPart, pattern, colour);
-
-        /// <summary>
-        /// Transforms the pattern on the given bodypart on the target user into the given pattern and secondary colour.
-        /// </summary>
-        /// <param name="target">The target user.</param>
         /// <param name="chirality">The chirality of the part.</param>
-        /// <param name="bodyPart">The part to transform.</param>
-        /// <param name="pattern">The pattern to transform it into.</param>
-        /// <param name="colour">The colour to transform it into.</param>
+        /// <param name="target">The target user.</param>
         [UsedImplicitly]
         [Command("pattern")]
         [Description("Transforms the pattern on the given bodypart on the target user into the given pattern and colour.")]
         [RequireContext(ChannelContext.Guild)]
         public async Task<Result<UserMessage>> ShiftPatternAsync
         (
-            IUser target,
-            Chirality chirality,
             Bodypart bodyPart,
             Pattern pattern,
-            Colour colour
+            Colour colour,
+            Chirality chirality = Chirality.Center,
+            IUser? target = null
         )
         {
+            target ??= _context.User;
+
             var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync
             (
                 _context.GuildID.Value,
@@ -401,76 +245,26 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         }
 
         /// <summary>
-        /// Transforms the colour of the pattern on the given bodypart to the given colour.
-        /// </summary>
-        /// <param name="chirality">The chirality of the bodypart.</param>
-        /// <param name="bodypart">The part to transform.</param>
-        /// <param name="colour">The colour to transform it into.</param>
-        [UsedImplicitly]
-        [Command("pattern-colour")]
-        [Description("Transforms the colour of the pattern on the given bodypart on yourself to the given colour.")]
-        [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> ShiftPatternColourAsync
-        (
-            Chirality chirality,
-            Bodypart bodypart,
-            Colour colour
-        )
-        => await ShiftPatternColourAsync(_context.User, chirality, bodypart, colour);
-
-        /// <summary>
-        /// Transforms the colour of the pattern on the given bodypart to the given colour.
-        /// </summary>
-        /// <param name="bodypart">The part to transform.</param>
-        /// <param name="colour">The colour to transform it into.</param>
-        [UsedImplicitly]
-        [Command("pattern-colour")]
-        [Description("Transforms the colour of the pattern on the given bodypart on yourself to the given colour.")]
-        [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> ShiftPatternColourAsync
-        (
-            Bodypart bodypart,
-            Colour colour
-        )
-            => await ShiftPatternColourAsync(_context.User, Chirality.Center, bodypart, colour);
-
-        /// <summary>
         /// Transforms the colour of the pattern on the given bodypart on the target user to the given colour.
         /// </summary>
-        /// <param name="target">The target user.</param>
         /// <param name="bodyPart">The part to transform.</param>
         /// <param name="colour">The colour to transform it into.</param>
-        [UsedImplicitly]
-        [Command("pattern-colour")]
-        [Description("Transforms the colour of the pattern on the given bodypart on the target user to the given colour.")]
-        [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> ShiftPatternColourAsync
-        (
-            IUser target,
-            Bodypart bodyPart,
-            Colour colour
-        )
-        => await ShiftPatternColourAsync(target, Chirality.Center, bodyPart, colour);
-
-        /// <summary>
-        /// Transforms the colour of the pattern on the given bodypart on the target user to the given colour.
-        /// </summary>
-        /// <param name="target">The target user.</param>
         /// <param name="chirality">The chirality of the part.</param>
-        /// <param name="bodyPart">The part to transform.</param>
-        /// <param name="colour">The colour to transform it into.</param>
+        /// <param name="target">The target user.</param>
         [UsedImplicitly]
         [Command("pattern-colour")]
         [Description("Transforms the colour of the pattern on the given bodypart on the target user to the given colour.")]
         [RequireContext(ChannelContext.Guild)]
         public async Task<Result<UserMessage>> ShiftPatternColourAsync
         (
-            IUser target,
-            Chirality chirality,
             Bodypart bodyPart,
-            Colour colour
+            Colour colour,
+            Chirality chirality = Chirality.Center,
+            IUser? target = null
         )
         {
+            target ??= _context.User;
+
             var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync
             (
                 _context.GuildID.Value,
@@ -499,24 +293,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         }
 
         /// <summary>
-        /// Describes the current physical appearance of the current character.
-        /// </summary>
-        [UsedImplicitly]
-        [Command("describe")]
-        [Description("Describes the current physical appearance of the current character.")]
-        [RequireContext(ChannelContext.Guild)]
-        public async Task<Result> DescribeCharacterAsync()
-        {
-            var result = await _characters.GetCurrentCharacterAsync(_context.GuildID.Value, _context.User.ID);
-            if (!result.IsSuccess)
-            {
-                return Result.FromError(result);
-            }
-
-            return await DescribeCharacterAsync(result.Entity);
-        }
-
-        /// <summary>
         /// Describes the current physical appearance of a character.
         /// </summary>
         /// <param name="character">The character to describe.</param>
@@ -524,8 +300,19 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command("describe")]
         [Description("Describes the current physical appearance of a character.")]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result> DescribeCharacterAsync(Character character)
+        public async Task<Result> DescribeCharacterAsync(Character? character = null)
         {
+            if (character is null)
+            {
+                var getCurrent = await _characters.GetCurrentCharacterAsync(_context.GuildID.Value, _context.User.ID);
+                if (!getCurrent.IsSuccess)
+                {
+                    return Result.FromError(getCurrent);
+                }
+
+                character = getCurrent.Entity;
+            }
+
             var generateDescriptionAsync = await _transformation.GenerateCharacterDescriptionAsync
             (
                 character
