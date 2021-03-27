@@ -21,7 +21,9 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
@@ -29,6 +31,8 @@ using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.API.Abstractions.Gateway.Events;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.Core;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
 
@@ -45,30 +49,44 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Responders
     {
         private readonly RoleplayDiscordService _roleplays;
         private readonly ILogger<RoleplayLoggingResponder> _log;
+        private readonly IDiscordRestUserAPI _userAPI;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleplayLoggingResponder"/> class.
         /// </summary>
         /// <param name="roleplays">The roleplay service.</param>
         /// <param name="log">The logging instance.</param>
+        /// <param name="userAPI">The user API.</param>
         public RoleplayLoggingResponder
         (
             RoleplayDiscordService roleplays,
-            ILogger<RoleplayLoggingResponder> log
+            ILogger<RoleplayLoggingResponder> log,
+            IDiscordRestUserAPI userAPI
         )
         {
             _roleplays = roleplays;
             _log = log;
+            _userAPI = userAPI;
         }
 
         /// <inheritdoc />
         public async Task<Result> RespondAsync(IReady gatewayEvent, CancellationToken ct = default)
         {
+            var joinedGuilds = new List<Snowflake>();
+            await foreach (var get in GetGuildsAsync(ct))
+            {
+                if (get.IsSuccess)
+                {
+                    joinedGuilds.Add(get.Entity);
+                }
+            }
+
             var activeRoleplays = await _roleplays.QueryRoleplaysAsync
             (
                 q => q
                     .Where(rp => rp.IsActive)
                     .Where(rp => rp.DedicatedChannelID.HasValue)
+                    .Where(rp => joinedGuilds.Contains(rp.Server.DiscordID))
             );
 
             foreach (var activeRoleplay in activeRoleplays)
@@ -132,6 +150,45 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Responders
             }
 
             return await _roleplays.ConsumeMessageAsync(gatewayEvent);
+        }
+
+        private async IAsyncEnumerable<Result<Snowflake>> GetGuildsAsync
+        (
+            [EnumeratorCancellation] CancellationToken ct = default
+        )
+        {
+            Optional<Snowflake> after = default;
+            while (true)
+            {
+                if (ct.IsCancellationRequested)
+                {
+                    yield break;
+                }
+
+                var getGuilds = await _userAPI.GetCurrentUserGuildsAsync(after: after, ct: ct);
+                if (!getGuilds.IsSuccess)
+                {
+                    yield break;
+                }
+
+                var retrievedGuilds = getGuilds.Entity;
+                if (retrievedGuilds.Count == 0)
+                {
+                    break;
+                }
+
+                foreach (var retrievedGuild in retrievedGuilds)
+                {
+                    if (!retrievedGuild.ID.HasValue)
+                    {
+                        continue;
+                    }
+
+                    yield return retrievedGuild.ID.Value;
+                }
+
+                after = getGuilds.Entity[^1].ID;
+            }
         }
     }
 }

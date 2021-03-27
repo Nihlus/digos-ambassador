@@ -21,6 +21,8 @@
 //
 
 using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -30,7 +32,9 @@ using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Remora.Behaviours.Bases;
+using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.Core;
 using Remora.Discord.Rest.Results;
 using Remora.Results;
 using static Remora.Discord.API.Abstractions.Results.DiscordError;
@@ -68,14 +72,31 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
         {
             var loggingService = tickServices.GetRequiredService<ChannelLoggingService>();
             var identityService = tickServices.GetRequiredService<IdentityInformationService>();
+            var guildAPI = tickServices.GetRequiredService<IDiscordRestGuildAPI>();
+            var userAPI = tickServices.GetRequiredService<IDiscordRestUserAPI>();
+
+            var joinedGuilds = new List<Snowflake>();
+            await foreach (var get in GetGuildsAsync(userAPI, ct))
+            {
+                if (get.IsSuccess)
+                {
+                    joinedGuilds.Add(get.Entity);
+                }
+            }
 
             var warningService = tickServices.GetRequiredService<WarningService>();
             var expiredWarnings = await warningService.GetExpiredWarningsAsync(ct);
+
             foreach (var expiredWarning in expiredWarnings)
             {
                 if (ct.IsCancellationRequested)
                 {
                     return Result.FromSuccess();
+                }
+
+                if (!joinedGuilds.Contains(expiredWarning.Server.DiscordID))
+                {
+                    continue;
                 }
 
                 // We'll use a transaction per warning to avoid timeouts
@@ -109,13 +130,17 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
             }
 
             var banService = tickServices.GetRequiredService<BanService>();
-            var guildAPI = tickServices.GetRequiredService<IDiscordRestGuildAPI>();
             var expiredBans = await banService.GetExpiredBansAsync(ct);
             foreach (var expiredBan in expiredBans)
             {
                 if (ct.IsCancellationRequested)
                 {
                     return Result.FromSuccess();
+                }
+
+                if (!joinedGuilds.Contains(expiredBan.Server.DiscordID))
+                {
+                    continue;
                 }
 
                 // We'll use a transaction per warning to avoid timeouts
@@ -181,6 +206,46 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
             }
 
             return Result.FromSuccess();
+        }
+
+        private async IAsyncEnumerable<Result<Snowflake>> GetGuildsAsync
+        (
+            IDiscordRestUserAPI userAPI,
+            [EnumeratorCancellation] CancellationToken ct = default
+        )
+        {
+            Optional<Snowflake> after = default;
+            while (true)
+            {
+                if (ct.IsCancellationRequested)
+                {
+                    yield break;
+                }
+
+                var getGuilds = await userAPI.GetCurrentUserGuildsAsync(after: after, ct: ct);
+                if (!getGuilds.IsSuccess)
+                {
+                    yield break;
+                }
+
+                var retrievedGuilds = getGuilds.Entity;
+                if (retrievedGuilds.Count == 0)
+                {
+                    break;
+                }
+
+                foreach (var retrievedGuild in retrievedGuilds)
+                {
+                    if (!retrievedGuild.ID.HasValue)
+                    {
+                        continue;
+                    }
+
+                    yield return retrievedGuild.ID.Value;
+                }
+
+                after = getGuilds.Entity[^1].ID;
+            }
         }
     }
 }
