@@ -117,7 +117,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             (
                 q => q.Where
                 (
-                    w => w.ExpiresOn.HasValue && w.ExpiresOn.Value >= now
+                    w => w.ExpiresOn.HasValue && now >= w.ExpiresOn.Value
                 ),
                 ct
             );
