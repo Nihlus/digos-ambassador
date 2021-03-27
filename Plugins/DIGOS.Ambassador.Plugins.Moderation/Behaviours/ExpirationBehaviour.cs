@@ -86,13 +86,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                     TransactionScopeAsyncFlowOption.Enabled
                 );
 
-                var deleteResult = await warningService.DeleteWarningAsync(expiredWarning, ct);
-                if (!deleteResult.IsSuccess)
-                {
-                    this.Log.LogWarning("Failed to rescind warning: {Reason}", deleteResult.Unwrap().Message);
-                    return deleteResult;
-                }
-
                 var notifyResult = await loggingService.NotifyUserWarningRemovedAsync
                 (
                     expiredWarning,
@@ -103,6 +96,13 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                 {
                     this.Log.LogWarning("Failed to rescind warning: {Reason}", notifyResult.Unwrap().Message);
                     return notifyResult;
+                }
+
+                var deleteResult = await warningService.DeleteWarningAsync(expiredWarning, ct);
+                if (!deleteResult.IsSuccess)
+                {
+                    this.Log.LogWarning("Failed to rescind warning: {Reason}", deleteResult.Unwrap().Message);
+                    return deleteResult;
                 }
 
                 warningTransaction.Complete();
@@ -163,18 +163,18 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                     }
                 }
 
-                var deleteResult = await banService.DeleteBanAsync(expiredBan, ct);
-                if (!deleteResult.IsSuccess)
-                {
-                    this.Log.LogWarning("Failed to rescind ban: {Reason}", removeBan.Unwrap().Message);
-                    return deleteResult;
-                }
-
                 var notifyResult = await loggingService.NotifyUserUnbannedAsync(expiredBan, identityService.ID);
                 if (!notifyResult.IsSuccess)
                 {
                     this.Log.LogWarning("Failed to rescind ban: {Reason}", removeBan.Unwrap().Message);
                     return notifyResult;
+                }
+
+                var deleteResult = await banService.DeleteBanAsync(expiredBan, ct);
+                if (!deleteResult.IsSuccess)
+                {
+                    this.Log.LogWarning("Failed to rescind ban: {Reason}", removeBan.Unwrap().Message);
+                    return deleteResult;
                 }
 
                 banTransaction.Complete();
