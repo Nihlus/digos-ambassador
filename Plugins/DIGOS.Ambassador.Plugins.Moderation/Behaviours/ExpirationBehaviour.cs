@@ -32,7 +32,6 @@ using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Remora.Behaviours.Bases;
-using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Core;
 using Remora.Discord.Rest.Results;

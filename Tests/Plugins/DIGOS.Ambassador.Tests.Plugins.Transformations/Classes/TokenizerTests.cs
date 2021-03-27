@@ -21,7 +21,6 @@
 //
 
 using System;
-using System.Linq;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens;
 using Moq;
