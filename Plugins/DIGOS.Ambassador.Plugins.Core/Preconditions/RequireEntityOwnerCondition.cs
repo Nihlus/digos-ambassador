@@ -57,7 +57,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Preconditions
         {
             return data.IsOwner(_context.User.ID)
                 ? new ValueTask<Result>(Result.FromSuccess())
-                : new ValueTask<Result>(new GenericError("You don't have permission to do that."));
+                : new ValueTask<Result>(new UserError("You don't have permission to do that."));
         }
     }
 }

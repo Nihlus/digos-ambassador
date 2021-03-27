@@ -99,7 +99,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         {
             if (_registeredPermissions.ContainsKey(permissionType))
             {
-                return new GenericError("The given permission has already been registered.");
+                return new UserError("The given permission has already been registered.");
             }
 
             IPermission permissionInstance;
@@ -114,7 +114,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
 
             if (_registeredPermissions.Values.Any(p => p.UniqueIdentifier == permissionInstance.UniqueIdentifier))
             {
-                return new GenericError
+                return new UserError
                 (
                     "A permission with that identifier has already been registered."
                 );
@@ -147,7 +147,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         public Result<IPermission> GetPermission(Type permissionType)
         {
             return !_registeredPermissions.TryGetValue(permissionType, out var permission)
-                ? new GenericError("No permission of that type has been registered.")
+                ? new UserError("No permission of that type has been registered.")
                 : Result<IPermission>.FromSuccess(permission);
         }
 
@@ -165,7 +165,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             );
 
             return permission is null
-                ? new GenericError("No permission of that type has been registered.")
+                ? new UserError("No permission of that type has been registered.")
                 : Result<IPermission>.FromSuccess(permission);
         }
     }

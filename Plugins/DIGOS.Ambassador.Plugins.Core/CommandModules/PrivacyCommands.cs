@@ -23,6 +23,7 @@
 using System.ComponentModel;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Core.Attributes;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using JetBrains.Annotations;
@@ -95,15 +96,15 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         [Description("Grants consent to store user data.")]
         [RequireContext(ChannelContext.DM)]
         [PrivacyExempt]
-        public async Task<IResult> GrantConsentAsync()
+        public async Task<Result<UserMessage>> GrantConsentAsync()
         {
             var grantResult = await _privacy.GrantUserConsentAsync(_context.User.ID);
             if (!grantResult.IsSuccess)
             {
-                return grantResult;
+                return Result<UserMessage>.FromError(grantResult);
             }
 
-            return Result<string>.FromSuccess("Thank you! Enjoy using the bot :smiley:");
+            return new ConfirmationMessage("Thank you! Enjoy using the bot :smiley:");
         }
 
         /// <summary>
@@ -114,15 +115,15 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         [Description("Revokes consent to store user data.")]
         [RequireContext(ChannelContext.DM)]
         [PrivacyExempt]
-        public async Task<IResult> RevokeConsentAsync()
+        public async Task<Result<UserMessage>> RevokeConsentAsync()
         {
             var revokeResult = await _privacy.RevokeUserConsentAsync(_context.User.ID);
             if (!revokeResult.IsSuccess)
             {
-                return revokeResult;
+                return Result<UserMessage>.FromError(revokeResult);
             }
 
-            return Result<string>.FromSuccess
+            return new ConfirmationMessage
             (
                 "Consent revoked - no more information will be stored about you from now on. If you would like to " +
                 "delete your existing data, or get a copy of it, please contact the privacy contact individual (use " +

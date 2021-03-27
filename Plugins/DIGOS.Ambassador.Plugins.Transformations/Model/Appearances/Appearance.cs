@@ -138,7 +138,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
             var getSpeciesResult = await transformations.GetSpeciesByNameAsync("template");
             if (!getSpeciesResult.IsSuccess)
             {
-                return new GenericError("Could not find the default species.");
+                return new UserError("Could not find the default species.");
             }
 
             var templateSpecies = getSpeciesResult.Entity;

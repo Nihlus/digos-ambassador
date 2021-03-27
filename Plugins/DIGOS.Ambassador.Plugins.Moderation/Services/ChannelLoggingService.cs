@@ -475,7 +475,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             if (settings.ModerationLogChannel is null)
             {
-                return new GenericError("No configured channel.");
+                return new UserError("No configured channel.");
             }
 
             return settings.ModerationLogChannel.Value;
@@ -498,7 +498,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             if (settings.MonitoringChannel is null)
             {
-                return new GenericError("No configured channel.");
+                return new UserError("No configured channel.");
             }
 
             return settings.MonitoringChannel.Value;

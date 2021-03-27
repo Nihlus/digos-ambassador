@@ -22,6 +22,7 @@
 
 using System.ComponentModel;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Moderation.Permissions;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
 using DIGOS.Ambassador.Plugins.Permissions.Conditions;
@@ -71,12 +72,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             [Description("Sets the contents of the note.")]
             [RequirePermission(typeof(ManageNotes), PermissionTarget.All)]
             [RequireContext(ChannelContext.Guild)]
-            public async Task<IResult> SetNoteContentsAsync(long noteID, string newContents)
+            public async Task<Result<UserMessage>> SetNoteContentsAsync(long noteID, string newContents)
             {
                 var getNote = await _notes.GetNoteAsync(_context.GuildID.Value, noteID);
                 if (!getNote.IsSuccess)
                 {
-                    return getNote;
+                    return Result<UserMessage>.FromError(getNote);
                 }
 
                 var note = getNote.Entity;
@@ -84,10 +85,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 var setContents = await _notes.SetNoteContentsAsync(note, newContents);
                 if (!setContents.IsSuccess)
                 {
-                    return setContents;
+                    return Result<UserMessage>.FromError(setContents);
                 }
 
-                return Result<string>.FromSuccess("Note contents updated.");
+                return new ConfirmationMessage("Note contents updated.");
             }
         }
     }

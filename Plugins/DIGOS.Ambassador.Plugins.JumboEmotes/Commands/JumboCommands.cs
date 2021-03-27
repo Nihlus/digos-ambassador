@@ -92,7 +92,7 @@ namespace DIGOS.Ambassador.Plugins.JumboEmotes.Commands
             {
                 if (emoji.Name is null)
                 {
-                    return Result.FromError(new GenericError("Looks like a bad emoji. Oops!"));
+                    return Result.FromError(new UserError("Looks like a bad emoji. Oops!"));
                 }
 
                 var emojiName = emoji.Name;
@@ -136,7 +136,7 @@ namespace DIGOS.Ambassador.Plugins.JumboEmotes.Commands
             var response = await _httpClient.GetAsync(emoteUrl, HttpCompletionOption.ResponseHeadersRead);
             if (!response.IsSuccessStatusCode)
             {
-                return Result.FromError(new GenericError("Sorry, I couldn't find that emote."));
+                return Result.FromError(new UserError("Sorry, I couldn't find that emote."));
             }
 
             var eb = new Embed

@@ -119,7 +119,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
                 return user;
             }
 
-            return new GenericError("Unknown user.");
+            return new UserError("Unknown user.");
         }
 
         /// <summary>
@@ -137,7 +137,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         {
             if (await IsUserKnownAsync(discordUser, ct))
             {
-                return new GenericError
+                return new UserError
                 (
                     $"A user with the ID {discordUser} has already been added to the database."
                 );
@@ -167,12 +167,12 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         {
             if (timezoneOffset < -12 || timezoneOffset > 14)
             {
-                return new GenericError($"{timezoneOffset} is not a valid offset.");
+                return new UserError($"{timezoneOffset} is not a valid offset.");
             }
 
             if (user.Timezone == timezoneOffset)
             {
-                return new GenericError("That's already your timezone.'");
+                return new UserError("That's already your timezone.'");
             }
 
             user.Timezone = timezoneOffset;
@@ -197,17 +197,17 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         {
             if (bio.IsNullOrWhitespace())
             {
-                return new GenericError("You must provide a bio.");
+                return new UserError("You must provide a bio.");
             }
 
             if (bio.Length > 1024)
             {
-                return new GenericError("Your bio may not be longer than 1024 characters.");
+                return new UserError("Your bio may not be longer than 1024 characters.");
             }
 
             if (user.Bio == bio)
             {
-                return new GenericError("That's already your bio.");
+                return new UserError("That's already your bio.");
             }
 
             user.Bio = bio;

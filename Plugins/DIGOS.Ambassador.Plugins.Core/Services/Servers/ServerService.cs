@@ -26,6 +26,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Extensions;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using JetBrains.Annotations;
@@ -119,7 +120,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
                 return server;
             }
 
-            return new GenericError("That server has not been registered in the database.");
+            return new UserError("That server has not been registered in the database.");
         }
 
         /// <summary>
@@ -137,7 +138,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         {
             if (await IsServerKnownAsync(discordServer, ct))
             {
-                return new GenericError
+                return new UserError
                 (
                     $"A server with the ID {discordServer} has already been added to the database."
                 );
@@ -159,14 +160,11 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         /// <param name="server">The server.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         [Pure]
-        public Result<string> GetDescription
-        (
-            Server server
-        )
+        public Result<string> GetDescription(Server server)
         {
             return server.Description.IsNullOrWhitespace()
-                ? new GenericError("No description set.")
-                : Result<string>.FromSuccess(server.Description);
+                ? new UserError("No description set.")
+                : server.Description;
         }
 
         /// <summary>
@@ -185,7 +183,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         {
             if (description.IsNullOrWhitespace())
             {
-                return new GenericError
+                return new UserError
                 (
                     "The description must not be empty."
                 );
@@ -193,7 +191,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
 
             if (server.Description == description)
             {
-                return new GenericError
+                return new UserError
                 (
                     "That's already the server's description."
                 );
@@ -201,7 +199,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
 
             if (description.Length > 800)
             {
-                return new GenericError
+                return new UserError
                 (
                     "The description may not be longer than 800 characters."
                 );
@@ -225,8 +223,8 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         )
         {
             return server.JoinMessage.IsNullOrWhitespace()
-                ? new GenericError("No join message set.")
-                : Result<string>.FromSuccess(server.JoinMessage);
+                ? new UserError("No join message set.")
+                : server.JoinMessage;
         }
 
         /// <summary>
@@ -245,7 +243,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         {
             if (joinMessage.IsNullOrWhitespace())
             {
-                return new GenericError
+                return new UserError
                 (
                     "The join message must not be empty."
                 );
@@ -253,7 +251,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
 
             if (server.JoinMessage == joinMessage)
             {
-                return new GenericError
+                return new UserError
                 (
                     "That's already the server's join message."
                 );
@@ -261,7 +259,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
 
             if (joinMessage.Length > 1200)
             {
-                return new GenericError
+                return new UserError
                 (
                     "The join message may not be longer than 1200 characters."
                 );
@@ -289,7 +287,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         {
             if (server.IsNSFW == isNsfw)
             {
-                return new GenericError
+                return new UserError
                 (
                     $"The server is already {(isNsfw ? string.Empty : "not")} NSFW."
                 );
@@ -317,7 +315,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         {
             if (server.SendJoinMessage == sendJoinMessage)
             {
-                return new GenericError
+                return new UserError
                 (
                     $"The server already {(sendJoinMessage ? string.Empty : "not")} sending first-join messages."
                 );
@@ -339,7 +337,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         {
             if (server.JoinMessage is null)
             {
-                return new GenericError("No join message has been set.");
+                return new UserError("No join message has been set.");
             }
 
             server.JoinMessage = null;

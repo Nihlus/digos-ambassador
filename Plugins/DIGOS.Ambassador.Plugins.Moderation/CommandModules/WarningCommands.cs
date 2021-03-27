@@ -27,6 +27,7 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Plugins.Moderation.Permissions;
@@ -180,12 +181,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [Description("Deletes the given warning.")]
         [RequirePermission(typeof(ManageWarnings), PermissionTarget.All)]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<IResult> DeleteWarningAsync(long warningID)
+        public async Task<Result<UserMessage>> DeleteWarningAsync(long warningID)
         {
             var getWarning = await _warnings.GetWarningAsync(_context.GuildID.Value, warningID);
             if (!getWarning.IsSuccess)
             {
-                return getWarning;
+                return Result<UserMessage>.FromError(getWarning);
             }
 
             var warning = getWarning.Entity;
@@ -195,16 +196,16 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             var notifyResult = await _logging.NotifyUserWarningRemovedAsync(warning, _context.User.ID);
             if (!notifyResult.IsSuccess)
             {
-                return notifyResult;
+                return Result<UserMessage>.FromError(notifyResult);
             }
 
             var deleteWarning = await _warnings.DeleteWarningAsync(warning);
             if (!deleteWarning.IsSuccess)
             {
-                return deleteWarning;
+                return Result<UserMessage>.FromError(deleteWarning);
             }
 
-            return Result<string>.FromSuccess("Warning deleted.");
+            return new ConfirmationMessage("Warning deleted.");
         }
 
         /// <summary>
@@ -217,7 +218,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [Description("Adds a warning to the given user.")]
         [RequirePermission(typeof(ManageWarnings), PermissionTarget.All)]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<IResult> AddWarningAsync
+        public async Task<Result<UserMessage>> AddWarningAsync
         (
             IUser user,
             string reason,
@@ -241,14 +242,14 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
 
             if (!addWarning.IsSuccess)
             {
-                return addWarning;
+                return Result<UserMessage>.FromError(addWarning);
             }
 
             var warning = addWarning.Entity;
             var getSettings = await _moderation.GetOrCreateServerSettingsAsync(_context.GuildID.Value);
             if (!getSettings.IsSuccess)
             {
-                return getSettings;
+                return Result<UserMessage>.FromError(getSettings);
             }
 
             var settings = getSettings.Entity;
@@ -256,13 +257,13 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             var notifyResult = await _logging.NotifyUserWarningAddedAsync(warning);
             if (!notifyResult.IsSuccess)
             {
-                return notifyResult;
+                return Result<UserMessage>.FromError(notifyResult);
             }
 
             var warnings = await _warnings.GetWarningsAsync(user.ID);
             if (warnings.Count < settings.WarningThreshold)
             {
-                return Result<string>.FromSuccess($"Warning added (ID {warning.ID}).");
+                return new ConfirmationMessage($"Warning added (ID {warning.ID}).");
             }
 
             var sendAlert = await _feedback.SendWarningAsync
@@ -273,8 +274,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             );
 
             return !sendAlert.IsSuccess
-                ? Result<string>.FromError(sendAlert)
-                : Result<string>.FromSuccess($"Warning added (ID {warning.ID}).");
+                ? Result<UserMessage>.FromError(sendAlert)
+                : new ConfirmationMessage($"Warning added (ID {warning.ID}).");
         }
     }
 }

@@ -120,7 +120,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             var permission = getPermissionResult.Entity;
             if (permission.IsGranted)
             {
-                return new GenericError("The user already has permission to do that.");
+                return new UserError("The user already has permission to do that.");
             }
 
             permission.IsGranted = true;
@@ -189,7 +189,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             var permission = getPermissionResult.Entity;
             if (permission.IsGranted)
             {
-                return new GenericError("The user already has permission to do that.");
+                return new UserError("The user already has permission to do that.");
             }
 
             permission.IsGranted = true;
@@ -264,7 +264,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             var permission = getPermissionResult.Entity;
             if (!permission.IsGranted)
             {
-                return new GenericError("The user is already prohibited from doing that.");
+                return new UserError("The user is already prohibited from doing that.");
             }
 
             permission.IsGranted = false;
@@ -333,7 +333,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             var permission = getPermissionResult.Entity;
             if (!permission.IsGranted)
             {
-                return new GenericError("The role is already prohibited from doing that.");
+                return new UserError("The role is already prohibited from doing that.");
             }
 
             permission.IsGranted = false;
@@ -405,7 +405,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
                     return Result.FromSuccess();
                 }
 
-                return new GenericError("Permission denied.");
+                return new UserError("Permission denied.");
             }
 
             var hasPermission = false;
@@ -456,7 +456,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
 
             return hasPermission
                 ? Result.FromSuccess()
-                : new GenericError("Permission denied.");
+                : new UserError("Permission denied.");
         }
 
         /// <summary>

@@ -149,7 +149,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             if (warning is null)
             {
-                return new GenericError("There's no warning with that ID in the database.");
+                return new UserError("There's no warning with that ID in the database.");
             }
 
             return warning;
@@ -249,12 +249,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         {
             if (reason.IsNullOrWhitespace())
             {
-                return new GenericError("You must provide some reason for the warning.");
+                return new UserError("You must provide some reason for the warning.");
             }
 
             if (reason.Length > 1024)
             {
-                return new GenericError
+                return new UserError
                 (
                     "The warning is too long. It can be at most 1024 characters."
                 );
@@ -262,7 +262,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             if (warning.Reason == reason)
             {
-                return new GenericError("That's already the warning's reason.");
+                return new UserError("That's already the warning's reason.");
             }
 
             warning.Reason = reason;
@@ -289,7 +289,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         {
             if (warning.MessageID == messageID)
             {
-                return new GenericError("That's already the warning's context message.");
+                return new UserError("That's already the warning's context message.");
             }
 
             warning.MessageID = messageID;
@@ -316,12 +316,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         {
             if (warning.ExpiresOn == expiresOn)
             {
-                return new GenericError("That's already the warning's expiry date.");
+                return new UserError("That's already the warning's expiry date.");
             }
 
             if (expiresOn < DateTime.UtcNow)
             {
-                return new GenericError("Warnings can't expire in the past.");
+                return new UserError("Warnings can't expire in the past.");
             }
 
             warning.ExpiresOn = expiresOn;
@@ -346,7 +346,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         {
             if (!_database.UserWarnings.Any(n => n.ID == warning.ID))
             {
-                return new GenericError
+                return new UserError
                 (
                     "That warning isn't in the database. This is probably an error in the bot."
                 );

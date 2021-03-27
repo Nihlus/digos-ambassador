@@ -122,7 +122,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             if (ban is null)
             {
-                return new GenericError("There's no ban with that ID in the database.");
+                return new UserError("There's no ban with that ID in the database.");
             }
 
             return ban;
@@ -222,12 +222,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         {
             if (reason.IsNullOrWhitespace())
             {
-                return new GenericError("You must provide some reason for the ban.");
+                return new UserError("You must provide some reason for the ban.");
             }
 
             if (reason.Length > 1024)
             {
-                return new GenericError
+                return new UserError
                 (
                     "The ban is too long. It can be at most 1024 characters."
                 );
@@ -235,7 +235,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             if (ban.Reason == reason)
             {
-                return new GenericError("That's already the ban's reason.");
+                return new UserError("That's already the ban's reason.");
             }
 
             ban.Reason = reason;
@@ -262,7 +262,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         {
             if (ban.MessageID == messageID)
             {
-                return new GenericError("That's already the ban's context message.");
+                return new UserError("That's already the ban's context message.");
             }
 
             ban.MessageID = messageID;
@@ -289,12 +289,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         {
             if (ban.ExpiresOn == expiresOn)
             {
-                return new GenericError("That's already the ban's expiry date.");
+                return new UserError("That's already the ban's expiry date.");
             }
 
             if (expiresOn < DateTime.UtcNow)
             {
-                return new GenericError("Bans can't expire in the past.");
+                return new UserError("Bans can't expire in the past.");
             }
 
             ban.ExpiresOn = expiresOn;
@@ -319,7 +319,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         {
             if (!_database.UserBans.Any(n => n.ID == ban.ID))
             {
-                return new GenericError
+                return new UserError
                 (
                     "That ban isn't in the database. This is probably an error in the bot."
                 );

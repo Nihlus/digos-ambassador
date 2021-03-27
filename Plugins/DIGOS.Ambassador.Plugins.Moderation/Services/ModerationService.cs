@@ -104,7 +104,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                 return settings;
             }
 
-            return new GenericError
+            return new UserError
             (
                 "The server doesn't have any settings."
             );
@@ -125,7 +125,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             var existingEntity = await GetServerSettingsAsync(guildID, ct);
             if (existingEntity.IsSuccess)
             {
-                return new GenericError("That server already has settings.");
+                return new UserError("That server already has settings.");
             }
 
             var getServer = await _servers.GetOrRegisterServerAsync(guildID, ct);
@@ -168,7 +168,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             if (settings.ModerationLogChannel == channelID)
             {
-                return new GenericError("That's already the moderation log channel.");
+                return new UserError("That's already the moderation log channel.");
             }
 
             settings.ModerationLogChannel = channelID;
@@ -201,7 +201,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             if (settings.MonitoringChannel == channelID)
             {
-                return new GenericError("That's already the monitoring channel.");
+                return new UserError("That's already the monitoring channel.");
             }
 
             settings.MonitoringChannel = channelID;
@@ -234,7 +234,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             if (settings.WarningThreshold == warningThreshold)
             {
-                return new GenericError($"The warning threshold is already {warningThreshold}.");
+                return new UserError($"The warning threshold is already {warningThreshold}.");
             }
 
             settings.WarningThreshold = warningThreshold;

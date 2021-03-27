@@ -203,7 +203,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
                 return consent;
             }
 
-            return new GenericError("The given user doesn't have a consent entity.");
+            return new UserError("The given user doesn't have a consent entity.");
         }
 
         /// <summary>
@@ -254,7 +254,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
             var getConsent = await GetUserConsentAsync(discordUser, ct);
             if (!getConsent.IsSuccess)
             {
-                return new GenericError("The user has not consented.");
+                return new UserError("The user has not consented.");
             }
 
             var userConsent = getConsent.Entity;

@@ -25,6 +25,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Plugins.Moderation.Permissions;
@@ -166,18 +167,18 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [Description("Adds a note to the given user.")]
         [RequirePermission(typeof(ManageNotes), PermissionTarget.All)]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<IResult> AddNoteAsync(IUser user, string content)
+        public async Task<Result<UserMessage>> AddNoteAsync(IUser user, string content)
         {
             var addNote = await _notes.CreateNoteAsync(_context.User.ID, user.ID, _context.GuildID.Value, content);
             if (!addNote.IsSuccess)
             {
-                return addNote;
+                return Result<UserMessage>.FromError(addNote);
             }
 
             var note = addNote.Entity;
 
             await _logging.NotifyUserNoteAddedAsync(note);
-            return Result<string>.FromSuccess($"Note added (ID {note.ID}).");
+            return new ConfirmationMessage($"Note added (ID {note.ID}).");
         }
 
         /// <summary>
@@ -188,12 +189,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [Description("Deletes the given note.")]
         [RequirePermission(typeof(ManageNotes), PermissionTarget.All)]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<IResult> DeleteNoteAsync(long noteID)
+        public async Task<Result<UserMessage>> DeleteNoteAsync(long noteID)
         {
             var getNote = await _notes.GetNoteAsync(_context.GuildID.Value, noteID);
             if (!getNote.IsSuccess)
             {
-                return getNote;
+                return Result<UserMessage>.FromError(getNote);
             }
 
             var note = getNote.Entity;
@@ -203,16 +204,16 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             var notifyResult = await _logging.NotifyUserNoteRemovedAsync(note, _context.User.ID);
             if (!notifyResult.IsSuccess)
             {
-                return notifyResult;
+                return Result<UserMessage>.FromError(notifyResult);
             }
 
             var deleteNote = await _notes.DeleteNoteAsync(note);
             if (!deleteNote.IsSuccess)
             {
-                return deleteNote;
+                return Result<UserMessage>.FromError(deleteNote);
             }
 
-            return Result<string>.FromSuccess("Note deleted.");
+            return new ConfirmationMessage("Note deleted.");
         }
     }
 }

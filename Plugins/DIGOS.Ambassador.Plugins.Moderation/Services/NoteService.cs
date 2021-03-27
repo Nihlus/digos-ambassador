@@ -107,7 +107,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             if (note is null)
             {
-                return new GenericError("There's no note with that ID in the database.");
+                return new UserError("There's no note with that ID in the database.");
             }
 
             return note;
@@ -185,12 +185,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         {
             if (content.IsNullOrWhitespace())
             {
-                return new GenericError("You must provide some content for the note.");
+                return new UserError("You must provide some content for the note.");
             }
 
             if (content.Length > 1024)
             {
-                return new GenericError
+                return new UserError
                 (
                     "The note is too long. It can be at most 1024 characters."
                 );
@@ -198,7 +198,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             if (note.Content == content)
             {
-                return new GenericError("That's already the note's contents.");
+                return new UserError("That's already the note's contents.");
             }
 
             note.Content = content;
@@ -223,7 +223,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         {
             if (!_database.UserNotes.Any(n => n.ID == note.ID))
             {
-                return new GenericError
+                return new UserError
                 (
                     "That note isn't in the database. This is probably an error in the bot."
                 );

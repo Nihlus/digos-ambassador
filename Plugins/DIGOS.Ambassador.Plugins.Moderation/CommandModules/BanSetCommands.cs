@@ -23,6 +23,7 @@
 using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Moderation.Permissions;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
 using DIGOS.Ambassador.Plugins.Permissions.Conditions;
@@ -73,12 +74,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             [Description("Sets the reason for the ban.")]
             [RequirePermission(typeof(ManageBans), PermissionTarget.All)]
             [RequireContext(ChannelContext.Guild)]
-            public async Task<IResult> SetBanReasonAsync(long banID, string newReason)
+            public async Task<Result<UserMessage>> SetBanReasonAsync(long banID, string newReason)
             {
                 var getBan = await _bans.GetBanAsync(_context.GuildID.Value, banID);
                 if (!getBan.IsSuccess)
                 {
-                    return getBan;
+                    return Result<UserMessage>.FromError(getBan);
                 }
 
                 var ban = getBan.Entity;
@@ -86,10 +87,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 var setContents = await _bans.SetBanReasonAsync(ban, newReason);
                 if (!setContents.IsSuccess)
                 {
-                    return setContents;
+                    return Result<UserMessage>.FromError(setContents);
                 }
 
-                return Result<string>.FromSuccess("Ban reason updated.");
+                return new ConfirmationMessage("Ban reason updated.");
             }
 
             /// <summary>
@@ -101,12 +102,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             [Description("Sets the contextually relevant message for the ban.")]
             [RequirePermission(typeof(ManageBans), PermissionTarget.All)]
             [RequireContext(ChannelContext.Guild)]
-            public async Task<IResult> SetBanContextMessageAsync(long banID, IMessage newMessage)
+            public async Task<Result<UserMessage>> SetBanContextMessageAsync(long banID, IMessage newMessage)
             {
                 var getBan = await _bans.GetBanAsync(_context.GuildID.Value, banID);
                 if (!getBan.IsSuccess)
                 {
-                    return getBan;
+                    return Result<UserMessage>.FromError(getBan);
                 }
 
                 var ban = getBan.Entity;
@@ -114,10 +115,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 var setMessage = await _bans.SetBanContextMessageAsync(ban, newMessage.ID);
                 if (!setMessage.IsSuccess)
                 {
-                    return setMessage;
+                    return Result<UserMessage>.FromError(setMessage);
                 }
 
-                return Result<string>.FromSuccess("Ban context message updated.");
+                return new ConfirmationMessage("Ban context message updated.");
             }
 
             /// <summary>
@@ -129,12 +130,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             [Description("Sets the duration of the ban.")]
             [RequirePermission(typeof(ManageBans), PermissionTarget.All)]
             [RequireContext(ChannelContext.Guild)]
-            public async Task<IResult> SetBanDurationAsync(long banID, TimeSpan newDuration)
+            public async Task<Result<UserMessage>> SetBanDurationAsync(long banID, TimeSpan newDuration)
             {
                 var getBan = await _bans.GetBanAsync(_context.GuildID.Value, banID);
                 if (!getBan.IsSuccess)
                 {
-                    return getBan;
+                    return Result<UserMessage>.FromError(getBan);
                 }
 
                 var ban = getBan.Entity;
@@ -144,10 +145,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 var setExpiration = await _bans.SetBanExpiryDateAsync(ban, newExpiration);
                 if (!setExpiration.IsSuccess)
                 {
-                    return setExpiration;
+                    return Result<UserMessage>.FromError(setExpiration);
                 }
 
-                return Result<string>.FromSuccess("Ban duration updated.");
+                return new ConfirmationMessage("Ban duration updated.");
             }
         }
     }

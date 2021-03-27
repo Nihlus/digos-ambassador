@@ -104,7 +104,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
 
             if (entity.IsOwner(newOwner))
             {
-                return new GenericError
+                return new UserError
                 (
                     $"That person already owns the {entity.EntityTypeDisplayName}."
                         .Humanize().Transform(To.SentenceCase)
@@ -113,7 +113,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
 
             if (newOwnerEntities.Any(e => string.Equals(e.Name.ToLower(), entity.Name.ToLower())))
             {
-                return new GenericError
+                return new UserError
                 (
                     $"That user already owns a {entity.EntityTypeDisplayName} named {entity.Name}. Please rename it first."
                         .Humanize().Transform(To.SentenceCase)
@@ -140,12 +140,12 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
         {
             if (entityName.IsNullOrWhitespace())
             {
-                return new GenericError("Names cannot be empty.");
+                return new UserError("Names cannot be empty.");
             }
 
             if (entityName.Any(c => _reservedNameCharacters.Contains(c)))
             {
-                return new GenericError
+                return new UserError
                 (
                     $"Names may not contain any of the following characters: {_reservedNameCharacters.Humanize()}"
                 );
@@ -153,14 +153,14 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
 
             if (_reservedNames.Any(n => string.Equals(n, entityName, StringComparison.OrdinalIgnoreCase)))
             {
-                return new GenericError
+                return new UserError
                 (
                     "That is a reserved name."
                 );
             }
 
             return commandNames.Any(entityName.Contains)
-                ? new GenericError("Names may not be the same as a command.")
+                ? new UserError("Names may not be the same as a command.")
                 : Result.FromSuccess();
         }
     }
