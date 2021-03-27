@@ -25,6 +25,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Net.Http;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.JumboEmotes.EmojiTools;
 using JetBrains.Annotations;
 using Remora.Commands.Attributes;
