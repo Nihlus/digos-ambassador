@@ -7,7 +7,7 @@
 
     <ItemGroup>
         <PackageReference Include="Remora.Discord.Commands" Version="3.7.1" />
-        <PackageReference Include="Remora.Plugins.Abstractions" Version="3.0.1" />
+        <PackageReference Include="Remora.Plugins.Abstractions" Version="3.1.0" />
     </ItemGroup>
 
     <!-- Workaround for a problem with EF Core -->
