@@ -308,7 +308,7 @@ namespace DIGOS.Ambassador.Responders
             var error = commandResult.Unwrap();
             switch (error)
             {
-                case NoCompatibleCommandFoundError:
+                case AmbiguousCommandInvocationError:
                 case ConditionNotSatisfiedError:
                 case UserError:
                 case { } when error.GetType().IsGenericType &&
