@@ -305,9 +305,16 @@ namespace DIGOS.Ambassador.Responders
                     : Result.FromSuccess();
             }
 
-            var error = commandResult.Unwrap();
+            IResult result = commandResult;
+            while (result.Inner is not null)
+            {
+                result = result.Inner;
+            }
+
+            var error = result.Unwrap();
             switch (error)
             {
+                case ParameterParsingError:
                 case AmbiguousCommandInvocationError:
                 case ConditionNotSatisfiedError:
                 case UserError:
