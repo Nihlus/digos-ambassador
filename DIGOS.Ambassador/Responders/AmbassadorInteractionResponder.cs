@@ -101,7 +101,6 @@ namespace DIGOS.Ambassador.Responders
             CancellationToken ct = default
         )
         {
-            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
             if (gatewayEvent is null)
             {
                 return Result.FromSuccess();
@@ -149,9 +148,6 @@ namespace DIGOS.Ambassador.Responders
                 return interactionResponse;
             }
 
-            var interactionData = gatewayEvent.Data.Value!;
-            interactionData.UnpackInteraction(out var command, out var parameters);
-
             var context = new InteractionContext
             (
                 gatewayEvent.GuildID,
@@ -163,6 +159,24 @@ namespace DIGOS.Ambassador.Responders
             );
 
             _contextInjection.Context = context;
+
+            return await RelayResultToUserAsync
+            (
+                context,
+                await TryExecuteCommandAsync(context, gatewayEvent.Data.Value, ct),
+                ct
+            );
+        }
+
+        private async Task<Result> TryExecuteCommandAsync
+        (
+            ICommandContext context,
+            IApplicationCommandInteractionData data,
+            CancellationToken ct = default
+        )
+        {
+            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+            data.UnpackInteraction(out var command, out var parameters);
 
             // Run any user-provided pre execution events
             var preExecution = await _eventCollector.RunPreExecutionEvents(context, ct);
@@ -184,33 +198,7 @@ namespace DIGOS.Ambassador.Responders
 
             if (!executeResult.IsSuccess)
             {
-                switch (executeResult.Unwrap())
-                {
-                    case NoCompatibleCommandFoundError:
-                    {
-                        var showError = await _webhookAPI.EditOriginalInteractionResponseAsync
-                        (
-                            _identityInformation.ApplicationID,
-                            gatewayEvent.Token,
-                            embeds: new[]
-                            {
-                                _userFeedback.CreateEmbedBase(Color.OrangeRed) with
-                                {
-                                    Description = executeResult.Unwrap().Message
-                                }
-                            },
-                            ct: ct
-                        );
-
-                        return showError.IsSuccess
-                            ? Result.FromSuccess()
-                            : Result.FromError(showError);
-                    }
-                    default:
-                    {
-                        return Result.FromError(executeResult);
-                    }
-                }
+                return Result.FromError(executeResult);
             }
 
             // Run any user-provided post execution events
@@ -226,78 +214,86 @@ namespace DIGOS.Ambassador.Responders
                 return postExecution;
             }
 
-            switch (executeResult.Entity.IsSuccess)
+            if (executeResult.Entity.IsSuccess)
             {
-                case true when executeResult.Entity is Result<UserMessage> messageResult:
+                transaction.Complete();
+            }
+
+            return Result.FromSuccess();
+        }
+
+        private async Task<Result> RelayResultToUserAsync<TResult>
+        (
+            InteractionContext context,
+            TResult commandResult,
+            CancellationToken ct = default
+        )
+            where TResult : struct, IResult
+        {
+            if (commandResult.IsSuccess)
+            {
+                if (commandResult is not Result<UserMessage> messageResult)
                 {
-                    // Relay the message to the user
-                    var sendMessage = await _userFeedback.SendMessageAsync
+                    // All good? Erase the original interaction message
+                    var eraseOriginal = await _webhookAPI.DeleteOriginalInteractionResponseAsync
                     (
-                        gatewayEvent.ChannelID.Value,
-                        user.ID,
-                        messageResult.Entity!,
+                        _identityInformation.ApplicationID,
+                        context.Token,
                         ct
                     );
 
-                    if (!sendMessage.IsSuccess)
-                    {
-                        return Result.FromError(sendMessage);
-                    }
-
-                    break;
+                    return !eraseOriginal.IsSuccess
+                        ? eraseOriginal
+                        : Result.FromSuccess();
                 }
-                case false:
-                {
-                    var error = executeResult.Entity.Unwrap();
-                    switch (error)
-                    {
-                        case ConditionNotSatisfiedError:
-                        case UserError:
-                        case { } when error.GetType().IsGenericType &&
-                                      error.GetType().GetGenericTypeDefinition() == typeof(ParsingError<>):
-                        {
-                            // Alert the user, and don't complete the transaction
-                            var sendError = await _webhookAPI.EditOriginalInteractionResponseAsync
-                            (
-                                _identityInformation.ApplicationID,
-                                gatewayEvent.Token,
-                                embeds: new[]
-                                {
-                                    _userFeedback.CreateEmbedBase(Color.OrangeRed) with
-                                    {
-                                        Description = error.Message
-                                    }
-                                },
-                                ct: ct
-                            );
 
-                            return sendError.IsSuccess
-                                ? Result.FromSuccess()
-                                : Result.FromError(sendError);
-                        }
-                        default:
-                        {
-                            return Result.FromError(executeResult.Entity.Unwrap());
-                        }
-                    }
-                }
+                // Relay the message to the user
+                var sendMessage = await _userFeedback.SendMessageAsync
+                (
+                    context.ChannelID,
+                    context.User.ID,
+                    messageResult.Entity!,
+                    ct
+                );
+
+                return !sendMessage.IsSuccess
+                    ? Result.FromError(sendMessage)
+                    : Result.FromSuccess();
             }
 
-            // All good? Erase the original interaction message
-            var eraseOriginal = await _webhookAPI.DeleteOriginalInteractionResponseAsync
-            (
-                _identityInformation.ApplicationID,
-                gatewayEvent.Token,
-                ct
-            );
-
-            if (!eraseOriginal.IsSuccess)
+            var error = commandResult.Unwrap();
+            switch (error)
             {
-                return eraseOriginal;
-            }
+                case NoCompatibleCommandFoundError:
+                case ConditionNotSatisfiedError:
+                case UserError:
+                case { } when error.GetType().IsGenericType &&
+                              error.GetType().GetGenericTypeDefinition() == typeof(ParsingError<>):
+                {
+                    // Alert the user, and don't complete the transaction
+                    var sendError = await _webhookAPI.EditOriginalInteractionResponseAsync
+                    (
+                        _identityInformation.ApplicationID,
+                        context.Token,
+                        embeds: new[]
+                        {
+                            _userFeedback.CreateEmbedBase(Color.OrangeRed) with
+                            {
+                                Description = error.Message
+                            }
+                        },
+                        ct: ct
+                    );
 
-            transaction.Complete();
-            return Result.FromSuccess();
+                    return sendError.IsSuccess
+                        ? Result.FromSuccess()
+                        : Result.FromError(sendError);
+                }
+                default:
+                {
+                    return Result.FromError(commandResult.Unwrap());
+                }
+            }
         }
     }
 }

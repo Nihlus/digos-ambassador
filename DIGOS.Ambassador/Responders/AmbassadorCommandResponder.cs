@@ -150,7 +150,12 @@ namespace DIGOS.Ambassador.Responders
                 )
             );
 
-            return await ExecuteCommandAsync(gatewayEvent.Content, context, ct);
+            return await RelayResultToUserAsync
+            (
+                context,
+                await ExecuteCommandAsync(gatewayEvent.Content, context, ct),
+                ct
+            );
         }
 
         /// <inheritdoc/>
@@ -202,7 +207,12 @@ namespace DIGOS.Ambassador.Responders
                 gatewayEvent
             );
 
-            return await ExecuteCommandAsync(gatewayEvent.Content.Value!, context, ct);
+            return await RelayResultToUserAsync
+            (
+                context,
+                await ExecuteCommandAsync(gatewayEvent.Content.Value!, context, ct),
+                ct
+            );
         }
 
         private async Task<Result> ExecuteCommandAsync
@@ -258,59 +268,70 @@ namespace DIGOS.Ambassador.Responders
                 return postExecution;
             }
 
-            switch (executeResult.Entity.IsSuccess)
+            if (executeResult.Entity.IsSuccess)
             {
-                case true when executeResult.Entity is Result<UserMessage> messageResult:
+                transaction.Complete();
+            }
+
+            return Result.FromSuccess();
+        }
+
+        private async Task<Result> RelayResultToUserAsync<TResult>
+        (
+            ICommandContext context,
+            TResult commandResult,
+            CancellationToken ct = default
+        )
+            where TResult : struct, IResult
+        {
+            if (commandResult.IsSuccess)
+            {
+                if (commandResult is not Result<UserMessage> messageResult)
                 {
-                    // Relay the message to the user
-                    var sendMessage = await _userFeedback.SendMessageAsync
+                    return Result.FromSuccess();
+                }
+
+                // Relay the message to the user
+                var sendMessage = await _userFeedback.SendMessageAsync
+                (
+                    context.ChannelID,
+                    context.User.ID,
+                    messageResult.Entity!,
+                    ct
+                );
+
+                return !sendMessage.IsSuccess
+                    ? Result.FromError(sendMessage)
+                    : Result.FromSuccess();
+            }
+
+            var error = commandResult.Unwrap();
+            switch (error)
+            {
+                case NoCompatibleCommandFoundError:
+                case ConditionNotSatisfiedError:
+                case UserError:
+                case { } when error.GetType().IsGenericType &&
+                              error.GetType().GetGenericTypeDefinition() == typeof(ParsingError<>):
+                {
+                    // Alert the user, and don't complete the transaction
+                    var sendError = await _userFeedback.SendErrorAsync
                     (
-                        commandContext.ChannelID,
-                        commandContext.User.ID,
-                        messageResult.Entity!,
+                        context.ChannelID,
+                        context.User.ID,
+                        error.Message,
                         ct
                     );
 
-                    if (!sendMessage.IsSuccess)
-                    {
-                        return Result.FromError(sendMessage);
-                    }
-
-                    break;
+                    return sendError.IsSuccess
+                        ? Result.FromSuccess()
+                        : Result.FromError(sendError);
                 }
-                case false:
+                default:
                 {
-                    var error = executeResult.Entity.Unwrap();
-                    switch (error)
-                    {
-                        case ConditionNotSatisfiedError:
-                        case UserError:
-                        case { } when error.GetType().IsGenericType &&
-                                      error.GetType().GetGenericTypeDefinition() == typeof(ParsingError<>):
-                        {
-                            // Alert the user, and don't complete the transaction
-                            var sendError = await _userFeedback.SendErrorAsync
-                            (
-                                commandContext.ChannelID,
-                                commandContext.User.ID,
-                                error.Message,
-                                ct
-                            );
-
-                            return sendError.IsSuccess
-                                ? Result.FromSuccess()
-                                : Result.FromError(sendError);
-                        }
-                        default:
-                        {
-                            return Result.FromError(executeResult.Entity.Unwrap());
-                        }
-                    }
+                    return Result.FromError(commandResult.Unwrap());
                 }
             }
-
-            transaction.Complete();
-            return Result.FromSuccess();
         }
     }
 }
