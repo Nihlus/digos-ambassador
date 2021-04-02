@@ -27,6 +27,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Services;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
@@ -36,11 +37,10 @@ using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Results;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters;
-using Discord;
-using Discord.Commands;
 using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Remora.Discord.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Services
@@ -88,7 +88,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="character">The character.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<Appearance>> GetOrCreateDefaultAppearanceAsync
+        public async Task<Result<Appearance>> GetOrCreateDefaultAppearanceAsync
         (
             Character character,
             CancellationToken ct = default
@@ -103,7 +103,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             var createDefaultAppearanceResult = await Appearance.CreateDefaultAsync(character, this);
             if (!createDefaultAppearanceResult.IsSuccess)
             {
-                return RetrieveEntityResult<Appearance>.FromError(createDefaultAppearanceResult);
+                return Result<Appearance>.FromError(createDefaultAppearanceResult);
             }
 
             var defaultAppearance = createDefaultAppearanceResult.Entity;
@@ -121,7 +121,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="character">The character.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        private async Task<RetrieveEntityResult<Appearance>> GetDefaultAppearanceAsync
+        private async Task<Result<Appearance>> GetDefaultAppearanceAsync
         (
             Character character,
             CancellationToken ct = default
@@ -130,8 +130,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             var appearance = await _database.Appearances.ServersideQueryAsync
             (
                 q => q
-                    .Where(da => da.Character == character && da.IsDefault)
-                    .SingleOrDefaultAsync(cancellationToken: ct)
+                    .Where(da => da.Character == character)
+                    .Where(da => da.IsDefault)
+                    .SingleOrDefaultAsync(ct)
             );
 
             if (!(appearance is null))
@@ -139,7 +140,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                 return appearance;
             }
 
-            return RetrieveEntityResult<Appearance>.FromError("The character doesn't have a default appearance.");
+            return new UserError("HThe character doesn't have a default appearance.");
         }
 
         /// <summary>
@@ -149,7 +150,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="character">The character.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<Appearance>> GetOrCreateCurrentAppearanceAsync
+        public async Task<Result<Appearance>> GetOrCreateCurrentAppearanceAsync
         (
             Character character,
             CancellationToken ct = default
@@ -165,7 +166,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             var getDefaultAppearance = await GetOrCreateDefaultAppearanceAsync(character, ct);
             if (!getDefaultAppearance.IsSuccess)
             {
-                return RetrieveEntityResult<Appearance>.FromError(getDefaultAppearance);
+                return Result<Appearance>.FromError(getDefaultAppearance);
             }
 
             var defaultAppearance = getDefaultAppearance.Entity;
@@ -185,7 +186,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="character">The character.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        private async Task<RetrieveEntityResult<Appearance>> GetCurrentAppearanceAsync
+        private async Task<Result<Appearance>> GetCurrentAppearanceAsync
         (
             Character character,
             CancellationToken ct = default
@@ -194,8 +195,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             var appearance = await _database.Appearances.ServersideQueryAsync
             (
                 q => q
-                    .Where(da => da.Character == character && da.IsCurrent)
-                    .SingleOrDefaultAsync(cancellationToken: ct)
+                    .Where(da => da.Character == character)
+                    .Where(da => da.IsCurrent)
+                    .SingleOrDefaultAsync(ct)
             );
 
             if (!(appearance is null))
@@ -203,38 +205,44 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                 return appearance;
             }
 
-            return RetrieveEntityResult<Appearance>.FromError("The character doesn't have a current appearance.");
+            return new UserError("The character doesn't have a current appearance.");
         }
 
         /// <summary>
         /// Removes the given character's bodypart.
         /// </summary>
-        /// <param name="context">The context of the command.</param>
+        /// <param name="invokingUser">The user that's performing the action.</param>
         /// <param name="character">The character to shift.</param>
         /// <param name="bodyPart">The bodypart to remove.</param>
         /// <param name="chirality">The chirality of the bodypart.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A shifting result which may or may not have succeeded.</returns>
-        public async Task<ShiftBodypartResult> RemoveBodypartAsync
+        public async Task<Result<ShiftBodypartResult>> RemoveBodypartAsync
         (
-            ICommandContext context,
+            Snowflake invokingUser,
             Character character,
             Bodypart bodyPart,
             Chirality chirality = Chirality.Center,
             CancellationToken ct = default
         )
         {
-            var discordUser = await context.Guild.GetUserAsync((ulong)character.Owner.DiscordID);
-            var canTransformResult = await CanUserTransformUserAsync(context.Guild, context.User, discordUser, ct);
+            var canTransformResult = await CanUserTransformUserAsync
+            (
+                character.Server.DiscordID,
+                invokingUser,
+                character.Owner.DiscordID,
+                ct
+            );
+
             if (!canTransformResult.IsSuccess)
             {
-                return ShiftBodypartResult.FromError(canTransformResult);
+                return Result<ShiftBodypartResult>.FromError(canTransformResult);
             }
 
             var getAppearanceResult = await GetOrCreateCurrentAppearanceAsync(character, ct);
             if (!getAppearanceResult.IsSuccess)
             {
-                return ShiftBodypartResult.FromError(getAppearanceResult);
+                return Result<ShiftBodypartResult>.FromError(getAppearanceResult);
             }
 
             var appearance = getAppearanceResult.Entity;
@@ -257,32 +265,38 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <summary>
         /// Removes the given character's bodypart.
         /// </summary>
-        /// <param name="context">The context of the command.</param>
+        /// <param name="invokingUser">The user that's performing the action.</param>
         /// <param name="character">The character to shift.</param>
         /// <param name="bodyPart">The bodypart to remove.</param>
         /// <param name="chirality">The chirality of the bodypart.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A shifting result which may or may not have succeeded.</returns>
-        public async Task<ShiftBodypartResult> RemoveBodypartPatternAsync
+        public async Task<Result<ShiftBodypartResult>> RemoveBodypartPatternAsync
         (
-            ICommandContext context,
+            Snowflake invokingUser,
             Character character,
             Bodypart bodyPart,
             Chirality chirality = Chirality.Center,
             CancellationToken ct = default
         )
         {
-            var discordUser = await context.Guild.GetUserAsync((ulong)character.Owner.DiscordID);
-            var canTransformResult = await CanUserTransformUserAsync(context.Guild, context.User, discordUser, ct);
+            var canTransformResult = await CanUserTransformUserAsync
+            (
+                character.Server.DiscordID,
+                invokingUser,
+                character.Owner.DiscordID,
+                ct
+            );
+
             if (!canTransformResult.IsSuccess)
             {
-                return ShiftBodypartResult.FromError(canTransformResult);
+                return Result<ShiftBodypartResult>.FromError(canTransformResult);
             }
 
             var getAppearanceResult = await GetOrCreateCurrentAppearanceAsync(character, ct);
             if (!getAppearanceResult.IsSuccess)
             {
-                return ShiftBodypartResult.FromError(getAppearanceResult);
+                return Result<ShiftBodypartResult>.FromError(getAppearanceResult);
             }
 
             var appearance = getAppearanceResult.Entity;
@@ -301,16 +315,16 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <summary>
         /// Shifts the given character's bodypart to the given species.
         /// </summary>
-        /// <param name="context">The context of the command.</param>
+        /// <param name="invokingUser">The user that's performing the action.</param>
         /// <param name="character">The character to shift.</param>
         /// <param name="bodyPart">The bodypart to shift.</param>
         /// <param name="speciesName">The species to shift the bodypart into.</param>
         /// <param name="chirality">The chirality of the bodypart.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A shifting result which may or may not have succeeded.</returns>
-        public async Task<ShiftBodypartResult> ShiftBodypartAsync
+        public async Task<Result<ShiftBodypartResult>> ShiftBodypartAsync
         (
-            ICommandContext context,
+            Snowflake invokingUser,
             Character character,
             Bodypart bodyPart,
             string speciesName,
@@ -318,17 +332,23 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             CancellationToken ct = default
         )
         {
-            var discordUser = await context.Guild.GetUserAsync((ulong)character.Owner.DiscordID);
-            var canTransformResult = await CanUserTransformUserAsync(context.Guild, context.User, discordUser, ct);
+            var canTransformResult = await CanUserTransformUserAsync
+            (
+                character.Server.DiscordID,
+                invokingUser,
+                character.Owner.DiscordID,
+                ct
+            );
+
             if (!canTransformResult.IsSuccess)
             {
-                return ShiftBodypartResult.FromError(canTransformResult);
+                return Result<ShiftBodypartResult>.FromError(canTransformResult);
             }
 
             var getSpeciesResult = await GetSpeciesByNameAsync(speciesName, ct);
             if (!getSpeciesResult.IsSuccess)
             {
-                return ShiftBodypartResult.FromError(getSpeciesResult);
+                return Result<ShiftBodypartResult>.FromError(getSpeciesResult);
             }
 
             var species = getSpeciesResult.Entity;
@@ -336,7 +356,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             var getCurrentAppearance = await GetOrCreateCurrentAppearanceAsync(character, ct);
             if (!getCurrentAppearance.IsSuccess)
             {
-                return ShiftBodypartResult.FromError(getCurrentAppearance);
+                return Result<ShiftBodypartResult>.FromError(getCurrentAppearance);
             }
 
             var appearance = getCurrentAppearance.Entity;
@@ -355,16 +375,16 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <summary>
         /// Shifts the colour of the given bodypart on the given character to the given colour.
         /// </summary>
-        /// <param name="context">The command context.</param>
+        /// <param name="invokingUser">The user that's performing the action.</param>
         /// <param name="character">The character to shift.</param>
         /// <param name="bodyPart">The bodypart to shift.</param>
         /// <param name="colour">The colour to shift it into.</param>
         /// <param name="chirality">The chirality of the bodypart.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A shifting result which may or may not have succeeded.</returns>
-        public async Task<ShiftBodypartResult> ShiftBodypartColourAsync
+        public async Task<Result<ShiftBodypartResult>> ShiftBodypartColourAsync
         (
-            ICommandContext context,
+            Snowflake invokingUser,
             Character character,
             Bodypart bodyPart,
             Colour colour,
@@ -372,16 +392,22 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             CancellationToken ct = default
         )
         {
-            var discordUser = await context.Guild.GetUserAsync((ulong)character.Owner.DiscordID);
-            var canTransformResult = await CanUserTransformUserAsync(context.Guild, context.User, discordUser, ct);
+            var canTransformResult = await CanUserTransformUserAsync
+            (
+                character.Server.DiscordID,
+                invokingUser,
+                character.Owner.DiscordID,
+                ct
+            );
+
             if (!canTransformResult.IsSuccess)
             {
-                return ShiftBodypartResult.FromError(canTransformResult);
+                return Result<ShiftBodypartResult>.FromError(canTransformResult);
             }
 
             if (bodyPart.IsChiral() && chirality == Chirality.Center)
             {
-                return ShiftBodypartResult.FromError
+                return new UserError
                 (
                     $"Please specify if it's the left or right {bodyPart.Humanize().ToLower()}."
                 );
@@ -390,7 +416,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             var getCurrentAppearance = await GetOrCreateCurrentAppearanceAsync(character, ct);
             if (!getCurrentAppearance.IsSuccess)
             {
-                return ShiftBodypartResult.FromError(getCurrentAppearance);
+                return Result<ShiftBodypartResult>.FromError(getCurrentAppearance);
             }
 
             var appearance = getCurrentAppearance.Entity;
@@ -409,7 +435,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <summary>
         /// Shifts the pattern of the given bodypart on the given character to the given pattern with the given colour.
         /// </summary>
-        /// <param name="context">The command context.</param>
+        /// <param name="invokingUser">The user that's performing the action.</param>
         /// <param name="character">The character to shift.</param>
         /// <param name="bodyPart">The bodypart to shift.</param>
         /// <param name="pattern">The pattern to shift the bodypart into.</param>
@@ -417,9 +443,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="chirality">The chirality of the bodypart.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A shifting result which may or may not have succeeded.</returns>
-        public async Task<ShiftBodypartResult> ShiftBodypartPatternAsync
+        public async Task<Result<ShiftBodypartResult>> ShiftBodypartPatternAsync
         (
-            ICommandContext context,
+            Snowflake invokingUser,
             Character character,
             Bodypart bodyPart,
             Pattern pattern,
@@ -428,17 +454,23 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             CancellationToken ct = default
         )
         {
-            var discordUser = await context.Guild.GetUserAsync((ulong)character.Owner.DiscordID);
-            var canTransformResult = await CanUserTransformUserAsync(context.Guild, context.User, discordUser, ct);
+            var canTransformResult = await CanUserTransformUserAsync
+            (
+                character.Server.DiscordID,
+                invokingUser,
+                character.Owner.DiscordID,
+                ct
+            );
+
             if (!canTransformResult.IsSuccess)
             {
-                return ShiftBodypartResult.FromError(canTransformResult);
+                return Result<ShiftBodypartResult>.FromError(canTransformResult);
             }
 
             var getAppearanceResult = await GetOrCreateCurrentAppearanceAsync(character, ct);
             if (!getAppearanceResult.IsSuccess)
             {
-                return ShiftBodypartResult.FromError(getAppearanceResult);
+                return Result<ShiftBodypartResult>.FromError(getAppearanceResult);
             }
 
             var appearance = getAppearanceResult.Entity;
@@ -457,16 +489,16 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <summary>
         /// Shifts the colour of the given bodypart's pattern on the given character to the given colour.
         /// </summary>
-        /// <param name="context">The command context.</param>
+        /// <param name="invokingUser">The user that's performing the action.</param>
         /// <param name="character">The character to shift.</param>
         /// <param name="bodyPart">The bodypart to shift.</param>
         /// <param name="patternColour">The colour to shift it into.</param>
         /// <param name="chirality">The chirality of the bodypart.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A shifting result which may or may not have succeeded.</returns>
-        public async Task<ShiftBodypartResult> ShiftPatternColourAsync
+        public async Task<Result<ShiftBodypartResult>> ShiftPatternColourAsync
         (
-            ICommandContext context,
+            Snowflake invokingUser,
             Character character,
             Bodypart bodyPart,
             Colour patternColour,
@@ -474,17 +506,23 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             CancellationToken ct = default
         )
         {
-            var discordUser = await context.Guild.GetUserAsync((ulong)character.Owner.DiscordID);
-            var canTransformResult = await CanUserTransformUserAsync(context.Guild, context.User, discordUser, ct);
+            var canTransformResult = await CanUserTransformUserAsync
+            (
+                character.Server.DiscordID,
+                invokingUser,
+                character.Owner.DiscordID,
+                ct
+            );
+
             if (!canTransformResult.IsSuccess)
             {
-                return ShiftBodypartResult.FromError(canTransformResult);
+                return Result<ShiftBodypartResult>.FromError(canTransformResult);
             }
 
             var getAppearanceResult = await GetOrCreateCurrentAppearanceAsync(character, ct);
             if (!getAppearanceResult.IsSuccess)
             {
-                return ShiftBodypartResult.FromError(getAppearanceResult);
+                return Result<ShiftBodypartResult>.FromError(getAppearanceResult);
             }
 
             var appearance = getAppearanceResult.Entity;
@@ -508,31 +546,31 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="targetUser">The user being transformed.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A conditional determination with an attached reason if it failed.</returns>
-        public async Task<DetermineConditionResult> CanUserTransformUserAsync
+        public async Task<Result> CanUserTransformUserAsync
         (
-            IGuild discordServer,
-            IUser invokingUser,
-            IUser targetUser,
+            Snowflake discordServer,
+            Snowflake invokingUser,
+            Snowflake targetUser,
             CancellationToken ct = default
         )
         {
             var getLocalProtectionResult = await GetOrCreateServerUserProtectionAsync(targetUser, discordServer, ct);
             if (!getLocalProtectionResult.IsSuccess)
             {
-                return DetermineConditionResult.FromError(getLocalProtectionResult);
+                return Result.FromError(getLocalProtectionResult);
             }
 
             var localProtection = getLocalProtectionResult.Entity;
 
             if (!localProtection.HasOptedIn)
             {
-                return DetermineConditionResult.FromError("The target hasn't opted into transformations.");
+                return new UserError("The target hasn't opted into transformations.");
             }
 
             var getGlobalProtectionResult = await GetOrCreateGlobalUserProtectionAsync(targetUser, ct);
             if (!getGlobalProtectionResult.IsSuccess)
             {
-                return DetermineConditionResult.FromError(getGlobalProtectionResult);
+                return Result.FromError(getGlobalProtectionResult);
             }
 
             var globalProtection = getGlobalProtectionResult.Entity;
@@ -540,15 +578,15 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             {
                 case ProtectionType.Blacklist:
                 {
-                    return globalProtection.Blacklist.All(u => u.DiscordID != (long)invokingUser.Id)
-                        ? DetermineConditionResult.FromSuccess()
-                        : DetermineConditionResult.FromError("You're on that user's blacklist.");
+                    return globalProtection.Blacklist.All(u => u.DiscordID != invokingUser)
+                        ? Result.FromSuccess()
+                        : new UserError("You're on that user's blacklist.");
                 }
                 case ProtectionType.Whitelist:
                 {
-                    return globalProtection.Whitelist.Any(u => u.DiscordID == (long)invokingUser.Id)
-                        ? DetermineConditionResult.FromSuccess()
-                        : DetermineConditionResult.FromError("You're not on that user's whitelist.");
+                    return globalProtection.Whitelist.Any(u => u.DiscordID == invokingUser)
+                        ? Result.FromSuccess()
+                        : new UserError("You're not on that user's whitelist.");
                 }
                 default:
                 {
@@ -563,7 +601,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="character">The character to generate the description for.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>An embed with a formatted description.</returns>
-        public async Task<CreateEntityResult<string>> GenerateCharacterDescriptionAsync
+        public async Task<Result<string>> GenerateCharacterDescriptionAsync
         (
             Character character,
             CancellationToken ct = default
@@ -575,13 +613,13 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
             if (!getCurrentAppearance.IsSuccess)
             {
-                return CreateEntityResult<string>.FromError(getCurrentAppearance);
+                return Result<string>.FromError(getCurrentAppearance);
             }
 
             var currentAppearance = getCurrentAppearance.Entity;
 
             var visualDescription = _descriptionBuilder.BuildVisualDescription(currentAppearance);
-            return CreateEntityResult<string>.FromSuccess(visualDescription);
+            return Result<string>.FromSuccess(visualDescription);
         }
 
         /// <summary>
@@ -619,7 +657,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="character">The character to reset.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> ResetCharacterFormAsync
+        public async Task<Result> ResetCharacterFormAsync
         (
             Character character,
             CancellationToken ct = default
@@ -628,7 +666,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             var getDefaultAppearanceResult = await GetOrCreateDefaultAppearanceAsync(character, ct);
             if (!getDefaultAppearanceResult.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getDefaultAppearanceResult);
+                return Result.FromError(getDefaultAppearanceResult);
             }
 
             var getCurrentAppearance = await GetCurrentAppearanceAsync(character, ct);
@@ -642,11 +680,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             var createNewCurrentResult = await GetOrCreateCurrentAppearanceAsync(character, ct);
             if (!createNewCurrentResult.IsSuccess)
             {
-                return ModifyEntityResult.FromError(createNewCurrentResult);
+                return Result.FromError(createNewCurrentResult);
             }
 
             await _database.SaveChangesAsync(ct);
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -655,7 +693,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="character">The character to set the default appearance of.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetCurrentAppearanceAsDefaultForCharacterAsync
+        public async Task<Result> SetCurrentAppearanceAsDefaultForCharacterAsync
         (
             Character character,
             CancellationToken ct = default
@@ -674,7 +712,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             var getCurrentAppearance = await GetOrCreateCurrentAppearanceAsync(character, ct);
             if (!getCurrentAppearance.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getCurrentAppearance);
+                return Result.FromError(getCurrentAppearance);
             }
 
             var existingCurrentAppearance = getCurrentAppearance.Entity;
@@ -685,7 +723,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             existingCurrentAppearance.IsCurrent = false;
 
             await _database.SaveChangesAsync(ct);
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -695,9 +733,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="protectionType">The protection type to set.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetDefaultProtectionTypeAsync
+        public async Task<Result> SetDefaultProtectionTypeAsync
         (
-            IUser discordUser,
+            Snowflake discordUser,
             ProtectionType protectionType,
             CancellationToken ct = default
         )
@@ -705,20 +743,20 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             var getGlobalProtectionResult = await GetOrCreateGlobalUserProtectionAsync(discordUser, ct);
             if (!getGlobalProtectionResult.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getGlobalProtectionResult);
+                return Result.FromError(getGlobalProtectionResult);
             }
 
             var protection = getGlobalProtectionResult.Entity;
 
             if (protection.DefaultType == protectionType)
             {
-                return ModifyEntityResult.FromError($"{protectionType.Humanize()} is already your default setting.");
+                return new UserError($"{protectionType.Humanize()} is already your default setting.");
             }
 
             protection.DefaultType = protectionType;
 
             await _database.SaveChangesAsync(ct);
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -729,10 +767,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="protectionType">The protection type to set.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetServerProtectionTypeAsync
+        public async Task<Result> SetServerProtectionTypeAsync
         (
-            IUser discordUser,
-            IGuild discordServer,
+            Snowflake discordUser,
+            Snowflake discordServer,
             ProtectionType protectionType,
             CancellationToken ct = default
         )
@@ -740,20 +778,20 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             var getServerProtectionResult = await GetOrCreateServerUserProtectionAsync(discordUser, discordServer, ct);
             if (!getServerProtectionResult.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getServerProtectionResult);
+                return Result.FromError(getServerProtectionResult);
             }
 
             var protection = getServerProtectionResult.Entity;
 
             if (protection.Type == protectionType)
             {
-                return ModifyEntityResult.FromError($"{protectionType.Humanize()} is already your current setting.");
+                return new UserError($"{protectionType.Humanize()} is already your current setting.");
             }
 
             protection.Type = protectionType;
 
             await _database.SaveChangesAsync(ct);
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -763,38 +801,38 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="whitelistedUser">The user to add to the whitelist.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> WhitelistUserAsync
+        public async Task<Result> WhitelistUserAsync
         (
-            IUser discordUser,
-            IUser whitelistedUser,
+            Snowflake discordUser,
+            Snowflake whitelistedUser,
             CancellationToken ct = default
         )
         {
             if (discordUser == whitelistedUser)
             {
-                return ModifyEntityResult.FromError("You can't whitelist yourself.");
+                return new UserError("You can't whitelist yourself.");
             }
 
             var getGlobalProtectionResult = await GetOrCreateGlobalUserProtectionAsync(discordUser, ct);
             if (!getGlobalProtectionResult.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getGlobalProtectionResult);
+                return Result.FromError(getGlobalProtectionResult);
             }
 
             var protection = getGlobalProtectionResult.Entity;
 
-            if (protection.Whitelist.Any(u => u.DiscordID == (long)whitelistedUser.Id))
+            if (protection.Whitelist.Any(u => u.DiscordID == whitelistedUser))
             {
-                return ModifyEntityResult.FromError("You've already whitelisted that user.");
+                return new UserError("You've already whitelisted that user.");
             }
 
-            var protectionEntry = protection.UserListing.FirstOrDefault(u => u.User.DiscordID == (long)discordUser.Id);
+            var protectionEntry = protection.UserListing.FirstOrDefault(u => u.User.DiscordID == discordUser);
             if (protectionEntry is null)
             {
                 var getUserResult = await _users.GetOrRegisterUserAsync(whitelistedUser, ct);
                 if (!getUserResult.IsSuccess)
                 {
-                    return ModifyEntityResult.FromError(getUserResult);
+                    return Result.FromError(getUserResult);
                 }
 
                 var user = getUserResult.Entity;
@@ -811,7 +849,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             }
 
             await _database.SaveChangesAsync(ct);
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -821,38 +859,38 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="blacklistedUser">The user to add to the blacklist.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> BlacklistUserAsync
+        public async Task<Result> BlacklistUserAsync
         (
-            IUser discordUser,
-            IUser blacklistedUser,
+            Snowflake discordUser,
+            Snowflake blacklistedUser,
             CancellationToken ct = default
         )
         {
             if (discordUser == blacklistedUser)
             {
-                return ModifyEntityResult.FromError("You can't blacklist yourself.");
+                return new UserError("You can't blacklist yourself.");
             }
 
             var getGlobalProtectionResult = await GetOrCreateGlobalUserProtectionAsync(discordUser, ct);
             if (!getGlobalProtectionResult.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getGlobalProtectionResult);
+                return Result.FromError(getGlobalProtectionResult);
             }
 
             var protection = getGlobalProtectionResult.Entity;
 
-            if (protection.Blacklist.Any(u => u.DiscordID == (long)blacklistedUser.Id))
+            if (protection.Blacklist.Any(u => u.DiscordID == blacklistedUser))
             {
-                return ModifyEntityResult.FromError("You've already blacklisted that user.");
+                return new UserError("You've already blacklisted that user.");
             }
 
-            var protectionEntry = protection.UserListing.FirstOrDefault(u => u.User.DiscordID == (long)discordUser.Id);
+            var protectionEntry = protection.UserListing.FirstOrDefault(u => u.User.DiscordID == discordUser);
             if (protectionEntry is null)
             {
                 var getUserResult = await _users.GetOrRegisterUserAsync(blacklistedUser, ct);
                 if (!getUserResult.IsSuccess)
                 {
-                    return ModifyEntityResult.FromError(getUserResult);
+                    return Result.FromError(getUserResult);
                 }
 
                 var user = getUserResult.Entity;
@@ -869,7 +907,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             }
 
             await _database.SaveChangesAsync(ct);
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -878,16 +916,16 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="discordUser">The user.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>Global protection data for the given user.</returns>
-        public async Task<RetrieveEntityResult<GlobalUserProtection>> GetOrCreateGlobalUserProtectionAsync
+        public async Task<Result<GlobalUserProtection>> GetOrCreateGlobalUserProtectionAsync
         (
-            IUser discordUser,
+            Snowflake discordUser,
             CancellationToken ct = default
         )
         {
             var protection = await _database.GlobalUserProtections.ServersideQueryAsync
             (
                 q => q
-                    .Where(p => p.User.DiscordID == (long)discordUser.Id)
+                    .Where(p => p.User.DiscordID == discordUser)
                     .SingleOrDefaultAsync(cancellationToken: ct)
             );
 
@@ -899,7 +937,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             var getUserResult = await _users.GetOrRegisterUserAsync(discordUser, ct);
             if (!getUserResult.IsSuccess)
             {
-                return RetrieveEntityResult<GlobalUserProtection>.FromError(getUserResult);
+                return Result<GlobalUserProtection>.FromError(getUserResult);
             }
 
             var user = getUserResult.Entity;
@@ -918,18 +956,19 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="guild">The server.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>Server-specific protection data for the given user.</returns>
-        public async Task<RetrieveEntityResult<ServerUserProtection>> GetOrCreateServerUserProtectionAsync
+        public async Task<Result<ServerUserProtection>> GetOrCreateServerUserProtectionAsync
         (
-            IUser discordUser,
-            IGuild guild,
+            Snowflake discordUser,
+            Snowflake guild,
             CancellationToken ct = default
         )
         {
             var protection = await _database.ServerUserProtections.ServersideQueryAsync
             (
                 q => q
-                    .Where(p => p.User.DiscordID == (long)discordUser.Id && p.Server.DiscordID == (long)guild.Id)
-                    .SingleOrDefaultAsync(cancellationToken: ct)
+                    .Where(p => p.User.DiscordID == discordUser)
+                    .Where(p => p.Server.DiscordID == guild)
+                    .SingleOrDefaultAsync(ct)
             );
 
             if (!(protection is null))
@@ -940,15 +979,16 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             var getServerResult = await _servers.GetOrRegisterServerAsync(guild, ct);
             if (!getServerResult.IsSuccess)
             {
-                return RetrieveEntityResult<ServerUserProtection>.FromError(getServerResult);
+                return Result<ServerUserProtection>.FromError(getServerResult);
             }
 
             var server = getServerResult.Entity;
+            server = _database.NormalizeReference(server);
 
             var getGlobalProtectionResult = await GetOrCreateGlobalUserProtectionAsync(discordUser, ct);
             if (!getGlobalProtectionResult.IsSuccess)
             {
-                return RetrieveEntityResult<ServerUserProtection>.FromError(getGlobalProtectionResult);
+                return Result<ServerUserProtection>.FromError(getGlobalProtectionResult);
             }
 
             var globalProtection = getGlobalProtectionResult.Entity;
@@ -968,7 +1008,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// </summary>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>An update result which may or may not have succeeded.</returns>
-        public async Task<UpdateTransformationsResult> UpdateTransformationDatabaseAsync
+        public async Task<Result<UpdateTransformationsResult>> UpdateTransformationDatabaseAsync
         (
             CancellationToken ct = default
         )
@@ -979,7 +1019,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             var bundledSpeciesResult = await _content.DiscoverBundledSpeciesAsync();
             if (!bundledSpeciesResult.IsSuccess)
             {
-                return UpdateTransformationsResult.FromError(bundledSpeciesResult);
+                return Result<UpdateTransformationsResult>.FromError(bundledSpeciesResult);
             }
 
             foreach (var species in bundledSpeciesResult.Entity.OrderBy(s => s.GetSpeciesDepth()))
@@ -992,8 +1032,14 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                 }
                 else
                 {
+                    var getExistingSpecies = await GetSpeciesByNameAsync(species.Name, ct);
+                    if (!getExistingSpecies.IsSuccess)
+                    {
+                        return Result<UpdateTransformationsResult>.FromError(getExistingSpecies);
+                    }
+
                     // There's an existing species with this name
-                    var existingSpecies = (await GetSpeciesByNameAsync(species.Name, ct)).Entity;
+                    var existingSpecies = getExistingSpecies.Entity;
 
                     species.ID = existingSpecies.ID;
 
@@ -1018,7 +1064,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                 var bundledTransformationsResult = await _content.DiscoverBundledTransformationsAsync(this, species);
                 if (!bundledTransformationsResult.IsSuccess)
                 {
-                    return UpdateTransformationsResult.FromError(bundledTransformationsResult);
+                    return Result<UpdateTransformationsResult>.FromError(bundledTransformationsResult);
                 }
 
                 foreach (var transformation in bundledTransformationsResult.Entity)
@@ -1031,16 +1077,20 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                     }
                     else
                     {
-                        // We just take the first one, since species can't define composite parts individually
-                        var existingTransformation =
+                        var getExistingTransformation = await GetTransformationsByPartAndSpeciesAsync
                         (
-                            await GetTransformationsByPartAndSpeciesAsync
-                            (
-                                transformation.Part,
-                                transformation.Species,
-                                ct
-                            )
-                        ).Entity.First();
+                            transformation.Part,
+                            transformation.Species,
+                            ct
+                        );
+
+                        if (!getExistingTransformation.IsSuccess)
+                        {
+                            return Result<UpdateTransformationsResult>.FromError(getExistingTransformation);
+                        }
+
+                        // We just take the first one, since species can't define composite parts individually
+                        var existingTransformation = getExistingTransformation.Entity[0];
 
                         // Override the new data's ID to match the existing one
                         transformation.ID = existingTransformation.ID;
@@ -1089,7 +1139,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             }
 
             await _database.SaveChangesAsync(ct);
-            return UpdateTransformationsResult.FromSuccess
+            return new UpdateTransformationsResult
             (
                 addedSpecies,
                 addedTransformations,
@@ -1106,7 +1156,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="species">The species.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<IReadOnlyList<Transformation>>> GetTransformationsByPartAndSpeciesAsync
+        public async Task<Result<IReadOnlyList<Transformation>>> GetTransformationsByPartAndSpeciesAsync
         (
             Bodypart bodypart,
             Species species,
@@ -1133,13 +1183,13 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
             if (!transformations.Any())
             {
-                return RetrieveEntityResult<IReadOnlyList<Transformation>>.FromError
+                return new UserError
                 (
-                    "No transformation found for that combination."
+                    $"{species.Name} doesn't have that bodypart."
                 );
             }
 
-            return RetrieveEntityResult<IReadOnlyList<Transformation>>.FromSuccess(transformations);
+            return Result<IReadOnlyList<Transformation>>.FromSuccess(transformations);
         }
 
         /// <summary>
@@ -1171,7 +1221,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// </summary>
         /// <param name="speciesName">The name of the species.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public RetrieveEntityResult<Species> GetSpeciesByName
+        public Result<Species> GetSpeciesByName
         (
             string speciesName
         )
@@ -1186,7 +1236,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                 return species;
             }
 
-            return RetrieveEntityResult<Species>.FromError("There is no species with that name in the database.");
+            return new UserError("There is no species with that name in the database.");
         }
 
         /// <summary>
@@ -1195,7 +1245,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="speciesName">The name of the species.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<Species>> GetSpeciesByNameAsync
+        public async Task<Result<Species>> GetSpeciesByNameAsync
         (
             string speciesName,
             CancellationToken ct = default
@@ -1216,7 +1266,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                 return species;
             }
 
-            return RetrieveEntityResult<Species>.FromError("There is no species with that name in the database.");
+            return new UserError("There is no species with that name in the database.");
         }
 
         /// <summary>
@@ -1247,30 +1297,30 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="guild">The guild.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> OptInUserAsync
+        public async Task<Result> OptInUserAsync
         (
-            IUser user,
-            IGuild guild,
+            Snowflake user,
+            Snowflake guild,
             CancellationToken ct = default
         )
         {
             var getProtectionResult = await GetOrCreateServerUserProtectionAsync(user, guild, ct);
             if (!getProtectionResult.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getProtectionResult);
+                return Result.FromError(getProtectionResult);
             }
 
             var protection = getProtectionResult.Entity;
 
             if (protection.HasOptedIn)
             {
-                return ModifyEntityResult.FromError("You're already opted into transformations.");
+                return new UserError("You're already opted into transformations.");
             }
 
             protection.HasOptedIn = true;
 
             await _database.SaveChangesAsync(ct);
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -1280,30 +1330,30 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="guild">The guild.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> OptOutUserAsync
+        public async Task<Result> OptOutUserAsync
         (
-            IUser user,
-            IGuild guild,
+            Snowflake user,
+            Snowflake guild,
             CancellationToken ct = default
         )
         {
             var getProtectionResult = await GetOrCreateServerUserProtectionAsync(user, guild, ct);
             if (!getProtectionResult.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getProtectionResult);
+                return Result.FromError(getProtectionResult);
             }
 
             var protection = getProtectionResult.Entity;
 
             if (!protection.HasOptedIn)
             {
-                return ModifyEntityResult.FromError("You're already opted out of transformations.");
+                return new UserError("You're already opted out of transformations.");
             }
 
             protection.HasOptedIn = false;
 
             await _database.SaveChangesAsync(ct);
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -1313,9 +1363,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="shouldOptIn">Whether the user should be opted by default on new servers.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetDefaultOptInAsync
+        public async Task<Result> SetDefaultOptInAsync
         (
-            IUser user,
+            Snowflake user,
             bool shouldOptIn,
             CancellationToken ct = default
         )
@@ -1323,19 +1373,19 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             var getProtectionResult = await GetOrCreateGlobalUserProtectionAsync(user, ct);
             if (!getProtectionResult.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getProtectionResult);
+                return Result.FromError(getProtectionResult);
             }
 
             var protection = getProtectionResult.Entity;
             if (protection.DefaultOptIn == shouldOptIn)
             {
-                return ModifyEntityResult.FromError($"You're already opted {(shouldOptIn ? "in" : "out")} by default.");
+                return new UserError($"You're already opted {(shouldOptIn ? "in" : "out")} by default.");
             }
 
             protection.DefaultOptIn = shouldOptIn;
 
             await _database.SaveChangesAsync(ct);
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
     }
 }

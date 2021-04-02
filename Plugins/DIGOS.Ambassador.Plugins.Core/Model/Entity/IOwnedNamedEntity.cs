@@ -21,8 +21,8 @@
 //
 
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
-using Discord;
 using JetBrains.Annotations;
+using Remora.Discord.Core;
 
 namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
 {
@@ -30,7 +30,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
     /// Represents an entity that is owned by a user, and has a unique name within the context of that user. The name
     /// is case-insensitive.
     /// </summary>
-    [PublicAPI]
     public interface IOwnedNamedEntity : IOwnedEntity
     {
         /// <summary>
@@ -52,19 +51,11 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
         bool IsOwner(User user);
 
         /// <summary>
-        /// Determines whether or not the given user is the owner of the entity.
-        /// </summary>
-        /// <param name="user">The user.</param>
-        /// <returns>true if the user is the owner; otherwise, false.</returns>
-        [Pure]
-        bool IsOwner(IUser user);
-
-        /// <summary>
         /// Determines whether or not the given user ID is the owner of the entity.
         /// </summary>
         /// <param name="userID">The ID of the user.</param>
         /// <returns>true if the user is the owner; otherwise, false.</returns>
         [Pure]
-        bool IsOwner(long userID);
+        bool IsOwner(Snowflake userID);
     }
 }

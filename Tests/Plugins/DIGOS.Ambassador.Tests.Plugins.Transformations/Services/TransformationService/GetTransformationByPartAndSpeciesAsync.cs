@@ -55,9 +55,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 );
 
                 Assert.True(result.IsSuccess);
-                Assert.Single(result.Entity);
+                Assert.Single(result.Entity!);
 
-                var transformation = result.Entity.First();
+                var transformation = result.Entity![0];
 
                 Assert.Equal(Bodypart.Face, transformation.Part);
                 Assert.Same(_templateSpecies, transformation.Species);
@@ -66,11 +66,11 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfSpeciesDoesNotExist()
             {
-                var nonexistantSpecies = new Species("ooga", "Dummy", "booga");
+                var nonexistentSpecies = new Species("ooga", "Dummy", "booga");
                 var result = await this.Transformations.GetTransformationsByPartAndSpeciesAsync
                 (
                     Bodypart.Face,
-                    nonexistantSpecies
+                    nonexistentSpecies
                 );
 
                 Assert.False(result.IsSuccess);

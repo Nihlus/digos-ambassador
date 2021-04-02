@@ -20,29 +20,34 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Discord.Extensions;
-using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Drone.Extensions;
 using DIGOS.Ambassador.Plugins.Drone.Services;
-using Discord;
-using Discord.Commands;
 using JetBrains.Annotations;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Contexts;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Drone.CommandModules
 {
     /// <summary>
     /// Contains droning commands.
     /// </summary>
-    [Name("drone")]
-    [Summary("Contains some commands to perform actions with drones.")]
-    public class DroneCommands : ModuleBase
+    [Description("Contains some commands to perform actions with drones.")]
+    public class DroneCommands : CommandGroup
     {
         private readonly ContentService _content;
         private readonly DroneService _drone;
         private readonly UserFeedbackService _feedback;
+        private readonly ICommandContext _context;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DroneCommands"/> class.
@@ -50,44 +55,65 @@ namespace DIGOS.Ambassador.Plugins.Drone.CommandModules
         /// <param name="drone">The drone service.</param>
         /// <param name="feedback">The feedback service.</param>
         /// <param name="content">The content service.</param>
-        public DroneCommands(DroneService drone, UserFeedbackService feedback, ContentService content)
+        /// <param name="context">The command context.</param>
+        public DroneCommands
+        (
+            DroneService drone,
+            UserFeedbackService feedback,
+            ContentService content,
+            ICommandContext context
+        )
         {
             _drone = drone;
             _feedback = feedback;
             _content = content;
+            _context = context;
         }
 
         /// <summary>
         /// Drones the target user... or does it? In reality, this is a turn-the-tables command that drones the invoker
         /// instead.
         /// </summary>
-        /// <param name="user">The user to drone.</param>
+        /// <param name="member">The user to drone.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [UsedImplicitly]
         [Command("drone")]
-        [RequireContext(ContextType.Guild)]
-        [RequireNsfw]
-        [Summary("Drones the target user.")]
-        public async Task<RuntimeResult> DroneAsync(IGuildUser user)
+        [RequireContext(ChannelContext.Guild)]
+        [Description("Drones the target user.")]
+        public async Task<Result<UserMessage>> DroneAsync(IGuildMember member)
         {
-            if (!(this.Context.User is IGuildUser target))
+            if (!member.User.HasValue)
             {
-                return RuntimeCommandResult.FromError("The target user wasn't a guild user.");
+                throw new InvalidOperationException();
             }
 
-            var droneMessage = user == target
+            var droneMessage = member.User.Value.ID == _context.User.ID
                 ? _content.GetRandomSelfDroneMessage()
                 : _content.GetRandomTurnTheTablesMessage();
 
-            await _feedback.SendConfirmationAsync(this.Context, droneMessage);
+            var sendMessage = await _feedback.SendConfirmationAsync
+            (
+                _context.ChannelID,
+                _context.User.ID,
+                droneMessage,
+                this.CancellationToken
+            );
 
-            var droneResult = await _drone.DroneUserAsync(target);
-            if (!droneResult.IsSuccess)
+            if (!sendMessage.IsSuccess)
             {
-                return droneResult.ToRuntimeResult();
+                return Result<UserMessage>.FromError(sendMessage);
             }
 
-            return RuntimeCommandResult.FromSuccess(_content.GetRandomConfirmationMessage());
+            var droneResult = await _drone.DroneUserAsync
+            (
+                _context.GuildID.Value,
+                member.User.Value.ID,
+                this.CancellationToken
+            );
+
+            return !droneResult.IsSuccess
+                ? Result<UserMessage>.FromError(droneResult)
+                : new ConfirmationMessage(_content.GetRandomConfirmationMessage());
         }
     }
 }

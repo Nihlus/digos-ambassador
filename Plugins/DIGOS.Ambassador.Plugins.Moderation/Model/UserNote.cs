@@ -27,7 +27,6 @@ using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Moderation.Model.Bases;
-using JetBrains.Annotations;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Moderation.Model
@@ -35,7 +34,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
     /// <summary>
     /// Represents a short note about a user.
     /// </summary>
-    [PublicAPI]
     [Table("UserNotes", Schema = "ModerationModule")]
     public class UserNote : AuthoredUserEntity
     {

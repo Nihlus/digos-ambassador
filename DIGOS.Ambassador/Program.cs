@@ -21,27 +21,36 @@
 //
 
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Transactions;
 using System.Xml;
-using DIGOS.Ambassador.Core.Database.Services;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Discord;
-using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Discord.Interactivity;
-using Discord;
-using Discord.Commands;
-using Discord.WebSocket;
+using DIGOS.Ambassador.Responders;
 using log4net;
 using log4net.Config;
 using log4net.Repository.Hierarchy;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Remora.Behaviours.Services;
-using Remora.EntityFrameworkCore.Modular.Services;
+using Remora.Commands.Extensions;
+using Remora.Commands.Trees.Nodes;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.Caching.Extensions;
+using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Parsers;
+using Remora.Discord.Commands.Results;
+using Remora.Discord.Commands.Services;
+using Remora.Discord.Core;
+using Remora.Discord.Gateway.Extensions;
+using Remora.Discord.Hosting.Extensions;
+using Remora.Plugins.Abstractions;
 using Remora.Plugins.Services;
 
 namespace DIGOS.Ambassador
@@ -57,6 +66,14 @@ namespace DIGOS.Ambassador
         /// <returns>A task.</returns>
         public static async Task Main()
         {
+            var cancellationSource = new CancellationTokenSource();
+
+            Console.CancelKeyPress += (_, eventArgs) =>
+            {
+                eventArgs.Cancel = true;
+                cancellationSource.Cancel();
+            };
+
             // Configure logging
             const string configurationName = "DIGOS.Ambassador.log4net.config";
             var logConfig = new XmlDocument();
@@ -73,42 +90,100 @@ namespace DIGOS.Ambassador
             var repo = LogManager.CreateRepository(Assembly.GetEntryAssembly(), typeof(Hierarchy));
             XmlConfigurator.Configure(repo, logConfig["log4net"]);
 
+            var contentFileSystem = FileSystemFactory.CreateContentFileSystem();
+            var contentService = new ContentService(contentFileSystem);
+
+            var getBotToken = await contentService.GetBotTokenAsync();
+            if (!getBotToken.IsSuccess)
+            {
+                throw new InvalidOperationException("No bot token available.");
+            }
+
+            var token = getBotToken.Entity.Trim();
+
+            var pluginService = new PluginService();
+            var plugins = pluginService.LoadAvailablePlugins().ToList();
+
             var hostBuilder = Host.CreateDefaultBuilder()
+                .AddDiscordService(_ => token)
                 .UseSystemd()
                 .ConfigureServices(services =>
                 {
-                    var pluginService = new PluginService();
+                    services.AddSingleton<BehaviourService>();
 
                     services
-                        .AddHostedService<AmbassadorBotService>()
                         .AddSingleton(pluginService)
-                        .AddSingleton
-                        (
-                            provider => new DiscordSocketClient
-                            (
-                                new DiscordSocketConfig
-                                {
-                                    MessageCacheSize = 100,
-                                    ShardId = 0,
-                                    TotalShards = 1
-                                }
-                            )
-                        )
-                        .AddSingleton<IDiscordClient>(s => s.GetRequiredService<DiscordSocketClient>())
-                        .AddSingleton<BaseSocketClient>(s => s.GetRequiredService<DiscordSocketClient>())
-                        .AddSingleton<CommandService>()
-                        .AddSingleton<BehaviourService>()
-                        .AddSingleton<ContentService>()
-                        .AddSingleton<DiscordService>()
-                        .AddSingleton<UserFeedbackService>()
-                        .AddSingleton<InteractivityService>()
-                        .AddSingleton<DelayedActionService>()
-                        .AddSingleton<SchemaAwareDbContextService>()
-                        .AddSingleton<ContextConfigurationService>()
-                        .AddSingleton(FileSystemFactory.CreateContentFileSystem())
+                        .AddSingleton(contentService)
+                        .AddSingleton(contentFileSystem)
                         .AddSingleton<Random>();
 
-                    var plugins = pluginService.LoadAvailablePlugins();
+                    services
+                        .AddCommands()
+                        .AddDiscordCaching();
+
+                    services.Configure<AmbassadorCommandResponderOptions>(o => o.Prefix = "!");
+
+                    // Custom responders & command services
+                    // Add the helpers used for context injection.
+                    services
+                        .TryAddScoped<ContextInjectionService>();
+
+                    services
+                        .TryAddTransient<ICommandContext>
+                        (
+                            s =>
+                            {
+                                var injectionService = s.GetRequiredService<ContextInjectionService>();
+                                return injectionService.Context ?? throw new InvalidOperationException
+                                (
+                                    "No context has been set for this scope."
+                                );
+                            }
+                        );
+
+                    services
+                        .TryAddTransient
+                        (
+                            s =>
+                            {
+                                var injectionService = s.GetRequiredService<ContextInjectionService>();
+                                return injectionService.Context as MessageContext ?? throw new InvalidOperationException
+                                (
+                                    "No message context has been set for this scope."
+                                );
+                            }
+                        );
+
+                    services
+                        .TryAddTransient
+                        (
+                            s =>
+                            {
+                                var injectionService = s.GetRequiredService<ContextInjectionService>();
+                                return injectionService.Context as InteractionContext ?? throw new InvalidOperationException
+                                (
+                                    "No interaction context has been set for this scope."
+                                );
+                            }
+                        );
+
+                    services.AddCondition<RequireContextCondition>();
+                    services.AddCondition<RequireOwnerCondition>();
+                    services.AddCondition<RequireUserGuildPermissionCondition>();
+
+                    services
+                        .AddParser<IChannel, ChannelParser>()
+                        .AddParser<IGuildMember, GuildMemberParser>()
+                        .AddParser<IRole, RoleParser>()
+                        .AddParser<IUser, UserParser>()
+                        .AddParser<Snowflake, SnowflakeParser>();
+
+                    services.TryAddScoped<ExecutionEventCollectorService>();
+                    services.TryAddSingleton<SlashService>();
+
+                    services.AddResponder<AmbassadorCommandResponder>();
+                    services.AddResponder<AmbassadorInteractionResponder>();
+
                     foreach (var plugin in plugins)
                     {
                         plugin.ConfigureServices(services);
@@ -125,11 +200,128 @@ namespace DIGOS.Ambassador
                 });
 
             var host = hostBuilder.Build();
+            var hostServices = host.Services;
 
-            var logger = host.Services.GetRequiredService<ILogger<Program>>();
-            logger.LogInformation($"Running on {RuntimeInformation.FrameworkDescription}");
+            var log = hostServices.GetRequiredService<ILogger<Program>>();
+            log.LogInformation("Running on {Framework}", RuntimeInformation.FrameworkDescription);
 
-            await host.RunAsync();
+            Snowflake? debugServer = null;
+            var debugServerString = Environment.GetEnvironmentVariable("REMORA_DEBUG_SERVER");
+            if (debugServerString is not null)
+            {
+                if (!Snowflake.TryParse(debugServerString, out debugServer))
+                {
+                    log.LogWarning("Failed to parse debug server from environment");
+                }
+            }
+
+            var slashService = hostServices.GetRequiredService<SlashService>();
+
+            var checkSlashSupport = slashService.SupportsSlashCommands();
+            if (!checkSlashSupport.IsSuccess)
+            {
+                var error = checkSlashSupport.Unwrap();
+                if (error is UnsupportedFeatureError ufe)
+                {
+                    var location = ufe.Node is not null
+                        ? GetCommandLocation(ufe.Node)
+                        : "unknown";
+
+                    log.LogWarning
+                    (
+                        "The registered commands of the bot don't support slash commands: {Reason} ({Location})",
+                        error.Message,
+                        location
+                    );
+                }
+                else
+                {
+                    log.LogError("Failed to check slash command compatibility: {Reason}", error.Message);
+                    return;
+                }
+            }
+            else
+            {
+                var updateSlash = await slashService.UpdateSlashCommandsAsync(debugServer, cancellationSource.Token);
+                if (!updateSlash.IsSuccess)
+                {
+                    log.LogWarning("Failed to update slash commands: {Reason}", updateSlash.Unwrap().Message);
+                }
+            }
+
+            foreach (var plugin in plugins)
+            {
+                log.LogInformation("Initializing plugin {Name}, version {Version}...", plugin.Name, plugin.Version);
+                var initializePlugin = await plugin.InitializeAsync(hostServices);
+                if (!initializePlugin.IsSuccess)
+                {
+                    log.LogError
+                    (
+                        "Failed to initialize plugin {Name}: {Error}",
+                        plugin.Name,
+                        initializePlugin.Unwrap().Message
+                    );
+
+                    return;
+                }
+
+                if (plugin is not IMigratablePlugin migratablePlugin)
+                {
+                    continue;
+                }
+
+                log.LogInformation("Applying plugin migrations...");
+
+                var migratePlugin = await migratablePlugin.MigratePluginAsync(hostServices);
+                if (migratePlugin.IsSuccess)
+                {
+                    continue;
+                }
+
+                log.LogError
+                (
+                    "Failed to migrate plugin {Name}: {Error}",
+                    plugin.Name,
+                    migratePlugin.Unwrap().Message
+                );
+
+                return;
+            }
+
+            var behaviourService = hostServices.GetRequiredService<BehaviourService>();
+            await behaviourService.StartBehavioursAsync();
+
+            await host.RunAsync(cancellationSource.Token);
+            await behaviourService.StopBehavioursAsync();
+        }
+
+        private static string GetCommandLocation(IChildNode node)
+        {
+            var sb = new StringBuilder();
+
+            switch (node)
+            {
+                case GroupNode group:
+                {
+                    IParentNode current = group;
+                    while (current is IChildNode child)
+                    {
+                        sb.Insert(0, "::");
+                        sb.Insert(0, child.Key);
+                        current = child.Parent;
+                    }
+                    break;
+                }
+                case CommandNode command:
+                {
+                    sb.Append(command.GroupType.FullName);
+                    sb.Append("::");
+                    sb.Append(command.CommandMethod.Name);
+                    break;
+                }
+            }
+
+            return sb.ToString();
         }
     }
 }

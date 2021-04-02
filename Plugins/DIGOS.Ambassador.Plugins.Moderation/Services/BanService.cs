@@ -27,11 +27,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Extensions;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
-using Discord;
 using Microsoft.EntityFrameworkCore;
+using Remora.Discord.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Moderation.Services
@@ -66,14 +67,32 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <summary>
         /// Gets the bans issued on the given guild.
         /// </summary>
-        /// <param name="guild">The guild.</param>
+        /// <param name="guildID">The ID of the guild the ban is on.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>The warnings.</returns>
-        public Task<IReadOnlyList<UserBan>> GetBansAsync(IGuild guild, CancellationToken ct = default)
+        public Task<IReadOnlyList<UserBan>> GetBansAsync(Snowflake guildID, CancellationToken ct = default)
         {
             return _database.UserBans.ServersideQueryAsync
             (
-                q => q.Where(b => b.Server.DiscordID == (long)guild.Id),
+                q => q.Where(b => b.Server.DiscordID == guildID),
+                ct
+            );
+        }
+
+        /// <summary>
+        /// Gets all expired bans.
+        /// </summary>
+        /// <param name="ct">The cancellation token in use.</param>
+        /// <returns>The warnings.</returns>
+        public Task<IReadOnlyList<UserBan>> GetExpiredBansAsync(CancellationToken ct = default)
+        {
+            var now = DateTimeOffset.UtcNow;
+            return _database.UserBans.ServersideQueryAsync
+            (
+                q => q.Where
+                (
+                    b => b.ExpiresOn.HasValue && now >= b.ExpiresOn.Value
+                ),
                 ct
             );
         }
@@ -81,13 +100,13 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <summary>
         /// Retrieves a ban with the given ID from the database.
         /// </summary>
-        /// <param name="server">The server the ban is on.</param>
+        /// <param name="guildID">The ID of the guild the ban is on.</param>
         /// <param name="banID">The ban ID.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<UserBan>> GetBanAsync
+        public async Task<Result<UserBan>> GetBanAsync
         (
-            IGuild server,
+            Snowflake guildID,
             long banID,
             CancellationToken ct = default
         )
@@ -97,14 +116,14 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             (
                 q => q.SingleOrDefaultAsync
                 (
-                    n => n.ID == banID && n.Server.DiscordID == (long)server.Id,
+                    n => n.ID == banID && n.Server.DiscordID == guildID,
                     ct
                 )
             );
 
             if (ban is null)
             {
-                return RetrieveEntityResult<UserBan>.FromError("There's no ban with that ID in the database.");
+                return new UserError("There's no ban with that ID in the database.");
             }
 
             return ban;
@@ -113,43 +132,45 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <summary>
         /// Creates a ban for the given user.
         /// </summary>
-        /// <param name="authorUser">The author of the ban.</param>
-        /// <param name="guildUser">The user.</param>
+        /// <param name="authorID">The ID of the author of the warning.</param>
+        /// <param name="userID">The ID of the warned user.</param>
+        /// <param name="guildID">The ID of the guild the user is on.</param>
         /// <param name="reason">The reason of the ban.</param>
         /// <param name="messageID">The message that caused the ban, if any.</param>
         /// <param name="expiresOn">The expiry date for the ban, if any.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A creation result which may or may not have succeeded.</returns>
-        public async Task<CreateEntityResult<UserBan>> CreateBanAsync
+        public async Task<Result<UserBan>> CreateBanAsync
         (
-            IUser authorUser,
-            IGuildUser guildUser,
+            Snowflake authorID,
+            Snowflake userID,
+            Snowflake guildID,
             string reason,
-            long? messageID = null,
+            Snowflake? messageID = null,
             DateTime? expiresOn = null,
             CancellationToken ct = default
         )
         {
-            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild, ct);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildID, ct);
             if (!getServer.IsSuccess)
             {
-                return CreateEntityResult<UserBan>.FromError(getServer);
+                return Result<UserBan>.FromError(getServer);
             }
 
             var server = getServer.Entity;
 
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
+            var getUser = await _users.GetOrRegisterUserAsync(userID, ct);
             if (!getUser.IsSuccess)
             {
-                return CreateEntityResult<UserBan>.FromError(getUser);
+                return Result<UserBan>.FromError(getUser);
             }
 
             var user = getUser.Entity;
 
-            var getAuthor = await _users.GetOrRegisterUserAsync(authorUser, ct);
+            var getAuthor = await _users.GetOrRegisterUserAsync(authorID, ct);
             if (!getAuthor.IsSuccess)
             {
-                return CreateEntityResult<UserBan>.FromError(getAuthor);
+                return Result<UserBan>.FromError(getAuthor);
             }
 
             var author = getAuthor.Entity;
@@ -160,7 +181,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             var setReason = await SetBanReasonAsync(ban, reason, ct);
             if (!setReason.IsSuccess)
             {
-                return CreateEntityResult<UserBan>.FromError(setReason);
+                return Result<UserBan>.FromError(setReason);
             }
 
             if (!(messageID is null))
@@ -168,7 +189,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                 var setMessage = await SetBanContextMessageAsync(ban, messageID.Value, ct);
                 if (!setMessage.IsSuccess)
                 {
-                    return CreateEntityResult<UserBan>.FromError(setMessage);
+                    return Result<UserBan>.FromError(setMessage);
                 }
             }
 
@@ -177,7 +198,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                 var setExpiry = await SetBanExpiryDateAsync(ban, expiresOn.Value, ct);
                 if (!setExpiry.IsSuccess)
                 {
-                    return CreateEntityResult<UserBan>.FromError(setExpiry);
+                    return Result<UserBan>.FromError(setExpiry);
                 }
             }
 
@@ -193,7 +214,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="reason">The reason.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetBanReasonAsync
+        public async Task<Result> SetBanReasonAsync
         (
             UserBan ban,
             string reason,
@@ -202,12 +223,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         {
             if (reason.IsNullOrWhitespace())
             {
-                return ModifyEntityResult.FromError("You must provide some reason for the ban.");
+                return new UserError("You must provide some reason for the ban.");
             }
 
             if (reason.Length > 1024)
             {
-                return ModifyEntityResult.FromError
+                return new UserError
                 (
                     "The ban is too long. It can be at most 1024 characters."
                 );
@@ -215,7 +236,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             if (ban.Reason == reason)
             {
-                return ModifyEntityResult.FromError("That's already the ban's reason.");
+                return new UserError("That's already the ban's reason.");
             }
 
             ban.Reason = reason;
@@ -223,7 +244,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -233,16 +254,16 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="messageID">The message.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetBanContextMessageAsync
+        public async Task<Result> SetBanContextMessageAsync
         (
             UserBan ban,
-            long messageID,
+            Snowflake messageID,
             CancellationToken ct = default
         )
         {
             if (ban.MessageID == messageID)
             {
-                return ModifyEntityResult.FromError("That's already the ban's context message.");
+                return new UserError("That's already the ban's context message.");
             }
 
             ban.MessageID = messageID;
@@ -250,7 +271,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -260,7 +281,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="expiresOn">The date and time at which the ban expires.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetBanExpiryDateAsync
+        public async Task<Result> SetBanExpiryDateAsync
         (
             UserBan ban,
             DateTime expiresOn,
@@ -269,12 +290,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         {
             if (ban.ExpiresOn == expiresOn)
             {
-                return ModifyEntityResult.FromError("That's already the ban's expiry date.");
+                return new UserError("That's already the ban's expiry date.");
             }
 
             if (expiresOn < DateTime.UtcNow)
             {
-                return ModifyEntityResult.FromError("Bans can't expire in the past.");
+                return new UserError("Bans can't expire in the past.");
             }
 
             ban.ExpiresOn = expiresOn;
@@ -282,7 +303,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -291,7 +312,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="ban">The ban to delete.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A deletion result which may or may ban have succeeded.</returns>
-        public async Task<DeleteEntityResult> DeleteBanAsync
+        public async Task<Result> DeleteBanAsync
         (
             UserBan ban,
             CancellationToken ct = default
@@ -299,7 +320,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         {
             if (!_database.UserBans.Any(n => n.ID == ban.ID))
             {
-                return DeleteEntityResult.FromError
+                return new UserError
                 (
                     "That ban isn't in the database. This is probably an error in the bot."
                 );
@@ -308,7 +329,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             _database.UserBans.Remove(ban);
             await _database.SaveChangesAsync(ct);
 
-            return DeleteEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
     }
 }

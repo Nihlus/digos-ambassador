@@ -39,11 +39,11 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 var result = await this.Transformations.GetSpeciesByNameAsync("template");
 
                 Assert.True(result.IsSuccess);
-                Assert.Equal("template", result.Entity.Name);
+                Assert.Equal("template", result.Entity!.Name);
             }
 
             [Fact]
-            public async Task ReturnsUnsuccesfulResultForNonexistantName()
+            public async Task ReturnsUnsuccessfulResultForNonexistentName()
             {
                 var result = await this.Transformations.GetSpeciesByNameAsync("aasddduaiii");
 
@@ -56,7 +56,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 var result = await this.Transformations.GetSpeciesByNameAsync("TEMPLATE");
 
                 Assert.True(result.IsSuccess);
-                Assert.Equal("template", result.Entity.Name);
+                Assert.Equal("template", result.Entity!.Name);
             }
         }
     }

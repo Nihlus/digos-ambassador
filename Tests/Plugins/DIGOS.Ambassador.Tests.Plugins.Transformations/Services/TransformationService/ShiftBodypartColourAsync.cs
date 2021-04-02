@@ -32,12 +32,11 @@ using DIGOS.Ambassador.Plugins.Characters.Services;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
+using DIGOS.Ambassador.Plugins.Transformations.Results;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
-using DIGOS.Ambassador.Tests.Utility;
-using Discord;
-using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
-using Moq;
+using Remora.Commands.Services;
+using Remora.Discord.Core;
 using Xunit;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
@@ -47,42 +46,17 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
     {
         public class ShiftBodypartColourAsync : TransformationServiceTestBase
         {
-            private readonly IGuild _guild;
-
-            private readonly IUser _owner = MockHelper.CreateDiscordGuildUser(0);
-            private readonly IUser _invoker = MockHelper.CreateDiscordGuildUser(1);
+            private readonly Snowflake _guild = new Snowflake(1);
+            private readonly Snowflake _owner = new Snowflake(2);
+            private readonly Snowflake _invoker = new Snowflake(3);
 
             private readonly Colour _newColour;
-
-            private readonly ICommandContext _context;
             private Character _character = null!;
 
             private Colour _originalColour = null!;
 
             public ShiftBodypartColourAsync()
             {
-                var mockedGuild = new Mock<IGuild>();
-                mockedGuild.Setup(g => g.Id).Returns(1);
-                mockedGuild.Setup
-                    (
-                        c =>
-                            c.GetUserAsync
-                            (
-                                It.Is<ulong>(id => id == _owner.Id),
-                                CacheMode.AllowDownload,
-                                null
-                            )
-                    )
-                    .Returns(Task.FromResult((IGuildUser)_owner));
-
-                _guild = mockedGuild.Object;
-
-                var mockedContext = new Mock<ICommandContext>();
-                mockedContext.Setup(c => c.Guild).Returns(_guild);
-                mockedContext.Setup(c => c.User).Returns(_invoker);
-
-                _context = mockedContext.Object;
-
                 if (!Colour.TryParse("bright purple", out var colour))
                 {
                     throw new InvalidOperationException("Bad colour.");
@@ -105,20 +79,18 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             protected override async Task InitializeTestAsync()
             {
                 // Ensure owner is opted into transformations
-                var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
+                await this.Transformations.OptInUserAsync
                 (
                     _owner,
                     _guild
                 );
 
-                protection.Entity.HasOptedIn = true;
-
                 // Create a test character
-                var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
+                var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity!;
                 var character = new Character
                 (
                     owner,
-                    new Server(0),
+                    new Server(_guild),
                     string.Empty,
                     string.Empty,
                     string.Empty,
@@ -138,7 +110,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _character
                 );
 
-                var appearance = getAppearanceConfigurationResult.Entity;
+                var appearance = getAppearanceConfigurationResult.Entity!;
                 _originalColour = appearance.GetAppearanceComponent(Bodypart.Face, Chirality.Center).BaseColour;
             }
 
@@ -149,7 +121,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
                 var result = await this.Transformations.ShiftBodypartColourAsync
                 (
-                    _context,
+                    _invoker,
                     _character,
                     Bodypart.Face,
                     _newColour
@@ -163,7 +135,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             {
                 var result = await this.Transformations.ShiftBodypartColourAsync
                 (
-                    _context,
+                    _invoker,
                     _character,
                     Bodypart.Wing,
                     _newColour,
@@ -174,17 +146,31 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             }
 
             [Fact]
-            public async Task ReturnsUnsuccessfulResultIfBodypartIsAlreadyThatColour()
+            public async Task ReturnsSuccessfulResultIfBodypartIsAlreadyThatColour()
             {
                 var result = await this.Transformations.ShiftBodypartColourAsync
                 (
-                    _context,
+                    _invoker,
                     _character,
                     Bodypart.Face,
                     _originalColour
                 );
 
-                Assert.False(result.IsSuccess);
+                Assert.True(result.IsSuccess);
+            }
+
+            [Fact]
+            public async Task ReturnsNoChangeIfBodypartIsAlreadyThatColour()
+            {
+                var result = await this.Transformations.ShiftBodypartColourAsync
+                (
+                    _invoker,
+                    _character,
+                    Bodypart.Face,
+                    _originalColour
+                );
+
+                Assert.Equal(ShiftBodypartAction.Nothing, result.Entity!.Action);
             }
 
             [Fact]
@@ -192,7 +178,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             {
                 var result = await this.Transformations.ShiftBodypartColourAsync
                 (
-                    _context,
+                    _invoker,
                     _character,
                     Bodypart.Face,
                     _newColour
@@ -206,13 +192,13 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             {
                 await this.Transformations.ShiftBodypartColourAsync
                 (
-                    _context,
+                    _invoker,
                     _character,
                     Bodypart.Face,
                     _newColour
                 );
 
-                var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity;
+                var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity!;
 
                 var face = appearance.Components.First(c => c.Bodypart == Bodypart.Face);
                 Assert.True(_newColour.IsSameColourAs(face.BaseColour));
@@ -223,14 +209,14 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             {
                 var result = await this.Transformations.ShiftBodypartColourAsync
                 (
-                    _context,
+                    _invoker,
                     _character,
                     Bodypart.Face,
                     _newColour
                 );
 
-                Assert.NotNull(result.ShiftMessage);
-                Assert.NotEmpty(result.ShiftMessage);
+                Assert.NotNull(result.Entity!.ShiftMessage);
+                Assert.NotEmpty(result.Entity!.ShiftMessage);
             }
         }
     }

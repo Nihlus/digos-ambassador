@@ -23,6 +23,7 @@
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Results;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
 {
@@ -49,17 +50,17 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         }
 
         /// <inheritdoc />
-        protected override Task<ShiftBodypartResult> RemoveBodypartAsync(Bodypart bodypart, Chirality chirality)
+        protected override async Task<Result<ShiftBodypartResult>> RemoveBodypartAsync(Bodypart bodypart, Chirality chirality)
         {
             if (!this.Appearance.TryGetAppearanceComponent(bodypart, chirality, out var component))
             {
-                return Task.FromResult(ShiftBodypartResult.FromError("The character doesn't have that bodypart."));
+                return new ShiftBodypartResult(await GetNoChangeMessageAsync(bodypart), ShiftBodypartAction.Nothing);
             }
 
             this.Appearance.Components.Remove(component);
 
             var removeMessage = _descriptionBuilder.BuildRemoveMessage(this.Appearance, bodypart);
-            return Task.FromResult(ShiftBodypartResult.FromSuccess(removeMessage, ShiftBodypartAction.Remove));
+            return new ShiftBodypartResult(removeMessage, ShiftBodypartAction.Remove);
         }
 
         /// <inheritdoc />

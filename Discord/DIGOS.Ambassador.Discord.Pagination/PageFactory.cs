@@ -21,9 +21,11 @@
 //
 
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
-using DIGOS.Ambassador.Discord.Extensions;
-using Discord;
+using DIGOS.Ambassador.Discord.Pagination.Extensions;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Objects;
 
 namespace DIGOS.Ambassador.Discord.Pagination
 {
@@ -40,45 +42,51 @@ namespace DIGOS.Ambassador.Discord.Pagination
         /// <param name="description">The description to display on each page.</param>
         /// <param name="pageBase">The base layout for the page.</param>
         /// <returns>The paginated embed.</returns>
-        public static IEnumerable<EmbedBuilder> FromFields
+        public static List<Embed> FromFields
         (
-            IEnumerable<EmbedFieldBuilder> fields,
+            IEnumerable<IEmbedField> fields,
             uint maxFieldsPerPage = 5,
             string description = "",
-            EmbedBuilder? pageBase = null
+            Embed? pageBase = null
         )
         {
+            pageBase ??= new Embed
+            {
+                Description = description,
+                Colour = Color.MediumPurple
+            };
+
+            var pageBaseLength = pageBase.CalculateEmbedLength();
             var enumeratedFields = fields.ToList();
 
             // Build the pages
-            var pages = new List<EmbedBuilder>();
-
-            if (pageBase is null)
+            var pages = new List<Embed>();
+            var currentPageFields = new List<IEmbedField>();
+            if (pageBase.Fields.HasValue && pageBase.Fields.Value is not null)
             {
-                pageBase = new EmbedBuilder();
-                pageBase.WithDescription(description);
-                pageBase.WithColor(Color.DarkPurple);
+                currentPageFields.AddRange(pageBase.Fields.Value);
             }
 
-            var currentPage = pageBase.CopyEmbedBuilder();
             foreach (var field in enumeratedFields)
             {
-                var fieldContentLength = field.Name.Length + (field.Value.ToString()?.Length ?? 0);
-
-                if (currentPage.Fields.Count >= maxFieldsPerPage || (currentPage.Length + fieldContentLength >= 1300))
+                var fieldContentLength = field.Name.Length + field.Value.Length;
+                if (currentPageFields.Count >= maxFieldsPerPage || (pageBaseLength + fieldContentLength >= 1300))
                 {
-                    pages.Add(currentPage);
-
-                    currentPage = pageBase.CopyEmbedBuilder();
+                    pages.Add(pageBase with { Fields = new List<IEmbedField>(currentPageFields) });
+                    currentPageFields.Clear();
                 }
 
-                currentPage.AddField(field);
-
-                if (field == enumeratedFields.Last() && !pages.Contains(currentPage))
-                {
-                    pages.Add(currentPage);
-                }
+                currentPageFields.Add(field);
             }
+
+            if (currentPageFields.Count <= 0)
+            {
+                return pages;
+            }
+
+            // Stick the remaining ones on the end
+            pages.Add(pageBase with { Fields = new List<IEmbedField>(currentPageFields) });
+            currentPageFields.Clear();
 
             return pages;
         }

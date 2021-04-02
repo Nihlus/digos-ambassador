@@ -27,7 +27,7 @@ using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Moderation.Model.Bases;
-using JetBrains.Annotations;
+using Remora.Discord.Core;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Moderation.Model
@@ -35,7 +35,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
     /// <summary>
     /// Represents a ban of a user.
     /// </summary>
-    [PublicAPI]
     [Table("UserBans", Schema = "ModerationModule")]
     public class UserBan : AuthoredUserEntity
     {
@@ -48,7 +47,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <summary>
         /// Gets the message that caused the warning, if any.
         /// </summary>
-        public long? MessageID { get; internal set; }
+        public Snowflake? MessageID { get; internal set; }
 
         /// <summary>
         /// Gets the time at which the ban was last updated.
@@ -59,11 +58,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// Gets the time at which the ban expires.
         /// </summary>
         public DateTime? ExpiresOn { get; internal set; }
-
-        /// <summary>
-        /// Gets a value indicating whether the ban is temporary.
-        /// </summary>
-        public bool IsTemporary => this.ExpiresOn.HasValue;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserBan"/> class.
@@ -91,7 +85,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
             User user,
             User author,
             string reason,
-            long? messageID = null,
+            Snowflake? messageID = null,
             DateTime? expiresOn = null
         )
             : base(server, user, author)

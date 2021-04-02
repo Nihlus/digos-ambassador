@@ -21,13 +21,13 @@
 //
 
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Transformations.Model;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Results;
 using DIGOS.Ambassador.Plugins.Transformations.Services;
 using Humanizer;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
 {
@@ -64,7 +64,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         }
 
         /// <inheritdoc />
-        protected override async Task<ShiftBodypartResult> ShiftBodypartAsync(Bodypart bodypart, Chirality chirality)
+        protected override async Task<Result<ShiftBodypartResult>> ShiftBodypartAsync(Bodypart bodypart, Chirality chirality)
         {
             if (_species is null)
             {
@@ -77,20 +77,19 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
             var getTFResult = await _transformations.GetTransformationsByPartAndSpeciesAsync(bodypart, _species);
             if (!getTFResult.IsSuccess)
             {
-                return ShiftBodypartResult.FromError(getTFResult);
+                return Result<ShiftBodypartResult>.FromError(getTFResult);
             }
 
-            var transformation = getTFResult.Entity.First();
+            var transformation = getTFResult.Entity[0];
 
             if (this.Appearance.TryGetAppearanceComponent(bodypart, chirality, out var existingComponent))
             {
                 if (existingComponent.Transformation.Species.Name.Equals(transformation.Species.Name))
                 {
-                    var message = await GetNoChangeMessageAsync(bodypart);
-
-                    return ShiftBodypartResult.FromError
+                    return new ShiftBodypartResult
                     (
-                        message
+                        await GetNoChangeMessageAsync(bodypart),
+                        ShiftBodypartAction.Nothing
                     );
                 }
             }
@@ -104,7 +103,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
                 this.Appearance.Components.Add(currentComponent);
 
                 shiftMessage = await GetAddMessageAsync(bodypart, chirality);
-                return ShiftBodypartResult.FromSuccess(shiftMessage, ShiftBodypartAction.Add);
+                return new ShiftBodypartResult(shiftMessage, ShiftBodypartAction.Add);
             }
 
             if (currentComponent.Transformation.Species.Name == "template")
@@ -120,7 +119,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
 
             shiftMessage = await GetShiftMessageAsync(bodypart, chirality);
 
-            return ShiftBodypartResult.FromSuccess(shiftMessage, ShiftBodypartAction.Shift);
+            return new ShiftBodypartResult(shiftMessage, ShiftBodypartAction.Shift);
         }
 
         /// <inheritdoc />

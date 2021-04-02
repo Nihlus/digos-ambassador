@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations.Design;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
@@ -49,7 +49,7 @@ namespace DIGOS.Ambassador.Core.Database.Design
             $"#pragma warning disable CS1591{Environment.NewLine}" +
             $"// ReSharper disable RedundantArgumentDefaultValue{Environment.NewLine}" +
             $"// ReSharper disable PartialTypeWithSinglePart{Environment.NewLine}" +
-            $"// ReSharper disable RedundantUsingDirective";
+            "// ReSharper disable RedundantUsingDirective";
 
         /// <inheritdoc />
         public override string GenerateMigration

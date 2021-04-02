@@ -20,127 +20,119 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Extensions;
-using DIGOS.Ambassador.Discord.Extensions.Results;
-using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
-using DIGOS.Ambassador.Discord.TypeReaders;
+using DIGOS.Ambassador.Plugins.Permissions.Conditions;
 using DIGOS.Ambassador.Plugins.Permissions.Extensions;
-using DIGOS.Ambassador.Plugins.Permissions.Model;
-using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
-using Discord;
-using Discord.Commands;
 using Humanizer;
-using JetBrains.Annotations;
-using static Discord.Commands.ContextType;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Contexts;
+using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
-
-#pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
 namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
 {
     /// <summary>
     /// Permission-related commands for granting, revoking and checking user permissions.
     /// </summary>
-    [PublicAPI]
     [Group("permission")]
-    [Summary("Permission-related commands for granting, revoking and checking user permissions.")]
-    public class PermissionCommands : ModuleBase
+    [Description("Permission-related commands for granting, revoking and checking user permissions.")]
+    public class PermissionCommands : CommandGroup
     {
-        private readonly UserFeedbackService _feedback;
-
         private readonly InteractivityService _interactivity;
-
         private readonly PermissionService _permissions;
-
         private readonly PermissionRegistryService _permissionRegistry;
+
+        private readonly ICommandContext _context;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PermissionCommands"/> class.
         /// </summary>
-        /// <param name="database">A database context from the context pool.</param>
-        /// <param name="feedback">The user feedback service.</param>
         /// <param name="permissions">The permission service.</param>
         /// <param name="interactivity">The interactivity service.</param>
         /// <param name="permissionRegistry">The permission registry service.</param>
+        /// <param name="context">The command context.</param>
         public PermissionCommands
         (
-            PermissionsDatabaseContext database,
-            UserFeedbackService feedback,
             PermissionService permissions,
             InteractivityService interactivity,
-            PermissionRegistryService permissionRegistry
+            PermissionRegistryService permissionRegistry,
+            ICommandContext context
         )
         {
-            _feedback = feedback;
             _permissions = permissions;
             _interactivity = interactivity;
             _permissionRegistry = permissionRegistry;
+            _context = context;
         }
 
         /// <summary>
         /// Lists all available permissions.
         /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [Command("list")]
-        [Summary("Lists all available permissions.")]
-        public async Task<RuntimeResult> ListPermissionsAsync()
+        [Description("Lists all available permissions.")]
+        public async Task<IResult> ListPermissionsAsync()
         {
             var availablePermissions = _permissionRegistry.RegisteredPermissions
                 .OrderBy(p => p.GetType().Name)
-                .ThenBy(p => p.FriendlyName);
+                .ThenBy(p => p.FriendlyName)
+                .ToList();
 
-            var appearance = PaginatedAppearanceOptions.Default;
-            appearance.HelpText =
-                "These are the available bot-specific permissions. Scroll through the pages by using the reactions.";
+            var appearance = PaginatedAppearanceOptions.Default with
+            {
+                HelpText = "These are the available bot-specific permissions. " +
+                           "Scroll through the pages by using the reactions."
+            };
 
-            var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
-                _feedback,
-                _interactivity,
-                this.Context.User,
                 availablePermissions,
                 p => p.FormatTitle(),
                 p => p.Description,
-                "No permissions available. This is most likely an error.",
-                appearance
+                "No permissions available. This is most likely an error."
             );
 
-            await _interactivity.SendPrivateInteractiveMessageAndDeleteAsync
+            return await _interactivity.SendInteractiveMessageAsync
             (
-                this.Context,
-                _feedback,
-                paginatedEmbed,
-                TimeSpan.FromMinutes(5)
+                _context.ChannelID,
+                (channelID, messageID) => new PaginatedMessage
+                (
+                    channelID,
+                    messageID,
+                    _context.User.ID,
+                    pages,
+                    appearance
+                ),
+                this.CancellationToken
             );
-
-            return RuntimeCommandResult.FromSuccess();
         }
-
-        /// <summary>
-        /// Lists all permissions that have been granted to the invoking user.
-        /// </summary>
-        [Command("list-granted")]
-        [Summary("Lists all permissions that have been granted to the invoking user.")]
-        [RequireContext(Guild)]
-        public Task<RuntimeResult> ListGrantedPermissionsAsync() => ListGrantedPermissionsAsync(this.Context.User);
 
         /// <summary>
         /// Lists all permissions that have been granted to target user.
         /// </summary>
         /// <param name="discordUser">The Discord user.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [Command("list-granted")]
-        [Summary("Lists all permissions that have been granted to target user.")]
-        [RequireContext(Guild)]
-        public async Task<RuntimeResult> ListGrantedPermissionsAsync(IUser discordUser)
+        [Description("Lists all permissions that have been granted to target user.")]
+        [RequireContext(ChannelContext.Guild)]
+        public async Task<IResult> ListGrantedPermissionsAsync(IUser discordUser)
         {
-            var userPermissions = await _permissions.GetApplicableUserPermissionsAsync(this.Context.Guild, discordUser);
+            var userPermissions = await _permissions.GetApplicableUserPermissionsAsync
+            (
+                _context.GuildID.Value,
+                discordUser.ID
+            );
 
             var permissions = _permissionRegistry.RegisteredPermissions
                 .Where(r => userPermissions.Any(u => u.Permission == r.UniqueIdentifier))
@@ -161,303 +153,211 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
                 );
 
                 titleBuilder.Append(grants.Humanize(",").Transform(To.SentenceCase));
-                titleBuilder.Append(")");
+                titleBuilder.Append(')');
 
                 permissionInfos.Add((titleBuilder.ToString(), permission.Description));
             }
 
-            var appearance = PaginatedAppearanceOptions.Default;
-            appearance.Author = discordUser;
-            appearance.HelpText =
-                "These are the permissions granted to the given user. Scroll through the pages by using the reactions.";
+            var appearance = PaginatedAppearanceOptions.Default with
+            {
+                HelpText = "These are the permissions granted to the given user. " +
+                           "Scroll through the pages by using the reactions."
+            };
 
-            var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
-                _feedback,
-                _interactivity,
-                this.Context.User,
                 permissionInfos,
                 p => p.Title,
                 p => p.Description,
-                "No permissions set.",
-                appearance
+                "No permissions set."
             );
 
-            await _interactivity.SendPrivateInteractiveMessageAndDeleteAsync
+            return await _interactivity.SendInteractiveMessageAsync
             (
-                this.Context,
-                _feedback,
-                paginatedEmbed,
-                TimeSpan.FromMinutes(5)
+                _context.ChannelID,
+                (channelID, messageID) => new PaginatedMessage
+                (
+                    channelID,
+                    messageID,
+                    _context.User.ID,
+                    pages,
+                    appearance
+                ),
+                this.CancellationToken
             );
-
-            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
-        /// Commands for granting users permissions.
+        /// Grant the targeted user the given permission.
         /// </summary>
-        [PublicAPI]
-        [Group("grant")]
-        public class GrantCommands : ModuleBase
+        /// <param name="discordUser">The Discord user.</param>
+        /// <param name="permissionName">The permission that is to be granted.</param>
+        /// <param name="grantedTarget">The target that the permission should be valid for.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Command("grant")]
+        [Description("Grant the targeted user the given permission.")]
+        [RequirePermission(typeof(GrantPermission), PermissionTarget.Other)]
+        [RequireContext(ChannelContext.Guild)]
+        public async Task<Result<UserMessage>> GrantAsync
+        (
+            IUser discordUser,
+            string permissionName,
+            PermissionTarget grantedTarget = PermissionTarget.Self
+        )
         {
-            private readonly UserFeedbackService _feedback;
-
-            private readonly PermissionService _permissions;
-
-            private readonly PermissionRegistryService _permissionRegistry;
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="GrantCommands"/> class.
-            /// </summary>
-            /// <param name="feedback">The user feedback service.</param>
-            /// <param name="permissions">The permission service.</param>
-            /// <param name="permissionRegistry">The permission registry service.</param>
-            public GrantCommands
-            (
-                UserFeedbackService feedback,
-                PermissionService permissions,
-                PermissionRegistryService permissionRegistry
-            )
+            var getPermissionResult = _permissionRegistry.GetPermission(permissionName);
+            if (!getPermissionResult.IsSuccess)
             {
-                _feedback = feedback;
-                _permissions = permissions;
-                _permissionRegistry = permissionRegistry;
+                return Result<UserMessage>.FromError(getPermissionResult);
             }
 
-            /// <summary>
-            /// Grant yourself the given permission.
-            /// </summary>
-            /// <param name="permissionName">The permission that is to be revoked.</param>
-            /// <param name="revokedTarget">The target that is to be revoked.</param>
-            [Command]
-            [Summary("Grant yourself the given permission.")]
-            [RequirePermission(typeof(GrantPermission), PermissionTarget.Self)]
-            public async Task<RuntimeResult> Default
+            var permission = getPermissionResult.Entity;
+            var grantPermissionResult = await _permissions.GrantPermissionAsync
             (
-                string permissionName,
-                [OverrideTypeReader(typeof(HumanizerEnumTypeReader<PermissionTarget>))]
-                PermissionTarget revokedTarget = PermissionTarget.Self
-            )
-                => await Default(this.Context.User, permissionName, revokedTarget);
+                _context.GuildID.Value,
+                discordUser.ID,
+                permission,
+                grantedTarget,
+                this.CancellationToken
+            );
 
-            /// <summary>
-            /// Grant the targeted user the given permission.
-            /// </summary>
-            /// <param name="discordUser">The Discord user.</param>
-            /// <param name="permissionName">The permission that is to be granted.</param>
-            /// <param name="grantedTarget">The target that the permission should be valid for.</param>
-            [Command]
-            [Summary("Grant the targeted user the given permission.")]
-            [RequirePermission(typeof(GrantPermission), PermissionTarget.Other)]
-            public async Task<RuntimeResult> Default
-            (
-                IUser discordUser,
-                string permissionName,
-                [OverrideTypeReader(typeof(HumanizerEnumTypeReader<PermissionTarget>))]
-                PermissionTarget grantedTarget = PermissionTarget.Self
-            )
+            if (!grantPermissionResult.IsSuccess)
             {
-                var getPermissionResult = _permissionRegistry.GetPermission(permissionName);
-                if (!getPermissionResult.IsSuccess)
-                {
-                    return getPermissionResult.ToRuntimeResult();
-                }
-
-                var permission = getPermissionResult.Entity;
-                var grantPermissionResult = await _permissions.GrantPermissionAsync
-                (
-                    this.Context.Guild,
-                    discordUser,
-                    permission,
-                    grantedTarget
-                );
-
-                if (!grantPermissionResult.IsSuccess)
-                {
-                    return grantPermissionResult.ToRuntimeResult();
-                }
-
-                return RuntimeCommandResult.FromSuccess
-                (
-                    $"{permission.FriendlyName} granted to {discordUser.Mention}."
-                );
+                return Result<UserMessage>.FromError(grantPermissionResult);
             }
 
-            /// <summary>
-            /// Grant the targeted role the given permission.
-            /// </summary>
-            /// <param name="discordRole">The Discord role.</param>
-            /// <param name="permissionName">The permission that is to be granted.</param>
-            /// <param name="grantedTarget">The target that the permission should be valid for.</param>
-            [Command]
-            [Summary("Grant the targeted role the given permission.")]
-            [RequirePermission(typeof(GrantPermission), PermissionTarget.Other)]
-            public async Task<RuntimeResult> Default
+            return new ConfirmationMessage
             (
-                IRole discordRole,
-                string permissionName,
-                [OverrideTypeReader(typeof(HumanizerEnumTypeReader<PermissionTarget>))]
-                PermissionTarget grantedTarget = PermissionTarget.Self
-            )
-            {
-                var getPermissionResult = _permissionRegistry.GetPermission(permissionName);
-                if (!getPermissionResult.IsSuccess)
-                {
-                    return getPermissionResult.ToRuntimeResult();
-                }
-
-                var permission = getPermissionResult.Entity;
-                var grantPermissionResult = await _permissions.GrantPermissionAsync
-                (
-                    discordRole,
-                    permission,
-                    grantedTarget
-                );
-
-                if (!grantPermissionResult.IsSuccess)
-                {
-                    return grantPermissionResult.ToRuntimeResult();
-                }
-
-                return RuntimeCommandResult.FromSuccess
-                (
-                    $"{permission.FriendlyName} granted to {MentionUtils.MentionRole(discordRole.Id)}."
-                );
-            }
+                $"{permission.FriendlyName} granted to <@{discordUser.ID}>."
+            );
         }
 
         /// <summary>
-        /// Commands for revoking permissions from users.
+        /// Grant the targeted role the given permission.
         /// </summary>
-        [PublicAPI]
-        [Group("revoke")]
-        public class RevokeCommands : ModuleBase
+        /// <param name="discordRole">The Discord role.</param>
+        /// <param name="permissionName">The permission that is to be granted.</param>
+        /// <param name="grantedTarget">The target that the permission should be valid for.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Command("grant-to-role")]
+        [Description("Grant the targeted role the given permission.")]
+        [RequirePermission(typeof(GrantPermission), PermissionTarget.Other)]
+        public async Task<Result<UserMessage>> GrantAsync
+        (
+            IRole discordRole,
+            string permissionName,
+            PermissionTarget grantedTarget = PermissionTarget.Self
+        )
         {
-            private readonly UserFeedbackService _feedback;
-
-            private readonly PermissionService _permissions;
-
-            private readonly PermissionRegistryService _permissionRegistry;
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="RevokeCommands"/> class.
-            /// </summary>
-            /// <param name="feedback">The user feedback service.</param>
-            /// <param name="permissions">The permission service.</param>
-            /// <param name="permissionRegistry">The permission registry service.</param>
-            public RevokeCommands
-            (
-                UserFeedbackService feedback,
-                PermissionService permissions,
-                PermissionRegistryService permissionRegistry
-            )
+            var getPermissionResult = _permissionRegistry.GetPermission(permissionName);
+            if (!getPermissionResult.IsSuccess)
             {
-                _feedback = feedback;
-                _permissions = permissions;
-                _permissionRegistry = permissionRegistry;
+                return Result<UserMessage>.FromError(getPermissionResult);
             }
 
-            /// <summary>
-            /// Revoke the given permission from yourself.
-            /// </summary>
-            /// <param name="permissionName">The permission that is to be revoked.</param>
-            /// <param name="revokedTarget">The target that is to be revoked.</param>
-            [Command]
-            [Summary("Revoke the given permission from yourself.")]
-            [RequirePermission(typeof(RevokePermission), PermissionTarget.Self)]
-            public async Task<RuntimeResult> Default
+            var permission = getPermissionResult.Entity;
+            var grantPermissionResult = await _permissions.GrantPermissionAsync
             (
-                string permissionName,
-                [OverrideTypeReader(typeof(HumanizerEnumTypeReader<PermissionTarget>))]
-                PermissionTarget revokedTarget = PermissionTarget.Self
-            )
-                => await Default(this.Context.User, permissionName, revokedTarget);
+                discordRole.ID,
+                permission,
+                grantedTarget
+            );
 
-            /// <summary>
-            /// Revoke the given permission from the targeted user.
-            /// </summary>
-            /// <param name="discordUser">The Discord user.</param>
-            /// <param name="permissionName">The permission that is to be revoked.</param>
-            /// <param name="revokedTarget">The target that is to be revoked.</param>
-            [Command]
-            [Summary("Revoke the given permission from the targeted user.")]
-            [RequirePermission(typeof(RevokePermission), PermissionTarget.Other)]
-            public async Task<RuntimeResult> Default
-            (
-                IUser discordUser,
-                string permissionName,
-                [OverrideTypeReader(typeof(HumanizerEnumTypeReader<PermissionTarget>))]
-                PermissionTarget revokedTarget = PermissionTarget.Self
-            )
+            if (!grantPermissionResult.IsSuccess)
             {
-                var getPermissionResult = _permissionRegistry.GetPermission(permissionName);
-                if (!getPermissionResult.IsSuccess)
-                {
-                    return getPermissionResult.ToRuntimeResult();
-                }
-
-                var permission = getPermissionResult.Entity;
-                var revokePermissionResult = await _permissions.RevokePermissionAsync
-                (
-                    this.Context.Guild,
-                    discordUser,
-                    permission,
-                    revokedTarget
-                );
-
-                if (!revokePermissionResult.IsSuccess)
-                {
-                    return revokePermissionResult.ToRuntimeResult();
-                }
-
-                return RuntimeCommandResult.FromSuccess
-                (
-                    $"{permission.FriendlyName} revoked from {discordUser.Mention}."
-                );
+                return Result<UserMessage>.FromError(grantPermissionResult);
             }
 
-            /// <summary>
-            /// Revoke the given permission from the targeted role.
-            /// </summary>
-            /// <param name="discordRole">The Discord role.</param>
-            /// <param name="permissionName">The permission that is to be revoked.</param>
-            /// <param name="revokedTarget">The target that is to be revoked.</param>
-            [Command]
-            [Summary("Revoke the given permission from the targeted role.")]
-            [RequirePermission(typeof(RevokePermission), PermissionTarget.Other)]
-            public async Task<RuntimeResult> Default
+            return new ConfirmationMessage
             (
-                IRole discordRole,
-                string permissionName,
-                [OverrideTypeReader(typeof(HumanizerEnumTypeReader<PermissionTarget>))]
-                PermissionTarget revokedTarget = PermissionTarget.Self
-            )
+                $"{permission.FriendlyName} granted to <&@{discordRole.ID}>."
+            );
+        }
+
+        /// <summary>
+        /// Revoke the given permission from the targeted user.
+        /// </summary>
+        /// <param name="discordUser">The Discord user.</param>
+        /// <param name="permissionName">The permission that is to be revoked.</param>
+        /// <param name="revokedTarget">The target that is to be revoked.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Command("revoke")]
+        [Description("Revoke the given permission from the targeted user.")]
+        [RequirePermission(typeof(RevokePermission), PermissionTarget.Other)]
+        [RequireContext(ChannelContext.Guild)]
+        public async Task<Result<UserMessage>> RevokeAsync
+        (
+            IUser discordUser,
+            string permissionName,
+            PermissionTarget revokedTarget = PermissionTarget.Self
+        )
+        {
+            var getPermissionResult = _permissionRegistry.GetPermission(permissionName);
+            if (!getPermissionResult.IsSuccess)
             {
-                var getPermissionResult = _permissionRegistry.GetPermission(permissionName);
-                if (!getPermissionResult.IsSuccess)
-                {
-                    return getPermissionResult.ToRuntimeResult();
-                }
-
-                var permission = getPermissionResult.Entity;
-                var revokePermissionResult = await _permissions.RevokePermissionAsync
-                (
-                    discordRole,
-                    permission,
-                    revokedTarget
-                );
-
-                if (!revokePermissionResult.IsSuccess)
-                {
-                    return revokePermissionResult.ToRuntimeResult();
-                }
-
-                return RuntimeCommandResult.FromSuccess
-                (
-                    $"{permission.FriendlyName} revoked from {MentionUtils.MentionRole(discordRole.Id)}."
-                );
+                return Result<UserMessage>.FromError(getPermissionResult);
             }
+
+            var permission = getPermissionResult.Entity;
+            var revokePermissionResult = await _permissions.RevokePermissionAsync
+            (
+                _context.GuildID.Value,
+                discordUser.ID,
+                permission,
+                revokedTarget
+            );
+
+            if (!revokePermissionResult.IsSuccess)
+            {
+                return Result<UserMessage>.FromError(revokePermissionResult);
+            }
+
+            return new ConfirmationMessage
+            (
+                $"{permission.FriendlyName} revoked from <@{discordUser.ID}>."
+            );
+        }
+
+        /// <summary>
+        /// Revoke the given permission from the targeted role.
+        /// </summary>
+        /// <param name="discordRole">The Discord role.</param>
+        /// <param name="permissionName">The permission that is to be revoked.</param>
+        /// <param name="revokedTarget">The target that is to be revoked.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Command("revoke-from-role")]
+        [Description("Revoke the given permission from the targeted role.")]
+        [RequirePermission(typeof(RevokePermission), PermissionTarget.Other)]
+        public async Task<Result<UserMessage>> RevokeAsync
+        (
+            IRole discordRole,
+            string permissionName,
+            PermissionTarget revokedTarget = PermissionTarget.Self
+        )
+        {
+            var getPermissionResult = _permissionRegistry.GetPermission(permissionName);
+            if (!getPermissionResult.IsSuccess)
+            {
+                return Result<UserMessage>.FromError(getPermissionResult);
+            }
+
+            var permission = getPermissionResult.Entity;
+            var revokePermissionResult = await _permissions.RevokePermissionAsync
+            (
+                discordRole.ID,
+                permission,
+                revokedTarget
+            );
+
+            if (!revokePermissionResult.IsSuccess)
+            {
+                return Result<UserMessage>.FromError(revokePermissionResult);
+            }
+
+            return new ConfirmationMessage
+            (
+                $"{permission.FriendlyName} revoked from <&@{discordRole.ID}>."
+            );
         }
     }
 }

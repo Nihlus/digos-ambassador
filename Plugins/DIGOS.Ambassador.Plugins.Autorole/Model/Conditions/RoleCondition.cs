@@ -25,8 +25,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
-using Discord;
 using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
@@ -34,20 +37,19 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
     /// <summary>
     /// Represents a required role.
     /// </summary>
-    [PublicAPI]
     public class RoleCondition : AutoroleCondition
     {
         /// <summary>
         /// Gets the ID of the Discord role.
         /// </summary>
-        public long RoleID { get; internal set; }
+        public Snowflake RoleID { get; internal set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleCondition"/> class.
         /// </summary>
         /// <param name="roleID">The ID of the Discord role.</param>
         [UsedImplicitly]
-        protected RoleCondition(long roleID)
+        protected RoleCondition(Snowflake roleID)
         {
             this.RoleID = roleID;
         }
@@ -57,14 +59,14 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         /// </summary>
         /// <param name="role">The role.</param>
         public RoleCondition(IRole role)
-            : this((long)role.Id)
+            : this(role.ID)
         {
         }
 
         /// <inheritdoc />
         public override string GetDescriptiveUIText()
         {
-            return $"Has the {MentionUtils.MentionRole((ulong)this.RoleID)} role";
+            return $"Has the <@&{this.RoleID}> role";
         }
 
         /// <inheritdoc />
@@ -79,17 +81,24 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         }
 
         /// <inheritdoc/>
-        public override Task<RetrieveEntityResult<bool>> IsConditionFulfilledForUserAsync
+        public override async Task<Result<bool>> IsConditionFulfilledForUserAsync
         (
             IServiceProvider services,
-            IGuildUser discordUser,
+            Snowflake guildID,
+            Snowflake userID,
             CancellationToken ct = default
         )
         {
-            return Task.FromResult
-            (
-                RetrieveEntityResult<bool>.FromSuccess(discordUser.RoleIds.Contains((ulong)this.RoleID))
-            );
+            var guildAPI = services.GetRequiredService<IDiscordRestGuildAPI>();
+            var getMember = await guildAPI.GetGuildMemberAsync(guildID, userID, ct);
+            if (!getMember.IsSuccess)
+            {
+                return Result<bool>.FromError(getMember);
+            }
+
+            var member = getMember.Entity;
+
+            return member.Roles.Contains(this.RoleID);
         }
     }
 }

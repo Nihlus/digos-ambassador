@@ -6,13 +6,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Remora.Discord.Behaviours" Version="5.0.2" />
-        <PackageReference Include="Remora.Results" Version="1.2.0" />
+      <ProjectReference Include="..\DIGOS.Ambassador.Discord.Feedback\DIGOS.Ambassador.Discord.Feedback.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\DIGOS.Ambassador.Discord.Extensions\DIGOS.Ambassador.Discord.Extensions.csproj" />
-      <ProjectReference Include="..\DIGOS.Ambassador.Discord.Feedback\DIGOS.Ambassador.Discord.Feedback.csproj" />
+      <PackageReference Include="Remora.Discord.Gateway" Version="3.1.9" />
     </ItemGroup>
 
 </Project>

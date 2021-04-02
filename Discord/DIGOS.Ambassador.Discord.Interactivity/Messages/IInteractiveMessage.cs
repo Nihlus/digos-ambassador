@@ -20,54 +20,26 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.Threading.Tasks;
-using Discord;
-using Discord.WebSocket;
-using Remora.Results;
+using Remora.Discord.Core;
 
 namespace DIGOS.Ambassador.Discord.Interactivity.Messages
 {
     /// <summary>
     /// Represents the public interface of an interactive message.
     /// </summary>
-    public interface IInteractiveMessage
+    public interface IInteractiveMessage : IInteractiveEntity
     {
-        /// <summary>
-        /// Gets the message that the interactive message wraps.
-        /// </summary>
-        IUserMessage? Message { get; }
+        /// <inheritdoc/>
+        string IInteractiveEntity.Nonce => this.MessageID.ToString();
 
         /// <summary>
-        /// Gets the user that caused the interactive message to be created.
+        /// Gets the ID of the channel the message is in.
         /// </summary>
-        IUser SourceUser { get; }
+        Snowflake ChannelID { get; }
 
         /// <summary>
-        /// Sends the interactive message to the given channel.
+        /// Gets the ID of the message.
         /// </summary>
-        /// <param name="service">The interactivity service that manages this message.</param>
-        /// <param name="channel">The channel.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task<OperationResult> SendAsync(InteractivityService service, IMessageChannel channel);
-
-        /// <summary>
-        /// Deletes the interactive message.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task<OperationResult> DeleteAsync();
-
-        /// <summary>
-        /// Handles an added interaction, performing tasks as needed.
-        /// </summary>
-        /// <param name="reaction">The added interaction.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task<OperationResult> HandleAddedInteractionAsync(SocketReaction reaction);
-
-        /// <summary>
-        /// Handles a removed interaction, performing tasks as needed.
-        /// </summary>
-        /// <param name="reaction">The removed interaction.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task<OperationResult> HandleRemovedInteractionAsync(SocketReaction reaction);
+        Snowflake MessageID { get; }
     }
 }

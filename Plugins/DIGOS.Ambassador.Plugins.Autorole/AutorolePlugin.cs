@@ -26,24 +26,22 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
-using DIGOS.Ambassador.Discord.Interactivity.Behaviours;
+using DIGOS.Ambassador.Discord.Interactivity.Extensions;
+using DIGOS.Ambassador.Discord.Pagination.Responders;
 using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Plugins.Autorole;
-using DIGOS.Ambassador.Plugins.Autorole.Behaviours;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
+using DIGOS.Ambassador.Plugins.Autorole.Parsers;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
-using DIGOS.Ambassador.Plugins.Autorole.TypeReaders;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
-using Discord;
-using Discord.Commands;
-using LazyCache;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Remora.Behaviours;
-using Remora.Behaviours.Extensions;
-using Remora.Behaviours.Services;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Remora.Commands.Extensions;
+using Remora.Discord.API.Abstractions.Objects;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
+using Remora.Results;
 using AutoroleCommands = DIGOS.Ambassador.Plugins.Autorole.CommandModules.AutoroleCommands;
 
 [assembly: InternalsVisibleTo("DIGOS.Ambassador.Tests.Plugins.Autorole")]
@@ -65,51 +63,37 @@ namespace DIGOS.Ambassador.Plugins.Autorole
         /// <inheritdoc />
         public override void ConfigureServices(IServiceCollection serviceCollection)
         {
-            serviceCollection
-                .AddScoped<AutoroleService>()
-                .AddScoped<AutoroleUpdateService>()
-                .AddScoped<UserStatisticsService>()
-                .AddConfiguredSchemaAwareDbContextPool<AutoroleDatabaseContext>()
-                .AddBehaviour<AutoroleUpdateBehaviour>()
-                .AddBehaviour<ReactiveAutoroleUpdateBehaviour>()
-                .AddBehaviour<UserStatisticBehaviour>();
+            serviceCollection.TryAddInteractivityResponder<PaginatedMessageResponder>();
+            serviceCollection.TryAddScoped<AutoroleService>();
+            serviceCollection.TryAddScoped<AutoroleUpdateService>();
+            serviceCollection.TryAddScoped<UserStatisticsService>();
 
-            serviceCollection
-                .AddLazyCache();
+            serviceCollection.AddParser<AutoroleConfiguration, AutoroleConfigurationParser>();
+            serviceCollection.AddParser<IEmoji, EmojiTypeReader>();
+            serviceCollection.AddCommandGroup<AutoroleCommands>();
+
+            serviceCollection.AddConfiguredSchemaAwareDbContextPool<AutoroleDatabaseContext>();
         }
 
         /// <inheritdoc />
-        public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
+        public override ValueTask<Result> InitializeAsync(IServiceProvider serviceProvider)
         {
             var permissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
-            var registrationResult = permissionRegistry.RegisterPermissions
+            return new ValueTask<Result>(permissionRegistry.RegisterPermissions
             (
                 Assembly.GetExecutingAssembly(),
                 serviceProvider
-            );
-
-            if (!registrationResult.IsSuccess)
-            {
-                return false;
-            }
-
-            var commands = serviceProvider.GetRequiredService<CommandService>();
-            commands.AddTypeReader<AutoroleConfiguration>(new AutoroleTypeReader());
-            commands.AddTypeReader<IEmote>(new EmojiTypeReader());
-
-            await commands.AddModuleAsync<AutoroleCommands>(serviceProvider);
-
-            return true;
+            ));
         }
 
         /// <inheritdoc />
-        public async Task<bool> MigratePluginAsync(IServiceProvider serviceProvider)
+        public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
         {
             var context = serviceProvider.GetRequiredService<AutoroleDatabaseContext>();
 
             await context.Database.MigrateAsync();
 
-            return true;
+            return Result.FromSuccess();
         }
 
         /// <inheritdoc />

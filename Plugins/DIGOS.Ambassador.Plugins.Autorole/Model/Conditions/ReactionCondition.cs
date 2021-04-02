@@ -21,15 +21,15 @@
 //
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
-using Discord;
 using JetBrains.Annotations;
-using LazyCache;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
@@ -37,18 +37,17 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
     /// <summary>
     /// Represents a required reaction to a message.
     /// </summary>
-    [PublicAPI]
     public class ReactionCondition : AutoroleCondition
     {
         /// <summary>
         /// Gets the ID of the Discord channel that the message is in.
         /// </summary>
-        public long ChannelID { get; private set; }
+        public Snowflake ChannelID { get; private set; }
 
         /// <summary>
         /// Gets the ID of the Discord message.
         /// </summary>
-        public long MessageID { get; internal set; }
+        public Snowflake MessageID { get; internal set; }
 
         /// <summary>
         /// Gets the name of the required emote.
@@ -62,7 +61,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         /// <param name="messageID">The message ID.</param>
         /// <param name="emoteName">The name of the emote.</param>
         [UsedImplicitly]
-        protected ReactionCondition(long channelID, long messageID, string emoteName)
+        protected ReactionCondition(Snowflake channelID, Snowflake messageID, string emoteName)
         {
             this.ChannelID = channelID;
             this.MessageID = messageID;
@@ -74,16 +73,21 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         /// </summary>
         /// <param name="message">The message.</param>
         /// <param name="emote">The required reaction.</param>
-        public ReactionCondition(IMessage message, IEmote emote)
-            : this((long)message.Channel.Id, (long)message.Id, emote.Name)
+        public ReactionCondition(IMessage message, IEmoji emote)
+            : this
+            (
+                message.ChannelID,
+                message.ID,
+                emote.Name ?? emote.ID.ToString() ?? throw new InvalidOperationException()
+            )
         {
         }
 
         /// <inheritdoc />
         public override string GetDescriptiveUIText()
         {
-            return $"Has reacted to {this.MessageID} in {MentionUtils.MentionChannel((ulong)this.ChannelID)} " +
-                   $"with {this.EmoteName}";
+            return $"Has reacted to {this.MessageID} in <#{this.ChannelID}> " +
+                   $"with :{this.EmoteName}:";
         }
 
         /// <inheritdoc />
@@ -100,50 +104,47 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         }
 
         /// <inheritdoc/>
-        public override async Task<RetrieveEntityResult<bool>> IsConditionFulfilledForUserAsync
+        public override async Task<Result<bool>> IsConditionFulfilledForUserAsync
         (
             IServiceProvider services,
-            IGuildUser discordUser,
+            Snowflake guildID,
+            Snowflake userID,
             CancellationToken ct = default
         )
         {
-            var channel = await discordUser.Guild.GetTextChannelAsync((ulong)this.ChannelID);
-            if (channel is null)
+            var channelAPI = services.GetRequiredService<IDiscordRestChannelAPI>();
+            Optional<Snowflake> lastUser = default;
+            while (true)
             {
-                return RetrieveEntityResult<bool>.FromError("Failed to find the channel.");
+                var getReactions = await channelAPI.GetReactionsAsync
+                (
+                    this.ChannelID,
+                    this.MessageID,
+                    this.EmoteName,
+                    after: lastUser,
+                    ct: ct
+                );
+
+                if (!getReactions.IsSuccess)
+                {
+                    return Result<bool>.FromError(getReactions);
+                }
+
+                var users = getReactions.Entity;
+                if (users.Count == 0)
+                {
+                    break;
+                }
+
+                if (users.Any(u => u.ID == userID))
+                {
+                    return true;
+                }
+
+                lastUser = users[^1].ID;
             }
 
-            var message = await channel.GetMessageAsync((ulong)this.MessageID);
-            if (message is null)
-            {
-                return RetrieveEntityResult<bool>.FromError("Failed to find the message.");
-            }
-
-            var reactions = message.Reactions;
-            var emojiKey = reactions.Keys.FirstOrDefault(k => k.Name == this.EmoteName);
-            if (emojiKey is null)
-            {
-                // Nobody's reacted with this emoji
-                return false;
-            }
-
-            var reactionData = reactions[emojiKey];
-
-            Task<List<IUser>> ReactionUsersFactory()
-            {
-                return message.GetReactionUsersAsync(emojiKey, reactionData.ReactionCount)
-                    .Flatten()
-                    .ToListAsync(ct)
-                    .AsTask();
-            }
-
-            // form the cache key
-            var cache = services.GetRequiredService<IAppCache>();
-            var cacheKey = $"{this.MessageID}:{this.EmoteName}";
-
-            var reactionUsers = await cache.GetOrAddAsync(cacheKey, ReactionUsersFactory);
-
-            return reactionUsers.Any(user => user.Id == discordUser.Id);
+            return false;
         }
     }
 }

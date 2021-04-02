@@ -26,8 +26,7 @@
 
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Tests.Plugins.Moderation.Bases;
-using DIGOS.Ambassador.Tests.Utility;
-using Discord;
+using Remora.Discord.Core;
 using Xunit;
 
 namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.ModerationService
@@ -36,7 +35,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.ModerationService
     {
         public class GetServerSettingsAsync : ModerationServiceTestBase
         {
-            private readonly IGuild _guild = MockHelper.CreateDiscordGuild(0);
+            private readonly Snowflake _guild = new Snowflake(0);
 
             [Fact]
             public async Task ReturnsSuccessfulIfSettingsExist()

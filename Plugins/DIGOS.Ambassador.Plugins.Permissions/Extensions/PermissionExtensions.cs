@@ -44,7 +44,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Extensions
             }
 
             var extraInfo = new StringBuilder();
-            extraInfo.Append("(");
+            extraInfo.Append('(');
             extraInfo.Append("Granted by default, targeting ");
 
             if (permission.IsGrantedByDefaultToSelf && permission.IsGrantedByDefaultToOthers)
@@ -64,7 +64,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Extensions
                 }
             }
 
-            extraInfo.Append(")");
+            extraInfo.Append(')');
 
             return $"{permission.FriendlyName} {extraInfo}";
         }

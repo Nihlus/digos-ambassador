@@ -20,14 +20,11 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using JetBrains.Annotations;
-
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
 {
     /// <summary>
     /// Enumerates the various message source types that are supported.
     /// </summary>
-    [PublicAPI]
     public enum MessageSourceType
     {
         /// <summary>

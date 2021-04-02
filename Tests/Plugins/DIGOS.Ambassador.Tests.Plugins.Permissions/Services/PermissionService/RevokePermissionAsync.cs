@@ -24,8 +24,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Permissions;
 using DIGOS.Ambassador.Tests.Plugins.Permissions.Data;
-using DIGOS.Ambassador.Tests.Utility;
-using Discord;
+using Remora.Discord.Core;
 using Xunit;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
@@ -39,14 +38,14 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
     {
         public class RevokePermissionFromUserAsync : PermissionServiceTestBase
         {
-            private readonly IGuild _discordGuild;
-            private readonly IUser _discordUser;
+            private readonly Snowflake _discordGuild;
+            private readonly Snowflake _discordUser;
             private readonly IPermission _permission;
 
             public RevokePermissionFromUserAsync()
             {
-                _discordGuild = MockHelper.CreateDiscordGuild(0);
-                _discordUser = MockHelper.CreateDiscordUser(0);
+                _discordGuild = new Snowflake(0);
+                _discordUser = new Snowflake(0);
 
                 _permission = new TestPermission();
             }
@@ -106,9 +105,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.Self
                 );
 
-                var permission = this.Database.UserPermissions.FirstOrDefault();
+                var permission = this.Database.UserPermissions.First();
 
-                Assert.NotNull(permission);
                 Assert.False(permission.IsGranted);
             }
 
@@ -227,20 +225,18 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.All
                 );
 
-                var selfPermission = this.Database.UserPermissions.FirstOrDefault
+                var selfPermission = this.Database.UserPermissions.First
                 (
                     p => p.Target == PermissionTarget.Self
                 );
 
-                Assert.NotNull(selfPermission);
                 Assert.False(selfPermission.IsGranted);
 
-                var otherPermission = this.Database.UserPermissions.FirstOrDefault
+                var otherPermission = this.Database.UserPermissions.First
                 (
                     p => p.Target == PermissionTarget.Other
                 );
 
-                Assert.NotNull(otherPermission);
                 Assert.False(otherPermission.IsGranted);
             }
 
@@ -263,12 +259,11 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.All
                 );
 
-                var selfPermission = this.Database.UserPermissions.FirstOrDefault
+                var selfPermission = this.Database.UserPermissions.First
                 (
                     p => p.Target == PermissionTarget.Self
                 );
 
-                Assert.NotNull(selfPermission);
                 Assert.False(selfPermission.IsGranted);
             }
 
@@ -291,24 +286,23 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.All
                 );
 
-                var otherPermission = this.Database.UserPermissions.FirstOrDefault
+                var otherPermission = this.Database.UserPermissions.First
                 (
                     p => p.Target == PermissionTarget.Other
                 );
 
-                Assert.NotNull(otherPermission);
                 Assert.False(otherPermission.IsGranted);
             }
         }
 
         public class RevokePermissionFromRoleAsync : PermissionServiceTestBase
         {
-            private readonly IRole _discordRole;
+            private readonly Snowflake _discordRole;
             private readonly IPermission _permission;
 
             public RevokePermissionFromRoleAsync()
             {
-                _discordRole = MockHelper.CreateDiscordRole(0);
+                _discordRole = new Snowflake(0);
 
                 _permission = new TestPermission();
             }
@@ -363,9 +357,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.Self
                 );
 
-                var permission = this.Database.RolePermissions.FirstOrDefault();
+                var permission = this.Database.RolePermissions.First();
 
-                Assert.NotNull(permission);
                 Assert.False(permission.IsGranted);
             }
 
@@ -473,20 +466,18 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.All
                 );
 
-                var selfPermission = this.Database.RolePermissions.FirstOrDefault
+                var selfPermission = this.Database.RolePermissions.First
                 (
                     p => p.Target == PermissionTarget.Self
                 );
 
-                Assert.NotNull(selfPermission);
                 Assert.False(selfPermission.IsGranted);
 
-                var otherPermission = this.Database.RolePermissions.FirstOrDefault
+                var otherPermission = this.Database.RolePermissions.First
                 (
                     p => p.Target == PermissionTarget.Other
                 );
 
-                Assert.NotNull(otherPermission);
                 Assert.False(otherPermission.IsGranted);
             }
 
@@ -507,12 +498,11 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.All
                 );
 
-                var selfPermission = this.Database.RolePermissions.FirstOrDefault
+                var selfPermission = this.Database.RolePermissions.First
                 (
                     p => p.Target == PermissionTarget.Self
                 );
 
-                Assert.NotNull(selfPermission);
                 Assert.False(selfPermission.IsGranted);
             }
 
@@ -533,12 +523,11 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.All
                 );
 
-                var otherPermission = this.Database.RolePermissions.FirstOrDefault
+                var otherPermission = this.Database.RolePermissions.First
                 (
                     p => p.Target == PermissionTarget.Other
                 );
 
-                Assert.NotNull(otherPermission);
                 Assert.False(otherPermission.IsGranted);
             }
         }

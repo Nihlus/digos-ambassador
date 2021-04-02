@@ -33,14 +33,12 @@ using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
-using DIGOS.Ambassador.Tests.Extensions;
 using DIGOS.Ambassador.Tests.TestBases;
-using Discord.Commands;
-using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Remora.Discord.Core;
 using Xunit;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
@@ -49,7 +47,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
     /// <summary>
     /// Serves as a test base for character service tests.
     /// </summary>
-    [PublicAPI]
     public abstract class CharacterServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
     {
         /// <summary>
@@ -86,11 +83,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
         /// Gets the server service.
         /// </summary>
         protected ServerService Servers { get; private set; } = null!;
-
-        /// <summary>
-        /// Gets the command service dependency.
-        /// </summary>
-        protected CommandService Commands { get; private set; } = null!;
 
         /// <summary>
         /// Creates a character in the database with the given settings.
@@ -151,7 +143,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             serviceCollection
                 .AddSingleton(FileSystemFactory.CreateContentFileSystem())
                 .AddSingleton<PronounService>()
-                .AddScoped<CommandService>()
                 .AddScoped<ContentService>()
                 .AddScoped<ServerService>()
                 .AddScoped<UserService>()
@@ -165,11 +156,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
         /// <inheritdoc />
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
-            var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            coreDatabase.Database.Create();
-
             var charactersDatabase = serviceProvider.GetRequiredService<CharactersDatabaseContext>();
-            charactersDatabase.Database.Create();
+            charactersDatabase.Database.EnsureCreated();
 
             this.Database = charactersDatabase;
 
@@ -177,12 +165,11 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             this.CharacterEditor = serviceProvider.GetRequiredService<ICharacterEditor>();
 
             this.Users = serviceProvider.GetRequiredService<UserService>();
-            this.Commands = serviceProvider.GetRequiredService<CommandService>();
 
-            this.DefaultOwner = this.Database.CreateProxy<User>(0);
+            this.DefaultOwner = this.Database.CreateProxy<User>(new Snowflake(0));
             this.Database.Update(this.DefaultOwner);
 
-            this.DefaultServer = this.Database.CreateProxy<Server>(1);
+            this.DefaultServer = this.Database.CreateProxy<Server>(new Snowflake(1));
             this.Database.Update(this.DefaultServer);
 
             this.Database.SaveChanges();

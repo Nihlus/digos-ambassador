@@ -25,9 +25,9 @@ namespace DIGOS.Ambassador.Plugins.Core.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("Core")
-                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn)
-                .HasAnnotation("ProductVersion", "3.1.3")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63)
+                .HasAnnotation("ProductVersion", "5.0.3")
+                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Core.Model.Servers.Server", b =>
                 {
@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Migrations
                     b.HasIndex("DiscordID")
                         .IsUnique();
 
-                    b.ToTable("Servers","Core");
+                    b.ToTable("Servers", "Core");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Core.Model.Users.ServerUser", b =>
@@ -81,7 +81,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("ServerUser","Core");
+                    b.ToTable("ServerUser", "Core");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Core.Model.Users.User", b =>
@@ -106,7 +106,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Migrations
                     b.HasIndex("DiscordID")
                         .IsUnique();
 
-                    b.ToTable("Users","Core");
+                    b.ToTable("Users", "Core");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Core.Model.Users.UserConsent", b =>
@@ -124,7 +124,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("UserConsents","Core");
+                    b.ToTable("UserConsents", "Core");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Core.Model.Users.ServerUser", b =>
@@ -140,6 +140,15 @@ namespace DIGOS.Ambassador.Plugins.Core.Migrations
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Server");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DIGOS.Ambassador.Plugins.Core.Model.Servers.Server", b =>
+                {
+                    b.Navigation("KnownUsers");
                 });
 #pragma warning restore 612, 618
         }

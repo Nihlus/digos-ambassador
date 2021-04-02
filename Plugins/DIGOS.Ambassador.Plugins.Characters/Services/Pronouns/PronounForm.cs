@@ -20,14 +20,11 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using JetBrains.Annotations;
-
 namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
 {
     /// <summary>
     /// Holds different forms that a pronoun can have.
     /// </summary>
-    [PublicAPI]
     public enum PronounForm
     {
         /// <summary>
@@ -46,7 +43,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
         Object,
 
         /// <summary>
-        /// The possessive adjective form, that is, "my" or "yours"
+        /// The possessive adjective form, that is, "my" or "yours".
         /// </summary>
         PossessiveAdjective,
 

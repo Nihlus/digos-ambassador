@@ -20,19 +20,23 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.ComponentModel;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Extensions;
-using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Core.Extensions;
-using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Permissions;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
-using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
-
-using Discord.Commands;
+using DIGOS.Ambassador.Plugins.Permissions.Conditions;
 using JetBrains.Annotations;
-using static Discord.Commands.ContextType;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.API;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Contexts;
+using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -44,23 +48,30 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
     /// </summary>
     [UsedImplicitly]
     [Group("server")]
-    [Alias("server", "guild")]
-    [Summary("Server-related commands, such as viewing or editing info about a specific server.")]
-    public class ServerCommands : ModuleBase
+    [Description("Server-related commands, such as viewing or editing info about a specific server.")]
+    public class ServerCommands : CommandGroup
     {
         private readonly UserFeedbackService _feedback;
         private readonly ServerService _servers;
+        private readonly ICommandContext _context;
+        private readonly IDiscordRestGuildAPI _guildAPI;
+        private readonly IDiscordRestChannelAPI _channelAPI;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ServerCommands"/> class.
         /// </summary>
-        /// <param name="database">A database context from the context pool.</param>
         /// <param name="feedback">The user feedback service.</param>
         /// <param name="servers">The servers service.</param>
-        public ServerCommands(CoreDatabaseContext database, UserFeedbackService feedback, ServerService servers)
+        /// <param name="context">The command context.</param>
+        /// <param name="guildAPI">The guild API.</param>
+        /// <param name="channelAPI">The channel API.</param>
+        public ServerCommands(UserFeedbackService feedback, ServerService servers, ICommandContext context, IDiscordRestGuildAPI guildAPI, IDiscordRestChannelAPI channelAPI)
         {
             _feedback = feedback;
             _servers = servers;
+            _context = context;
+            _guildAPI = guildAPI;
+            _channelAPI = channelAPI;
         }
 
         /// <summary>
@@ -68,56 +79,83 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         /// </summary>
         [UsedImplicitly]
         [Command("show")]
-        [Alias("show", "info")]
-        [Summary("Shows general information about the current server.")]
-        [RequireContext(Guild)]
+        [Description("Shows general information about the current server.")]
+        [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(ShowServerInfo), PermissionTarget.Self)]
-        public async Task<RuntimeResult> ShowServerAsync()
+        public async Task<IResult> ShowServerAsync()
         {
-            var eb = _feedback.CreateEmbedBase();
-
-            var guild = this.Context.Guild;
-
-            var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
+            var getServerResult = await _servers.GetOrRegisterServerAsync(_context.GuildID.Value);
             if (!getServerResult.IsSuccess)
             {
-                return getServerResult.ToRuntimeResult();
+                return getServerResult;
             }
+
+            var getGuild = await _guildAPI.GetGuildAsync(_context.GuildID.Value, ct: this.CancellationToken);
+            if (!getGuild.IsSuccess)
+            {
+                return getGuild;
+            }
+
+            var guild = getGuild.Entity;
 
             var server = getServerResult.Entity;
 
-            eb.WithTitle(guild.Name);
+            var fields = new[]
+            {
+                new EmbedField("Permission Warnings", server.SuppressPermissionWarnings ? "On" : "Off", true),
+                new EmbedField("NSFW", server.IsNSFW ? "Yes" : "No"),
+                new EmbedField("Send first-join message", server.SendJoinMessage ? "Yes" : "No"),
+                new EmbedField
+                (
+                    "First-join message",
+                    server.JoinMessage is null ? "Not set" : server.JoinMessage.Ellipsize(1024)
+                )
+            };
 
-            if (!(guild.SplashUrl is null))
+            var eb = _feedback.CreateEmbedBase() with
             {
-                eb.WithThumbnailUrl(guild.SplashUrl);
-            }
-            else if (!(guild.IconUrl is null))
-            {
-                eb.WithThumbnailUrl(guild.IconUrl);
-            }
+                Title = guild.Name,
+                Fields = fields
+            };
 
-            var getDescriptionResult = _servers.GetDescription(server);
-            if (getDescriptionResult.IsSuccess)
+            var getGuildSplash = CDN.GetGuildSplashUrl(guild);
+            if (getGuildSplash.IsSuccess)
             {
-                eb.WithDescription(getDescriptionResult.Entity);
+                eb = eb with
+                {
+                    Thumbnail = new EmbedThumbnail(getGuildSplash.Entity.ToString())
+                };
             }
             else
             {
-                eb.WithDescription("The server doesn't have a description set.");
+                var getGuildIcon = CDN.GetGuildIconUrl(guild);
+                if (getGuildIcon.IsSuccess)
+                {
+                    eb = eb with
+                    {
+                        Thumbnail = new EmbedThumbnail(getGuildIcon.Entity.ToString())
+                    };
+                }
             }
 
-            eb.AddField("Permission Warnings", server.SuppressPermissionWarnings ? "On" : "Off", true);
-            eb.AddField("NSFW", server.IsNSFW ? "Yes" : "No");
-            eb.AddField("Send first-join message", server.SendJoinMessage ? "Yes" : "No");
-            eb.AddField
+            var getDescription = _servers.GetDescription(server);
+            eb = eb with
+            {
+                Description = getDescription.IsSuccess
+                    ? getDescription.Entity
+                    : "The server doesn't have a description set."
+            };
+
+            var sendResult = await _channelAPI.CreateMessageAsync
             (
-                "First-join message",
-                server.JoinMessage is null ? "Not set" : server.JoinMessage.Ellipsize(1024)
+                _context.ChannelID,
+                embed: eb,
+                ct: this.CancellationToken
             );
 
-            await _feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
-            return RuntimeCommandResult.FromSuccess();
+            return sendResult.IsSuccess
+                ? Result.FromSuccess()
+                : Result.FromError(sendResult);
         }
 
         /// <summary>
@@ -125,15 +163,15 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         /// </summary>
         [UsedImplicitly]
         [Command("join-message")]
-        [Summary("Shows the server's join message.")]
-        [RequireContext(Guild)]
+        [Description("Shows the server's join message.")]
+        [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(ShowServerInfo), PermissionTarget.Self)]
-        public async Task<RuntimeResult> ShowJoinMessageAsync()
+        public async Task<IResult> ShowJoinMessageAsync()
         {
-            var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
+            var getServerResult = await _servers.GetOrRegisterServerAsync(_context.GuildID.Value);
             if (!getServerResult.IsSuccess)
             {
-                return getServerResult.ToRuntimeResult();
+                return getServerResult;
             }
 
             var server = getServerResult.Entity;
@@ -141,16 +179,25 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             var getJoinMessageResult = _servers.GetJoinMessage(server);
             if (!getJoinMessageResult.IsSuccess)
             {
-                return getJoinMessageResult.ToRuntimeResult();
+                return getJoinMessageResult;
             }
 
-            var eb = _feedback.CreateEmbedBase();
+            var eb = _feedback.CreateEmbedBase() with
+            {
+                Title = "Welcome!",
+                Description = getJoinMessageResult.Entity
+            };
 
-            eb.WithTitle("Welcome!");
-            eb.WithDescription(getJoinMessageResult.Entity);
+            var sendResult = await _channelAPI.CreateMessageAsync
+            (
+                _context.ChannelID,
+                embed: eb,
+                ct: this.CancellationToken
+            );
 
-            await _feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
-            return RuntimeCommandResult.FromSuccess();
+            return sendResult.IsSuccess
+                ? Result.FromSuccess()
+                : Result.FromError(sendResult);
         }
 
         /// <summary>
@@ -158,15 +205,15 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         /// </summary>
         [UsedImplicitly]
         [Command("clear-join-message")]
-        [Summary("Clears the join message.")]
-        [RequireContext(Guild)]
+        [Description("Clears the join message.")]
+        [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
-        public async Task<RuntimeResult> ClearJoinMessageAsync()
+        public async Task<Result<UserMessage>> ClearJoinMessageAsync()
         {
-            var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
+            var getServerResult = await _servers.GetOrRegisterServerAsync(_context.GuildID.Value);
             if (!getServerResult.IsSuccess)
             {
-                return getServerResult.ToRuntimeResult();
+                return Result<UserMessage>.FromError(getServerResult);
             }
 
             var server = getServerResult.Entity;
@@ -174,10 +221,10 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             var result = await _servers.ClearJoinMessageAsync(server);
             if (!result.IsSuccess)
             {
-                return result.ToRuntimeResult();
+                return Result<UserMessage>.FromError(result);
             }
 
-            return RuntimeCommandResult.FromSuccess("Join message cleared.");
+            return new ConfirmationMessage("Join message cleared.");
         }
 
         /// <summary>
@@ -185,35 +232,36 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         /// </summary>
         [UsedImplicitly]
         [Group("set")]
-        public class SetCommands : ModuleBase
+        public class SetCommands : CommandGroup
         {
             private readonly ServerService _servers;
+            private readonly ICommandContext _context;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="SetCommands"/> class.
             /// </summary>
-            /// <param name="database">A database context from the context pool.</param>
             /// <param name="servers">The servers service.</param>
-            public SetCommands(CoreDatabaseContext database, ServerService servers)
+            /// <param name="context">The command context.</param>
+            public SetCommands(ServerService servers, ICommandContext context)
             {
                 _servers = servers;
+                _context = context;
             }
 
             /// <summary>
             /// Sets the server's description.
             /// </summary>
             /// <param name="newDescription">The new description.</param>
-            [UsedImplicitly]
             [Command("description")]
-            [Summary("Sets the server's description.")]
-            [RequireContext(Guild)]
+            [Description("Sets the server's description.")]
+            [RequireContext(ChannelContext.Guild)]
             [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
-            public async Task<RuntimeResult> SetDescriptionAsync(string newDescription)
+            public async Task<Result<UserMessage>> SetDescriptionAsync(string newDescription)
             {
-                var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
+                var getServerResult = await _servers.GetOrRegisterServerAsync(_context.GuildID.Value);
                 if (!getServerResult.IsSuccess)
                 {
-                    return getServerResult.ToRuntimeResult();
+                    return Result<UserMessage>.FromError(getServerResult);
                 }
 
                 var server = getServerResult.Entity;
@@ -221,27 +269,26 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                 var result = await _servers.SetDescriptionAsync(server, newDescription);
                 if (!result.IsSuccess)
                 {
-                    return result.ToRuntimeResult();
+                    return Result<UserMessage>.FromError(result);
                 }
 
-                return RuntimeCommandResult.FromSuccess("Server description set.");
+                return new ConfirmationMessage("Server description set.");
             }
 
             /// <summary>
             /// Sets the server's first-join message.
             /// </summary>
             /// <param name="newJoinMessage">The new join message.</param>
-            [UsedImplicitly]
             [Command("join-message")]
-            [Summary("Sets the server's first-join message.")]
-            [RequireContext(Guild)]
+            [Description("Sets the server's first-join message.")]
+            [RequireContext(ChannelContext.Guild)]
             [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
-            public async Task<RuntimeResult> SetJoinMessageAsync(string newJoinMessage)
+            public async Task<Result<UserMessage>> SetJoinMessageAsync(string newJoinMessage)
             {
-                var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
+                var getServerResult = await _servers.GetOrRegisterServerAsync(_context.GuildID.Value);
                 if (!getServerResult.IsSuccess)
                 {
-                    return getServerResult.ToRuntimeResult();
+                    return Result<UserMessage>.FromError(getServerResult);
                 }
 
                 var server = getServerResult.Entity;
@@ -249,27 +296,26 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                 var result = await _servers.SetJoinMessageAsync(server, newJoinMessage);
                 if (!result.IsSuccess)
                 {
-                    return result.ToRuntimeResult();
+                    return Result<UserMessage>.FromError(result);
                 }
 
-                return RuntimeCommandResult.FromSuccess("Server first-join message set.");
+                return new ConfirmationMessage("Server first-join message set.");
             }
 
             /// <summary>
             /// Sets whether the server is NSFW.
             /// </summary>
             /// <param name="isNsfw">Whether the server is NSFW.</param>
-            [UsedImplicitly]
             [Command("is-nsfw")]
-            [Summary("Sets whether the server is NSFW.")]
-            [RequireContext(Guild)]
+            [Description("Sets whether the server is NSFW.")]
+            [RequireContext(ChannelContext.Guild)]
             [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
-            public async Task<RuntimeResult> SetIsNSFWAsync(bool isNsfw)
+            public async Task<Result<UserMessage>> SetIsNSFWAsync(bool isNsfw)
             {
-                var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
+                var getServerResult = await _servers.GetOrRegisterServerAsync(_context.GuildID.Value);
                 if (!getServerResult.IsSuccess)
                 {
-                    return getServerResult.ToRuntimeResult();
+                    return Result<UserMessage>.FromError(getServerResult);
                 }
 
                 var server = getServerResult.Entity;
@@ -277,10 +323,10 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                 var result = await _servers.SetIsNSFWAsync(server, isNsfw);
                 if (!result.IsSuccess)
                 {
-                    return result.ToRuntimeResult();
+                    return Result<UserMessage>.FromError(result);
                 }
 
-                return RuntimeCommandResult.FromSuccess
+                return new ConfirmationMessage
                 (
                     $"The server is {(isNsfw ? "now set as NSFW" : "no longer NSFW")}."
                 );
@@ -290,17 +336,16 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             /// Sets whether the bot sends join messages to new users.
             /// </summary>
             /// <param name="sendJoinMessage">Whether the bot sends join messages to new users.</param>
-            [UsedImplicitly]
             [Command("send-join-messages")]
-            [Summary("Sets whether the bot sends join messages to new users.")]
-            [RequireContext(Guild)]
+            [Description("Sets whether the bot sends join messages to new users.")]
+            [RequireContext(ChannelContext.Guild)]
             [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
-            public async Task<RuntimeResult> SetSendJoinMessagesAsync(bool sendJoinMessage)
+            public async Task<Result<UserMessage>> SetSendJoinMessagesAsync(bool sendJoinMessage)
             {
-                var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
+                var getServerResult = await _servers.GetOrRegisterServerAsync(_context.GuildID.Value);
                 if (!getServerResult.IsSuccess)
                 {
-                    return getServerResult.ToRuntimeResult();
+                    return Result<UserMessage>.FromError(getServerResult);
                 }
 
                 var server = getServerResult.Entity;
@@ -308,14 +353,14 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                 var result = await _servers.SetSendJoinMessageAsync(server, sendJoinMessage);
                 if (!result.IsSuccess)
                 {
-                    return result.ToRuntimeResult();
+                    return Result<UserMessage>.FromError(result);
                 }
 
                 var willDo = sendJoinMessage
                     ? "will now send first-join messages to new users"
                     : "no longer sends first-join messages";
 
-                return RuntimeCommandResult.FromSuccess($"The server {willDo}.");
+                return new ConfirmationMessage($"The server {willDo}.");
             }
         }
     }

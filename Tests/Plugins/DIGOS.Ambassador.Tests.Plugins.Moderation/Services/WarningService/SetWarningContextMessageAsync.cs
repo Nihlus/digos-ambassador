@@ -29,6 +29,7 @@ using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
 using DIGOS.Ambassador.Tests.Plugins.Moderation.Bases;
+using Remora.Discord.Core;
 using Xunit;
 
 namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
@@ -39,17 +40,17 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
         {
             private readonly UserWarning _warning = new UserWarning
             (
-                new Server(0),
-                new User(0),
-                new User(1),
+                new Server(new Snowflake(0)),
+                new User(new Snowflake(0)),
+                new User(new Snowflake(1)),
                 string.Empty
             );
 
             [Fact]
             public async Task ReturnsUnsuccessfulIfNewMessageIsSameMessage()
             {
-                await this.Warnings.SetWarningContextMessageAsync(_warning, 1);
-                var result = await this.Warnings.SetWarningContextMessageAsync(_warning, 1);
+                await this.Warnings.SetWarningContextMessageAsync(_warning, new Snowflake(1));
+                var result = await this.Warnings.SetWarningContextMessageAsync(_warning, new Snowflake(1));
 
                 Assert.False(result.IsSuccess);
             }
@@ -57,8 +58,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
             [Fact]
             public async Task ReturnsSuccessfulIfNewMessageIsAnotherMessage()
             {
-                await this.Warnings.SetWarningContextMessageAsync(_warning, 1);
-                var result = await this.Warnings.SetWarningContextMessageAsync(_warning, 2);
+                await this.Warnings.SetWarningContextMessageAsync(_warning, new Snowflake(1));
+                var result = await this.Warnings.SetWarningContextMessageAsync(_warning, new Snowflake(2));
 
                 Assert.True(result.IsSuccess);
             }
@@ -66,9 +67,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
             [Fact]
             public async Task ActuallySetsMessage()
             {
-                await this.Warnings.SetWarningContextMessageAsync(_warning, 1);
+                await this.Warnings.SetWarningContextMessageAsync(_warning, new Snowflake(1));
 
-                Assert.Equal(1, _warning.MessageID);
+                Assert.Equal(new Snowflake(1), _warning.MessageID);
             }
 
             [Fact]
@@ -76,7 +77,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
             {
                 var before = _warning.UpdatedAt;
 
-                await this.Warnings.SetWarningContextMessageAsync(_warning, 1);
+                await this.Warnings.SetWarningContextMessageAsync(_warning, new Snowflake(1));
 
                 var after = _warning.UpdatedAt;
 

@@ -5,14 +5,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.6" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.6.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.4" />
     <PackageReference Include="xunit" Version="2.4.1" />
-    <PackageReference Include="Moq" Version="4.14.5" />
-    <PackageReference Include="Discord.Net.Core" Version="2.2.0" />
+    <PackageReference Include="Moq" Version="4.16.1" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <ProjectReference Include="..\..\Core\DIGOS.Ambassador.Core.Database\DIGOS.Ambassador.Core.Database.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Extensions" />
   </ItemGroup>
 </Project>

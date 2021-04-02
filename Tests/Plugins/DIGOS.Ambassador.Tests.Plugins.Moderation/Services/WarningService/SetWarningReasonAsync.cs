@@ -30,6 +30,7 @@ using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
 using DIGOS.Ambassador.Tests.Plugins.Moderation.Bases;
+using Remora.Discord.Core;
 using Xunit;
 
 namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
@@ -38,7 +39,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
     {
         public class SetWarningReasonAsync : WarningServiceTestBase
         {
-            private readonly UserWarning _warning = new UserWarning(new Server(0), new User(0), new User(1), string.Empty);
+            private readonly UserWarning _warning = new UserWarning(new Server(new Snowflake(0)), new User(new Snowflake(0)), new User(new Snowflake(1)), string.Empty);
 
             [Fact]
             public async Task ReturnsUnsuccessfulIfNewReasonIsEmpty()

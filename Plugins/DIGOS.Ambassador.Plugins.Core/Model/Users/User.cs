@@ -23,21 +23,20 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Core.Database.Entities;
-using JetBrains.Annotations;
+using Remora.Discord.Core;
 
 namespace DIGOS.Ambassador.Plugins.Core.Model.Users
 {
     /// <summary>
     /// Represents globally accessible information about a user.
     /// </summary>
-    [PublicAPI]
     [Table("Users", Schema = "Core")]
     public class User : EFEntity
     {
         /// <summary>
         /// Gets the Discord ID of the user.
         /// </summary>
-        public long DiscordID { get; private set; }
+        public Snowflake DiscordID { get; private set; }
 
         /// <summary>
         /// Gets the biography of the user. This contains useful information that the users provide themselves.
@@ -54,7 +53,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Users
         /// Initializes a new instance of the <see cref="User"/> class.
         /// </summary>
         /// <param name="discordID">The Discord ID of the user.</param>
-        public User(long discordID)
+        public User(Snowflake discordID)
         {
             this.DiscordID = discordID;
             this.Bio = string.Empty;

@@ -29,7 +29,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions
     /// <summary>
     /// Defines the public API of a permission.
     /// </summary>
-    [PublicAPI]
     public interface IPermission
     {
         /// <summary>

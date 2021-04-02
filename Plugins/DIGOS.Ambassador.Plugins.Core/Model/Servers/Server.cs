@@ -26,22 +26,20 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
-using Discord;
-using JetBrains.Annotations;
+using Remora.Discord.Core;
 
 namespace DIGOS.Ambassador.Plugins.Core.Model.Servers
 {
     /// <summary>
     /// Represents stored settings for a Discord server.
     /// </summary>
-    [PublicAPI]
     [Table("Servers", Schema = "Core")]
     public class Server : EFEntity
     {
         /// <summary>
         /// Gets the globally unique guild ID of the server.
         /// </summary>
-        public virtual long DiscordID { get; private set; }
+        public virtual Snowflake DiscordID { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether or not the server allows NSFW content globally.
@@ -57,7 +55,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Servers
         /// Gets the users known to the bot on this server.
         /// </summary>
         [Required]
-        public virtual List<ServerUser> KnownUsers { get; internal set; } = new List<ServerUser>();
+        public virtual List<ServerUser> KnownUsers { get; internal set; } = new();
 
         /// <summary>
         /// Gets the server's description.
@@ -79,7 +77,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Servers
         /// Initializes a new instance of the <see cref="Server"/> class.
         /// </summary>
         /// <param name="discordID">The server's Discord ID.</param>
-        public Server(long discordID)
+        public Server(Snowflake discordID)
         {
             this.DiscordID = discordID;
         }
@@ -89,9 +87,9 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Servers
         /// </summary>
         /// <param name="user">The user.</param>
         /// <returns>true if the user is known; otherwise, false.</returns>
-        public bool IsUserKnown(IUser user)
+        public bool IsUserKnown(Snowflake user)
         {
-            return this.KnownUsers.Any(su => su.User.DiscordID == (long)user.Id);
+            return this.KnownUsers.Any(su => su.User.DiscordID == user);
         }
     }
 }

@@ -29,6 +29,7 @@ using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
 using DIGOS.Ambassador.Tests.Plugins.Moderation.Bases;
+using Remora.Discord.Core;
 using Xunit;
 
 namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
@@ -39,17 +40,17 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
         {
             private readonly UserBan _ban = new UserBan
             (
-                new Server(0),
-                new User(0),
-                new User(1),
+                new Server(new Snowflake(0)),
+                new User(new Snowflake(0)),
+                new User(new Snowflake(1)),
                 string.Empty
             );
 
             [Fact]
             public async Task ReturnsUnsuccessfulIfNewMessageIsSameMessage()
             {
-                await this.Bans.SetBanContextMessageAsync(_ban, 1);
-                var result = await this.Bans.SetBanContextMessageAsync(_ban, 1);
+                await this.Bans.SetBanContextMessageAsync(_ban, new Snowflake(1));
+                var result = await this.Bans.SetBanContextMessageAsync(_ban, new Snowflake(1));
 
                 Assert.False(result.IsSuccess);
             }
@@ -57,8 +58,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
             [Fact]
             public async Task ReturnsSuccessfulIfNewMessageIsAnotherMessage()
             {
-                await this.Bans.SetBanContextMessageAsync(_ban, 1);
-                var result = await this.Bans.SetBanContextMessageAsync(_ban, 2);
+                await this.Bans.SetBanContextMessageAsync(_ban, new Snowflake(1));
+                var result = await this.Bans.SetBanContextMessageAsync(_ban, new Snowflake(2));
 
                 Assert.True(result.IsSuccess);
             }
@@ -66,9 +67,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
             [Fact]
             public async Task ActuallySetsMessage()
             {
-                await this.Bans.SetBanContextMessageAsync(_ban, 1);
+                await this.Bans.SetBanContextMessageAsync(_ban, new Snowflake(1));
 
-                Assert.Equal(1, _ban.MessageID);
+                Assert.Equal(new Snowflake(1), _ban.MessageID);
             }
 
             [Fact]
@@ -76,7 +77,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
             {
                 var before = _ban.UpdatedAt;
 
-                await this.Bans.SetBanContextMessageAsync(_ban, 1);
+                await this.Bans.SetBanContextMessageAsync(_ban, new Snowflake(1));
 
                 var after = _ban.UpdatedAt;
 

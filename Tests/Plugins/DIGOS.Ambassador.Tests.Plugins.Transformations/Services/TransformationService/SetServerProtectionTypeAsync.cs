@@ -27,8 +27,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
-using DIGOS.Ambassador.Tests.Utility;
-using Discord;
+using Remora.Discord.Core;
 using Xunit;
 
 namespace DIGOS.Ambassador.Tests.Plugins.Transformations
@@ -37,8 +36,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
     {
         public class SetServerProtectionTypeAsync : TransformationServiceTestBase
         {
-            private readonly IUser _user = MockHelper.CreateDiscordUser(0);
-            private readonly IGuild _guild = MockHelper.CreateDiscordGuild(1);
+            private readonly Snowflake _user = new Snowflake(0);
+            private readonly Snowflake _guild = new Snowflake(1);
 
             [Fact]
             public async Task CanSetType()
@@ -52,7 +51,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 );
 
                 Assert.True(result.IsSuccess);
-                Assert.True(result.WasModified);
                 Assert.Equal(expected, this.Database.ServerUserProtections.First().Type);
             }
 

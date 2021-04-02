@@ -23,10 +23,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
-using DIGOS.Ambassador.Plugins.Core.Model.Users;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
+using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using Humanizer;
 using JetBrains.Annotations;
+using Remora.Discord.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
@@ -34,7 +37,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
     /// <summary>
     /// Acts as an interface for accessing and modifying named entities owned by users.
     /// </summary>
-    [PublicAPI]
     public sealed class OwnedEntityService
     {
         /// <summary>
@@ -46,6 +48,17 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
         /// Holds reserved names which entities may not have.
         /// </summary>
         private readonly string[] _reservedNames = { "current" };
+
+        private readonly UserService _users;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OwnedEntityService"/> class.
+        /// </summary>
+        /// <param name="users">The user service.</param>
+        public OwnedEntityService(UserService users)
+        {
+            _users = users;
+        }
 
         /// <summary>
         /// Determines whether or not the given entity name is unique for a given set of user entities.
@@ -71,20 +84,28 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
         /// <summary>
         /// Transfers ownership of the given entity to the specified user.
         /// </summary>
-        /// <param name="newOwner">The new owner.</param>
+        /// <param name="newOwnerID">The ID of the new owner.</param>
         /// <param name="newOwnerEntities">The entities that the user already owns.</param>
         /// <param name="entity">The entity to transfer.</param>
         /// <returns>An entity modification result, which may or may not have succeeded.</returns>
-        public ModifyEntityResult TransferEntityOwnership
+        public async Task<Result> TransferEntityOwnershipAsync
         (
-            User newOwner,
-            IReadOnlyCollection<IOwnedNamedEntity> newOwnerEntities,
+            Snowflake newOwnerID,
+            IEnumerable<IOwnedNamedEntity> newOwnerEntities,
             IOwnedNamedEntity entity
         )
         {
+            var getNewOwner = await _users.GetOrRegisterUserAsync(newOwnerID);
+            if (!getNewOwner.IsSuccess)
+            {
+                return Result.FromError(getNewOwner);
+            }
+
+            var newOwner = getNewOwner.Entity;
+
             if (entity.IsOwner(newOwner))
             {
-                return ModifyEntityResult.FromError
+                return new UserError
                 (
                     $"That person already owns the {entity.EntityTypeDisplayName}."
                         .Humanize().Transform(To.SentenceCase)
@@ -93,7 +114,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
 
             if (newOwnerEntities.Any(e => string.Equals(e.Name.ToLower(), entity.Name.ToLower())))
             {
-                return ModifyEntityResult.FromError
+                return new UserError
                 (
                     $"That user already owns a {entity.EntityTypeDisplayName} named {entity.Name}. Please rename it first."
                         .Humanize().Transform(To.SentenceCase)
@@ -102,7 +123,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
 
             entity.Owner = newOwner;
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -112,7 +133,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
         /// <param name="entityName">The name of the entity.</param>
         /// <returns>true if the name is valid; otherwise, false.</returns>
         [Pure]
-        public DetermineConditionResult IsEntityNameValid
+        public Result IsEntityNameValid
         (
             IEnumerable<string> commandNames,
             string? entityName
@@ -120,12 +141,12 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
         {
             if (entityName.IsNullOrWhitespace())
             {
-                return DetermineConditionResult.FromError("Names cannot be empty.");
+                return new UserError("Names cannot be empty.");
             }
 
             if (entityName.Any(c => _reservedNameCharacters.Contains(c)))
             {
-                return DetermineConditionResult.FromError
+                return new UserError
                 (
                     $"Names may not contain any of the following characters: {_reservedNameCharacters.Humanize()}"
                 );
@@ -133,18 +154,15 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
 
             if (_reservedNames.Any(n => string.Equals(n, entityName, StringComparison.OrdinalIgnoreCase)))
             {
-                return DetermineConditionResult.FromError
+                return new UserError
                 (
                     "That is a reserved name."
                 );
             }
 
-            if (commandNames.Any(entityName.Contains))
-            {
-                return DetermineConditionResult.FromError("Names may not be the same as a command.");
-            }
-
-            return DetermineConditionResult.FromSuccess();
+            return commandNames.Any(entityName.Contains)
+                ? new UserError("Names may not be the same as a command.")
+                : Result.FromSuccess();
         }
     }
 }

@@ -26,8 +26,7 @@
 
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Tests.Plugins.Moderation.Bases;
-using DIGOS.Ambassador.Tests.Utility;
-using Discord;
+using Remora.Discord.Core;
 using Xunit;
 
 namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.NoteService
@@ -36,20 +35,16 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.NoteService
     {
         public class GetNoteAsync : NoteServiceTestBase
         {
-            private readonly IGuild _guild = MockHelper.CreateDiscordGuild(0);
-            private readonly IGuild _otherGuild = MockHelper.CreateDiscordGuild(1);
-            private readonly IGuildUser _guildUser = MockHelper.CreateDiscordEntity<IGuildUser>
-            (
-                0,
-                m => m.Setup(gu => gu.Guild.Id).Returns(0)
-            );
+            private readonly Snowflake _guild = new Snowflake(0);
+            private readonly Snowflake _otherGuild = new Snowflake(1);
+            private readonly Snowflake _user = new Snowflake(2);
 
-            private readonly IUser _author = MockHelper.CreateDiscordUser(1);
+            private readonly Snowflake _author = new Snowflake(3);
 
             [Fact]
             public async Task ReturnsSuccessfulIfNoteExists()
             {
-                var note = (await this.Notes.CreateNoteAsync(_author, _guildUser, "Dummy thicc")).Entity;
+                var note = (await this.Notes.CreateNoteAsync(_author, _user, _guild, "Dummy thicc")).Entity!;
 
                 var result = await this.Notes.GetNoteAsync(_guild, note.ID);
 
@@ -67,7 +62,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.NoteService
             [Fact]
             public async Task ReturnsUnsuccessfulIfNoteExistsButServerIsWrong()
             {
-                var note = (await this.Notes.CreateNoteAsync(_author, _guildUser, "Dummy thicc")).Entity;
+                var note = (await this.Notes.CreateNoteAsync(_author, _user, _guild, "Dummy thicc")).Entity!;
 
                 var result = await this.Notes.GetNoteAsync(_otherGuild, note.ID);
 
@@ -77,7 +72,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.NoteService
             [Fact]
             public async Task ActuallyReturnsNote()
             {
-                var note = (await this.Notes.CreateNoteAsync(_author, _guildUser, "Dummy thicc")).Entity;
+                var note = (await this.Notes.CreateNoteAsync(_author, _user, _guild, "Dummy thicc")).Entity!;
 
                 var result = await this.Notes.GetNoteAsync(_guild, note.ID);
 

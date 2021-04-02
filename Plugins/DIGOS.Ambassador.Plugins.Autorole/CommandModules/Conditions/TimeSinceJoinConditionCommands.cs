@@ -21,17 +21,18 @@
 //
 
 using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Extensions;
-using DIGOS.Ambassador.Discord.Extensions.Results;
+using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Permissions;
-using DIGOS.Ambassador.Plugins.Autorole.Services;
+using DIGOS.Ambassador.Plugins.Permissions.Conditions;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
-using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
-using Discord.Commands;
 using JetBrains.Annotations;
+using Remora.Commands.Attributes;
+using Remora.Discord.Commands.Conditions;
+using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
@@ -42,99 +43,70 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         public partial class AutoroleConditionCommands
         {
             /// <summary>
-            /// Contains commands for adding or modifying a condition based having been a certain time in a server.
+            /// Adds an instance of the condition to the role.
             /// </summary>
-            [Group("time-since-join")]
-            public class TimeSinceJoinConditionCommands : ModuleBase
+            /// <param name="autorole">The autorole configuration.</param>
+            /// <param name="time">The required time.</param>
+            [UsedImplicitly]
+            [Command("add-time-since-join")]
+            [Description("Adds an instance of the condition to the role.")]
+            [RequireContext(ChannelContext.Guild)]
+            [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
+            public async Task<Result<UserMessage>> AddSinceJoinConditionAsync
+            (
+                AutoroleConfiguration autorole,
+                TimeSpan time
+            )
             {
-                private readonly AutoroleService _autoroles;
+                var condition = _autoroles.CreateConditionProxy<TimeSinceJoinCondition>(time)
+                                ?? throw new InvalidOperationException();
 
-                /// <summary>
-                /// Initializes a new instance of the <see cref="TimeSinceJoinConditionCommands"/> class.
-                /// </summary>
-                /// <param name="autoroles">The autorole service.</param>
-                public TimeSinceJoinConditionCommands(AutoroleService autoroles)
-                {
-                    _autoroles = autoroles;
-                }
+                var addCondition = await _autoroles.AddConditionAsync(autorole, condition);
 
-                /// <summary>
-                /// Adds an instance of the condition to the role.
-                /// </summary>
-                /// <param name="autorole">The autorole configuration.</param>
-                /// <param name="time">The required time.</param>
-                [UsedImplicitly]
-                [Command]
-                [Summary("Adds an instance of the condition to the role.")]
-                [RequireContext(ContextType.Guild)]
-                [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-                public async Task<RuntimeResult> AddConditionAsync(AutoroleConfiguration autorole, TimeSpan time)
-                {
-                    var condition = _autoroles.CreateConditionProxy<TimeSinceJoinCondition>
-                    (
-                        time
-                    );
+                return !addCondition.IsSuccess
+                    ? Result<UserMessage>.FromError(addCondition)
+                    : new ConfirmationMessage("Condition added.");
+            }
 
-                    if (condition is null)
-                    {
-                        return RuntimeCommandResult.FromError("Failed to create a condition object. Yikes!");
-                    }
-
-                    var addCondition = await _autoroles.AddConditionAsync(autorole, condition);
-                    if (!addCondition.IsSuccess)
-                    {
-                        return addCondition.ToRuntimeResult();
-                    }
-
-                    return RuntimeCommandResult.FromSuccess("Condition added.");
-                }
-
-                /// <summary>
-                /// Modifies an instance of the condition on the role.
-                /// </summary>
-                /// <param name="autorole">The autorole configuration.</param>
-                /// <param name="conditionID">The ID of the condition.</param>
-                /// <param name="time">The required time.</param>
-                [UsedImplicitly]
-                [Command]
-                [Summary("Modifies an instance of the condition on the role.")]
-                [RequireContext(ContextType.Guild)]
-                [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-                public async Task<RuntimeResult> ModifyConditionAsync
+            /// <summary>
+            /// Modifies an instance of the condition on the role.
+            /// </summary>
+            /// <param name="autorole">The autorole configuration.</param>
+            /// <param name="conditionID">The ID of the condition.</param>
+            /// <param name="time">The required time.</param>
+            [UsedImplicitly]
+            [Command("set-time-since-join")]
+            [Description("Modifies an instance of the condition on the role.")]
+            [RequireContext(ChannelContext.Guild)]
+            [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
+            public async Task<Result<UserMessage>> ModifySinceJoinConditionAsync
+            (
+                AutoroleConfiguration autorole,
+                long conditionID,
+                TimeSpan time
+            )
+            {
+                var getCondition = _autoroles.GetCondition<TimeSinceJoinCondition>
                 (
-                    AutoroleConfiguration autorole,
-                    long conditionID,
-                    TimeSpan time
-                )
+                    autorole,
+                    conditionID
+                );
+
+                if (!getCondition.IsSuccess)
                 {
-                    var getCondition = _autoroles.GetCondition<TimeSinceJoinCondition>
-                    (
-                        autorole,
-                        conditionID
-                    );
-
-                    if (!getCondition.IsSuccess)
-                    {
-                        return getCondition.ToRuntimeResult();
-                    }
-
-                    var condition = getCondition.Entity;
-                    var modifyResult = await _autoroles.ModifyConditionAsync
-                    (
-                        condition,
-                        c =>
-                        {
-                            condition.RequiredTime = time;
-                        }
-                    );
-
-                    if (!modifyResult.IsSuccess)
-                    {
-                        return modifyResult.ToRuntimeResult();
-                    }
-
-                    return RuntimeCommandResult.FromSuccess("Condition updated.");
+                    return Result<UserMessage>.FromError(getCondition);
                 }
+
+                var condition = getCondition.Entity;
+                var modifyResult = await _autoroles.ModifyConditionAsync
+                (
+                    condition,
+                    c => { c.RequiredTime = time; }
+                );
+
+                return !modifyResult.IsSuccess
+                    ? Result<UserMessage>.FromError(modifyResult)
+                    : new ConfirmationMessage("Condition updated.");
             }
         }
     }

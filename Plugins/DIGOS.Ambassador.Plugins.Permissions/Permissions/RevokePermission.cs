@@ -21,14 +21,12 @@
 //
 
 using System;
-using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Permissions
 {
     /// <summary>
     /// Represents a permission that allows a user to revoke a permission.
     /// </summary>
-    [PublicAPI]
     public sealed class RevokePermission : Permission
     {
         /// <inheritdoc />

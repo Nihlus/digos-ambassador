@@ -20,14 +20,11 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using JetBrains.Annotations;
-
 namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
 {
     /// <summary>
     /// Provides sie and hir pronouns.
     /// </summary>
-    [PublicAPI]
     public class SieHirPronounProvider : SheHirPronounProvider
     {
         /// <inheritdoc />

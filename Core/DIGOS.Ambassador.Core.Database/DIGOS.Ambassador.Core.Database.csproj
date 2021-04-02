@@ -1,9 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
-        <PackageReference Include="Remora.EntityFrameworkCore.Modular" Version="2.0.3" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="3.1.6" />
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.1.3" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.4">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>compile; runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Remora.EntityFrameworkCore.Modular" Version="3.0.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="5.0.4" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.2" />
     </ItemGroup>
 
     <ItemGroup>

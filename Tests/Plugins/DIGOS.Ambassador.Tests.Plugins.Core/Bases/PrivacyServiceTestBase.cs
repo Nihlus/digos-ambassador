@@ -26,12 +26,12 @@ using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
-using DIGOS.Ambassador.Tests.Extensions;
 using DIGOS.Ambassador.Tests.TestBases;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Remora.Behaviours.Services;
+using Moq;
+using Remora.Discord.API.Abstractions.Rest;
 using Xunit;
 
 #pragma warning disable SA1648
@@ -59,12 +59,16 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
         {
             serviceCollection.AddDbContext<CoreDatabaseContext>(ConfigureOptions<CoreDatabaseContext>);
 
+            var channelAPIMock = new Mock<IDiscordRestChannelAPI>();
+            var userAPIMock = new Mock<IDiscordRestUserAPI>();
+
             serviceCollection
                 .AddSingleton(FileSystemFactory.CreateContentFileSystem())
-                .AddSingleton<DelayedActionService>()
                 .AddScoped<ContentService>()
                 .AddScoped<UserFeedbackService>()
                 .AddScoped<PrivacyService>()
+                .AddSingleton(channelAPIMock.Object)
+                .AddSingleton(userAPIMock.Object)
                 .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
         }
 
@@ -72,7 +76,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
             this.Database = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            this.Database.Database.Create();
+            this.Database.Database.EnsureCreated();
 
             this.Privacy = serviceProvider.GetRequiredService<PrivacyService>();
         }

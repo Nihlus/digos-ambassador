@@ -21,8 +21,7 @@
 //
 
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Tests.Utility;
-using Discord;
+using Remora.Discord.Core;
 using Xunit;
 
 #pragma warning disable SA1600
@@ -35,11 +34,11 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
     {
         public class IsServerKnownAsync : ServerServiceTestBase
         {
-            private readonly IGuild _discordGuild;
+            private readonly Snowflake _discordGuild;
 
             public IsServerKnownAsync()
             {
-                _discordGuild = MockHelper.CreateDiscordGuild(0);
+                _discordGuild = new Snowflake(0);
             }
 
             [Fact]

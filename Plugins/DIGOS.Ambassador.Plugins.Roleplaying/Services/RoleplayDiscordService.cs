@@ -25,13 +25,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
-using DIGOS.Ambassador.Discord.Extensions;
-using DIGOS.Ambassador.Plugins.Core.Model.Entity;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
-using Discord;
-using Discord.Commands;
+using Humanizer;
+using Microsoft.EntityFrameworkCore;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
@@ -42,120 +44,96 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
     /// </summary>
     public class RoleplayDiscordService
     {
-        private readonly IDiscordClient _client;
         private readonly RoleplayService _roleplays;
         private readonly DedicatedChannelService _dedicatedChannels;
+        private readonly IDiscordRestGuildAPI _guildAPI;
+        private readonly IDiscordRestChannelAPI _channelAPI;
 
         private readonly UserService _users;
         private readonly ServerService _servers;
 
-        private readonly CommandService _commands;
-        private readonly OwnedEntityService _ownedEntities;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleplayDiscordService"/> class.
         /// </summary>
-        /// <param name="client">The Discord client.</param>
         /// <param name="roleplays">The roleplay service.</param>
         /// <param name="dedicatedChannels">The dedicated channel service.</param>
         /// <param name="users">The user service.</param>
         /// <param name="servers">The server service.</param>
-        /// <param name="commands">The command service.</param>
-        /// <param name="ownedEntities">The owned entity service.</param>
+        /// <param name="guildAPI">The guild API.</param>
+        /// <param name="channelAPI">The channel API.</param>
         public RoleplayDiscordService
         (
-            IDiscordClient client,
             RoleplayService roleplays,
             DedicatedChannelService dedicatedChannels,
             UserService users,
             ServerService servers,
-            CommandService commands,
-            OwnedEntityService ownedEntities
+            IDiscordRestGuildAPI guildAPI,
+            IDiscordRestChannelAPI channelAPI
         )
         {
-            _client = client;
             _roleplays = roleplays;
             _dedicatedChannels = dedicatedChannels;
             _users = users;
             _servers = servers;
-            _commands = commands;
-            _ownedEntities = ownedEntities;
+            _guildAPI = guildAPI;
+            _channelAPI = channelAPI;
         }
 
         /// <summary>
-        /// Gets the roleplays on the given guild.
+        /// Gets the roleplays that match the given query.
         /// </summary>
-        /// <param name="guild">The guild.</param>
+        /// <param name="query">Additional query statements.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<IEnumerable<Roleplay>>> GetRoleplaysAsync(IGuild guild)
-        {
-            var getServer = await _servers.GetOrRegisterServerAsync(guild);
-            if (!getServer.IsSuccess)
-            {
-                return RetrieveEntityResult<IEnumerable<Roleplay>>.FromError(getServer);
-            }
-
-            var server = getServer.Entity;
-
-            var roleplays = await _roleplays.GetRoleplaysAsync(server);
-            return RetrieveEntityResult<IEnumerable<Roleplay>>.FromSuccess(roleplays);
-        }
+        public Task<IReadOnlyList<Roleplay>> QueryRoleplaysAsync
+        (
+            Func<IQueryable<Roleplay>, IQueryable<Roleplay>>? query = default
+        )
+         => _roleplays.QueryDatabaseAsync(query);
 
         /// <summary>
-        /// Gets the roleplays belonging to the given guild user.
+        /// Gets the roleplays that match the given query.
         /// </summary>
-        /// <param name="guildUser">The guild user.</param>
+        /// <typeparam name="TOut">The output type of the query.</typeparam>
+        /// <param name="query">Additional query statements.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<IEnumerable<Roleplay>>> GetUserRoleplaysAsync(IGuildUser guildUser)
-        {
-            var getGuildRoleplays = await GetRoleplaysAsync(guildUser.Guild);
-            if (!getGuildRoleplays.IsSuccess)
-            {
-                return getGuildRoleplays;
-            }
-
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser);
-            if (!getUser.IsSuccess)
-            {
-                return RetrieveEntityResult<IEnumerable<Roleplay>>.FromError(getUser);
-            }
-
-            var user = getUser.Entity;
-            var guildRoleplays = getGuildRoleplays.Entity;
-
-            return RetrieveEntityResult<IEnumerable<Roleplay>>.FromSuccess(guildRoleplays.Where(r => r.Owner == user));
-        }
+        public Task<TOut> QueryRoleplaysAsync<TOut>
+        (
+            Func<IQueryable<Roleplay>, Task<TOut>> query
+        )
+            => _roleplays.QueryDatabaseAsync(query);
 
         /// <summary>
         /// Creates a new roleplay with the given owner and parameters.
         /// </summary>
-        /// <param name="owner">The owner.</param>
+        /// <param name="guildID">The ID of the guild the user is on.</param>
+        /// <param name="userID">The ID of the user.</param>
         /// <param name="name">The name of the roleplay.</param>
         /// <param name="summary">A short summary.</param>
         /// <param name="isNSFW">Whether the roleplay is NSFW.</param>
         /// <param name="isPublic">Whether the roleplay is public.</param>
         /// <returns>A creation result which may or may not have succeeded.</returns>
-        public async Task<CreateEntityResult<Roleplay>> CreateRoleplayAsync
+        public async Task<Result<Roleplay>> CreateRoleplayAsync
         (
-            IGuildUser owner,
+            Snowflake guildID,
+            Snowflake userID,
             string name,
             string summary,
             bool isNSFW,
             bool isPublic
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(owner);
+            var getUser = await _users.GetOrRegisterUserAsync(userID);
             if (!getUser.IsSuccess)
             {
-                return CreateEntityResult<Roleplay>.FromError(getUser);
+                return Result<Roleplay>.FromError(getUser);
             }
 
             var user = getUser.Entity;
 
-            var getServer = await _servers.GetOrRegisterServerAsync(owner.Guild);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildID);
             if (!getServer.IsSuccess)
             {
-                return CreateEntityResult<Roleplay>.FromError(getServer);
+                return Result<Roleplay>.FromError(getServer);
             }
 
             var server = getServer.Entity;
@@ -168,13 +146,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             var roleplay = createRoleplay.Entity;
 
-            var createChannel = await _dedicatedChannels.CreateDedicatedChannelAsync(owner.Guild, roleplay);
-            if (!createChannel.IsSuccess)
-            {
-                return CreateEntityResult<Roleplay>.FromError(createChannel);
-            }
+            var createChannel = await _dedicatedChannels.CreateDedicatedChannelAsync(roleplay);
 
-            return roleplay;
+            return !createChannel.IsSuccess
+                ? Result<Roleplay>.FromError(createChannel)
+                : roleplay;
         }
 
         /// <summary>
@@ -182,44 +158,32 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="roleplay">The roleplay.</param>
         /// <returns>A deletion result which may or may not have succeeded.</returns>
-        public async Task<DeleteEntityResult> DeleteRoleplayAsync(Roleplay roleplay)
+        public async Task<Result> DeleteRoleplayAsync(Roleplay roleplay)
         {
-            var guild = await _client.GetGuildAsync((ulong)roleplay.Server.DiscordID);
-            if (guild is null)
-            {
-                return DeleteEntityResult.FromError("Could not retrieve the associated guild.");
-            }
-
             if (roleplay.DedicatedChannelID.HasValue)
             {
-                var deleteChannel = await _dedicatedChannels.DeleteChannelAsync(guild, roleplay);
+                var deleteChannel = await _dedicatedChannels.DeleteChannelAsync(roleplay);
                 if (!deleteChannel.IsSuccess)
                 {
                     return deleteChannel;
                 }
             }
 
-            var deleteRoleplay = await _roleplays.DeleteRoleplayAsync(roleplay);
-            if (!deleteRoleplay.IsSuccess)
-            {
-                return deleteRoleplay;
-            }
-
-            return DeleteEntityResult.FromSuccess();
+            return await _roleplays.DeleteRoleplayAsync(roleplay);
         }
 
         /// <summary>
         /// Invites the given user to the given roleplay.
         /// </summary>
         /// <param name="roleplay">The roleplay to invite the user to.</param>
-        /// <param name="discordUser">The user to invite.</param>
+        /// <param name="userID">The ID of the user.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> InviteUserToRoleplayAsync(Roleplay roleplay, IGuildUser discordUser)
+        public async Task<Result> InviteUserToRoleplayAsync(Roleplay roleplay, Snowflake userID)
         {
-            var getUser = await _users.GetOrRegisterUserAsync(discordUser);
+            var getUser = await _users.GetOrRegisterUserAsync(userID);
             if (!getUser.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getUser);
+                return Result.FromError(getUser);
             }
 
             var user = getUser.Entity;
@@ -231,18 +195,18 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// Adds the given user to the given roleplay.
         /// </summary>
         /// <param name="roleplay">The roleplay.</param>
-        /// <param name="discordUser">The discord user.</param>
+        /// <param name="userID">The ID of the user.</param>
         /// <returns>A creation result which may or may not have succeeded.</returns>
-        public async Task<CreateEntityResult<RoleplayParticipant>> AddUserToRoleplayAsync
+        public async Task<Result<RoleplayParticipant>> AddUserToRoleplayAsync
         (
             Roleplay roleplay,
-            IGuildUser discordUser
+            Snowflake userID
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(discordUser);
+            var getUser = await _users.GetOrRegisterUserAsync(userID);
             if (!getUser.IsSuccess)
             {
-                return CreateEntityResult<RoleplayParticipant>.FromError(getUser);
+                return Result<RoleplayParticipant>.FromError(getUser);
             }
 
             var user = getUser.Entity;
@@ -258,18 +222,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 return addUserAsync;
             }
 
-            var updatePermissions = await _dedicatedChannels.UpdateParticipantPermissionsAsync
-            (
-                discordUser.Guild,
-                roleplay
-            );
+            var updatePermissions = await _dedicatedChannels.UpdateParticipantPermissionsAsync(roleplay);
 
-            if (!updatePermissions.IsSuccess)
-            {
-                return CreateEntityResult<RoleplayParticipant>.FromError(updatePermissions);
-            }
-
-            return addUserAsync;
+            return !updatePermissions.IsSuccess
+                ? Result<RoleplayParticipant>.FromError(updatePermissions)
+                : addUserAsync;
         }
 
         /// <summary>
@@ -277,14 +234,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// exists).
         /// </summary>
         /// <param name="roleplay">The roleplay.</param>
-        /// <param name="discordUser">The user.</param>
+        /// <param name="userID">The ID of the user.</param>
         /// <returns>A deletion result which may or may not have succeeded.</returns>
-        public async Task<DeleteEntityResult> RemoveUserFromRoleplayAsync(Roleplay roleplay, IGuildUser discordUser)
+        public async Task<Result> RemoveUserFromRoleplayAsync(Roleplay roleplay, Snowflake userID)
         {
-            var getUser = await _users.GetOrRegisterUserAsync(discordUser);
+            var getUser = await _users.GetOrRegisterUserAsync(userID);
             if (!getUser.IsSuccess)
             {
-                return DeleteEntityResult.FromError(getUser);
+                return Result.FromError(getUser);
             }
 
             var user = getUser.Entity;
@@ -300,27 +257,21 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 return removeUserAsync;
             }
 
-            var revoke = await _dedicatedChannels.RevokeUserAccessAsync(roleplay, discordUser);
-            if (!revoke.IsSuccess)
-            {
-                return DeleteEntityResult.FromError(revoke);
-            }
-
-            return DeleteEntityResult.FromSuccess();
+            return await _dedicatedChannels.RevokeUserAccessAsync(roleplay, userID);
         }
 
         /// <summary>
         /// Kicks the given user from the given roleplay, preventing them from joining again.
         /// </summary>
         /// <param name="roleplay">The roleplay.</param>
-        /// <param name="discordUser">The user.</param>
+        /// <param name="userID">The ID of the user.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> KickUserFromRoleplayAsync(Roleplay roleplay, IGuildUser discordUser)
+        public async Task<Result> KickUserFromRoleplayAsync(Roleplay roleplay, Snowflake userID)
         {
-            var getUser = await _users.GetOrRegisterUserAsync(discordUser);
+            var getUser = await _users.GetOrRegisterUserAsync(userID);
             if (!getUser.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getUser);
+                return Result.FromError(getUser);
             }
 
             var user = getUser.Entity;
@@ -336,47 +287,49 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 return removeUserAsync;
             }
 
-            var revoke = await _dedicatedChannels.RevokeUserAccessAsync(roleplay, discordUser);
-            if (!revoke.IsSuccess)
-            {
-                return ModifyEntityResult.FromError(revoke);
-            }
-
-            return ModifyEntityResult.FromSuccess();
+            return await _dedicatedChannels.RevokeUserAccessAsync(roleplay, userID);
         }
 
         /// <summary>
         /// Starts the given roleplay in the current channel, or the dedicated channel if one exists.
         /// </summary>
-        /// <param name="currentChannel">The current channel.</param>
+        /// <param name="currentChannelID">The current channel.</param>
         /// <param name="roleplay">The roleplay.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> StartRoleplayAsync(ITextChannel currentChannel, Roleplay roleplay)
+        public async Task<Result> StartRoleplayAsync(Snowflake currentChannelID, Roleplay roleplay)
         {
-            var guild = currentChannel.Guild;
-
-            var getDedicatedChannelResult = await _dedicatedChannels.GetDedicatedChannelAsync
-            (
-                guild,
-                roleplay
-            );
+            var getDedicatedChannelResult = _dedicatedChannels.GetDedicatedChannel(roleplay);
 
             // Identify the channel to start the RP in. Preference is given to the roleplay's dedicated channel.
-            var channel = getDedicatedChannelResult.IsSuccess ? getDedicatedChannelResult.Entity : currentChannel;
-            if (roleplay.IsNSFW && !channel.IsNsfw)
+            var channelID = getDedicatedChannelResult.IsSuccess ? getDedicatedChannelResult.Entity : currentChannelID;
+            var getChannel = await _channelAPI.GetChannelAsync(channelID);
+            if (!getChannel.IsSuccess)
             {
-                return ModifyEntityResult.FromError
+                return Result.FromError(getChannel);
+            }
+
+            var channel = getChannel.Entity;
+
+            if (roleplay.IsNSFW && !(channel.IsNsfw.HasValue && channel.IsNsfw.Value))
+            {
+                return new UserError
                 (
                     "This channel is not marked as NSFW, while your roleplay is... naughty!"
                 );
             }
 
-            if (await HasActiveRoleplayAsync(channel))
+            var getHasActiveRoleplay = await HasActiveRoleplayAsync(channelID);
+            if (!getHasActiveRoleplay.IsSuccess)
             {
-                var currentRoleplayResult = await GetActiveRoleplayAsync(channel);
+                return Result.FromError(getHasActiveRoleplay);
+            }
+
+            if (getHasActiveRoleplay.Entity)
+            {
+                var currentRoleplayResult = await GetActiveRoleplayAsync(channelID);
                 if (!currentRoleplayResult.IsSuccess)
                 {
-                    return ModifyEntityResult.FromError(currentRoleplayResult);
+                    return Result.FromError(currentRoleplayResult);
                 }
 
                 var currentRoleplay = currentRoleplayResult.Entity;
@@ -389,11 +342,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 }
                 else
                 {
-                    return ModifyEntityResult.FromError("There's already a roleplay active in this channel.");
+                    return new UserError("There's already a roleplay active in this channel.");
                 }
             }
 
-            var start = await _roleplays.StartRoleplayAsync(roleplay, (long)channel.Id);
+            var start = await _roleplays.StartRoleplayAsync(roleplay, channelID);
             if (!start.IsSuccess)
             {
                 return start;
@@ -402,16 +355,31 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             // If the channel in question is the roleplay's dedicated channel, enable it
             if (!roleplay.DedicatedChannelID.HasValue)
             {
-                return ModifyEntityResult.FromSuccess();
+                return Result.FromSuccess();
             }
 
-            var enableChannel = await _dedicatedChannels.UpdateParticipantPermissionsAsync(guild, roleplay);
+            var enableChannel = await _dedicatedChannels.UpdateParticipantPermissionsAsync(roleplay);
             if (!enableChannel.IsSuccess)
             {
                 return enableChannel;
             }
 
-            return ModifyEntityResult.FromSuccess();
+            var joinedUsers = roleplay.JoinedUsers.Select
+            (
+                u => $"<@{u.User.DiscordID}>"
+            );
+
+            var participantList = joinedUsers.Humanize();
+
+            var send = await _channelAPI.CreateMessageAsync
+            (
+                roleplay.ActiveChannelID!.Value,
+                $"Calling {participantList}!"
+            );
+
+            return !send.IsSuccess
+                ? Result.FromError(send)
+                : Result.FromSuccess();
         }
 
         /// <summary>
@@ -419,7 +387,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="roleplay">The roleplay.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> StopRoleplayAsync(Roleplay roleplay)
+        public async Task<Result> StopRoleplayAsync(Roleplay roleplay)
         {
             var stop = await _roleplays.StopRoleplayAsync(roleplay);
             if (!stop.IsSuccess)
@@ -430,22 +398,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             // If the channel in question is the roleplay's dedicated channel, disable it
             if (!roleplay.DedicatedChannelID.HasValue)
             {
-                return ModifyEntityResult.FromSuccess();
+                return Result.FromSuccess();
             }
 
-            var guild = await _client.GetGuildAsync((ulong)roleplay.Server.DiscordID);
-            if (guild is null)
-            {
-                return ModifyEntityResult.FromError("Failed to get a valid guild for the roleplay.");
-            }
-
-            var enableChannel = await _dedicatedChannels.UpdateParticipantPermissionsAsync(guild, roleplay);
-            if (!enableChannel.IsSuccess)
-            {
-                return enableChannel;
-            }
-
-            return ModifyEntityResult.FromSuccess();
+            return await _dedicatedChannels.UpdateParticipantPermissionsAsync(roleplay);
         }
 
         /// <summary>
@@ -454,15 +410,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="roleplay">The roleplay.</param>
         /// <param name="name">The new name.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetRoleplayNameAsync(Roleplay roleplay, string name)
+        public async Task<Result> SetRoleplayNameAsync(Roleplay roleplay, string name)
         {
-            var commandModule = _commands.Modules.First(m => m.Name == "roleplay");
-            var validNameResult = _ownedEntities.IsEntityNameValid(commandModule.GetAllCommandNames(), name);
-            if (!validNameResult.IsSuccess)
-            {
-                return ModifyEntityResult.FromError(validNameResult);
-            }
-
             var setName = await _roleplays.SetRoleplayNameAsync(roleplay, name);
             if (!setName.IsSuccess)
             {
@@ -471,16 +420,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             if (!roleplay.DedicatedChannelID.HasValue)
             {
-                return ModifyEntityResult.FromSuccess();
+                return Result.FromSuccess();
             }
 
-            var setChannelName = await _dedicatedChannels.UpdateChannelNameAsync(roleplay);
-            if (!setChannelName.IsSuccess)
-            {
-                return setChannelName;
-            }
-
-            return ModifyEntityResult.FromSuccess();
+            return await _dedicatedChannels.UpdateChannelNameAsync(roleplay);
         }
 
         /// <summary>
@@ -489,7 +432,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="roleplay">The roleplay to set the summary of.</param>
         /// <param name="summary">The new summary.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetRoleplaySummaryAsync(Roleplay roleplay, string summary)
+        public async Task<Result> SetRoleplaySummaryAsync(Roleplay roleplay, string summary)
         {
             var setSummary = await _roleplays.SetRoleplaySummaryAsync(roleplay, summary);
             if (!setSummary.IsSuccess)
@@ -499,16 +442,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             if (!roleplay.DedicatedChannelID.HasValue)
             {
-                return ModifyEntityResult.FromSuccess();
+                return Result.FromSuccess();
             }
 
-            var setChannelSummary = await _dedicatedChannels.UpdateChannelSummaryAsync(roleplay);
-            if (!setChannelSummary.IsSuccess)
-            {
-                return setChannelSummary;
-            }
-
-            return ModifyEntityResult.FromSuccess();
+            return await _dedicatedChannels.UpdateChannelSummaryAsync(roleplay);
         }
 
         /// <summary>
@@ -517,7 +454,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="roleplay">The roleplay.</param>
         /// <param name="isNSFW">Whether the roleplay is NSFW.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetRoleplayIsNSFWAsync(Roleplay roleplay, bool isNSFW)
+        public async Task<Result> SetRoleplayIsNSFWAsync(Roleplay roleplay, bool isNSFW)
         {
             var setNSFW = await _roleplays.SetRoleplayIsNSFWAsync(roleplay, isNSFW);
             if (!setNSFW.IsSuccess)
@@ -530,13 +467,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 return setNSFW;
             }
 
-            var setChannelNSFW = await _dedicatedChannels.UpdateChannelNSFWStatus(roleplay);
-            if (!setChannelNSFW.IsSuccess)
-            {
-                return setChannelNSFW;
-            }
-
-            return ModifyEntityResult.FromSuccess();
+            return await _dedicatedChannels.UpdateChannelNSFWStatus(roleplay);
         }
 
         /// <summary>
@@ -545,7 +476,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="roleplay">The roleplay.</param>
         /// <param name="isPublic">Whether the roleplay is public.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetRoleplayIsPublicAsync(Roleplay roleplay, bool isPublic)
+        public async Task<Result> SetRoleplayIsPublicAsync(Roleplay roleplay, bool isPublic)
         {
             var setPublic = await _roleplays.SetRoleplayIsPublicAsync(roleplay, isPublic);
             if (!setPublic.IsSuccess)
@@ -558,44 +489,28 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 return setPublic;
             }
 
-            var guild = await _client.GetGuildAsync((ulong)roleplay.Server.DiscordID);
-            if (guild is null)
-            {
-                return ModifyEntityResult.FromError("Failed to get a valid guild");
-            }
-
-            var updatePermissions = await _dedicatedChannels.UpdateParticipantPermissionsAsync(guild, roleplay);
-            if (!updatePermissions.IsSuccess)
-            {
-                return updatePermissions;
-            }
-
-            return ModifyEntityResult.FromSuccess();
+            return await _dedicatedChannels.UpdateParticipantPermissionsAsync(roleplay);
         }
 
         /// <summary>
         /// Gets the roleplay currently active in the given channel.
         /// </summary>
-        /// <param name="textChannel">The channel.</param>
+        /// <param name="channelID">The channel.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<Roleplay>> GetActiveRoleplayAsync(ITextChannel textChannel)
+        public async Task<Result<Roleplay>> GetActiveRoleplayAsync(Snowflake channelID)
         {
-            var getServer = await _servers.GetOrRegisterServerAsync(textChannel.Guild);
-            if (!getServer.IsSuccess)
-            {
-                return RetrieveEntityResult<Roleplay>.FromError(getServer);
-            }
-
-            var server = getServer.Entity;
-
-            var roleplay = (await _roleplays.GetRoleplaysAsync(server)).FirstOrDefault
+            var roleplays = await _roleplays.QueryDatabaseAsync
             (
-                rp => rp.IsActive && rp.ActiveChannelID == (long)textChannel.Id
+                q => q
+                    .Where(rp => rp.IsActive)
+                    .Where(rp => rp.ActiveChannelID == channelID)
             );
+
+            var roleplay = roleplays.SingleOrDefault();
 
             if (roleplay is null)
             {
-                return RetrieveEntityResult<Roleplay>.FromError
+                return new UserError
                 (
                     "There is no roleplay that is currently active in this channel."
                 );
@@ -609,72 +524,52 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// the global list is searched for a unique name. If neither are provided, the currently active roleplay is
         /// returned. If no match can be found, a failed result is returned.
         /// </summary>
-        /// <param name="currentChannel">The channel the command was executed in.</param>
-        /// <param name="guild">The guild the command was executed in.</param>
-        /// <param name="roleplayOwner">The owner of the roleplay, if any.</param>
+        /// <param name="channelID">The channel the command was executed in.</param>
+        /// <param name="guildID">The guild the command was executed in.</param>
+        /// <param name="roleplayOwnerID">The owner of the roleplay, if any.</param>
         /// <param name="roleplayName">The name of the roleplay, if any.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<Roleplay>> GetBestMatchingRoleplayAsync
+        public async Task<Result<Roleplay>> GetBestMatchingRoleplayAsync
         (
-            ITextChannel currentChannel,
-            IGuild guild,
-            IUser? roleplayOwner,
+            Snowflake channelID,
+            Snowflake guildID,
+            Snowflake? roleplayOwnerID,
             string? roleplayName
         )
         {
-            if (roleplayOwner is null && roleplayName is null)
+            switch (roleplayOwnerID)
             {
-                return await GetActiveRoleplayAsync(currentChannel);
-            }
-
-            var getServer = await _servers.GetOrRegisterServerAsync(guild);
-            if (!getServer.IsSuccess)
-            {
-                return RetrieveEntityResult<Roleplay>.FromError(getServer);
-            }
-
-            var server = getServer.Entity;
-
-            if (roleplayOwner is null)
-            {
-                return await _roleplays.GetNamedRoleplayAsync(roleplayName!, server);
+                case null when roleplayName is null:
+                {
+                    return await GetActiveRoleplayAsync(channelID);
+                }
+                case null:
+                {
+                    return await _roleplays.GetNamedRoleplayAsync(roleplayName!, guildID);
+                }
             }
 
             if (roleplayName.IsNullOrWhitespace())
             {
-                return await GetActiveRoleplayAsync(currentChannel);
+                return await GetActiveRoleplayAsync(channelID);
             }
 
-            var getOwner = await _users.GetOrRegisterUserAsync(roleplayOwner);
-            if (!getOwner.IsSuccess)
-            {
-                return RetrieveEntityResult<Roleplay>.FromError(getOwner);
-            }
-
-            var owner = getOwner.Entity;
-
-            return await _roleplays.GetUserRoleplayByNameAsync(server, owner, roleplayName);
+            return await _roleplays.GetUserRoleplayByNameAsync(guildID, roleplayOwnerID.Value, roleplayName);
         }
 
         /// <summary>
         /// Determines whether or not there is an active roleplay in the given channel.
         /// </summary>
-        /// <param name="textChannel">The channel to check.</param>
+        /// <param name="channelID">The channel to check.</param>
         /// <returns>true if there is an active roleplay; otherwise, false.</returns>
-        public async Task<bool> HasActiveRoleplayAsync(ITextChannel textChannel)
+        public async Task<Result<bool>> HasActiveRoleplayAsync(Snowflake channelID)
         {
-            var getServer = await _servers.GetOrRegisterServerAsync(textChannel.Guild);
-            if (!getServer.IsSuccess)
-            {
-                // TODO: Better return type
-                return false;
-            }
-
-            var server = getServer.Entity;
-
-            return (await _roleplays.GetRoleplaysAsync(server)).Any
+            return await QueryRoleplaysAsync
             (
-                rp => rp.IsActive && rp.ActiveChannelID == (long)textChannel.Id
+                q => q
+                    .Where(rp => rp.IsActive)
+                    .Where(rp => rp.ActiveChannelID == channelID)
+                    .AnyAsync()
             );
         }
 
@@ -683,36 +578,51 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="message">The received message.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task<ModifyEntityResult> ConsumeMessageAsync(IUserMessage message)
+        public async Task<Result> ConsumeMessageAsync(IMessage message)
         {
-            if (!(message.Channel is ITextChannel textChannel))
+            var checkForActive = await HasActiveRoleplayAsync(message.ChannelID);
+            if (!checkForActive.IsSuccess)
             {
-                return ModifyEntityResult.FromError("The message did not come from a text channel.");
+                return Result.FromError(checkForActive);
             }
 
-            var result = await GetActiveRoleplayAsync(textChannel);
+            if (!checkForActive.Entity)
+            {
+                // There's no roleplay in that channel, so it's fine
+                return Result.FromSuccess();
+            }
+
+            var result = await GetActiveRoleplayAsync(message.ChannelID);
             if (!result.IsSuccess)
             {
-                return ModifyEntityResult.FromError(result);
+                return Result.FromError(result);
             }
 
             var roleplay = result.Entity;
 
             if (!roleplay.HasJoined(message.Author))
             {
-                return ModifyEntityResult.FromError("The given message was not authored by a participant of the roleplay.");
+                return new UserError("The given message was not authored by a participant of the roleplay.");
             }
 
             var userNick = message.Author.Username;
-            if (message.Author is IGuildUser guildUser && !string.IsNullOrEmpty(guildUser.Nickname))
+            if (message.GuildID.HasValue)
             {
-                userNick = guildUser.Nickname;
+                var getMember = await _guildAPI.GetGuildMemberAsync(message.GuildID.Value, message.Author.ID);
+                if (getMember.IsSuccess)
+                {
+                    var member = getMember.Entity;
+                    if (member.Nickname.HasValue && member.Nickname.Value is not null)
+                    {
+                        userNick = member.Nickname.Value;
+                    }
+                }
             }
 
-            var getAuthor = await _users.GetOrRegisterUserAsync(message.Author);
+            var getAuthor = await _users.GetOrRegisterUserAsync(message.Author.ID);
             if (!getAuthor.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getAuthor);
+                return Result.FromError(getAuthor);
             }
 
             var author = getAuthor.Entity;
@@ -721,7 +631,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             (
                 roleplay,
                 author,
-                (long)message.Id,
+                message.ID,
                 message.Timestamp,
                 userNick,
                 message.Content
@@ -729,35 +639,156 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         }
 
         /// <summary>
-        /// Transfers ownership of the given roleplay to the given user.
+        /// Consumes a message, adding it to the active roleplay in its channel if the author is a participant.
         /// </summary>
-        /// <param name="newDiscordOwner">The new owner.</param>
-        /// <param name="roleplay">The roleplay to transfer.</param>
-        /// <returns>An execution result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> TransferRoleplayOwnershipAsync
-        (
-            IGuildUser newDiscordOwner,
-            Roleplay roleplay
-        )
+        /// <param name="message">The received message.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task<Result> ConsumeMessageAsync(IPartialMessage message)
         {
-            var getNewOwner = await _users.GetOrRegisterUserAsync(newDiscordOwner);
-            if (!getNewOwner.IsSuccess)
+            if (!message.ID.HasValue)
             {
-                return ModifyEntityResult.FromError(getNewOwner);
+                return new GenericError("Unable to process messages without IDs.");
             }
 
-            var newOwner = getNewOwner.Entity;
-            return await _roleplays.TransferRoleplayOwnershipAsync(newOwner, roleplay);
+            if (!message.Timestamp.HasValue)
+            {
+                return new GenericError("Unable to process messages without timestamps.");
+            }
+
+            if (!message.Content.HasValue)
+            {
+                return new GenericError("Unable to process messages without content.");
+            }
+
+            if (!message.ChannelID.HasValue)
+            {
+                return new GenericError("Unable to process messages without channel IDs.");
+            }
+
+            if (!message.Author.HasValue)
+            {
+                return new GenericError("Unable to process messages without authors.");
+            }
+
+            var result = await GetActiveRoleplayAsync(message.ChannelID.Value);
+            if (!result.IsSuccess)
+            {
+                return Result.FromError(result);
+            }
+
+            var roleplay = result.Entity;
+
+            if (!roleplay.HasJoined(message.Author.Value))
+            {
+                return new UserError("The given message was not authored by a participant of the roleplay.");
+            }
+
+            var userNick = message.Author.Value.Username;
+            if (message.GuildID.HasValue)
+            {
+                var getMember = await _guildAPI.GetGuildMemberAsync(message.GuildID.Value, message.Author.Value.ID);
+                if (getMember.IsSuccess)
+                {
+                    var member = getMember.Entity;
+                    if (member.Nickname.HasValue && member.Nickname.Value is not null)
+                    {
+                        userNick = member.Nickname.Value;
+                    }
+                }
+            }
+
+            var getAuthor = await _users.GetOrRegisterUserAsync(message.Author.Value.ID);
+            if (!getAuthor.IsSuccess)
+            {
+                return Result.FromError(getAuthor);
+            }
+
+            var author = getAuthor.Entity;
+
+            return await _roleplays.AddOrUpdateMessageInRoleplayAsync
+            (
+                roleplay,
+                author,
+                message.ID.Value,
+                message.Timestamp.Value,
+                userNick,
+                message.Content.Value
+            );
         }
+
+        /// <summary>
+        /// Ensures all messages from the roleplay's dedicated channel are logged, in case the bot was down when one or
+        /// more messages were sent.
+        /// </summary>
+        /// <param name="roleplay">The roleplay.</param>
+        /// <returns>An execution result which may or may not have succeeded.</returns>
+        public async Task<Result<ulong>> EnsureAllMessagesAreLoggedAsync(Roleplay roleplay)
+        {
+            var targetChannel = roleplay.DedicatedChannelID ?? (roleplay.ActiveChannelID ?? null);
+            if (targetChannel is null)
+            {
+                return new UserError("The roleplay doesn't have a dedicated channel, nor is it active in one.");
+            }
+
+            var lastMessage = roleplay.Messages.LastOrDefault()?.DiscordMessageID ?? default;
+
+            ulong updatedMessages = 0;
+            while (true)
+            {
+                var getMessages = await _channelAPI.GetChannelMessagesAsync
+                (
+                    roleplay.DedicatedChannelID!.Value,
+                    after: lastMessage
+                );
+
+                if (!getMessages.IsSuccess)
+                {
+                    return Result<ulong>.FromError(getMessages);
+                }
+
+                var messages = getMessages.Entity;
+                if (messages.Count == 0)
+                {
+                    break;
+                }
+
+                lastMessage = messages[^1].ID;
+
+                foreach (var message in messages)
+                {
+                    if (!roleplay.HasJoined(message.Author))
+                    {
+                        continue;
+                    }
+
+                    var updateResult = await ConsumeMessageAsync(message);
+                    if (!updateResult.IsSuccess)
+                    {
+                        return Result<ulong>.FromError(updateResult);
+                    }
+
+                    ++updatedMessages;
+                }
+            }
+
+            return updatedMessages;
+        }
+
+        /// <summary>
+        /// Transfers ownership of the given roleplay to the given user.
+        /// </summary>
+        /// <param name="userID">The ID of the user.</param>
+        /// <param name="roleplay">The roleplay to transfer.</param>
+        /// <returns>An execution result which may or may not have succeeded.</returns>
+        public async Task<Result> TransferRoleplayOwnershipAsync(Snowflake userID, Roleplay roleplay)
+            => await _roleplays.TransferRoleplayOwnershipAsync(userID, roleplay);
 
         /// <summary>
         /// Refreshes the timestamp on the given roleplay.
         /// </summary>
         /// <param name="roleplay">The roleplay.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        public Task<ModifyEntityResult> RefreshRoleplayAsync(Roleplay roleplay)
-        {
-            return _roleplays.RefreshRoleplayAsync(roleplay);
-        }
+        public Task<Result> RefreshRoleplayAsync(Roleplay roleplay)
+            => _roleplays.RefreshRoleplayAsync(roleplay);
     }
 }

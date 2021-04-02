@@ -21,7 +21,9 @@
 //
 
 using System.Diagnostics.CodeAnalysis;
-using JetBrains.Annotations;
+using DIGOS.Ambassador.Plugins.Core.Extensions;
+using DIGOS.Ambassador.Plugins.Moderation.Extensions;
+using DIGOS.Ambassador.Plugins.Permissions.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Remora.EntityFrameworkCore.Modular;
 
@@ -31,7 +33,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
     /// <summary>
     /// Represents the database model of the dossier plugin.
     /// </summary>
-    [PublicAPI]
     public class ModerationDatabaseContext : SchemaAwareDbContext
     {
         private const string SchemaName = "ModerationModule";
@@ -64,6 +65,17 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         public ModerationDatabaseContext(DbContextOptions<ModerationDatabaseContext> contextOptions)
             : base(SchemaName, contextOptions)
         {
+        }
+
+        /// <inheritdoc />
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder
+                .ConfigurePermissionConversions()
+                .ConfigureCoreConversions()
+                .ConfigureModerationConversions();
         }
     }
 }

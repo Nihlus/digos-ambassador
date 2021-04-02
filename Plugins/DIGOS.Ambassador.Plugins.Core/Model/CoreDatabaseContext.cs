@@ -19,8 +19,11 @@
 //  You should have received a copy of the GNU Affero General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
+
+using DIGOS.Ambassador.Plugins.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
+using DIGOS.Ambassador.Plugins.Permissions.Extensions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Remora.EntityFrameworkCore.Modular;
@@ -31,7 +34,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Model
     /// <summary>
     /// Represents the database model of the core plugin.
     /// </summary>
-    [PublicAPI]
     public class CoreDatabaseContext : SchemaAwareDbContext
     {
         private const string SchemaName = "Core";
@@ -67,6 +69,10 @@ namespace DIGOS.Ambassador.Plugins.Core.Model
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder
+                .ConfigurePermissionConversions()
+                .ConfigureCoreConversions();
 
             modelBuilder.Entity<ServerUser>().HasOne(su => su.Server).WithMany(s => s.KnownUsers);
             modelBuilder.Entity<ServerUser>().HasOne(su => su.User).WithMany();

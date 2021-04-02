@@ -54,7 +54,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Extensions
         /// <typeparam name="TResult">The resulting type.</typeparam>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         [Pure]
-        public static async Task<RetrieveEntityResult<TResult>> SelectFromBestLevenshteinMatchAsync<TSource, TResult>
+        public static async Task<Result<TResult>> SelectFromBestLevenshteinMatchAsync<TSource, TResult>
         (
             this IQueryable<TSource> @this,
             Func<TSource, TResult> selector,
@@ -71,7 +71,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Extensions
 
             if (!matchResult.IsSuccess)
             {
-                return RetrieveEntityResult<TResult>.FromError(matchResult);
+                return Result<TResult>.FromError(matchResult);
             }
 
             var selectedString = matchResult.Entity;
@@ -81,12 +81,12 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Extensions
             var selectedObject = await @this.FirstOrDefaultAsync(i => selectorFunc(i) == selectedString, ct);
             if (selectedObject is null)
             {
-                return RetrieveEntityResult<TResult>.FromError("No matching object for the selector found.");
+                return new GenericError("No matching object for the selector found.");
             }
 
             var result = selector(selectedObject);
 
-            return RetrieveEntityResult<TResult>.FromSuccess(result);
+            return Result<TResult>.FromSuccess(result);
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Extensions
         /// <typeparam name="TResult">The resulting type.</typeparam>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         [Pure]
-        public static RetrieveEntityResult<TResult> SelectFromBestLevenshteinMatch<TSource, TResult>
+        public static Result<TResult> SelectFromBestLevenshteinMatch<TSource, TResult>
         (
             this IEnumerable<TSource> @this,
             Func<TSource, TResult> selector,
@@ -117,7 +117,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Extensions
             var matchResult = enumerable.Select(stringSelector).BestLevenshteinMatch(search, tolerance);
             if (!matchResult.IsSuccess)
             {
-                return RetrieveEntityResult<TResult>.FromError(matchResult);
+                return Result<TResult>.FromError(matchResult);
             }
 
             var selectedString = matchResult.Entity;
@@ -125,12 +125,12 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Extensions
             var selectedObject = enumerable.FirstOrDefault(i => stringSelector(i) == selectedString);
             if (selectedObject is null)
             {
-                return RetrieveEntityResult<TResult>.FromError("No matching object for the selector found.");
+                return new GenericError("No matching object for the selector found.");
             }
 
             var result = selector(selectedObject);
 
-            return RetrieveEntityResult<TResult>.FromSuccess(result);
+            return Result<TResult>.FromSuccess(result);
         }
     }
 }

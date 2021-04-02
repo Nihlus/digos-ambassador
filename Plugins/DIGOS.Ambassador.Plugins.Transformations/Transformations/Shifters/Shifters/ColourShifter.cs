@@ -22,9 +22,11 @@
 
 using System;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Results;
 using Humanizer;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
 {
@@ -56,22 +58,26 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         }
 
         /// <inheritdoc />
-        protected override async Task<ShiftBodypartResult> ShiftBodypartAsync(Bodypart bodypart, Chirality chirality)
+        protected override async Task<Result<ShiftBodypartResult>> ShiftBodypartAsync
+        (
+            Bodypart bodypart,
+            Chirality chirality
+        )
         {
             if (!this.Appearance.TryGetAppearanceComponent(bodypart, chirality, out var currentComponent))
             {
-                return ShiftBodypartResult.FromError("The character doesn't have that bodypart.");
+                return new UserError("The character doesn't have that bodypart.");
             }
 
             if (currentComponent.BaseColour.IsSameColourAs(_colour))
             {
-                return ShiftBodypartResult.FromError("The bodypart is already that colour.");
+                return new ShiftBodypartResult(await GetNoChangeMessageAsync(bodypart), ShiftBodypartAction.Nothing);
             }
 
             currentComponent.BaseColour = _colour.Clone();
 
             var shiftMessage = await GetShiftMessageAsync(bodypart, chirality);
-            return ShiftBodypartResult.FromSuccess(shiftMessage, ShiftBodypartAction.Shift);
+            return new ShiftBodypartResult(shiftMessage, ShiftBodypartAction.Shift);
         }
 
         /// <inheritdoc />

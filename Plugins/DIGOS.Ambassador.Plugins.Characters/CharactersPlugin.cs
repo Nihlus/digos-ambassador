@@ -26,23 +26,23 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
-using DIGOS.Ambassador.Discord.Interactivity.Behaviours;
+using DIGOS.Ambassador.Discord.Interactivity.Extensions;
 using DIGOS.Ambassador.Plugins.Characters;
 using DIGOS.Ambassador.Plugins.Characters.CommandModules;
 using DIGOS.Ambassador.Plugins.Characters.Model;
+using DIGOS.Ambassador.Plugins.Characters.Parsers;
 using DIGOS.Ambassador.Plugins.Characters.Services;
 using DIGOS.Ambassador.Plugins.Characters.Services.Interfaces;
 using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
-using DIGOS.Ambassador.Plugins.Characters.TypeReaders;
+using DIGOS.Ambassador.Plugins.Core.Preconditions;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
-using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Remora.Behaviours;
-using Remora.Behaviours.Extensions;
-using Remora.Behaviours.Services;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Remora.Commands.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
+using Remora.Results;
 
 [assembly: InternalsVisibleTo("DIGOS.Ambassador.Tests.Plugins.Characters")]
 [assembly: RemoraPlugin(typeof(CharactersPlugin))]
@@ -63,20 +63,27 @@ namespace DIGOS.Ambassador.Plugins.Characters
         /// <inheritdoc />
         public override void ConfigureServices(IServiceCollection serviceCollection)
         {
-            serviceCollection
-                .AddSingleton<PronounService>()
-                .AddScoped<CharacterService>()
-                .AddScoped<ICharacterService>(s => s.GetRequiredService<CharacterService>())
-                .AddScoped<ICharacterEditor>(s => s.GetRequiredService<CharacterService>())
-                .AddScoped<CharacterDiscordService>()
-                .AddScoped<CharacterRoleService>()
-                .AddConfiguredSchemaAwareDbContextPool<CharactersDatabaseContext>()
-                .AddBehaviour<InteractivityBehaviour>()
-                .AddBehaviour<DelayedActionBehaviour>();
+            // Dependencies
+            serviceCollection.AddInteractivity();
+
+            // Our stuff
+            serviceCollection.TryAddSingleton<PronounService>();
+            serviceCollection.TryAddScoped<CharacterService>();
+            serviceCollection.TryAddScoped<ICharacterService>(s => s.GetRequiredService<CharacterService>());
+            serviceCollection.TryAddScoped<ICharacterEditor>(s => s.GetRequiredService<CharacterService>());
+            serviceCollection.TryAddScoped<CharacterDiscordService>();
+            serviceCollection.TryAddScoped<CharacterRoleService>();
+
+            serviceCollection.AddConfiguredSchemaAwareDbContextPool<CharactersDatabaseContext>();
+
+            serviceCollection.AddParser<Character, CharacterParser>();
+            serviceCollection.AddCommandGroup<CharacterCommands>();
+
+            serviceCollection.AddCondition<RequireEntityOwnerCondition<Character>>();
         }
 
         /// <inheritdoc />
-        public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
+        public override ValueTask<Result> InitializeAsync(IServiceProvider serviceProvider)
         {
             var permissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
             var registrationResult = permissionRegistry.RegisterPermissions
@@ -87,28 +94,23 @@ namespace DIGOS.Ambassador.Plugins.Characters
 
             if (!registrationResult.IsSuccess)
             {
-                return false;
+                return new ValueTask<Result>(registrationResult);
             }
-
-            var commands = serviceProvider.GetRequiredService<CommandService>();
-
-            commands.AddTypeReader<Character>(new CharacterTypeReader());
-            await commands.AddModuleAsync<CharacterCommands>(serviceProvider);
 
             var pronounService = serviceProvider.GetRequiredService<PronounService>();
             pronounService.DiscoverPronounProviders();
 
-            return true;
+            return new ValueTask<Result>(Result.FromSuccess());
         }
 
         /// <inheritdoc />
-        public async Task<bool> MigratePluginAsync(IServiceProvider serviceProvider)
+        public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
         {
             var context = serviceProvider.GetRequiredService<CharactersDatabaseContext>();
 
             await context.Database.MigrateAsync();
 
-            return true;
+            return Result.FromSuccess();
         }
 
         /// <inheritdoc />

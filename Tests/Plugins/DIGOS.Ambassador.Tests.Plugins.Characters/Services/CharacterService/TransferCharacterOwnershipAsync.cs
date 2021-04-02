@@ -24,6 +24,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
+using Remora.Discord.Core;
 using Xunit;
 
 #pragma warning disable SA1600
@@ -42,7 +43,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             public TransferCharacterOwnershipAsync()
             {
                 _character = CreateCharacter();
-                _newOwner = new User(1);
+                _newOwner = new User(new Snowflake(1));
             }
 
             [Fact]
@@ -64,7 +65,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 await this.Characters.TransferCharacterOwnershipAsync(_newOwner, this.DefaultServer, _character);
 
                 var character = this.Database.Characters.First();
-                Assert.Equal(_newOwner, character.Owner);
+                Assert.Equal(_newOwner.DiscordID, character.Owner.DiscordID);
             }
         }
     }

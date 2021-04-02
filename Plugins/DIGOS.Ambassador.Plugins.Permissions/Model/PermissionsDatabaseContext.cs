@@ -21,6 +21,7 @@
 //
 
 using System.Diagnostics.CodeAnalysis;
+using DIGOS.Ambassador.Plugins.Permissions.Extensions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Remora.EntityFrameworkCore.Modular;
@@ -31,7 +32,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Model
     /// <summary>
     /// Represents the database model of the dossier plugin.
     /// </summary>
-    [PublicAPI]
     public class PermissionsDatabaseContext : SchemaAwareDbContext
     {
         private const string SchemaName = "PermissionModule";
@@ -54,6 +54,14 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Model
         public PermissionsDatabaseContext(DbContextOptions<PermissionsDatabaseContext> contextOptions)
             : base(SchemaName, contextOptions)
         {
+        }
+
+        /// <inheritdoc />
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.ConfigurePermissionConversions();
         }
     }
 }

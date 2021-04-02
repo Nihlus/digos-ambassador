@@ -32,7 +32,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     /// </summary>
     [PublicAPI]
     [TokenIdentifier("pronoun", "pr")]
-    public sealed class PronounToken : ReplacableTextToken<PronounToken>
+    public sealed class PronounToken : ReplaceableTextToken<PronounToken>
     {
         private readonly PronounService _pronouns;
 

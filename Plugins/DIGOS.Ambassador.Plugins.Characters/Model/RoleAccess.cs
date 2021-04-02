@@ -20,7 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using Discord;
+using Remora.Discord.API.Abstractions.Objects;
 
 namespace DIGOS.Ambassador.Plugins.Characters.Model
 {
@@ -35,7 +35,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         Open,
 
         /// <summary>
-        /// The role can only be applied by people with the <see cref="GuildPermission.ManageRoles"/> permission.
+        /// The role can only be applied by people with the <see cref="DiscordPermission.ManageRoles"/> permission.
         /// </summary>
         Restricted
     }

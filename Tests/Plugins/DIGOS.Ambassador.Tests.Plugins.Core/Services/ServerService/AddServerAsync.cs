@@ -22,8 +22,7 @@
 
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Tests.Utility;
-using Discord;
+using Remora.Discord.Core;
 using Xunit;
 
 #pragma warning disable SA1600
@@ -36,11 +35,11 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
     {
         public class AddServerAsync : ServerServiceTestBase
         {
-            private readonly IGuild _discordGuild;
+            private readonly Snowflake _discordGuild;
 
             public AddServerAsync()
             {
-                _discordGuild = MockHelper.CreateDiscordGuild(0);
+                _discordGuild = new Snowflake(0);
             }
 
             [Fact]
@@ -56,10 +55,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             {
                 await this.Servers.AddServerAsync(_discordGuild);
 
-                var server = this.Database.Servers.FirstOrDefault();
+                var server = this.Database.Servers.First();
 
                 Assert.NotNull(server);
-                Assert.Equal((long)_discordGuild.Id, server.DiscordID);
+                Assert.Equal(_discordGuild, server.DiscordID);
             }
 
             [Fact]

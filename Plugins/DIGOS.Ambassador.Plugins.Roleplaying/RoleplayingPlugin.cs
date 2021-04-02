@@ -25,25 +25,27 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
-using DIGOS.Ambassador.Discord.Interactivity.Behaviours;
 using DIGOS.Ambassador.Discord.TypeReaders;
+using DIGOS.Ambassador.Plugins.Core.Preconditions;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
 using DIGOS.Ambassador.Plugins.Roleplaying;
 using DIGOS.Ambassador.Plugins.Roleplaying.Behaviours;
 using DIGOS.Ambassador.Plugins.Roleplaying.CommandModules;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
+using DIGOS.Ambassador.Plugins.Roleplaying.Preconditions;
+using DIGOS.Ambassador.Plugins.Roleplaying.Responders;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
+using DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters;
 using DIGOS.Ambassador.Plugins.Roleplaying.TypeReaders;
-using Discord;
-using Discord.Commands;
-using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Remora.Behaviours;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Remora.Behaviours.Extensions;
-using Remora.Behaviours.Services;
+using Remora.Commands.Extensions;
+using Remora.Discord.Gateway.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
+using Remora.Results;
 
 [assembly: RemoraPlugin(typeof(RoleplayingPlugin))]
 
@@ -52,7 +54,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying
     /// <summary>
     /// Describes the roleplay plugin.
     /// </summary>
-    [PublicAPI]
     public sealed class RoleplayingPlugin : PluginDescriptor, IMigratablePlugin
     {
         /// <inheritdoc />
@@ -64,21 +65,30 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying
         /// <inheritdoc />
         public override void ConfigureServices(IServiceCollection serviceCollection)
         {
+            serviceCollection.TryAddScoped<RoleplayService>();
+            serviceCollection.TryAddScoped<RoleplayDiscordService>();
+            serviceCollection.TryAddScoped<RoleplayServerSettingsService>();
+            serviceCollection.TryAddScoped<DedicatedChannelService>();
+            serviceCollection.AddConfiguredSchemaAwareDbContextPool<RoleplayingDatabaseContext>();
+
+            serviceCollection.AddCommandGroup<RoleplayCommands>();
+
+            serviceCollection.AddParser<Roleplay, RoleplayParser>();
+            serviceCollection.AddParser<ExportFormat, HumanizerEnumTypeReader<ExportFormat>>();
+
+            serviceCollection.AddCondition<RequireActiveRoleplayCondition>();
+            serviceCollection.AddCondition<RequireEntityOwnerCondition<Roleplay>>();
+
             serviceCollection
-                .AddScoped<RoleplayService>()
-                .AddScoped<RoleplayDiscordService>()
-                .AddScoped<RoleplayServerSettingsService>()
-                .AddScoped<DedicatedChannelService>()
-                .AddConfiguredSchemaAwareDbContextPool<RoleplayingDatabaseContext>()
-                .AddBehaviour<InteractivityBehaviour>()
-                .AddBehaviour<DelayedActionBehaviour>()
                 .AddBehaviour<RoleplayArchivalBehaviour>()
-                .AddBehaviour<RoleplayLoggingBehaviour>()
                 .AddBehaviour<RoleplayTimeoutBehaviour>();
+
+            serviceCollection
+                .AddResponder<RoleplayLoggingResponder>();
         }
 
         /// <inheritdoc />
-        public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
+        public override ValueTask<Result> InitializeAsync(IServiceProvider serviceProvider)
         {
             var permissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
             var registrationResult = permissionRegistry.RegisterPermissions
@@ -87,29 +97,19 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying
                 serviceProvider
             );
 
-            if (!registrationResult.IsSuccess)
-            {
-                return false;
-            }
-
-            var commands = serviceProvider.GetRequiredService<CommandService>();
-
-            commands.AddTypeReader<IMessage>(new UncachedMessageTypeReader<IMessage>(), true);
-            commands.AddTypeReader<Roleplay>(new RoleplayTypeReader());
-
-            await commands.AddModuleAsync<RoleplayCommands>(serviceProvider);
-
-            return true;
+            return !registrationResult.IsSuccess
+                ? new ValueTask<Result>(registrationResult)
+                : new ValueTask<Result>(Result.FromSuccess());
         }
 
         /// <inheritdoc />
-        public async Task<bool> MigratePluginAsync(IServiceProvider serviceProvider)
+        public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
         {
             var context = serviceProvider.GetRequiredService<RoleplayingDatabaseContext>();
 
             await context.Database.MigrateAsync();
 
-            return true;
+            return Result.FromSuccess();
         }
 
         /// <inheritdoc />

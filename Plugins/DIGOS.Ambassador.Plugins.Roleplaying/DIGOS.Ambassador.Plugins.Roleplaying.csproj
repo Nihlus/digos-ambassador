@@ -8,12 +8,17 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="iTextSharp.LGPLv2.Core" Version="1.6.8" />
+        <PackageReference Include="Humanizer.Core" Version="2.8.26" />
+        <PackageReference Include="iTextSharp.LGPLv2.Core" Version="1.7.1" />
+        <PackageReference Include="Remora.Behaviours" Version="6.1.0" />
     </ItemGroup>
 
     <!-- Workaround for a problem with EF Core -->
     <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.6" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.4">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
     </ItemGroup>
 
     <ItemGroup>

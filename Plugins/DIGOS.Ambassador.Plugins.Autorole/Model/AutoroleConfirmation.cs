@@ -24,14 +24,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
-using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model
 {
     /// <summary>
     /// Represents an externally initiated confirmation of a user's qualification for an autorole.
     /// </summary>
-    [PublicAPI]
     [Table("AutoroleConfirmations", Schema = "AutoroleModule")]
     public class AutoroleConfirmation : EFEntity
     {

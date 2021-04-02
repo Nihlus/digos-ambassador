@@ -33,7 +33,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     /// </summary>
     [PublicAPI]
     [TokenIdentifier("sex")]
-    public sealed class SexToken : ReplacableTextToken<SexToken>
+    public sealed class SexToken : ReplaceableTextToken<SexToken>
     {
         /// <inheritdoc />
         public override string GetText(Appearance appearance, AppearanceComponent? component)
@@ -53,12 +53,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
                 return "herm";
             }
 
-            if (genderedParts.Contains(Penis))
-            {
-                return "male";
-            }
-
-            return "female";
+            return genderedParts.Contains(Penis)
+                ? "male"
+                : "female";
         }
 
         /// <inheritdoc />

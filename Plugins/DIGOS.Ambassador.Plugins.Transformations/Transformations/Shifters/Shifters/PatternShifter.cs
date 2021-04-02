@@ -21,9 +21,11 @@
 //
 
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Results;
 using Humanizer;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
 {
@@ -60,16 +62,20 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         }
 
         /// <inheritdoc />
-        protected override async Task<ShiftBodypartResult> ShiftBodypartAsync(Bodypart bodypart, Chirality chirality)
+        protected override async Task<Result<ShiftBodypartResult>> ShiftBodypartAsync
+        (
+            Bodypart bodypart,
+            Chirality chirality
+        )
         {
             if (!this.Appearance.TryGetAppearanceComponent(bodypart, chirality, out var currentComponent))
             {
-                return ShiftBodypartResult.FromError("The character doesn't have that bodypart.");
+                return new UserError("The character doesn't have that bodypart.");
             }
 
             if (currentComponent.Pattern == _pattern)
             {
-                return ShiftBodypartResult.FromError("The character already has that pattern.");
+                return new ShiftBodypartResult(await GetNoChangeMessageAsync(bodypart), ShiftBodypartAction.Nothing);
             }
 
             var shiftAction = ShiftBodypartAction.Shift;
@@ -82,7 +88,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
             currentComponent.PatternColour = _patternColour.Clone();
 
             var shiftMessage = await GetShiftMessageAsync(bodypart, chirality);
-            return ShiftBodypartResult.FromSuccess(shiftMessage, shiftAction);
+            return new ShiftBodypartResult(shiftMessage, shiftAction);
         }
 
         /// <inheritdoc />
@@ -122,7 +128,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
 
             if (bodypart == Bodypart.Full)
             {
-                var fullMessage = $"{character.Nickname} is already that colour.";
+                var fullMessage = $"{character.Nickname} is already that pattern.";
                 fullMessage = fullMessage.Transform(To.LowerCase, To.SentenceCase);
 
                 return Task.FromResult(fullMessage);
@@ -130,7 +136,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
 
             var message =
                 $"{character.Nickname}'s {bodypartHumanized} " +
-                $"{(bodypartHumanized.EndsWith("s") ? "are" : "is")} already that colour.";
+                $"{(bodypartHumanized.EndsWith("s") ? "are" : "is")} already that pattern.";
 
             message = message.Transform(To.LowerCase, To.SentenceCase);
             return Task.FromResult(message);

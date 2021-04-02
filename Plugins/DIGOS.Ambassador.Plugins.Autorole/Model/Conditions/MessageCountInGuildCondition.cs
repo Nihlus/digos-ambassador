@@ -25,9 +25,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
-using Discord;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
@@ -43,7 +44,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         /// <param name="sourceID">The source ID.</param>
         /// <param name="requiredCount">The required message count.</param>
         [UsedImplicitly]
-        protected MessageCountInGuildCondition(long sourceID, long requiredCount)
+        protected MessageCountInGuildCondition(Snowflake sourceID, long requiredCount)
             : base(sourceID, requiredCount)
         {
         }
@@ -54,7 +55,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         /// <param name="guild">The source guild.</param>
         /// <param name="requiredCount">The required number of messages.</param>
         public MessageCountInGuildCondition(IGuild guild, long requiredCount)
-            : this((long)guild.Id, requiredCount)
+            : this(guild.ID, requiredCount)
         {
         }
 
@@ -65,19 +66,20 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         }
 
         /// <inheritdoc/>
-        public override async Task<RetrieveEntityResult<bool>> IsConditionFulfilledForUserAsync
+        public override async Task<Result<bool>> IsConditionFulfilledForUserAsync
         (
             IServiceProvider services,
-            IGuildUser discordUser,
+            Snowflake guildID,
+            Snowflake userID,
             CancellationToken ct = default
         )
         {
             var statistics = services.GetRequiredService<UserStatisticsService>();
 
-            var getUserStatistics = await statistics.GetOrCreateUserServerStatisticsAsync(discordUser, ct);
+            var getUserStatistics = await statistics.GetOrCreateUserServerStatisticsAsync(guildID, userID, ct);
             if (!getUserStatistics.IsSuccess)
             {
-                return RetrieveEntityResult<bool>.FromError(getUserStatistics);
+                return Result<bool>.FromError(getUserStatistics);
             }
 
             var userStatistics = getUserStatistics.Entity;

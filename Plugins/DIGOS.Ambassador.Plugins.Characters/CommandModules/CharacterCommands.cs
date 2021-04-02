@@ -20,32 +20,39 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Discord.Extensions;
-using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
+using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
+using DIGOS.Ambassador.Discord.Pagination.Extensions;
 using DIGOS.Ambassador.Plugins.Characters.Extensions;
 using DIGOS.Ambassador.Plugins.Characters.Model;
-using DIGOS.Ambassador.Plugins.Characters.Pagination;
 using DIGOS.Ambassador.Plugins.Characters.Permissions;
 using DIGOS.Ambassador.Plugins.Characters.Services;
 using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
 using DIGOS.Ambassador.Plugins.Core.Preconditions;
-using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
-using Discord;
-using Discord.Commands;
-using Discord.Net;
+using DIGOS.Ambassador.Plugins.Permissions.Conditions;
 using Humanizer;
 using JetBrains.Annotations;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.API;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Contexts;
+using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -56,26 +63,17 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
     /// Commands for creating, editing, and interacting with user characters.
     /// </summary>
     [UsedImplicitly]
-    [Alias("character", "char", "ch")]
-    [Group("character")]
-    [Summary("Commands for creating, editing, and interacting with user characters.")]
-    [Remarks
-    (
-        "Parameters which take a character can be specified in two ways - by just the name, which will search your " +
-        "characters, and by mention and name, which will search the given user's characters. For example,\n" +
-        "\n" +
-        "Your character: Amby  \n" +
-        "Another user's character: @DIGOS Ambassador:Amby\n" +
-        "\n" +
-        "You can also substitute any character name for \"current\", and your active character will be used instead."
-    )]
-    public partial class CharacterCommands : ModuleBase
+    [Group("ch")]
+    [Description("Commands for creating, editing, and interacting with user characters.")]
+    public partial class CharacterCommands : CommandGroup
     {
         private readonly PronounService _pronouns;
         private readonly ContentService _content;
         private readonly UserFeedbackService _feedback;
         private readonly CharacterDiscordService _characters;
         private readonly InteractivityService _interactivity;
+        private readonly ICommandContext _context;
+        private readonly IDiscordRestGuildAPI _guildAPI;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CharacterCommands"/> class.
@@ -85,13 +83,17 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         /// <param name="characterService">The character service.</param>
         /// <param name="interactivity">The interactivity service.</param>
         /// <param name="pronouns">The pronoun service.</param>
+        /// <param name="context">The command context.</param>
+        /// <param name="guildAPI">The guild API.</param>
         public CharacterCommands
         (
             ContentService contentService,
             UserFeedbackService feedbackService,
             CharacterDiscordService characterService,
             InteractivityService interactivity,
-            PronounService pronouns
+            PronounService pronouns,
+            ICommandContext context,
+            IDiscordRestGuildAPI guildAPI
         )
         {
             _content = contentService;
@@ -99,38 +101,33 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             _characters = characterService;
             _interactivity = interactivity;
             _pronouns = pronouns;
+            _context = context;
+            _guildAPI = guildAPI;
         }
 
         /// <summary>
         /// Shows available pronoun families that can be used with characters.
         /// </summary>
         [UsedImplicitly]
-        [Alias("available-pronouns", "pronouns")]
-        [Command("available-pronouns")]
-        [Summary("Shows available pronoun families that can be used with characters.")]
-        public async Task<RuntimeResult> ShowAvailablePronounFamiliesAsync()
+        [Command("show-available-pronouns")]
+        [Description("Shows available pronoun families that can be used with characters.")]
+        public async Task<Result> ShowAvailablePronounFamiliesAsync()
         {
-            EmbedFieldBuilder CreatePronounField(IPronounProvider pronounProvider)
+            EmbedField CreatePronounField(IPronounProvider pronounProvider)
             {
-                var ef = new EmbedFieldBuilder();
-
-                ef.WithName(pronounProvider.Family);
-
                 var value = $"{pronounProvider.GetSubjectForm()} ate {pronounProvider.GetPossessiveAdjectiveForm()} " +
                             $"pie that {pronounProvider.GetSubjectForm()} brought with " +
                             $"{pronounProvider.GetReflexiveForm()}.";
 
                 value = value.Transform(To.SentenceCase);
 
-                ef.WithValue($"*{value}*");
-
-                return ef;
+                return new EmbedField(pronounProvider.Family, value);
             }
 
             var pronounProviders = _pronouns.GetAvailablePronounProviders().ToList();
             if (!pronounProviders.Any())
             {
-                return RuntimeCommandResult.FromError("There doesn't seem to be any pronouns available.");
+                return new UserError("There doesn't seem to be any pronouns available.");
             }
 
             var fields = pronounProviders.Select(CreatePronounField);
@@ -138,58 +135,52 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                               "each field is the pronoun family that you use when selecting the pronoun, and below it" +
                               "is a short example of how it might be used.";
 
-            var paginatedEmbedPages = PageFactory.FromFields
+            var pageBase = _feedback.CreateEmbedBase() with
+            {
+                Title = "Available pronouns"
+            };
+
+            var pages = PageFactory.FromFields
             (
                 fields,
-                description: description
+                description: description,
+                pageBase: pageBase
             );
 
-            var paginatedEmbed = new PaginatedEmbed(_feedback, _interactivity, this.Context.User).WithPages
+            await _interactivity.SendInteractiveMessageAsync
             (
-                paginatedEmbedPages.Select
-                (
-                    p => p.WithColor(Color.DarkPurple).WithTitle("Available pronouns")
-                )
+                _context.ChannelID,
+                _context.User.ID,
+                pages,
+                ct: this.CancellationToken
             );
 
-            await _interactivity.SendInteractiveMessageAndDeleteAsync
-            (
-                this.Context.Channel,
-                paginatedEmbed,
-                TimeSpan.FromMinutes(5.0)
-            );
-
-            return RuntimeCommandResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
         /// Shows quick information about your current character.
         /// </summary>
         [UsedImplicitly]
-        [Alias("show", "info")]
-        [Command("show")]
-        [Summary("Shows quick information about your current character.")]
-        [RequireContext(ContextType.Guild)]
-        public async Task<RuntimeResult> ShowCharacterAsync()
+        [Command("show-current")]
+        [Description("Shows quick information about your current character.")]
+        [RequireContext(ChannelContext.Guild)]
+        public async Task<Result> ShowCharacterAsync()
         {
-            var retrieveCurrentCharacterResult = await _characters.GetCurrentCharacterAsync((IGuildUser)this.Context.User);
+            var retrieveCurrentCharacterResult = await _characters.GetCurrentCharacterAsync
+            (
+                _context.GuildID.Value,
+                _context.User.ID,
+                this.CancellationToken
+            );
+
             if (!retrieveCurrentCharacterResult.IsSuccess)
             {
-                return retrieveCurrentCharacterResult.ToRuntimeResult();
+                return Result.FromError(retrieveCurrentCharacterResult);
             }
 
             var character = retrieveCurrentCharacterResult.Entity;
-            var eb = await CreateCharacterInfoEmbedAsync(character);
-
-            // Override the colour if a role is set.
-            if (!(character.Role is null))
-            {
-                var roleColour = this.Context.Guild.GetRole((ulong)character.Role.DiscordID).Color;
-                eb.WithColor(roleColour);
-            }
-
-            await ShowCharacterAsync(character, eb);
-            return RuntimeCommandResult.FromSuccess();
+            return await ShowCharacterAsync(character);
         }
 
         /// <summary>
@@ -197,170 +188,176 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         /// </summary>
         /// <param name="character">The character.</param>
         [UsedImplicitly]
-        [Alias("show", "info")]
-        [Priority(1)]
         [Command("show")]
-        [Summary("Shows quick information about a character.")]
-        [RequireContext(ContextType.Guild)]
-        public async Task<RuntimeResult> ShowCharacterAsync(Character character)
+        [Description("Shows quick information about a character.")]
+        [RequireContext(ChannelContext.Guild)]
+        public async Task<Result> ShowCharacterAsync(Character character)
         {
-            var eb = await CreateCharacterInfoEmbedAsync(character);
+            var createEmbed = await CreateCharacterInfoEmbedAsync(character);
+            if (!createEmbed.IsSuccess)
+            {
+                return Result.FromError(createEmbed);
+            }
 
-            await ShowCharacterAsync(character, eb);
-            return RuntimeCommandResult.FromSuccess();
+            var send = await _feedback.SendEmbedAsync(_context.ChannelID, createEmbed.Entity, this.CancellationToken);
+            return send.IsSuccess
+                ? Result.FromSuccess()
+                : Result.FromError(send);
         }
 
         /// <summary>
         /// Shows a gallery of all your characters.
         /// </summary>
         [UsedImplicitly]
-        [Alias("view-char")]
         [Command("view-characters")]
-        [Summary("Shows a gallery of all your characters.")]
-        [RequireContext(ContextType.Guild)]
-        public Task<RuntimeResult> ShowCharactersAsync() => ShowCharactersAsync(this.Context.User);
+        [Description("Shows a gallery of all your characters.")]
+        [RequireContext(ChannelContext.Guild)]
+        public Task<Result> ShowCharactersAsync() => ShowCharactersAsync(_context.User);
 
         /// <summary>
         /// Shows a gallery of all the user's characters.
         /// </summary>
         /// <param name="discordUser">The user.</param>
         [UsedImplicitly]
-        [Alias("view-char")]
-        [Command("view-characters")]
-        [Summary("Shows a gallery of all the user's characters.")]
-        [RequireContext(ContextType.Guild)]
-        public async Task<RuntimeResult> ShowCharactersAsync(IUser discordUser)
+        [Command("view-user-characters")]
+        [Description("Shows a gallery of all the user's characters.")]
+        [RequireContext(ChannelContext.Guild)]
+        public async Task<Result> ShowCharactersAsync(IUser discordUser)
         {
-            var getCharacters = await _characters.GetUserCharactersAsync((IGuildUser)this.Context.User);
+            var getCharacters = await _characters.GetUserCharactersAsync
+            (
+                _context.GuildID.Value,
+                _context.User.ID,
+                this.CancellationToken
+            );
+
             if (!getCharacters.IsSuccess)
             {
-                return getCharacters.ToRuntimeResult();
+                return Result.FromError(getCharacters);
             }
 
             var characters = getCharacters.Entity.ToList();
 
-            var embeds = new List<EmbedBuilder>();
-            foreach (var character in characters)
-            {
-                var embed = await CreateCharacterInfoEmbedAsync(character);
-                if (character.Description.Length + embed.Build().Length < 2000)
-                {
-                    embed.AddField("Description", character.Description);
-                }
-
-                embeds.Add(embed);
-            }
-
-            var paginatedEmbed = new PaginatedEmbed(_feedback, _interactivity, this.Context.User)
-            {
-                Appearance =
-                {
-                    Author = discordUser,
-                    Title =
-                        $"{(this.Context.User == discordUser ? "Your" : $"{discordUser.Mention}'s")} characters"
-                }
-            };
-
-            if (embeds.Count == 0)
-            {
-                var eb = paginatedEmbed.Appearance.CreateEmbedBase().WithDescription("You don't have any characters.");
-                paginatedEmbed.AppendPage(eb);
-            }
-            else
-            {
-                paginatedEmbed.WithPages(embeds);
-            }
-
-            await _interactivity.SendInteractiveMessageAndDeleteAsync
+            var pages = await PaginatedEmbedFactory.PagesFromCollectionAsync
             (
-                this.Context.Channel,
-                paginatedEmbed,
-                TimeSpan.FromMinutes(5.0)
+                characters,
+                async c =>
+                {
+                    var createEmbed = await CreateCharacterInfoEmbedAsync(c);
+                    if (!createEmbed.IsSuccess)
+                    {
+                        return createEmbed;
+                    }
+
+                    return createEmbed.Entity with
+                    {
+                        Title = $"{(_context.User.ID == discordUser.ID ? "Your" : $"<@{discordUser.ID}>'s")} characters"
+                    };
+                },
+                "You don't have any characters"
             );
 
-            return RuntimeCommandResult.FromSuccess();
+            await _interactivity.SendInteractiveMessageAsync
+            (
+                _context.ChannelID,
+                _context.User.ID,
+                pages.Where(p => p.IsSuccess).Select(p => p.Entity!).ToList(),
+                ct: this.CancellationToken
+            );
+
+            return Result.FromSuccess();
         }
 
-        private async Task ShowCharacterAsync(Character character, EmbedBuilder eb)
-        {
-            if (character.Description.Length + eb.Build().Length > 2000)
-            {
-                var userDMChannel = await this.Context.Message.Author.GetOrCreateDMChannelAsync();
-
-                try
-                {
-                    await using (var ds = new MemoryStream(Encoding.UTF8.GetBytes(character.Description)))
-                    {
-                        await userDMChannel.SendMessageAsync(string.Empty, false, eb.Build());
-                        await userDMChannel.SendFileAsync(ds, $"{character.Name}_description.txt");
-                    }
-
-                    if (this.Context is SocketCommandContext socketContext && socketContext.IsPrivate)
-                    {
-                        await _feedback.SendConfirmationAsync(this.Context, "Please check your private messages.");
-                    }
-                }
-                catch (HttpException hex) when (hex.WasCausedByDMsNotAccepted())
-                {
-                    await _feedback.SendWarningAsync
-                    (
-                        this.Context,
-                        "Your description is really long, and you don't accept DMs from non-friends on this server, so I'm unable to do that."
-                    );
-                }
-                finally
-                {
-                    await userDMChannel.CloseAsync();
-                }
-            }
-            else
-            {
-                eb.AddField("Description", character.Description);
-                await _feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
-            }
-        }
-
-        private async Task<EmbedBuilder> CreateCharacterInfoEmbedAsync(Character character)
+        private async Task<Result<Embed>> CreateCharacterInfoEmbedAsync
+        (
+            Character character,
+            CancellationToken ct = default
+        )
         {
             var eb = _feedback.CreateEmbedBase();
 
-            // Override the colour if a role is set
-            if (!(character.Role is null))
+            var getOwner = await _guildAPI.GetGuildMemberAsync(_context.GuildID.Value, character.Owner.DiscordID, ct);
+            if (!getOwner.IsSuccess)
             {
-                var roleColour = this.Context.Guild.GetRole((ulong)character.Role.DiscordID).Color;
-                eb.WithColor(roleColour);
+                return Result<Embed>.FromError(getOwner);
             }
 
-            eb.WithAuthor(await this.Context.Client.GetUserAsync((ulong)character.Owner.DiscordID));
+            var owner = getOwner.Entity;
+            var ownerName = owner.Nickname.HasValue && owner.Nickname.Value is not null
+                ? owner.Nickname.Value
+                : owner.User.Value!.Username;
+
+            var author = new EmbedAuthor(ownerName);
+
+            var getOwnerAvatar = CDN.GetUserAvatarUrl(owner.User.Value!);
+            if (getOwnerAvatar.IsSuccess)
+            {
+                author = author with { IconUrl = getOwnerAvatar.Entity.ToString() };
+            }
 
             var characterInfoTitle = character.Nickname.IsNullOrWhitespace()
                 ? character.Name
                 : $"{character.Name} - \"{character.Nickname}\"";
 
-            eb.WithTitle(characterInfoTitle);
-            eb.WithDescription(character.Summary);
+            var characterAvatarUrl = !character.AvatarUrl.IsNullOrWhitespace()
+                ? character.AvatarUrl
+                : _content.GetDefaultAvatarUri().ToString();
 
-            eb.WithThumbnailUrl
-            (
-                !character.AvatarUrl.IsNullOrWhitespace()
-                    ? character.AvatarUrl
-                    : _content.GetDefaultAvatarUri().ToString()
-            );
-
-            eb.AddField("Preferred pronouns", character.PronounProviderFamily);
+            var embedFields = new List<EmbedField>
+            {
+                new("Preferred pronouns", character.PronounProviderFamily)
+            };
 
             if (!(character.Role is null))
             {
-               eb.AddField("Role", $"<@&{character.Role.DiscordID}>");
+                embedFields.Add(new EmbedField("Role", $"<@&{character.Role.DiscordID}>"));
             }
+
+            eb = eb with
+            {
+                Title = characterInfoTitle,
+                Description = character.Summary,
+                Thumbnail = new EmbedThumbnail(characterAvatarUrl),
+                Fields = embedFields,
+                Author = author
+            };
 
             if (character.Images.Any())
             {
-                eb.WithFooter
-                (
-                    $"This character has one or more images. Use \"!ch view-gallery {character.Name}\" to view them."
-                );
+                eb = eb with
+                {
+                    Footer = new EmbedFooter
+                    (
+                        $"This character has one or more images. Use \"!ch view-gallery {character.Name}\" to view " +
+                        "them."
+                    )
+                };
             }
+
+            // Override the colour if a role is set
+            if (!(character.Role is null))
+            {
+                var getGuildRoles = await _guildAPI.GetGuildRolesAsync(_context.GuildID.Value, this.CancellationToken);
+                if (!getGuildRoles.IsSuccess)
+                {
+                    return Result<Embed>.FromError(getGuildRoles);
+                }
+
+                var guildRoles = getGuildRoles.Entity;
+                var guildRole = guildRoles.FirstOrDefault(gr => gr.ID == character.Role.DiscordID);
+
+                var roleColour = guildRole?.Colour ?? Color.Gray;
+
+                eb = eb with { Colour = roleColour };
+            }
+
+            // Finally, the description
+            embedFields.Add
+            (
+                eb.CalculateEmbedLength() + character.Description.Length > 2000
+                    ? new EmbedField("Description", "Your description is really long, and can't be displayed.")
+                    : new EmbedField("Description", character.Description)
+            );
 
             return eb;
         }
@@ -375,10 +372,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         /// <param name="characterAvatarUrl">A url pointing to the character's avatar. Optional.</param>
         [UsedImplicitly]
         [Command("create")]
-        [Summary("Creates a new character.")]
-        [RequireContext(ContextType.Guild)]
+        [Description("Creates a new character.")]
+        [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(CreateCharacter), PermissionTarget.Self)]
-        public async Task<RuntimeResult> CreateCharacterAsync
+        public async Task<Result<UserMessage>> CreateCharacterAsync
         (
             string characterName,
             string? characterNickname = null,
@@ -391,20 +388,19 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
 
             var createCharacterResult = await _characters.CreateCharacterAsync
             (
-                (IGuildUser)this.Context.User,
+                _context.GuildID.Value,
+                _context.User.ID,
                 characterName,
                 characterAvatarUrl,
                 characterNickname,
                 characterSummary,
-                characterDescription
+                characterDescription,
+                ct: this.CancellationToken
             );
 
-            if (!createCharacterResult.IsSuccess)
-            {
-                return createCharacterResult.ToRuntimeResult();
-            }
-
-            return RuntimeCommandResult.FromSuccess($"Character \"{createCharacterResult.Entity.Name}\" created.");
+            return !createCharacterResult.IsSuccess
+                ? Result<UserMessage>.FromError(createCharacterResult)
+                : new ConfirmationMessage($"Character \"{createCharacterResult.Entity.Name}\" created.");
         }
 
         /// <summary>
@@ -413,28 +409,26 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         /// <param name="character">The character to delete.</param>
         [UsedImplicitly]
         [Command("delete")]
-        [Summary("Deletes the named character.")]
-        [RequireContext(ContextType.Guild)]
+        [Description("Deletes the named character.")]
+        [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(DeleteCharacter), PermissionTarget.Self)]
-        public async Task<RuntimeResult> DeleteCharacterAsync
+        public async Task<Result<UserMessage>> DeleteCharacterAsync
         (
-            [RequireEntityOwnerOrPermission(typeof(DeleteCharacter), PermissionTarget.Other)]
+            [RequireEntityOwner]
             Character character
         )
         {
-            var owner = await this.Context.Guild.GetUserAsync((ulong)character.Owner.DiscordID);
-            if (owner is null)
-            {
-                return RuntimeCommandResult.FromError("Failed to get the owner of the character.");
-            }
+            var deleteResult = await _characters.DeleteCharacterAsync
+            (
+                _context.GuildID.Value,
+                _context.User.ID,
+                character,
+                this.CancellationToken
+            );
 
-            var deleteResult = await _characters.DeleteCharacterAsync(owner, character);
-            if (!deleteResult.IsSuccess)
-            {
-                return deleteResult.ToRuntimeResult();
-            }
-
-            return RuntimeCommandResult.FromSuccess($"Character \"{character.Name}\" deleted.");
+            return !deleteResult.IsSuccess
+                ? Result<UserMessage>.FromError(deleteResult)
+                : new ConfirmationMessage($"Character \"{character.Name}\" deleted.");
         }
 
         /// <summary>
@@ -442,62 +436,67 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         /// </summary>
         /// <param name="discordUser">The user whose characters should be listed. Optional.</param>
         [UsedImplicitly]
-        [Alias("list-owned", "list", "owned")]
-        [Command("list-owned")]
-        [Summary("Lists the characters owned by a given user.")]
-        [RequireContext(ContextType.Guild)]
-        public async Task<RuntimeResult> ListOwnedCharactersAsync(IUser? discordUser = null)
+        [Command("list")]
+        [Description("Lists the characters owned by a given user.")]
+        [RequireContext(ChannelContext.Guild)]
+        public async Task<Result> ListOwnedCharactersAsync(IUser? discordUser = null)
         {
-            discordUser ??= this.Context.Message.Author;
+            discordUser ??= _context.User;
 
-            var getCharacters = await _characters.GetUserCharactersAsync((IGuildUser)discordUser);
+            var getCharacters = await _characters.GetUserCharactersAsync
+            (
+                _context.GuildID.Value,
+                discordUser.ID,
+                this.CancellationToken
+            );
+
             if (!getCharacters.IsSuccess)
             {
-                return getCharacters.ToRuntimeResult();
+                return Result.FromError(getCharacters);
             }
 
             var characters = getCharacters.Entity.ToList();
 
-            var appearance = PaginatedAppearanceOptions.Default;
-            appearance.Title = "Your characters";
-            appearance.Author = discordUser;
-
-            var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
-                _feedback,
-                _interactivity,
-                this.Context.User,
                 characters,
                 c => c.Name,
                 c => c.Summary,
-                "You don't have any characters.",
-                appearance
+                "You don't have any characters."
             );
 
-            await _interactivity.SendInteractiveMessageAndDeleteAsync
+            pages = pages.Select(p => p with { Title = "Your characters" }).ToList();
+
+            await _interactivity.SendInteractiveMessageAsync
             (
-                this.Context.Channel,
-                paginatedEmbed,
-                TimeSpan.FromMinutes(5.0)
+                _context.ChannelID,
+                _context.User.ID,
+                pages,
+                ct: this.CancellationToken
             );
 
-            return RuntimeCommandResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
         /// Switches the user's current character to a different one, picked at random.
         /// </summary>
         [UsedImplicitly]
-        [Alias("random")]
         [Command("random")]
-        [Summary("Switches the user's current character to a different one, picked at random.")]
-        [RequireContext(ContextType.Guild)]
-        public async Task<RuntimeResult> AssumeRandomCharacterFormAsync()
+        [Description("Switches the user's current character to a different one, picked at random.")]
+        [RequireContext(ChannelContext.Guild)]
+        public async Task<Result<UserMessage>> AssumeRandomCharacterFormAsync()
         {
-            var getRandom = await _characters.GetRandomUserCharacterAsync((IGuildUser)this.Context.User);
+            var getRandom = await _characters.GetRandomUserCharacterAsync
+            (
+                _context.GuildID.Value,
+                _context.User.ID,
+                this.CancellationToken
+            );
+
             if (!getRandom.IsSuccess)
             {
-                return getRandom.ToRuntimeResult();
+                return Result<UserMessage>.FromError(getRandom);
             }
 
             var randomCharacter = getRandom.Entity;
@@ -509,26 +508,32 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         /// </summary>
         /// <param name="character">The character to become.</param>
         [UsedImplicitly]
-        [Alias("assume", "become", "transform", "active")]
-        [Command("assume")]
-        [Summary("Sets the named character as the user's current character.")]
-        [RequireContext(ContextType.Guild)]
+        [Command("become")]
+        [Description("Sets the named character as the user's current character.")]
+        [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(AssumeCharacter), PermissionTarget.Self)]
-        public async Task<RuntimeResult> AssumeCharacterFormAsync
+        public async Task<Result<UserMessage>> AssumeCharacterFormAsync
         (
-            [RequireEntityOwnerOrPermission(typeof(AssumeCharacter), PermissionTarget.Other)]
+            [RequireEntityOwner]
             Character character
         )
         {
-            var makeCurrent = await _characters.MakeCharacterCurrentAsync((IGuildUser)this.Context.User, character);
+            var makeCurrent = await _characters.MakeCharacterCurrentAsync
+            (
+                _context.GuildID.Value,
+                _context.User.ID,
+                character,
+                this.CancellationToken
+            );
+
             if (!makeCurrent.IsSuccess)
             {
-                return makeCurrent.ToRuntimeResult();
+                return Result<UserMessage>.FromError(makeCurrent);
             }
 
-            return RuntimeCommandResult.FromSuccess
+            return new ConfirmationMessage
             (
-                $"{this.Context.Message.Author.Username} shimmers and morphs into {character.Name}."
+                $"{_context.User.Username} shimmers and morphs into {character.Name}."
             );
         }
 
@@ -536,46 +541,56 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         /// Clears your default form.
         /// </summary>
         [UsedImplicitly]
-        [Alias("clear-default", "drop-default")]
         [Command("clear-default")]
-        [Summary("Clears your default form.")]
-        [RequireContext(ContextType.Guild)]
-        public async Task<RuntimeResult> ClearDefaultCharacterAsync()
+        [Description("Clears your default form.")]
+        [RequireContext(ChannelContext.Guild)]
+        public async Task<Result<UserMessage>> ClearDefaultCharacterAsync()
         {
-            var result = await _characters.ClearDefaultCharacterAsync((IGuildUser)this.Context.User);
-            if (!result.IsSuccess)
-            {
-                return result.ToRuntimeResult();
-            }
+            var result = await _characters.ClearDefaultCharacterAsync
+            (
+                _context.GuildID.Value,
+                _context.User.ID,
+                this.CancellationToken
+            );
 
-            return RuntimeCommandResult.FromSuccess("Default character cleared.");
+            return !result.IsSuccess
+                ? Result<UserMessage>.FromError(result)
+                : new ConfirmationMessage("Default character cleared.");
         }
 
         /// <summary>
         /// Clears any active characters from you, restoring your default form.
         /// </summary>
         [UsedImplicitly]
-        [Alias("clear", "drop", "default")]
-        [Command("clear")]
-        [Summary("Clears any active characters from you, restoring your default form.")]
-        [RequireContext(ContextType.Guild)]
-        public async Task<RuntimeResult> ClearCharacterFormAsync()
+        [Command("default")]
+        [Description("Clears any active characters from you, restoring your default form.")]
+        [RequireContext(ChannelContext.Guild)]
+        public async Task<Result<UserMessage>> ClearCharacterFormAsync()
         {
             // First, let's try dropping to a default form instead.
-            var getDefaultCharacter = await _characters.GetDefaultCharacterAsync((IGuildUser)this.Context.User);
+            var getDefaultCharacter = await _characters.GetDefaultCharacterAsync
+            (
+                _context.GuildID.Value,
+                _context.User.ID,
+                this.CancellationToken
+            );
+
             if (getDefaultCharacter.IsSuccess)
             {
                 var defaultCharacter = getDefaultCharacter.Entity;
                 return await AssumeCharacterFormAsync(defaultCharacter);
             }
 
-            var result = await _characters.ClearCurrentCharacterAsync((IGuildUser)this.Context.User);
-            if (!result.IsSuccess)
-            {
-                return result.ToRuntimeResult();
-            }
+            var result = await _characters.ClearCurrentCharacterAsync
+            (
+                _context.GuildID.Value,
+                _context.User.ID,
+                this.CancellationToken
+            );
 
-            return RuntimeCommandResult.FromSuccess("Character cleared.");
+            return !result.IsSuccess
+                ? Result<UserMessage>.FromError(result)
+                : new ConfirmationMessage("Character cleared.");
         }
 
         /// <summary>
@@ -583,36 +598,35 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         /// </summary>
         /// <param name="character">The character to view the gallery of.</param>
         [UsedImplicitly]
-        [Alias("view-gallery", "gallery")]
         [Command("view-gallery")]
-        [Summary("View the images in a character's gallery.")]
-        [RequireContext(ContextType.Guild)]
-        public async Task<RuntimeResult> ViewCharacterGalleryAsync(Character character)
+        [Description("View the images in a character's gallery.")]
+        [RequireContext(ChannelContext.Guild)]
+        public async Task<Result> ViewCharacterGalleryAsync(Character character)
         {
             if (character.Images.Count <= 0)
             {
-                return RuntimeCommandResult.FromError("There are no images in that character's gallery.");
+                return new UserError("There are no images in that character's gallery.");
             }
 
-            var gallery = new PaginatedGallery(_feedback, _interactivity, this.Context.User)
-                .WithPages(character.Images);
-
-            gallery.Appearance = new PaginatedAppearanceOptions
+            var appearance = PaginatedAppearanceOptions.Default with
             {
                 FooterFormat = "Image {0}/{1}",
-                HelpText = "Use the reactions to navigate the gallery.",
-                Color = Color.DarkPurple,
-                Title = character.Name
+                HelpText = "Use the reactions to navigate the gallery."
             };
 
-            await _interactivity.SendInteractiveMessageAndDeleteAsync
+            var pages = character.Images.Select
             (
-                this.Context.Channel,
-                gallery,
-                TimeSpan.FromMinutes(5.0)
+                i => new Embed(i.Name, Description: i.Caption, Image: new EmbedImage(i.Url))
             );
 
-            return RuntimeCommandResult.FromSuccess();
+            return await _interactivity.SendInteractiveMessageAsync
+            (
+                _context.ChannelID,
+                _context.User.ID,
+                pages.ToList(),
+                appearance,
+                this.CancellationToken
+            );
         }
 
         /// <summary>
@@ -621,33 +635,27 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         /// <param name="character">The character.</param>
         [UsedImplicitly]
         [Command("list-images")]
-        [Summary("Lists the images in a character's gallery.")]
-        [RequireContext(ContextType.Guild)]
-        public async Task<RuntimeResult> ListImagesAsync(Character character)
+        [Description("Lists the images in a character's gallery.")]
+        [RequireContext(ChannelContext.Guild)]
+        public Task<Result> ListImagesAsync(Character character)
         {
-            var appearance = PaginatedAppearanceOptions.Default;
-            appearance.Title = "Images in character gallery";
-
-            var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
-                _feedback,
-                _interactivity,
-                this.Context.User,
                 character.Images,
                 i => i.Name,
                 i => i.Caption.IsNullOrWhitespace() ? "No caption set." : i.Caption,
-                "There are no images in the character's gallery.",
-                appearance
+                "There are no images in the character's gallery."
             );
 
-            await _interactivity.SendInteractiveMessageAndDeleteAsync
+            pages = pages.Select(p => p with { Title = "Images in character gallery" }).ToList();
+
+            return _interactivity.SendInteractiveMessageAsync
             (
-                this.Context.Channel,
-                paginatedEmbed,
-                TimeSpan.FromMinutes(5.0)
+                _context.ChannelID,
+                _context.User.ID,
+                pages,
+                ct: this.CancellationToken
             );
-
-            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -659,36 +667,40 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         /// <param name="isNSFW">Whether or not the image is NSFW.</param>
         [UsedImplicitly]
         [Command("add-image")]
-        [Summary("Adds an attached image to a character's gallery.")]
-        [RequireContext(ContextType.Guild)]
+        [Description("Adds an attached image to a character's gallery.")]
+        [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
-        public async Task<RuntimeResult> AddImageAsync
+        public async Task<Result<UserMessage>> AddImageAsync
         (
-            [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
+            [RequireEntityOwner]
             Character character,
             string? imageName = null,
             string? imageCaption = null,
             bool isNSFW = false
         )
         {
-            var hasAtLeastOneAttachment = this.Context.Message.Attachments.Any();
-            if (!hasAtLeastOneAttachment)
+            if (_context is not MessageContext messageContext)
             {
-                return RuntimeCommandResult.FromError("You need to attach an image.");
+                return new UserError("Images can't be added via slash commands. This is a discord limitation.");
+            }
+
+            var attachments = messageContext.Message.Attachments;
+            if (!attachments.HasValue || attachments.Value.Count == 0)
+            {
+                return new UserError("You need to attach an image.");
             }
 
             // Check that it's an image
-            var firstAttachment = this.Context.Message.Attachments.First();
+            var firstAttachment = attachments.Value[0];
             var firstAttachmentIsImage = firstAttachment.Width.HasValue && firstAttachment.Height.HasValue;
 
             if (!firstAttachmentIsImage)
             {
-                return RuntimeCommandResult.FromError("You need to attach an image.");
+                return new UserError("You need to attach an image.");
             }
-            var imageUrl = firstAttachment.Url;
 
-            imageName = (imageName ?? Path.GetFileNameWithoutExtension(firstAttachment.Filename))
-                        ?? firstAttachment.Url.GetHashCode().ToString();
+            var imageUrl = firstAttachment.Url;
+            imageName ??= Path.GetFileNameWithoutExtension(firstAttachment.Filename);
 
             return await AddImageAsync(character, imageName, imageUrl, imageCaption, isNSFW);
         }
@@ -702,13 +714,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         /// <param name="imageCaption">The caption of the image.</param>
         /// <param name="isNSFW">Whether or not the image is NSFW.</param>
         [UsedImplicitly]
-        [Command("add-image")]
-        [Summary("Adds a linked image to a character's gallery.")]
-        [RequireContext(ContextType.Guild)]
+        [Command("add-linked-image")]
+        [Description("Adds a linked image to a character's gallery.")]
+        [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
-        public async Task<RuntimeResult> AddImageAsync
+        public async Task<Result<UserMessage>> AddImageAsync
         (
-            [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
+            [RequireEntityOwner]
             Character character,
             string imageName,
             string imageUrl,
@@ -725,12 +737,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 isNSFW
             );
 
-            if (!addImageResult.IsSuccess)
-            {
-                return addImageResult.ToRuntimeResult();
-            }
-
-            return RuntimeCommandResult.FromSuccess($"Added \"{imageName}\" to {character.Name}'s gallery.");
+            return !addImageResult.IsSuccess
+                ? Result<UserMessage>.FromError(addImageResult)
+                : new ConfirmationMessage($"Added \"{imageName}\" to {character.Name}'s gallery.");
         }
 
         /// <summary>
@@ -739,14 +748,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         /// <param name="character">The character to remove the image from.</param>
         /// <param name="imageName">The image to remove.</param>
         [UsedImplicitly]
-        [Alias("remove-image", "delete-image")]
         [Command("remove-image")]
-        [Summary("Removes an image from a character's gallery.")]
-        [RequireContext(ContextType.Guild)]
+        [Description("Removes an image from a character's gallery.")]
+        [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
-        public async Task<RuntimeResult> RemoveImageAsync
+        public async Task<Result<UserMessage>> RemoveImageAsync
         (
-            [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
+            [RequireEntityOwner]
             Character character,
             string imageName
         )
@@ -754,16 +762,14 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             var image = character.Images.FirstOrDefault(i => string.Equals(imageName.ToLower(), i.Name.ToLower()));
             if (image is null)
             {
-                return RuntimeCommandResult.FromError("The character doesn't have an image with that name.");
+                return new UserError("The character doesn't have an image with that name.");
             }
 
             var removeImageResult = await _characters.RemoveImageFromCharacterAsync(character, image);
-            if (!removeImageResult.IsSuccess)
-            {
-                return removeImageResult.ToRuntimeResult();
-            }
 
-            return RuntimeCommandResult.FromSuccess("Image removed.");
+            return !removeImageResult.IsSuccess
+                ? Result<UserMessage>.FromError(removeImageResult)
+                : new ConfirmationMessage("Image removed.");
         }
 
         /// <summary>
@@ -772,29 +778,28 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         /// <param name="newOwner">The new owner of the character.</param>
         /// <param name="character">The character to transfer.</param>
         [UsedImplicitly]
-        [Alias("transfer-ownership", "transfer")]
-        [Command("transfer-ownership")]
-        [Summary("Transfers ownership of the named character to another user.")]
-        [RequireContext(ContextType.Guild)]
+        [Command("transfer")]
+        [Description("Transfers ownership of the named character to another user.")]
+        [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(TransferCharacter), PermissionTarget.Self)]
-        public async Task<RuntimeResult> TransferCharacterOwnershipAsync
+        public async Task<Result<UserMessage>> TransferCharacterOwnershipAsync
         (
             IUser newOwner,
-            [RequireEntityOwnerOrPermission(typeof(TransferCharacter), PermissionTarget.Other)]
+            [RequireEntityOwner]
             Character character
         )
         {
             var transferResult = await _characters.TransferCharacterOwnershipAsync
             (
-                (IGuildUser)this.Context.User, character
+                _context.GuildID.Value,
+                _context.User.ID,
+                character,
+                this.CancellationToken
             );
 
-            if (!transferResult.IsSuccess)
-            {
-                return transferResult.ToRuntimeResult();
-            }
-
-            return RuntimeCommandResult.FromSuccess("Character ownership transferred.");
+            return !transferResult.IsSuccess
+                ? Result<UserMessage>.FromError(transferResult)
+                : new ConfirmationMessage("Character ownership transferred.");
         }
     }
 }

@@ -32,7 +32,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     /// </summary>
     [PublicAPI]
     [TokenIdentifier("fluent", "f")]
-    public sealed class FluentPronounToken : ReplacableTextToken<FluentPronounToken>
+    public sealed class FluentPronounToken : ReplaceableTextToken<FluentPronounToken>
     {
         private readonly PronounService _pronouns;
 

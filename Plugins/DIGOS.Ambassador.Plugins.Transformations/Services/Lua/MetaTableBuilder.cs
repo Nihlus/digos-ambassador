@@ -80,16 +80,16 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
                 return;
             }
 
-            var subnode = parent.Value.FirstOrDefault(t => t.Name == components.First());
-            if (subnode is null)
+            var childNode = parent.Value.FirstOrDefault(t => t.Name == components.First());
+            if (childNode is null)
             {
-                subnode = new TableNode(components.First(), new List<INode>());
-                parent.Value.Add(subnode);
+                childNode = new TableNode(components.First(), new List<INode>());
+                parent.Value.Add(childNode);
             }
 
-            if (subnode is TableNode subtable)
+            if (childNode is TableNode childTable)
             {
-                PopulateSubNodes(subtable, string.Join(".", components.Skip(1)), originalValue);
+                PopulateSubNodes(childTable, string.Join(".", components.Skip(1)), originalValue);
             }
         }
     }

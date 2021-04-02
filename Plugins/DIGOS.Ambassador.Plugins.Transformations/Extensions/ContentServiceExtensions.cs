@@ -33,6 +33,7 @@ using DIGOS.Ambassador.Plugins.Transformations.Services;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages;
 using JetBrains.Annotations;
+using Remora.Commands.Results;
 using Remora.Results;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
@@ -72,14 +73,14 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         /// </summary>
         /// <param name="this">The content service.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public static RetrieveEntityResult<TransformationText> GetTransformationMessages
+        public static Result<TransformationText> GetTransformationMessages
         (
             this ContentService @this
         )
         {
             if (!@this.FileSystem.FileExists(TransformationMessagesPath))
             {
-                return RetrieveEntityResult<TransformationText>.FromError("Transformation messages not found.");
+                return new GenericError("Transformation messages not found.");
             }
 
             using var reader = new StreamReader
@@ -94,12 +95,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
             );
 
             var content = reader.ReadToEnd();
-            if (!TransformationText.TryDeserialize(content, out var text))
-            {
-                return RetrieveEntityResult<TransformationText>.FromError("Failed to parse the messages.");
-            }
-
-            return RetrieveEntityResult<TransformationText>.FromSuccess(text);
+            return TransformationText.TryDeserialize(content, out var text)
+                ? Result<TransformationText>.FromSuccess(text)
+                : new ParsingError<TransformationText>("Failed to parse the messages.");
         }
 
         /// <summary>
@@ -108,14 +106,14 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         /// <param name="this">The content service.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         [Pure]
-        public static async Task<RetrieveEntityResult<IReadOnlyList<Species>>> DiscoverBundledSpeciesAsync
+        public static async Task<Result<IReadOnlyList<Species>>> DiscoverBundledSpeciesAsync
         (
             this ContentService @this
         )
         {
             const string speciesFilename = "Species.yml";
 
-            var deser = new DeserializerBuilder()
+            var deserializer = new DeserializerBuilder()
                 .WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
                 .WithNamingConvention(UnderscoredNamingConvention.Instance)
                 .Build();
@@ -137,7 +135,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
                 var openStreamResult = @this.OpenLocalStream(speciesFilePath);
                 if (!openStreamResult.IsSuccess)
                 {
-                    return RetrieveEntityResult<IReadOnlyList<Species>>.FromError(openStreamResult);
+                    return Result<IReadOnlyList<Species>>.FromError(openStreamResult);
                 }
 
                 await using var speciesFile = openStreamResult.Entity;
@@ -145,20 +143,20 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
 
                 try
                 {
-                    species.Add(deser.Deserialize<Species>(content));
+                    species.Add(deserializer.Deserialize<Species>(content));
                 }
                 catch (YamlException yex)
                 {
                     if (yex.InnerException is SerializationException sex)
                     {
-                        return RetrieveEntityResult<IReadOnlyList<Species>>.FromError(sex);
+                        return Result<IReadOnlyList<Species>>.FromError(sex);
                     }
 
-                    return RetrieveEntityResult<IReadOnlyList<Species>>.FromError(yex);
+                    return Result<IReadOnlyList<Species>>.FromError(yex);
                 }
             }
 
-            return RetrieveEntityResult<IReadOnlyList<Species>>.FromSuccess(species);
+            return Result<IReadOnlyList<Species>>.FromSuccess(species);
         }
 
         /// <summary>
@@ -170,7 +168,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         /// <param name="species">The species to discover transformations for.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         [Pure]
-        public static async Task<RetrieveEntityResult<IReadOnlyList<Transformation>>> DiscoverBundledTransformationsAsync
+        public static async Task<Result<IReadOnlyList<Transformation>>> DiscoverBundledTransformationsAsync
         (
             this ContentService @this,
             TransformationService transformation,
@@ -184,7 +182,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
                 .Where(p => !p.ToString().EndsWith(speciesFilename));
 
             var transformations = new List<Transformation>();
-            var deser = new DeserializerBuilder()
+            var deserializer = new DeserializerBuilder()
                 .WithTypeConverter(new ColourYamlConverter())
                 .WithTypeConverter(new SpeciesYamlConverter(transformation))
                 .WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
@@ -207,20 +205,20 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
 
                 try
                 {
-                    transformations.Add(deser.Deserialize<Transformation>(content));
+                    transformations.Add(deserializer.Deserialize<Transformation>(content));
                 }
                 catch (YamlException yex)
                 {
                     if (yex.InnerException is SerializationException sex)
                     {
-                        return RetrieveEntityResult<IReadOnlyList<Transformation>>.FromError(sex);
+                        return Result<IReadOnlyList<Transformation>>.FromError(sex);
                     }
 
-                    return RetrieveEntityResult<IReadOnlyList<Transformation>>.FromError(yex);
+                    return Result<IReadOnlyList<Transformation>>.FromError(yex);
                 }
             }
 
-            return RetrieveEntityResult<IReadOnlyList<Transformation>>.FromSuccess(transformations);
+            return Result<IReadOnlyList<Transformation>>.FromSuccess(transformations);
         }
 
         [Pure]

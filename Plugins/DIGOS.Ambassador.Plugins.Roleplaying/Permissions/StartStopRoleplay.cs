@@ -22,14 +22,12 @@
 
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
-using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions
 {
     /// <summary>
     /// Represents a permission that allows a user to start and stop roleplays.
     /// </summary>
-    [PublicAPI]
     public sealed class StartStopRoleplay : Permission
     {
         /// <inheritdoc />

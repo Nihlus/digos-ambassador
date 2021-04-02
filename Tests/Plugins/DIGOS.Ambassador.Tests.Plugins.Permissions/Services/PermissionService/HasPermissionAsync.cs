@@ -20,13 +20,10 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Permissions;
 using DIGOS.Ambassador.Tests.Plugins.Permissions.Data;
-using DIGOS.Ambassador.Tests.Utility;
-using Discord;
-using Moq;
+using Remora.Discord.Core;
 using Xunit;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
@@ -40,33 +37,13 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
     {
         public class HasPermissionAsync : PermissionServiceTestBase
         {
-            private readonly IGuild _discordGuild;
-            private readonly IGuildUser _discordUser;
-            private readonly IRole _discordRole;
+            private readonly Snowflake _discordGuild = new Snowflake(0);
+            private readonly Snowflake _discordUser = new Snowflake(1);
+            private readonly Snowflake _discordRole = new Snowflake(2);
 
-            private readonly IGuildUser _discordGuildOwner;
+            private readonly Snowflake _discordGuildOwner = new Snowflake(3);
 
-            private readonly IPermission _permission;
-
-            public HasPermissionAsync()
-            {
-                _discordGuild = MockHelper.CreateDiscordGuild(0, 1);
-                _discordRole = MockHelper.CreateDiscordRole(0);
-
-                var mock = new Mock<IGuildUser>();
-                mock.Setup(u => u.Id).Returns(0);
-                mock.Setup(u => u.RoleIds).Returns(new List<ulong> { _discordRole.Id });
-
-                _discordUser = mock.Object;
-
-                var ownerMock = new Mock<IGuildUser>();
-                ownerMock.Setup(u => u.Id).Returns(1);
-                ownerMock.Setup(u => u.RoleIds).Returns(new List<ulong> { _discordRole.Id });
-
-                _discordGuildOwner = ownerMock.Object;
-
-                _permission = new TestPermission();
-            }
+            private readonly IPermission _permission = new TestPermission();
 
             [Fact]
             public async Task ReturnsFalseIfPermissionIsNotGrantedToUser()

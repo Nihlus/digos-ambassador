@@ -20,14 +20,19 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Extensions;
-using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
-using Discord;
-using Discord.Commands;
-using JetBrains.Annotations;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.API;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Contexts;
+using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
@@ -38,68 +43,85 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         /// <summary>
         /// Server-related commands, such as viewing or editing info about a specific server.
         /// </summary>
-        [PublicAPI]
         [Group("server")]
-        [Summary("Server-related commands, such as viewing or editing info about a specific server.")]
-        public partial class ModerationServerCommands : ModuleBase
+        [Description("Server-related commands, such as viewing or editing info about a specific server.")]
+        public class ModerationServerCommands : CommandGroup
         {
             private readonly ModerationService _moderation;
-
             private readonly UserFeedbackService _feedback;
+            private readonly ICommandContext _context;
+            private readonly IDiscordRestGuildAPI _guildAPI;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="ModerationServerCommands"/> class.
             /// </summary>
             /// <param name="moderation">The moderation service.</param>
             /// <param name="feedback">The feedback service.</param>
+            /// <param name="context">The command context.</param>
+            /// <param name="guildAPI">The guild API.</param>
             public ModerationServerCommands
             (
                 ModerationService moderation,
-                UserFeedbackService feedback
+                UserFeedbackService feedback,
+                ICommandContext context,
+                IDiscordRestGuildAPI guildAPI
             )
             {
                 _moderation = moderation;
                 _feedback = feedback;
+                _context = context;
+                _guildAPI = guildAPI;
             }
 
             /// <summary>
             /// Shows the server's moderation settings.
             /// </summary>
             [Command("settings")]
-            [Summary("Shows the server's moderation settings.")]
-            [RequireContext(ContextType.Guild)]
-            public async Task<RuntimeResult> ShowServerSettingsAsync()
+            [Description("Shows the server's moderation settings.")]
+            [RequireContext(ChannelContext.Guild)]
+            public async Task<IResult> ShowServerSettingsAsync()
             {
-                var guild = this.Context.Guild;
+                var getGuild = await _guildAPI.GetGuildAsync(_context.GuildID.Value);
+                if (!getGuild.IsSuccess)
+                {
+                    return getGuild;
+                }
 
-                var getSettings = await _moderation.GetOrCreateServerSettingsAsync(guild);
+                var guild = getGuild.Entity;
+
+                var getSettings = await _moderation.GetOrCreateServerSettingsAsync(guild.ID);
                 if (!getSettings.IsSuccess)
                 {
-                    return getSettings.ToRuntimeResult();
+                    return getSettings;
                 }
 
                 var settings = getSettings.Entity;
 
-                var eb = _feedback.CreateEmbedBase();
-                eb.WithTitle(guild.Name);
-                eb.WithThumbnailUrl(guild.IconUrl);
+                var getGuildIcon = CDN.GetGuildIconUrl(guild);
+
+                var embedFields = new List<EmbedField>();
+                var eb = _feedback.CreateEmbedBase() with
+                {
+                    Title = guild.Name,
+                    Thumbnail = getGuildIcon.IsSuccess ? new EmbedThumbnail(getGuildIcon.Entity.ToString()) : default,
+                    Fields = embedFields
+                };
 
                 var moderationLogChannelName = settings.ModerationLogChannel.HasValue
-                    ? MentionUtils.MentionChannel((ulong)settings.ModerationLogChannel)
+                    ? $"<#{settings.ModerationLogChannel}>"
                     : "None";
 
-                eb.AddField("Moderation Log Channel", moderationLogChannelName);
+                embedFields.Add(new EmbedField("Moderation Log Channel", moderationLogChannelName));
 
                 var monitoringChannelName = settings.MonitoringChannel.HasValue
-                    ? MentionUtils.MentionChannel((ulong)settings.MonitoringChannel)
+                    ? $"<#{settings.MonitoringChannel}>"
                     : "None";
 
-                eb.AddField("Event Monitor Channel", monitoringChannelName);
+                embedFields.Add(new EmbedField("Event Monitor Channel", monitoringChannelName));
 
-                eb.AddField("Warning Threshold", settings.WarningThreshold);
+                embedFields.Add(new EmbedField("Warning Threshold", settings.WarningThreshold.ToString()));
 
-                await _feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
-                return RuntimeCommandResult.FromSuccess();
+                return await _feedback.SendEmbedAsync(_context.ChannelID, eb);
             }
         }
     }

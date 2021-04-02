@@ -20,17 +20,19 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.ComponentModel;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Extensions;
-using DIGOS.Ambassador.Discord.Extensions.Results;
-using DIGOS.Ambassador.Plugins.Core.Services.Servers;
+using DIGOS.Ambassador.Discord.Feedback.Results;
+using DIGOS.Ambassador.Plugins.Permissions.Conditions;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
-using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Permissions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
-using Discord.Commands;
 using JetBrains.Annotations;
-using static Discord.Commands.ContextType;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Contexts;
+using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
@@ -43,25 +45,25 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         /// </summary>
         [UsedImplicitly]
         [Group("server")]
-        [Alias("server", "guild")]
-        [Summary("Server-related commands, such as viewing or editing info about a specific server.")]
-        public partial class RoleplayServerCommands : ModuleBase
+        [Description("Server-related commands, such as viewing or editing info about a specific server.")]
+        public partial class RoleplayServerCommands : CommandGroup
         {
-            private readonly ServerService _servers;
             private readonly RoleplayServerSettingsService _serverSettings;
+            private readonly ICommandContext _context;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="RoleplayServerCommands"/> class.
             /// </summary>
             /// <param name="serverSettings">The roleplaying server settings service.</param>
-            /// <param name="servers">The server service.</param>
+            /// <param name="context">The command context.</param>
             public RoleplayServerCommands
             (
                 RoleplayServerSettingsService serverSettings,
-                ServerService servers)
+                ICommandContext context
+            )
             {
                 _serverSettings = serverSettings;
-                _servers = servers;
+                _context = context;
             }
 
             /// <summary>
@@ -69,27 +71,16 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             /// </summary>
             [UsedImplicitly]
             [Command("clear-roleplay-category")]
-            [Summary("Clears the channel category to use for dedicated roleplays.")]
-            [RequireContext(Guild)]
+            [Description("Clears the channel category to use for dedicated roleplays.")]
+            [RequireContext(ChannelContext.Guild)]
             [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
-            public async Task<RuntimeResult> ClearDedicatedRoleplayChannelCategory()
+            public async Task<Result<UserMessage>> ClearDedicatedRoleplayChannelCategory()
             {
-                var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
-                if (!getServerResult.IsSuccess)
-                {
-                    return getServerResult.ToRuntimeResult();
-                }
+                var result = await _serverSettings.SetDedicatedChannelCategoryAsync(_context.GuildID.Value, null);
 
-                var server = getServerResult.Entity;
-
-                var result = await _serverSettings.SetDedicatedChannelCategoryAsync(server, null);
-
-                if (!result.IsSuccess)
-                {
-                    return result.ToRuntimeResult();
-                }
-
-                return RuntimeCommandResult.FromSuccess("Dedicated channel category cleared.");
+                return !result.IsSuccess
+                    ? Result<UserMessage>.FromError(result)
+                    : new ConfirmationMessage("Dedicated channel category cleared.");
             }
 
             /// <summary>
@@ -97,31 +88,20 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             /// </summary>
             [UsedImplicitly]
             [Command("clear-default-user-role")]
-            [Summary("Clears the role to use as a default @everyone role in dynamic roleplays.")]
-            [RequireContext(Guild)]
+            [Description("Clears the role to use as a default @everyone role in dynamic roleplays.")]
+            [RequireContext(ChannelContext.Guild)]
             [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
-            public async Task<RuntimeResult> SetDefaultUserRole()
+            public async Task<Result<UserMessage>> SetDefaultUserRole()
             {
-                var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
-                if (!getServerResult.IsSuccess)
-                {
-                    return getServerResult.ToRuntimeResult();
-                }
-
-                var server = getServerResult.Entity;
-
                 var result = await _serverSettings.SetDefaultUserRoleAsync
                 (
-                    server,
+                    _context.GuildID.Value,
                     null
                 );
 
-                if (!result.IsSuccess)
-                {
-                    return result.ToRuntimeResult();
-                }
-
-                return RuntimeCommandResult.FromSuccess("Default user role cleared.");
+                return !result.IsSuccess
+                    ? Result<UserMessage>.FromError(result)
+                    : new ConfirmationMessage("Default user role cleared.");
             }
         }
     }

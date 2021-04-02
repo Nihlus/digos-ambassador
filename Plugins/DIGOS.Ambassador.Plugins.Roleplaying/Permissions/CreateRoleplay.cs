@@ -22,14 +22,12 @@
 
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
-using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions
 {
     /// <summary>
     /// Represents a permission that allows a user to create roleplays.
     /// </summary>
-    [PublicAPI]
     public sealed class CreateRoleplay : Permission
     {
         /// <inheritdoc />

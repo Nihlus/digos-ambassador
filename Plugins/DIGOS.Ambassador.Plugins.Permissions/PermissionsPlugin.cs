@@ -25,21 +25,22 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
-using DIGOS.Ambassador.Discord.Interactivity.Behaviours;
-using DIGOS.Ambassador.Discord.TypeReaders.Extensions;
+using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Interactivity.Extensions;
+using DIGOS.Ambassador.Discord.Pagination.Responders;
+using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Plugins.Permissions;
 using DIGOS.Ambassador.Plugins.Permissions.CommandModules;
+using DIGOS.Ambassador.Plugins.Permissions.Conditions;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
-using Discord.Commands;
-using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Remora.Behaviours;
-using Remora.Behaviours.Extensions;
-using Remora.Behaviours.Services;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Remora.Commands.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
+using Remora.Results;
 
 [assembly: RemoraPlugin(typeof(PermissionsPlugin))]
 
@@ -48,7 +49,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions
     /// <summary>
     /// Describes the permission plugin.
     /// </summary>
-    [PublicAPI]
     public sealed class PermissionsPlugin : PluginDescriptor, IMigratablePlugin
     {
         /// <inheritdoc />
@@ -60,44 +60,41 @@ namespace DIGOS.Ambassador.Plugins.Permissions
         /// <inheritdoc />
         public override void ConfigureServices(IServiceCollection serviceCollection)
         {
-            serviceCollection
-                .AddSingleton<PermissionRegistryService>()
-                .AddScoped<PermissionService>()
-                .AddConfiguredSchemaAwareDbContextPool<PermissionsDatabaseContext>()
-                .AddBehaviour<InteractivityBehaviour>()
-                .AddBehaviour<DelayedActionBehaviour>();
+            // Dependencies
+            serviceCollection.TryAddSingleton<UserFeedbackService>();
+            serviceCollection.AddInteractivity();
+            serviceCollection.TryAddInteractivityResponder<PaginatedMessageResponder>();
+
+            // Our stuff
+            serviceCollection.TryAddSingleton<PermissionRegistryService>();
+            serviceCollection.TryAddScoped<PermissionService>();
+
+            serviceCollection.AddConfiguredSchemaAwareDbContextPool<PermissionsDatabaseContext>();
+
+            serviceCollection.AddCondition<RequirePermissionCondition>();
+            serviceCollection.AddCommandGroup<PermissionCommands>();
+            serviceCollection.AddParser<PermissionTarget, HumanizerEnumTypeReader<PermissionTarget>>();
         }
 
         /// <inheritdoc />
-        public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
+        public override ValueTask<Result> InitializeAsync(IServiceProvider serviceProvider)
         {
             var permissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
-            var registrationResult = permissionRegistry.RegisterPermissions
+            return new ValueTask<Result>(permissionRegistry.RegisterPermissions
             (
                 Assembly.GetExecutingAssembly(),
                 serviceProvider
-            );
-
-            if (!registrationResult.IsSuccess)
-            {
-                return false;
-            }
-
-            var commands = serviceProvider.GetRequiredService<CommandService>();
-            commands.AddEnumReader<PermissionTarget>();
-            await commands.AddModuleAsync<PermissionCommands>(serviceProvider);
-
-            return true;
+            ));
         }
 
         /// <inheritdoc />
-        public async Task<bool> MigratePluginAsync(IServiceProvider serviceProvider)
+        public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
         {
             var context = serviceProvider.GetRequiredService<PermissionsDatabaseContext>();
 
             await context.Database.MigrateAsync();
 
-            return true;
+            return Result.FromSuccess();
         }
 
         /// <inheritdoc />

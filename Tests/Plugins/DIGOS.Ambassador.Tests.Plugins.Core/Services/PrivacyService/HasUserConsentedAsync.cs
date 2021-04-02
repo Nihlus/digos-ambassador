@@ -21,8 +21,7 @@
 //
 
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Tests.Utility;
-using Discord;
+using Remora.Discord.Core;
 using Xunit;
 
 #pragma warning disable SA1600
@@ -35,11 +34,11 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
     {
         public class HasUserConsentedAsync : PrivacyServiceTestBase
         {
-            private readonly IUser _discordUser;
+            private readonly Snowflake _discordUser;
 
             public HasUserConsentedAsync()
             {
-                _discordUser = MockHelper.CreateDiscordUser(0);
+                _discordUser = new Snowflake(0);
             }
 
             [Fact]

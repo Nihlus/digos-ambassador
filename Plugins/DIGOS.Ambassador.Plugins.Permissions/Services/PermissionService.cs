@@ -26,10 +26,12 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
-using Discord;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.Core;
 using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
@@ -41,14 +43,17 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
     public sealed class PermissionService
     {
         private readonly PermissionsDatabaseContext _database;
+        private readonly IDiscordRestGuildAPI _guildAPI;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PermissionService"/> class.
         /// </summary>
         /// <param name="database">The database.</param>
-        public PermissionService(PermissionsDatabaseContext database)
+        /// <param name="guildAPI">The guild API.</param>
+        public PermissionService(PermissionsDatabaseContext database, IDiscordRestGuildAPI guildAPI)
         {
             _database = database;
+            _guildAPI = guildAPI;
         }
 
         /// <summary>
@@ -60,10 +65,10 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// <param name="target">The granted target.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> GrantPermissionAsync
+        public async Task<Result> GrantPermissionAsync
         (
-            IGuild discordServer,
-            IUser discordUser,
+            Snowflake discordServer,
+            Snowflake discordUser,
             IPermission grantedPermission,
             PermissionTarget target,
             CancellationToken ct = default
@@ -92,11 +97,11 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
 
                 if (grantSelfResult.IsSuccess || grantOtherResult.IsSuccess)
                 {
-                    return ModifyEntityResult.FromSuccess();
+                    return Result.FromSuccess();
                 }
 
                 // Both are false, so we'll just inherit the error from the self grant.
-                return ModifyEntityResult.FromError(grantSelfResult);
+                return grantSelfResult;
             }
 
             var getPermissionResult = await GetOrCreateUserPermissionAsync
@@ -110,19 +115,19 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
 
             if (!getPermissionResult.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getPermissionResult);
+                return Result.FromError(getPermissionResult);
             }
 
             var permission = getPermissionResult.Entity;
             if (permission.IsGranted)
             {
-                return ModifyEntityResult.FromError("The user already has permission to do that.");
+                return new UserError("The user already has permission to do that.");
             }
 
             permission.IsGranted = true;
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -133,9 +138,9 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// <param name="target">The granted target.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> GrantPermissionAsync
+        public async Task<Result> GrantPermissionAsync
         (
-            IRole discordRole,
+            Snowflake discordRole,
             IPermission grantedPermission,
             PermissionTarget target,
             CancellationToken ct = default
@@ -162,11 +167,11 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
 
                 if (grantSelfResult.IsSuccess || grantOtherResult.IsSuccess)
                 {
-                    return ModifyEntityResult.FromSuccess();
+                    return Result.FromSuccess();
                 }
 
                 // Both are false, so we'll just inherit the self result.
-                return ModifyEntityResult.FromError(grantSelfResult);
+                return grantSelfResult;
             }
 
             var getPermissionResult = await GetOrCreateRolePermissionAsync
@@ -179,19 +184,19 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
 
             if (!getPermissionResult.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getPermissionResult);
+                return Result.FromError(getPermissionResult);
             }
 
             var permission = getPermissionResult.Entity;
             if (permission.IsGranted)
             {
-                return ModifyEntityResult.FromError("The user already has permission to do that.");
+                return new UserError("The user already has permission to do that.");
             }
 
             permission.IsGranted = true;
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -204,10 +209,10 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// <param name="target">The revoked target.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> RevokePermissionAsync
+        public async Task<Result> RevokePermissionAsync
         (
-            IGuild discordServer,
-            IUser discordUser,
+            Snowflake discordServer,
+            Snowflake discordUser,
             IPermission revokedPermission,
             PermissionTarget target,
             CancellationToken ct = default
@@ -236,11 +241,11 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
 
                 if (revokeSelfResult.IsSuccess || revokeOtherResult.IsSuccess)
                 {
-                    return ModifyEntityResult.FromSuccess();
+                    return Result.FromSuccess();
                 }
 
                 // Both are false, so we'll just inherit the self result.
-                return ModifyEntityResult.FromError(revokeSelfResult);
+                return revokeSelfResult;
             }
 
             var getPermissionResult = await GetOrCreateUserPermissionAsync
@@ -254,19 +259,19 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
 
             if (!getPermissionResult.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getPermissionResult);
+                return Result.FromError(getPermissionResult);
             }
 
             var permission = getPermissionResult.Entity;
             if (!permission.IsGranted)
             {
-                return ModifyEntityResult.FromError("The user is already prohibited from doing that.");
+                return new UserError("The user is already prohibited from doing that.");
             }
 
             permission.IsGranted = false;
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -277,9 +282,9 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// <param name="target">The revoked target.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> RevokePermissionAsync
+        public async Task<Result> RevokePermissionAsync
         (
-            IRole discordRole,
+            Snowflake discordRole,
             IPermission revokedPermission,
             PermissionTarget target,
             CancellationToken ct = default
@@ -306,11 +311,11 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
 
                 if (revokeSelfResult.IsSuccess || revokeOtherResult.IsSuccess)
                 {
-                    return ModifyEntityResult.FromSuccess();
+                    return Result.FromSuccess();
                 }
 
                 // Both are false, so we'll just inherit the self result.
-                return ModifyEntityResult.FromError(revokeSelfResult);
+                return revokeSelfResult;
             }
 
             var getPermissionResult = await GetOrCreateRolePermissionAsync
@@ -323,19 +328,19 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
 
             if (!getPermissionResult.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getPermissionResult);
+                return Result.FromError(getPermissionResult);
             }
 
             var permission = getPermissionResult.Entity;
             if (!permission.IsGranted)
             {
-                return ModifyEntityResult.FromError("The role is already prohibited from doing that.");
+                return new UserError("The role is already prohibited from doing that.");
             }
 
             permission.IsGranted = false;
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -352,19 +357,27 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns><value>true</value> if the user has the permission; otherwise, <value>false</value>.</returns>
         [Pure]
-        public async Task<DetermineConditionResult> HasPermissionAsync
+        public async Task<Result> HasPermissionAsync
         (
-            IGuild discordServer,
-            IGuildUser discordUser,
+            Snowflake discordServer,
+            Snowflake discordUser,
             IPermission requiredPermission,
             PermissionTarget target,
             CancellationToken ct = default
         )
         {
-            // The server owner always has all permissions by default
-            if (discordServer.OwnerId == discordUser.Id)
+            var getDiscordServer = await _guildAPI.GetGuildAsync(discordServer, ct: ct);
+            if (!getDiscordServer.IsSuccess)
             {
-                return DetermineConditionResult.FromSuccess();
+                return Result.FromError(getDiscordServer);
+            }
+
+            var guild = getDiscordServer.Entity;
+
+            // The server owner always has all permissions by default
+            if (guild.OwnerID == discordUser)
+            {
+                return Result.FromSuccess();
             }
 
             // Special handling for the All target
@@ -390,16 +403,24 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
 
                 if (hasSelf.IsSuccess && hasOther.IsSuccess)
                 {
-                    return DetermineConditionResult.FromSuccess();
+                    return Result.FromSuccess();
                 }
 
-                return DetermineConditionResult.FromError("Permission denied.");
+                return new UserError("Permission denied.");
             }
 
             var hasPermission = false;
 
+            var getGuildMember = await _guildAPI.GetGuildMemberAsync(discordServer, discordUser, ct);
+            if (!getGuildMember.IsSuccess)
+            {
+                return Result.FromError(getGuildMember);
+            }
+
+            var member = getGuildMember.Entity;
+
             // Check if the user is part of any roles which this permission applies to
-            var rolePermissions = await GetApplicableRolePermissionsAsync(discordUser, ct);
+            var rolePermissions = await GetApplicableRolePermissionsAsync(member.Roles, ct);
             var rolePermission = rolePermissions.FirstOrDefault
             (
                 p =>
@@ -416,8 +437,8 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             var userPermission = await _database.UserPermissions.ServersideQueryAsync
             (
                 q => q
-                    .Where(p => p.ServerID == (long)discordServer.Id)
-                    .Where(p => p.UserID == (long)discordUser.Id)
+                    .Where(p => p.ServerID == discordServer)
+                    .Where(p => p.UserID == discordUser)
                     .Where(p => p.Permission == requiredPermission.UniqueIdentifier)
                     .Where(p => p.Target == target)
                     .SingleOrDefaultAsync(ct)
@@ -434,12 +455,9 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
                 hasPermission = requiredPermission.IsGrantedByDefaultTo(target);
             }
 
-            if (hasPermission)
-            {
-                return DetermineConditionResult.FromSuccess();
-            }
-
-            return DetermineConditionResult.FromError("Permission denied.");
+            return hasPermission
+                ? Result.FromSuccess()
+                : new UserError("Permission denied.");
         }
 
         /// <summary>
@@ -451,16 +469,16 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// <returns>An object representing the query.</returns>
         public async Task<IEnumerable<UserPermission>> GetApplicableUserPermissionsAsync
         (
-            IGuild discordServer,
-            IUser discordUser,
+            Snowflake discordServer,
+            Snowflake discordUser,
             CancellationToken ct = default
         )
         {
             return await _database.UserPermissions.ServersideQueryAsync
             (
                 q => q
-                    .Where(p => p.ServerID == (long)discordServer.Id)
-                    .Where(p => p.UserID == (long)discordUser.Id),
+                    .Where(p => p.ServerID == discordServer)
+                    .Where(p => p.UserID == discordUser),
                 ct
             );
         }
@@ -468,20 +486,20 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// <summary>
         /// Retrieves the role-level permissions applicable to the given user.
         /// </summary>
-        /// <param name="discordUser">The user.</param>
+        /// <param name="discordUserRoles">The user's roles.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>An object representing the query.</returns>
         public async Task<IEnumerable<RolePermission>> GetApplicableRolePermissionsAsync
         (
-            IGuildUser discordUser,
+            IReadOnlyList<Snowflake> discordUserRoles,
             CancellationToken ct = default
         )
         {
-            var userRoles = discordUser.RoleIds.Select(r => (long)r).ToList();
+            var userRoles = discordUserRoles.ToList();
 
             var permissions = await _database.RolePermissions.ServersideQueryAsync
             (
-                q => q.Where(p => userRoles.Contains(p.RoleID)),
+                q => q.Where(p => discordUserRoles.Contains(p.RoleID)),
                 ct
             );
 
@@ -496,9 +514,9 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// <param name="target">The target.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have finished.</returns>
-        private async Task<RetrieveEntityResult<RolePermission>> GetOrCreateRolePermissionAsync
+        private async Task<Result<RolePermission>> GetOrCreateRolePermissionAsync
         (
-            IRole discordRole,
+            Snowflake discordRole,
             IPermission permission,
             PermissionTarget target,
             CancellationToken ct = default
@@ -512,7 +530,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             var rolePermissions = await _database.RolePermissions.ServersideQueryAsync
             (
                 q => q
-                    .Where(p => p.RoleID == (long)discordRole.Id)
+                    .Where(p => p.RoleID == discordRole)
                     .Where(p => p.Permission == permission.UniqueIdentifier)
                     .Where(p => p.Target == target),
                 ct
@@ -527,7 +545,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
 
             var newPermission = _database.CreateProxy<RolePermission>
             (
-                (long)discordRole.Id,
+                discordRole,
                 permission.UniqueIdentifier,
                 target
             );
@@ -549,10 +567,10 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// <param name="target">The target.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have finished.</returns>
-        private async Task<RetrieveEntityResult<UserPermission>> GetOrCreateUserPermissionAsync
+        private async Task<Result<UserPermission>> GetOrCreateUserPermissionAsync
         (
-            IGuild discordGuild,
-            IUser discordUser,
+            Snowflake discordGuild,
+            Snowflake discordUser,
             IPermission permission,
             PermissionTarget target,
             CancellationToken ct = default
@@ -568,8 +586,8 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
                 q => q.Where
                 (
                     p =>
-                        p.ServerID == (long)discordGuild.Id &&
-                        p.UserID == (long)discordUser.Id &&
+                        p.ServerID == discordGuild &&
+                        p.UserID == discordUser &&
                         p.Permission == permission.UniqueIdentifier &&
                         p.Target == target
                 ),
@@ -585,8 +603,8 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
 
             var newPermission = _database.CreateProxy<UserPermission>
             (
-                (long)discordGuild.Id,
-                (long)discordUser.Id,
+                discordGuild,
+                discordUser,
                 permission.UniqueIdentifier,
                 target
             );

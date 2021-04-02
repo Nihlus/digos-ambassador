@@ -26,15 +26,18 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
+using DIGOS.Ambassador.Core.Database.Interfaces;
 using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Kinks.Extensions;
 using DIGOS.Ambassador.Plugins.Kinks.Model;
-using Discord;
 using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq.Extensions;
+using Remora.Discord.API.Objects;
+using Remora.Discord.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Kinks.Services
@@ -43,7 +46,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
     /// Service class for user kinks.
     /// </summary>
     [PublicAPI]
-    public sealed class KinkService
+    public sealed class KinkService : IQueryService<UserKink>
     {
         private readonly KinksDatabaseContext _database;
         private readonly UserService _users;
@@ -74,7 +77,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         [Pure]
-        public async Task<RetrieveEntityResult<Kink>> GetKinkByNameAsync(string name, CancellationToken ct = default)
+        public async Task<Result<Kink>> GetKinkByNameAsync(string name, CancellationToken ct = default)
         {
             return await _database.Kinks.SelectFromBestLevenshteinMatchAsync
             (
@@ -93,12 +96,11 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         [Pure]
         public Embed BuildKinkInfoEmbed(Kink kink)
         {
-            var eb = _feedback.CreateEmbedBase();
-
-            eb.WithTitle(kink.Name.Transform(To.TitleCase));
-            eb.WithDescription(kink.Description);
-
-            return eb.Build();
+            return _feedback.CreateEmbedBase() with
+            {
+                Title = kink.Name.Transform(To.TitleCase),
+                Description = kink.Description
+            };
         }
 
         /// <summary>
@@ -109,20 +111,19 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         [Pure]
-        public async Task<RetrieveEntityResult<UserKink>> GetUserKinkByNameAsync
+        public async Task<Result<UserKink>> GetUserKinkByNameAsync
         (
-            IUser discordUser,
+            Snowflake discordUser,
             string name,
             CancellationToken ct = default
         )
         {
-            var getUserKinksResult = await GetUserKinksAsync(discordUser, ct: ct);
-            if (!getUserKinksResult.IsSuccess)
-            {
-                return RetrieveEntityResult<UserKink>.FromError(getUserKinksResult);
-            }
-
-            var userKinks = getUserKinksResult.Entity;
+            var userKinks = await QueryDatabaseAsync
+            (
+                q => q
+                    .Where(k => k.User.DiscordID == discordUser),
+                ct
+            );
 
             return userKinks.SelectFromBestLevenshteinMatch(x => x, k => k.Kink.Name, name);
         }
@@ -133,45 +134,16 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// <param name="userKink">The kink.</param>
         /// <returns>An embed.</returns>
         [Pure]
-        public EmbedBuilder BuildUserKinkInfoEmbedBase(UserKink userKink)
+        public Embed BuildUserKinkInfoEmbedBase(UserKink userKink)
         {
-            var eb = _feedback.CreateEmbedBase();
-
-            eb.AddField(userKink.Kink.Name.Transform(To.TitleCase), userKink.Kink.Description);
-            eb.AddField("Current preference", userKink.Preference.Humanize());
-
-            return eb;
-        }
-
-        /// <summary>
-        /// Gets the given user's kink preferences.
-        /// </summary>
-        /// <param name="discordUser">The user.</param>
-        /// <param name="query">Additional query statements.</param>
-        /// <param name="ct">The cancellation token in use.</param>
-        /// <returns>The user's kinks.</returns>
-        [Pure]
-        public async Task<RetrieveEntityResult<IReadOnlyList<UserKink>>> GetUserKinksAsync
-        (
-            IUser discordUser,
-            Func<IQueryable<UserKink>, IQueryable<UserKink>>? query = null,
-            CancellationToken ct = default
-        )
-        {
-            query ??= q => q;
-
-            var getUserResult = await _users.GetOrRegisterUserAsync(discordUser, ct);
-            if (!getUserResult.IsSuccess)
+            return _feedback.CreateEmbedBase() with
             {
-                return RetrieveEntityResult<IReadOnlyList<UserKink>>.FromError(getUserResult);
-            }
-
-            var user = getUserResult.Entity;
-
-            return RetrieveEntityResult<IReadOnlyList<UserKink>>.FromSuccess
-            (
-                await _database.UserKinks.ServersideQueryAsync(q => query(q.Where(k => k.User == user)), ct)
-            );
+                Fields = new[]
+                {
+                    new EmbedField(userKink.Kink.Name.Transform(To.TitleCase), userKink.Kink.Description),
+                    new EmbedField("Current preference", userKink.Preference.Humanize())
+                }
+            };
         }
 
         /// <summary>
@@ -182,25 +154,23 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// <param name="kinks">The kinks.</param>
         /// <returns>A paginated embed.</returns>
         [Pure]
-        public IEnumerable<EmbedBuilder> BuildKinkOverlapEmbeds
+        public List<Embed> BuildKinkOverlapEmbeds
         (
-            IUser firstUser,
-            IUser secondUser,
+            Snowflake firstUser,
+            Snowflake secondUser,
             IEnumerable<UserKink> kinks
         )
         {
-            var pages =
+            return
             (
                 from batch in kinks.Batch(3)
                 from kink in batch
-                select BuildUserKinkInfoEmbedBase(kink).WithTitle
-                (
-                    $"Matching kinks between {firstUser.Mention} and {secondUser.Mention}"
-                )
+                select BuildUserKinkInfoEmbedBase(kink) with
+                {
+                    Title = $"Matching kinks between <@{firstUser}> and <@{secondUser}>"
+                }
             )
             .ToList();
-
-            return pages;
         }
 
         /// <summary>
@@ -209,20 +179,18 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// <param name="kinks">The kinks.</param>
         /// <returns>A paginated embed.</returns>
         [Pure]
-        public IEnumerable<EmbedBuilder> BuildPaginatedUserKinkEmbeds
+        public List<Embed> BuildPaginatedUserKinkEmbeds
         (
             IEnumerable<UserKink> kinks
         )
         {
-            var pages =
+            return
             (
                 from batch in kinks.Batch(3)
                 from kink in batch
                 select BuildUserKinkInfoEmbedBase(kink)
             )
             .ToList();
-
-            return pages;
         }
 
         /// <summary>
@@ -232,7 +200,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// <param name="preference">The new preference.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetKinkPreferenceAsync
+        public async Task<Result> SetKinkPreferenceAsync
         (
             UserKink userKink,
             KinkPreference preference,
@@ -242,7 +210,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
             userKink.Preference = preference;
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -253,41 +221,38 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>The user's kink preference.</returns>
         [Pure]
-        public async Task<RetrieveEntityResult<UserKink>> GetUserKinkByFListIDAsync
+        public async Task<Result<UserKink>> GetUserKinkByFListIDAsync
         (
-            IUser discordUser,
-            int onlineKinkID,
+            Snowflake discordUser,
+            long onlineKinkID,
             CancellationToken ct = default
         )
         {
-            var getKinkResult = await GetKinkByFListIDAsync(onlineKinkID, ct);
-            if (!getKinkResult.IsSuccess)
-            {
-                return RetrieveEntityResult<UserKink>.FromError(getKinkResult);
-            }
-
-            var getUserKinksResult = await GetUserKinksAsync(discordUser, ct: ct);
-            if (!getUserKinksResult.IsSuccess)
-            {
-                return RetrieveEntityResult<UserKink>.FromError(getUserKinksResult);
-            }
-
-            var userKinks = getUserKinksResult.Entity;
-            var userKink = userKinks.FirstOrDefault(k => k.Kink.FListID == onlineKinkID);
+            var userKink = await QueryDatabaseAsync
+            (
+                q => q
+                    .Where(k => k.User.DiscordID == discordUser)
+                    .Where(k => k.Kink.FListID == onlineKinkID)
+                    .SingleOrDefaultAsync(ct)
+            );
 
             if (!(userKink is null))
             {
-                return RetrieveEntityResult<UserKink>.FromSuccess(userKink);
+                return Result<UserKink>.FromSuccess(userKink);
             }
 
-            var kink = getKinkResult.Entity;
-            var addKinkResult = await AddUserKinkAsync(discordUser, kink, ct);
-            if (!addKinkResult.IsSuccess)
+            var getKink = await GetKinkByFListIDAsync(onlineKinkID, ct);
+            if (!getKink.IsSuccess)
             {
-                return RetrieveEntityResult<UserKink>.FromError(addKinkResult);
+                return Result<UserKink>.FromError(getKink);
             }
 
-            return RetrieveEntityResult<UserKink>.FromSuccess(addKinkResult.Entity);
+            var kink = getKink.Entity;
+            var addKinkResult = await AddUserKinkAsync(discordUser, kink, ct);
+
+            return addKinkResult.IsSuccess
+                ? Result<UserKink>.FromSuccess(addKinkResult.Entity)
+                : Result<UserKink>.FromError(addKinkResult);
         }
 
         /// <summary>
@@ -297,30 +262,30 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// <param name="kink">The kink.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A creation result which may or may not have succeeded.</returns>
-        public async Task<CreateEntityResult<UserKink>> AddUserKinkAsync
+        public async Task<Result<UserKink>> AddUserKinkAsync
         (
-            IUser discordUser,
+            Snowflake discordUser,
             Kink kink,
             CancellationToken ct = default
         )
         {
-            var getUserKinksResult = await GetUserKinksAsync(discordUser, ct: ct);
-            if (!getUserKinksResult.IsSuccess)
-            {
-                return CreateEntityResult<UserKink>.FromError(getUserKinksResult);
-            }
+            var hasKink = await QueryDatabaseAsync
+            (
+                q => q
+                    .Where(k => k.User.DiscordID == discordUser)
+                    .Where(k => k.Kink == kink)
+                    .AnyAsync(ct)
+            );
 
-            var userKinks = getUserKinksResult.Entity;
-
-            if (userKinks.Any(k => k.Kink.FListID == kink.FListID))
+            if (hasKink)
             {
-                return CreateEntityResult<UserKink>.FromError("The user already has a preference for that kink.");
+                return new UserError("The user already has a preference for that kink.");
             }
 
             var getUserResult = await _users.GetOrRegisterUserAsync(discordUser, ct);
             if (!getUserResult.IsSuccess)
             {
-                return CreateEntityResult<UserKink>.FromError(getUserResult);
+                return Result<UserKink>.FromError(getUserResult);
             }
 
             var user = getUserResult.Entity;
@@ -343,7 +308,9 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         {
             var categories = await _database.Kinks.ServersideQueryAsync
             (
-                q => q.Select(k => k.Category),
+                q => q
+                    .Select(k => k.Category)
+                    .Distinct(),
                 ct
             );
 
@@ -357,7 +324,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         [Pure]
-        public async Task<RetrieveEntityResult<Kink>> GetKinkByFListIDAsync
+        public async Task<Result<Kink>> GetKinkByFListIDAsync
         (
             long onlineKinkID,
             CancellationToken ct = default
@@ -375,7 +342,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
                 return kink;
             }
 
-            return RetrieveEntityResult<Kink>.FromError("No kink with that ID found.");
+            return new UserError("No kink with that ID found.");
         }
 
         /// <summary>
@@ -385,7 +352,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         [Pure]
-        public async Task<RetrieveEntityResult<IEnumerable<Kink>>> GetKinksByCategoryAsync
+        public async Task<Result<IReadOnlyList<Kink>>> GetKinksByCategoryAsync
         (
             KinkCategory category,
             CancellationToken ct = default
@@ -398,51 +365,15 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
                 ct
             );
 
-            var enumeratedKinks = kinks
-                .OrderBy(g => g.Category.ToString())
-                .ToList();
-
-            if (!enumeratedKinks.Any())
+            if (!kinks.Any())
             {
-                return RetrieveEntityResult<IEnumerable<Kink>>.FromError
+                return new UserError
                 (
                     "There are no kinks in that category."
                 );
             }
 
-            return enumeratedKinks;
-        }
-
-        /// <summary>
-        /// Gets a list of all a user's kinks in a given category.
-        /// </summary>
-        /// <param name="user">The user.</param>
-        /// <param name="category">The category.</param>
-        /// <param name="ct">The cancellation token in use.</param>
-        /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure]
-        public async Task<RetrieveEntityResult<IEnumerable<UserKink>>> GetUserKinksByCategoryAsync
-        (
-            IUser user,
-            KinkCategory category,
-            CancellationToken ct = default
-        )
-        {
-            var getUserKinksResult = await GetUserKinksAsync(user, ct: ct);
-            if (!getUserKinksResult.IsSuccess)
-            {
-                return RetrieveEntityResult<IEnumerable<UserKink>>.FromError(getUserKinksResult);
-            }
-
-            var userKinks = getUserKinksResult.Entity;
-
-            var group = userKinks.Where(k => k.Kink.Category == category).ToList();
-            if (!group.Any())
-            {
-                return RetrieveEntityResult<IEnumerable<UserKink>>.FromSuccess(new UserKink[] { });
-            }
-
-            return RetrieveEntityResult<IEnumerable<UserKink>>.FromSuccess(group.OrderBy(uk => uk.Kink.ToString()));
+            return Result<IReadOnlyList<Kink>>.FromSuccess(kinks);
         }
 
         /// <summary>
@@ -451,16 +382,16 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// <param name="discordUser">The user.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A task that must be awaited.</returns>
-        public async Task<ModifyEntityResult> ResetUserKinksAsync
+        public async Task<Result> ResetUserKinksAsync
         (
-            IUser discordUser,
+            Snowflake discordUser,
             CancellationToken ct = default
         )
         {
             var getUserResult = await _users.GetOrRegisterUserAsync(discordUser, ct);
             if (!getUserResult.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getUserResult);
+                return Result.FromError(getUserResult);
             }
 
             var user = getUserResult.Entity;
@@ -474,7 +405,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
             _database.UserKinks.RemoveRange(kinksToRemove);
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -485,52 +416,59 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         [Pure]
-        public async Task<RetrieveEntityResult<Kink>> GetFirstKinkWithoutPreferenceInCategoryAsync
+        public async Task<Result<Kink>> GetFirstKinkWithoutPreferenceInCategoryAsync
         (
-            IUser user,
+            Snowflake user,
             KinkCategory category,
             CancellationToken ct = default
         )
         {
+            // First, look for something that's already registered, but doesn't have a preference
+            var kinkWithoutPreference = await QueryDatabaseAsync
+            (
+                q => q
+                    .Where(k => k.User.DiscordID == user)
+                    .Where(k => k.Kink.Category == category)
+                    .FirstOrDefaultAsync(k => k.Preference == KinkPreference.NoPreference, ct)
+            );
+
+            if (kinkWithoutPreference is not null)
+            {
+                return kinkWithoutPreference.Kink;
+            }
+
+            // Okay, no kink registered - let's find the last one
+            var lastKink = await QueryDatabaseAsync
+            (
+                q => q
+                    .Where(k => k.User.DiscordID == user)
+                    .Where(k => k.Kink.Category == category)
+                    .OrderBy(k => k.Kink.FListID)
+                    .LastOrDefaultAsync(ct)
+            );
+
             var getKinksResult = await GetKinksByCategoryAsync(category, ct);
             if (!getKinksResult.IsSuccess)
             {
-                return RetrieveEntityResult<Kink>.FromError(getKinksResult);
+                return Result<Kink>.FromError(getKinksResult);
             }
 
             var kinks = getKinksResult.Entity;
 
-            var getKinksByCategoryResult = await GetUserKinksByCategoryAsync(user, category, ct);
-            if (!getKinksByCategoryResult.IsSuccess)
+            // The user doesn't have any set kinks in this category; grab the first one
+            if (lastKink is null)
             {
-                return RetrieveEntityResult<Kink>.FromError(getKinksByCategoryResult);
+                return kinks[0];
             }
 
-            var userKinks = getKinksByCategoryResult.Entity.ToList();
-
-            // Find the first kink that the user either has in their list with no preference, or does not exist
-            // in their list
-            var kinkWithoutPreference = kinks.FirstOrDefault
-            (
-                k =>
-                    userKinks.Any
-                    (
-                        uk =>
-                            k.FListID == uk.Kink.FListID && uk.Preference == KinkPreference.NoPreference
-                    ) ||
-                    userKinks.All
-                    (
-                        uk =>
-                            k.FListID != uk.Kink.FListID
-                    )
-            );
-
-            if (kinkWithoutPreference is null)
+            // Still nothing? Just pick the first one without a preference
+            var firstKinkWithoutPreference = kinks.FirstOrDefault(k => k.FListID != lastKink.Kink.FListID);
+            if (firstKinkWithoutPreference is not null)
             {
-                return RetrieveEntityResult<Kink>.FromError("No kink without a set preference found.");
+                return firstKinkWithoutPreference;
             }
 
-            return RetrieveEntityResult<Kink>.FromSuccess(kinkWithoutPreference);
+            return new UserError("No kink without a set preference found.");
         }
 
         /// <summary>
@@ -540,19 +478,17 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         [Pure]
-        public async Task<RetrieveEntityResult<Kink>> GetFirstKinkInCategoryAsync
+        public async Task<Result<Kink>> GetFirstKinkInCategoryAsync
         (
             KinkCategory category,
             CancellationToken ct = default
         )
         {
             var getKinksResult = await GetKinksByCategoryAsync(category, ct);
-            if (!getKinksResult.IsSuccess)
-            {
-                return RetrieveEntityResult<Kink>.FromError(getKinksResult);
-            }
 
-            return RetrieveEntityResult<Kink>.FromSuccess(getKinksResult.Entity.First());
+            return getKinksResult.IsSuccess
+                ? Result<Kink>.FromSuccess(getKinksResult.Entity[0])
+                : Result<Kink>.FromError(getKinksResult);
         }
 
         /// <summary>
@@ -562,9 +498,9 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         [Pure]
-        public async Task<RetrieveEntityResult<Kink>> GetNextKinkByCurrentFListIDAsync
+        public async Task<Result<Kink>> GetNextKinkByCurrentFListIDAsync
         (
-            int precedingFListID,
+            long precedingFListID,
             CancellationToken ct = default
         )
         {
@@ -578,18 +514,15 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
             var getKinksResult = await GetKinksByCategoryAsync(currentKink.Category, ct);
             if (!getKinksResult.IsSuccess)
             {
-                return RetrieveEntityResult<Kink>.FromError(getKinksResult);
+                return Result<Kink>.FromError(getKinksResult);
             }
 
             var group = getKinksResult.Entity;
             var nextKink = group.SkipUntil(k => k.FListID == precedingFListID).FirstOrDefault();
 
-            if (nextKink is null)
-            {
-                return RetrieveEntityResult<Kink>.FromError("The current kink was the last one in the category.");
-            }
-
-            return RetrieveEntityResult<Kink>.FromSuccess(nextKink);
+            return nextKink is null
+                ? new UserError("The current kink was the last one in the category.")
+                : Result<Kink>.FromSuccess(nextKink);
         }
 
         /// <summary>
@@ -604,19 +537,30 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
             CancellationToken ct = default
         )
         {
-            var alteredKinks = 0;
-            foreach (var kink in newKinks)
-            {
-                var entry = _database.Kinks.Update(kink);
-                if (entry.State != EntityState.Unchanged)
-                {
-                    ++alteredKinks;
-                }
-            }
+            var alteredKinks = newKinks
+                .Select(kink => _database.Kinks.Update(kink))
+                .Count(entry => entry.State != EntityState.Unchanged);
 
             await _database.SaveChangesAsync(ct);
 
             return alteredKinks;
+        }
+
+        /// <inheritdoc />
+        public async Task<IReadOnlyList<UserKink>> QueryDatabaseAsync
+        (
+            Func<IQueryable<UserKink>, IQueryable<UserKink>>? query = default,
+            CancellationToken ct = default
+        )
+        {
+            query ??= q => q;
+            return await _database.UserKinks.ServersideQueryAsync(query, ct);
+        }
+
+        /// <inheritdoc />
+        public async Task<TOut> QueryDatabaseAsync<TOut>(Func<IQueryable<UserKink>, Task<TOut>> query)
+        {
+            return await _database.UserKinks.ServersideQueryAsync(query);
         }
     }
 }

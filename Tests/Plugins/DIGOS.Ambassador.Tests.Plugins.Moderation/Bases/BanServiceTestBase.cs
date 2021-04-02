@@ -27,7 +27,6 @@ using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
-using DIGOS.Ambassador.Tests.Extensions;
 using DIGOS.Ambassador.Tests.TestBases;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
@@ -71,11 +70,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Bases
         /// <inheritdoc />
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
-            var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            coreDatabase.Database.Create();
-
             var banDatabase = serviceProvider.GetRequiredService<ModerationDatabaseContext>();
-            banDatabase.Database.Create();
+            banDatabase.Database.EnsureCreated();
 
             this.Database = banDatabase;
             this.Bans = serviceProvider.GetRequiredService<BanService>();

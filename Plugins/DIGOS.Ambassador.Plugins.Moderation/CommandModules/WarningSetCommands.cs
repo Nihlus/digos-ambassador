@@ -21,18 +21,19 @@
 //
 
 using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Extensions;
-using DIGOS.Ambassador.Discord.Extensions.Results;
-using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Moderation.Permissions;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
-using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
-using Discord;
-using Discord.Commands;
-using JetBrains.Annotations;
-
-using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
+using DIGOS.Ambassador.Plugins.Permissions.Conditions;
+using DIGOS.Ambassador.Plugins.Permissions.Model;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Contexts;
+using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
@@ -43,27 +44,25 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         /// <summary>
         /// Warning setter commands.
         /// </summary>
-        [PublicAPI]
         [Group("set")]
-        public class WarningSetCommands : ModuleBase
+        public class WarningSetCommands : CommandGroup
         {
             private readonly WarningService _warnings;
-
-            private readonly UserFeedbackService _feedback;
+            private readonly ICommandContext _context;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="WarningSetCommands"/> class.
             /// </summary>
             /// <param name="warnings">The moderation service.</param>
-            /// <param name="feedback">The feedback service.</param>
+            /// <param name="context">The command context.</param>
             public WarningSetCommands
             (
                 WarningService warnings,
-                UserFeedbackService feedback
+                ICommandContext context
             )
             {
                 _warnings = warnings;
-                _feedback = feedback;
+                _context = context;
             }
 
             /// <summary>
@@ -72,15 +71,15 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             /// <param name="warningID">The ID of the warning to edit.</param>
             /// <param name="newReason">The new reason for the warning.</param>
             [Command("reason")]
-            [Summary("Sets the reason for the warning.")]
+            [Description("Sets the reason for the warning.")]
             [RequirePermission(typeof(ManageWarnings), PermissionTarget.All)]
-            [RequireContext(ContextType.Guild)]
-            public async Task<RuntimeResult> SetWarningReasonAsync(long warningID, string newReason)
+            [RequireContext(ChannelContext.Guild)]
+            public async Task<Result<UserMessage>> SetWarningReasonAsync(long warningID, string newReason)
             {
-                var getWarning = await _warnings.GetWarningAsync(this.Context.Guild, warningID);
+                var getWarning = await _warnings.GetWarningAsync(_context.GuildID.Value, warningID);
                 if (!getWarning.IsSuccess)
                 {
-                    return getWarning.ToRuntimeResult();
+                    return Result<UserMessage>.FromError(getWarning);
                 }
 
                 var warning = getWarning.Entity;
@@ -88,10 +87,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 var setContents = await _warnings.SetWarningReasonAsync(warning, newReason);
                 if (!setContents.IsSuccess)
                 {
-                    return setContents.ToRuntimeResult();
+                    return Result<UserMessage>.FromError(setContents);
                 }
 
-                return RuntimeCommandResult.FromSuccess("Warning reason updated.");
+                return new ConfirmationMessage("Warning reason updated.");
             }
 
             /// <summary>
@@ -100,26 +99,26 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             /// <param name="warningID">The ID of the warning to edit.</param>
             /// <param name="newMessage">The new reason for the warning.</param>
             [Command("context-message")]
-            [Summary("Sets the contextually relevant message for the warning.")]
+            [Description("Sets the contextually relevant message for the warning.")]
             [RequirePermission(typeof(ManageWarnings), PermissionTarget.All)]
-            [RequireContext(ContextType.Guild)]
-            public async Task<RuntimeResult> SetWarningContextMessageAsync(long warningID, IMessage newMessage)
+            [RequireContext(ChannelContext.Guild)]
+            public async Task<Result<UserMessage>> SetWarningContextMessageAsync(long warningID, IMessage newMessage)
             {
-                var getWarning = await _warnings.GetWarningAsync(this.Context.Guild, warningID);
+                var getWarning = await _warnings.GetWarningAsync(_context.GuildID.Value, warningID);
                 if (!getWarning.IsSuccess)
                 {
-                    return getWarning.ToRuntimeResult();
+                    return Result<UserMessage>.FromError(getWarning);
                 }
 
                 var warning = getWarning.Entity;
 
-                var setMessage = await _warnings.SetWarningContextMessageAsync(warning, (long)newMessage.Id);
+                var setMessage = await _warnings.SetWarningContextMessageAsync(warning, newMessage.ID);
                 if (!setMessage.IsSuccess)
                 {
-                    return setMessage.ToRuntimeResult();
+                    return Result<UserMessage>.FromError(setMessage);
                 }
 
-                return RuntimeCommandResult.FromSuccess("Warning context message updated.");
+                return new ConfirmationMessage("Warning context message updated.");
             }
 
             /// <summary>
@@ -128,15 +127,15 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             /// <param name="warningID">The ID of the warning to edit.</param>
             /// <param name="newDuration">The new duration of the warning.</param>
             [Command("duration")]
-            [Summary("Sets the duration of the warning.")]
+            [Description("Sets the duration of the warning.")]
             [RequirePermission(typeof(ManageWarnings), PermissionTarget.All)]
-            [RequireContext(ContextType.Guild)]
-            public async Task<RuntimeResult> SetWarningDurationAsync(long warningID, TimeSpan newDuration)
+            [RequireContext(ChannelContext.Guild)]
+            public async Task<Result<UserMessage>> SetWarningDurationAsync(long warningID, TimeSpan newDuration)
             {
-                var getWarning = await _warnings.GetWarningAsync(this.Context.Guild, warningID);
+                var getWarning = await _warnings.GetWarningAsync(_context.GuildID.Value, warningID);
                 if (!getWarning.IsSuccess)
                 {
-                    return getWarning.ToRuntimeResult();
+                    return Result<UserMessage>.FromError(getWarning);
                 }
 
                 var warning = getWarning.Entity;
@@ -146,10 +145,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 var setExpiration = await _warnings.SetWarningExpiryDateAsync(warning, newExpiration);
                 if (!setExpiration.IsSuccess)
                 {
-                    return setExpiration.ToRuntimeResult();
+                    return Result<UserMessage>.FromError(setExpiration);
                 }
 
-                return RuntimeCommandResult.FromSuccess("Warning duration updated.");
+                return new ConfirmationMessage("Warning duration updated.");
             }
         }
     }

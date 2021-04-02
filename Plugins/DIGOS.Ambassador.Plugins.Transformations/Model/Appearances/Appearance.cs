@@ -28,6 +28,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Entities;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Transformations.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Services;
@@ -112,8 +113,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// </summary>
         /// <param name="sourceAppearance">The source appearance.</param>
         /// <returns>The new appearance.</returns>
-        [JetBrains.Annotations.NotNull]
-        public static Appearance CopyFrom([JetBrains.Annotations.NotNull] Appearance sourceAppearance)
+        public static Appearance CopyFrom(Appearance sourceAppearance)
         {
             var componentCopies = sourceAppearance.Components.Select(AppearanceComponent.CopyFrom).ToList();
 
@@ -130,16 +130,16 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <param name="transformations">The transformation service.</param>
         /// <returns>A creation result which may or may not have succeeded.</returns>
         [Pure]
-        public static async Task<CreateEntityResult<Appearance>> CreateDefaultAsync
+        public static async Task<Result<Appearance>> CreateDefaultAsync
         (
-            [JetBrains.Annotations.NotNull] Character character,
-            [JetBrains.Annotations.NotNull] TransformationService transformations
+            Character character,
+            TransformationService transformations
         )
         {
             var getSpeciesResult = await transformations.GetSpeciesByNameAsync("template");
             if (!getSpeciesResult.IsSuccess)
             {
-                return CreateEntityResult<Appearance>.FromError("Could not find the default species.");
+                return new UserError("Could not find the default species.");
             }
 
             var templateSpecies = getSpeciesResult.Entity;
@@ -160,7 +160,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
                         continue;
                     }
 
-                    return CreateEntityResult<Appearance>.FromError(getTFResult);
+                    return Result<Appearance>.FromError(getTFResult);
                 }
 
                 templateTransformations.AddRange(getTFResult.Entity);
@@ -182,7 +182,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
             var appearance = new Appearance(character);
             appearance.Components.AddRange(templateComponents);
 
-            return CreateEntityResult<Appearance>.FromSuccess(appearance);
+            return Result<Appearance>.FromSuccess(appearance);
         }
 
          /// <summary>

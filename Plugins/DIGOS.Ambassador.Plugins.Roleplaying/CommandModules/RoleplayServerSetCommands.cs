@@ -20,17 +20,16 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.ComponentModel;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Extensions;
-using DIGOS.Ambassador.Discord.Extensions.Results;
-using DIGOS.Ambassador.Plugins.Core.Services.Servers;
-using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
+using DIGOS.Ambassador.Discord.Feedback.Results;
+using DIGOS.Ambassador.Plugins.Permissions.Conditions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Permissions;
-using DIGOS.Ambassador.Plugins.Roleplaying.Services;
-using Discord;
-using Discord.Commands;
 using JetBrains.Annotations;
-using static Discord.Commands.ContextType;
+using Remora.Commands.Attributes;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.Commands.Conditions;
+using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -39,131 +38,75 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 {
     public partial class RoleplayCommands
     {
+        /// <summary>
+        /// Server info setter commands.
+        /// </summary>
         public partial class RoleplayServerCommands
         {
             /// <summary>
-            /// Server info setter commands.
+            /// Sets the channel category to use for dedicated roleplays.
             /// </summary>
+            /// <param name="category">The category to use.</param>
             [UsedImplicitly]
-            [Group("set")]
-            public class ServerSetCommands : ModuleBase
+            [Command("set-roleplay-category")]
+            [Description("Sets the channel category to use for dedicated roleplays.")]
+            [RequireContext(ChannelContext.Guild)]
+            [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
+            public async Task<Result<UserMessage>> SetDedicatedRoleplayChannelCategory(IChannel category)
             {
-                private readonly ServerService _servers;
-                private readonly RoleplayServerSettingsService _serverSettings;
-
-                /// <summary>
-                /// Initializes a new instance of the <see cref="ServerSetCommands"/> class.
-                /// </summary>
-                /// <param name="serverSettings">The server settings service.</param>
-                /// <param name="servers">The server service.</param>
-                public ServerSetCommands
+                var result = await _serverSettings.SetDedicatedChannelCategoryAsync
                 (
-                    RoleplayServerSettingsService serverSettings,
-                    ServerService servers
-                )
-                {
-                    _serverSettings = serverSettings;
-                    _servers = servers;
-                }
+                    _context.GuildID.Value,
+                    category.ID
+                );
 
-                /// <summary>
-                /// Sets the channel category to use for dedicated roleplays.
-                /// </summary>
-                /// <param name="category">The category to use.</param>
-                [UsedImplicitly]
-                [Command("roleplay-category")]
-                [Summary("Sets the channel category to use for dedicated roleplays.")]
-                [RequireContext(Guild)]
-                [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
-                public async Task<RuntimeResult> SetDedicatedRoleplayChannelCategory(ICategoryChannel category)
-                {
-                    var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
-                    if (!getServerResult.IsSuccess)
-                    {
-                        return getServerResult.ToRuntimeResult();
-                    }
+                return !result.IsSuccess
+                    ? Result<UserMessage>.FromError(result)
+                    : new ConfirmationMessage("Dedicated channel category set.");
+            }
 
-                    var server = getServerResult.Entity;
+            /// <summary>
+            /// Sets the channel to use for archival of roleplays.
+            /// </summary>
+            /// <param name="channel">The channel to use.</param>
+            [UsedImplicitly]
+            [Command("set-archive-channel")]
+            [Description("Sets the channel to use for archival of roleplays.")]
+            [RequireContext(ChannelContext.Guild)]
+            [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
+            public async Task<Result<UserMessage>> SetArchiveChannelAsync(IChannel channel)
+            {
+                var result = await _serverSettings.SetArchiveChannelAsync
+                (
+                    _context.GuildID.Value,
+                    channel.ID
+                );
 
-                    var result = await _serverSettings.SetDedicatedChannelCategoryAsync
-                    (
-                        server,
-                        category
-                    );
+                return !result.IsSuccess
+                    ? Result<UserMessage>.FromError(result)
+                    : new ConfirmationMessage("Archive channel set.");
+            }
 
-                    if (!result.IsSuccess)
-                    {
-                        return result.ToRuntimeResult();
-                    }
+            /// <summary>
+            /// Sets the role to use as a default @everyone role in dynamic roleplays.
+            /// </summary>
+            /// <param name="role">The role to use.</param>
+            [UsedImplicitly]
+            [Command("set-default-user-role")]
+            [Description("Sets the role to use as a default @everyone role in dynamic roleplays.")]
+            [RequireContext(ChannelContext.Guild)]
+            [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
+            public async Task<Result<UserMessage>> SetDefaultUserRole(IRole role)
+            {
+                var result = await _serverSettings.SetDefaultUserRoleAsync
+                (
+                    _context.GuildID.Value,
+                    role.ID
+                );
 
-                    return RuntimeCommandResult.FromSuccess("Dedicated channel category set.");
-                }
-
-                /// <summary>
-                /// Sets the channel to use for archival of roleplays.
-                /// </summary>
-                /// <param name="channel">The channel to use.</param>
-                [UsedImplicitly]
-                [Command("archive-channel")]
-                [Summary("Sets the channel to use for archival of roleplays.")]
-                [RequireContext(Guild)]
-                [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
-                public async Task<RuntimeResult> SetArchiveChannelAsync(ITextChannel channel)
-                {
-                    var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
-                    if (!getServerResult.IsSuccess)
-                    {
-                        return getServerResult.ToRuntimeResult();
-                    }
-
-                    var server = getServerResult.Entity;
-
-                    var result = await _serverSettings.SetArchiveChannelAsync
-                    (
-                        server,
-                        channel
-                    );
-
-                    if (!result.IsSuccess)
-                    {
-                        return result.ToRuntimeResult();
-                    }
-
-                    return RuntimeCommandResult.FromSuccess("Archive channel set.");
-                }
-
-                /// <summary>
-                /// Sets the role to use as a default @everyone role in dynamic roleplays.
-                /// </summary>
-                /// <param name="role">The role to use.</param>
-                [UsedImplicitly]
-                [Command("default-user-role")]
-                [Summary("Sets the role to use as a default @everyone role in dynamic roleplays.")]
-                [RequireContext(Guild)]
-                [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
-                public async Task<RuntimeResult> SetDefaultUserRole(IRole role)
-                {
-                    var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
-                    if (!getServerResult.IsSuccess)
-                    {
-                        return getServerResult.ToRuntimeResult();
-                    }
-
-                    var server = getServerResult.Entity;
-
-                    var result = await _serverSettings.SetDefaultUserRoleAsync
-                    (
-                        server,
-                        role
-                    );
-
-                    if (!result.IsSuccess)
-                    {
-                        return result.ToRuntimeResult();
-                    }
-
-                    return RuntimeCommandResult.FromSuccess("Default user role set.");
-                }
+                return !result.IsSuccess
+                    ? Result<UserMessage>.FromError(result)
+                    : new ConfirmationMessage("Default user role set.");
             }
         }
     }

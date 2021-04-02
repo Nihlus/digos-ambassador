@@ -114,12 +114,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         [Pure]
         public bool IsSameSpeciesAs(Species? species)
         {
-            if (species is null)
-            {
-                return false;
-            }
-
-            return string.Equals(this.Name.ToLower(), species.Name.ToLower());
+            return species is not null && string.Equals(this.Name.ToLower(), species.Name.ToLower());
         }
 
         /// <inheritdoc />

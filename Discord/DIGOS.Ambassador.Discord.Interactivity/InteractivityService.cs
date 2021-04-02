@@ -21,14 +21,19 @@
 //
 
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
+using System.Drawing;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Interactivity.Messages;
-using Discord;
-using Discord.WebSocket;
-using Remora.Behaviours.Services;
+using DIGOS.Ambassador.Discord.Interactivity.Responders;
+using Microsoft.Extensions.DependencyInjection;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Objects;
+using Remora.Discord.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Discord.Interactivity
@@ -38,247 +43,227 @@ namespace DIGOS.Ambassador.Discord.Interactivity
     /// </summary>
     public class InteractivityService
     {
-        private readonly DelayedActionService _delayedActions;
-        private readonly IList<IInteractiveMessage> _trackedMessages;
+        /// <summary>
+        /// Holds a mapping of message IDs to tracked messages.
+        /// </summary>
+        private readonly ConcurrentDictionary<string, IInteractiveMessage> _trackedMessages = new();
 
         /// <summary>
-        /// Gets the client that the service is attached to.
+        /// Holds the Discord channel API.
         /// </summary>
-        public BaseSocketClient Client { get; }
+        private readonly IDiscordRestChannelAPI _channelAPI;
+
+        /// <summary>
+        /// Holds the Discord user API.
+        /// </summary>
+        private readonly IDiscordRestUserAPI _userAPI;
+
+        /// <summary>
+        /// Holds the available services.
+        /// </summary>
+        private readonly IServiceProvider _services;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InteractivityService"/> class.
         /// </summary>
-        /// <param name="client">The client to listen for messages from.</param>
-        /// <param name="delayedActions">The delayed actions service.</param>
-        public InteractivityService(BaseSocketClient client, DelayedActionService delayedActions)
+        /// <param name="services">The available services.</param>
+        /// <param name="channelAPI">The channel API.</param>
+        /// <param name="userAPI">The user API.</param>
+        public InteractivityService
+        (
+            IServiceProvider services,
+            IDiscordRestChannelAPI channelAPI,
+            IDiscordRestUserAPI userAPI
+        )
         {
-            this.Client = client;
-            _delayedActions = delayedActions;
-
-            _trackedMessages = new List<IInteractiveMessage>();
+            _channelAPI = channelAPI;
+            _userAPI = userAPI;
+            _services = services;
         }
 
         /// <summary>
-        /// Gets the next message in the given channel.
+        /// Sends an interactive message.
         /// </summary>
-        /// <param name="channel">The channel to watch for the next message.</param>
-        /// <param name="filter">A filter function that determines if the message should be accepted.</param>
-        /// <param name="timeout">A timeout after which the function will return. Defaults to 15 seconds.</param>
-        /// <returns>A result that may contain the message.</returns>
-        public async Task<RetrieveEntityResult<IUserMessage>> GetNextMessageAsync
+        /// <param name="userID">The user to send the message to.</param>
+        /// <param name="messageFactory">A factory function that wraps a sent message.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A result which may or may not have succeeded.</returns>
+        public async Task<Result> SendPrivateInteractiveMessageAsync
         (
-            IMessageChannel channel,
-            Func<IUserMessage, bool>? filter = null,
-            TimeSpan? timeout = null
+            Snowflake userID,
+            Func<Snowflake, Snowflake, IInteractiveMessage> messageFactory,
+            CancellationToken ct = default
         )
         {
-            filter ??= m => true;
-            timeout ??= TimeSpan.FromSeconds(15);
-
-            var messageTrigger = new TaskCompletionSource<IUserMessage>();
-
-            Task Handler(SocketMessage message)
+            var createDM = await _userAPI.CreateDMAsync(userID, ct);
+            if (!createDM.IsSuccess)
             {
-                if (!(message is IUserMessage userMessage))
+                return Result.FromError(createDM);
+            }
+
+            var dm = createDM.Entity;
+
+            return await SendInteractiveMessageAsync(dm.ID, messageFactory, ct);
+        }
+
+        /// <summary>
+        /// Sends an interactive message.
+        /// </summary>
+        /// <param name="channelID">The channel to send the message in.</param>
+        /// <param name="messageFactory">A factory function that wraps a sent message.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A result which may or may not have succeeded.</returns>
+        public async Task<Result> SendInteractiveMessageAsync
+        (
+            Snowflake channelID,
+            Func<Snowflake, Snowflake, IInteractiveMessage> messageFactory,
+            CancellationToken ct = default
+        )
+        {
+            var initialEmbed = new Embed
+            {
+                Colour = Color.Gray,
+                Description = "Loading..."
+            };
+
+            var sendMessage = await _channelAPI.CreateMessageAsync(channelID, embed: initialEmbed, ct: ct);
+            if (!sendMessage.IsSuccess)
+            {
+                return Result.FromError(sendMessage);
+            }
+
+            var message = sendMessage.Entity;
+            var interactiveMessage = messageFactory(channelID, message.ID);
+            var trackMessage = TrackMessage(interactiveMessage);
+            if (!trackMessage.IsSuccess)
+            {
+                return trackMessage;
+            }
+
+            var interestedResponders = _services.GetServices<InteractivityResponder>();
+            foreach (var responder in interestedResponders)
+            {
+                var updateMessage = await responder.OnCreateAsync(interactiveMessage.Nonce, ct);
+                if (!updateMessage.IsSuccess)
                 {
-                    return Task.CompletedTask;
+                    return updateMessage;
+                }
+            }
+
+            return Result.FromSuccess();
+        }
+
+        /// <summary>
+        /// Begins tracking the given message.
+        /// </summary>
+        /// <param name="message">The interactive message.</param>
+        /// <returns>A result which may or may not have succeeded.</returns>
+        public Result TrackMessage(IInteractiveMessage message)
+        {
+            return _trackedMessages.TryAdd(message.Nonce, message)
+                ? Result.FromSuccess()
+                : new GenericError("A message with that ID is already tracked.");
+        }
+
+        /// <summary>
+        /// Ceases tracking the message with the given ID.
+        /// </summary>
+        /// <param name="id">The ID of the message.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A result which may or may not have succeeded.</returns>
+        public async Task<Result> UntrackMessageAsync(Snowflake id, CancellationToken ct = default)
+        {
+            if (!_trackedMessages.TryRemove(id.ToString(), out var trackedMessage))
+            {
+                // The message is already removed
+                return Result.FromSuccess();
+            }
+
+            await trackedMessage.Semaphore.WaitAsync(ct);
+            trackedMessage.Dispose();
+
+            return Result.FromSuccess();
+        }
+
+        /// <summary>
+        /// Gets a registered interactive entity that matches the given nonce.
+        /// </summary>
+        /// <param name="nonce">The entity's unique identifier.</param>
+        /// <param name="entity">The entity, or null if none exists.</param>
+        /// <typeparam name="TEntity">The concrete entity type.</typeparam>
+        /// <returns>true if a matching entity was successfully found; otherwise, false.</returns>
+        public bool TryGetInteractiveEntity<TEntity>(string nonce, [NotNullWhen(true)] out TEntity? entity)
+            where TEntity : IInteractiveEntity
+        {
+            entity = default;
+
+            if (!_trackedMessages.TryGetValue(nonce, out var untypedEntity))
+            {
+                return false;
+            }
+
+            if (untypedEntity is not TEntity typedEntity)
+            {
+                return false;
+            }
+
+            entity = typedEntity;
+            return true;
+        }
+
+        /// <summary>
+        /// Gets the next message sent in the given channel.
+        /// </summary>
+        /// <param name="channelID">The channel to watch.</param>
+        /// <param name="timeout">The timeout, after which the method gives up.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>The message, or null if no message was sent within the given timespan.</returns>
+        public async Task<Result<IMessage?>> GetNextMessageAsync
+        (
+            Snowflake channelID,
+            TimeSpan timeout,
+            CancellationToken ct = default
+        )
+        {
+            var now = DateTimeOffset.UtcNow;
+            var timeoutTime = now + timeout;
+            var after = Snowflake.CreateTimestampSnowflake(now);
+
+            while (now <= timeoutTime)
+            {
+                now = DateTimeOffset.UtcNow;
+                var getMessage = await _channelAPI.GetChannelMessagesAsync
+                (
+                    channelID,
+                    after: after,
+                    limit: 1,
+                    ct: ct
+                );
+
+                if (!getMessage.IsSuccess)
+                {
+                    return Result<IMessage?>.FromError(getMessage);
                 }
 
-                if (userMessage.Channel.Id != channel.Id)
+                var message = getMessage.Entity.FirstOrDefault();
+                if (message is not null)
                 {
-                    return Task.CompletedTask;
+                    return Result<IMessage?>.FromSuccess(message);
                 }
 
-                if (filter!(userMessage))
-                {
-                    messageTrigger!.SetResult(userMessage);
-                }
-
-                return Task.CompletedTask;
+                await Task.Delay(TimeSpan.FromMilliseconds(500), ct);
             }
 
-            this.Client.MessageReceived += Handler;
-
-            var trigger = messageTrigger.Task;
-            var delay = Task.Delay(timeout.Value);
-
-            var task = await Task.WhenAny(trigger, delay);
-
-            this.Client.MessageReceived -= Handler;
-
-            if (task == trigger)
-            {
-                return RetrieveEntityResult<IUserMessage>.FromSuccess(await trigger);
-            }
-
-            return RetrieveEntityResult<IUserMessage>.FromError
-            (
-                "No accepted message received within the timeout period."
-            );
+            return Result<IMessage?>.FromSuccess(null);
         }
 
         /// <summary>
-        /// Sends an interactive message to the given channel.
+        /// Ceases tracking the message with the given ID.
         /// </summary>
-        /// <param name="channel">The channel to send the message to.</param>
-        /// <param name="message">The message to send.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task SendInteractiveMessageAsync
-        (
-            IMessageChannel channel,
-            IInteractiveMessage message
-        )
-        {
-            _trackedMessages.Add(message);
-            await message.SendAsync(this, channel);
-
-            while (_trackedMessages.Contains(message))
-            {
-                await Task.Delay(TimeSpan.FromSeconds(5));
-            }
-        }
-
-        /// <summary>
-        /// Sends an interactive message to the given channel and deletes it after a certain timeout.
-        /// </summary>
-        /// <param name="channel">The channel to send the message to.</param>
-        /// <param name="message">The message to send.</param>
-        /// <param name="timeout">The timeout after which the embed will be deleted. Defaults to 15 seconds.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task SendInteractiveMessageAndDeleteAsync
-        (
-            IMessageChannel channel,
-            IInteractiveMessage message,
-            TimeSpan? timeout = null
-        )
-        {
-            timeout ??= TimeSpan.FromSeconds(15.0);
-
-            _trackedMessages.Add(message);
-            await message.SendAsync(this, channel);
-
-            _delayedActions.DelayUntil(() => DeleteInteractiveMessageAsync(message), timeout.Value);
-        }
-
-        /// <summary>
-        /// Deletes an interactive message.
-        /// </summary>
-        /// <param name="message">The message to delete.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public Task<OperationResult> DeleteInteractiveMessageAsync(IInteractiveMessage message)
-        {
-            _trackedMessages.Remove(message);
-            return message.DeleteAsync();
-        }
-
-        /// <summary>
-        /// Handles the deletion of a message, removing it from the tracking list.
-        /// </summary>
-        /// <param name="message">The deleted message.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        internal async Task<OperationResult> OnMessageDeletedAsync
-        (
-            Cacheable<IMessage, ulong> message
-        )
-        {
-            var userMessage = await message.GetOrDownloadAsync();
-            if (userMessage is null)
-            {
-                return OperationResult.FromError("Failed to get the message.");
-            }
-
-            var deletedMessages = _trackedMessages.Where(m => m.Message?.Id == userMessage.Id);
-            foreach (var deletedMessage in deletedMessages)
-            {
-                _trackedMessages.Remove(deletedMessage);
-            }
-
-            return OperationResult.FromSuccess();
-        }
-
-        /// <summary>
-        /// Handles reception of a message.
-        /// </summary>
-        /// <param name="message">The message.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        internal Task<OperationResult> OnMessageReceivedAsync(SocketMessage message)
-        {
-            return Task.FromResult(OperationResult.FromSuccess());
-        }
-
-        /// <summary>
-        /// Handles an removed reaction.
-        /// </summary>
-        /// <param name="message">The message the reaction was removed to.</param>
-        /// <param name="reaction">The removed reaction.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        internal async Task<OperationResult> OnReactionRemovedAsync
-        (
-            Cacheable<IUserMessage, ulong> message,
-            SocketReaction reaction
-        )
-        {
-            if (reaction.User.IsSpecified && reaction.User.Value.IsMe(this.Client))
-            {
-                return OperationResult.FromSuccess();
-            }
-
-            var userMessage = await message.GetOrDownloadAsync();
-            if (userMessage is null)
-            {
-                return OperationResult.FromError("Failed to get the message.");
-            }
-
-            var relevantMessages = _trackedMessages.Where(m => m.Message?.Id == userMessage.Id);
-            var handlerTasks = relevantMessages
-                .Select(relevantMessage => relevantMessage.HandleRemovedInteractionAsync(reaction));
-
-            var handlerResults = await Task.WhenAll(handlerTasks);
-            var failedResult = handlerResults.FirstOrDefault(r => !r.IsSuccess);
-            if (failedResult is null)
-            {
-                return OperationResult.FromSuccess();
-            }
-
-            return OperationResult.FromError(failedResult);
-        }
-
-        /// <summary>
-        /// Handles an added reaction.
-        /// </summary>
-        /// <param name="message">The message the reaction was added to.</param>
-        /// <param name="reaction">The added reaction.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        internal async Task<OperationResult> OnReactionAddedAsync
-        (
-            Cacheable<IUserMessage, ulong> message,
-            SocketReaction reaction
-        )
-        {
-            if (reaction.User.IsSpecified && reaction.User.Value.IsMe(this.Client))
-            {
-                return OperationResult.FromSuccess();
-            }
-
-            var userMessage = await message.GetOrDownloadAsync();
-            if (userMessage is null)
-            {
-                return OperationResult.FromError("Failed to get the message.");
-            }
-
-            var relevantMessages = _trackedMessages.Where(m => m.Message?.Id == userMessage.Id);
-            var handlerTasks = relevantMessages
-                .Select(relevantMessage => relevantMessage.HandleAddedInteractionAsync(reaction)).ToList();
-
-            var handlerResults = await Task.WhenAll(handlerTasks);
-            var failedResult = handlerResults.FirstOrDefault(r => !r.IsSuccess);
-            if (failedResult is null)
-            {
-                return OperationResult.FromSuccess();
-            }
-
-            return OperationResult.FromError(failedResult);
-        }
+        /// <param name="id">The ID of the message.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A result which may or may not have succeeded.</returns>
+        public Task<Result> OnMessageDeletedAsync(Snowflake id, CancellationToken ct = default)
+            => UntrackMessageAsync(id, ct);
     }
 }

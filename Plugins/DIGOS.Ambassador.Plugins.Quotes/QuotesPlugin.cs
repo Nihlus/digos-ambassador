@@ -20,16 +20,11 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
-using System.Reflection;
-using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Quotes;
-using DIGOS.Ambassador.Plugins.Quotes.Behaviours;
+using DIGOS.Ambassador.Plugins.Quotes.Responders;
 using DIGOS.Ambassador.Plugins.Quotes.Services;
-using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
-using Remora.Behaviours.Extensions;
-using Remora.Behaviours.Services;
+using Remora.Discord.Gateway.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
 
@@ -40,7 +35,6 @@ namespace DIGOS.Ambassador.Plugins.Quotes
     /// <summary>
     /// Describes the Quotes plugin.
     /// </summary>
-    [PublicAPI]
     public sealed class QuotesPlugin : PluginDescriptor
     {
         /// <inheritdoc />
@@ -54,7 +48,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes
         {
             serviceCollection
                 .AddSingleton<QuoteService>()
-                .AddBehaviour<MessageQuoteBehaviour>();
+                .AddResponder<MessageQuoteResponder>();
         }
     }
 }

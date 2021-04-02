@@ -26,8 +26,7 @@
 
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
-using DIGOS.Ambassador.Tests.Utility;
-using Discord;
+using Remora.Discord.Core;
 using Xunit;
 
 namespace DIGOS.Ambassador.Tests.Plugins.Transformations
@@ -36,10 +35,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
     {
         public class CanUserTransformUserAsync : TransformationServiceTestBase
         {
-            private readonly IUser _user = MockHelper.CreateDiscordUser(0);
-            private readonly IUser _targetUser = MockHelper.CreateDiscordUser(1);
+            private readonly Snowflake _user = new Snowflake(0);
+            private readonly Snowflake _targetUser = new Snowflake(1);
 
-            private readonly IGuild _guild = MockHelper.CreateDiscordGuild(0);
+            private readonly Snowflake _guild = new Snowflake(0);
 
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfTargetUserHasNotOptedIn()
@@ -129,14 +128,15 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 Assert.True(result.IsSuccess);
             }
 
-            private async Task EnsureOptedInAsync(IUser user)
+            private async Task EnsureOptedInAsync(Snowflake user)
             {
                 var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
                 (
                     user,
                     _guild
                 );
-                protection.Entity.HasOptedIn = true;
+
+                protection.Entity!.HasOptedIn = true;
             }
         }
     }

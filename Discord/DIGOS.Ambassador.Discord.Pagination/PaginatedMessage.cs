@@ -20,251 +20,150 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Interactivity.Messages;
-using Discord;
-using Discord.WebSocket;
-using Remora.Results;
+using DIGOS.Ambassador.Discord.Pagination.Extensions;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Objects;
+using Remora.Discord.Core;
 
-// ReSharper disable AssignmentIsFullyDiscarded
 namespace DIGOS.Ambassador.Discord.Pagination
 {
     /// <summary>
     /// A page building class for paginated galleries.
     /// </summary>
-    /// <typeparam name="TContent">The type of content in the pager.</typeparam>
-    /// <typeparam name="TType">The type of the pager.</typeparam>
-    public abstract class PaginatedMessage<TContent, TType> : InteractiveMessage, IPager<TContent, TType>
-        where TType : PaginatedMessage<TContent, TType>
+    public class PaginatedMessage : InteractiveMessage
     {
         /// <summary>
-        /// Gets the user interaction service.
+        /// Gets the names of the reactions, mapped to their emoji.
         /// </summary>
-        private UserFeedbackService Feedback { get; }
-
-        /// <inheritdoc />
-        public virtual IList<TContent> Pages { get; protected set; } = new List<TContent>();
-
-        /// <inheritdoc />
-        public PaginatedAppearanceOptions Appearance { get; set; } = PaginatedAppearanceOptions.Default;
-
-        private int _currentPage = 1;
+        public IReadOnlyDictionary<string, IEmoji> ReactionNames { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PaginatedMessage{T1,T2}"/> class.
+        /// Gets the pages in the message.
         /// </summary>
-        /// <param name="feedbackService">The user feedback service.</param>
-        /// <param name="interactivityService">The interactivity service.</param>
-        /// <param name="sourceUser">The user who caused the interactive message to be created.</param>
-        protected PaginatedMessage
+        public IReadOnlyList<Embed> Pages { get; }
+
+        /// <summary>
+        /// Gets the appearance options for the message.
+        /// </summary>
+        public PaginatedAppearanceOptions Appearance { get; }
+
+        /// <summary>
+        /// Gets the ID of the source user.
+        /// </summary>
+        public Snowflake SourceUserID { get; }
+
+        /// <summary>
+        /// Gets or sets the current page index.
+        /// </summary>
+        public int CurrentPage { get; set;  }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PaginatedMessage"/> class.
+        /// </summary>
+        /// <param name="channelID">The ID of the channel the message is in.</param>
+        /// <param name="messageID">The ID of the message.</param>
+        /// <param name="sourceUserID">The ID of the source user.</param>
+        /// <param name="pages">The pages in the paginated message.</param>
+        /// <param name="appearance">The appearance options.</param>
+        public PaginatedMessage
         (
-            UserFeedbackService feedbackService,
-            InteractivityService interactivityService,
-            IUser sourceUser
+            Snowflake channelID,
+            Snowflake messageID,
+            Snowflake sourceUserID,
+            IReadOnlyList<Embed> pages,
+            PaginatedAppearanceOptions? appearance = null
         )
-            : base(sourceUser, interactivityService)
+            : base(channelID, messageID)
         {
-            this.Feedback = feedbackService;
-            this.Appearance.Color = Color.DarkPurple;
+            appearance ??= PaginatedAppearanceOptions.Default;
+
+            this.SourceUserID = sourceUserID;
+            this.Pages = pages;
+            this.Appearance = appearance;
+
+            this.ReactionNames = new Dictionary<string, IEmoji>
+            {
+                { appearance.First.GetEmojiName(), appearance.First },
+                { appearance.Back.GetEmojiName(), appearance.Back },
+                { appearance.Next.GetEmojiName(), appearance.Next },
+                { appearance.Last.GetEmojiName(), appearance.Last },
+                { appearance.Close.GetEmojiName(), appearance.Close },
+                { appearance.Help.GetEmojiName(), appearance.Help }
+            };
         }
 
-        /// <inheritdoc/>
-        public virtual TType AppendPage(TContent page)
+        /// <summary>
+        /// Moves the paginated message to the next page.
+        /// </summary>
+        /// <returns>True if the page changed.</returns>
+        public bool MoveNext()
         {
-            this.Pages.Add(page);
-            return (TType)this;
-        }
-
-        /// <inheritdoc/>
-        public virtual TType WithPages(IEnumerable<TContent> pages)
-        {
-            this.Pages = pages.ToList();
-
-            return (TType)this;
-        }
-
-        /// <inheritdoc/>
-        public abstract Embed BuildEmbed(int page);
-
-        /// <inheritdoc/>
-        protected override async Task<CreateEntityResult<IUserMessage>> OnDisplayAsync(IMessageChannel channel)
-        {
-            if (!this.Pages.Any())
-            {
-                return CreateEntityResult<IUserMessage>.FromError("The pager is empty.");
-            }
-
-            var embed = BuildEmbed(_currentPage - 1);
-
-            var message = await channel.SendMessageAsync(string.Empty, embed: embed);
-
-            if (this.Pages.Count > 1)
-            {
-                await message.AddReactionAsync(this.Appearance.First);
-                await message.AddReactionAsync(this.Appearance.Back);
-                await message.AddReactionAsync(this.Appearance.Next);
-                await message.AddReactionAsync(this.Appearance.Last);
-
-                var manageMessages = await CanManageMessages();
-
-                var canJump =
-                    this.Appearance.JumpDisplayCondition == JumpDisplayCondition.Always ||
-                    (this.Appearance.JumpDisplayCondition == JumpDisplayCondition.WithManageMessages && manageMessages);
-
-                if (canJump)
-                {
-                    await message.AddReactionAsync(this.Appearance.Jump);
-                }
-
-                if (this.Appearance.DisplayInformationIcon)
-                {
-                    await message.AddReactionAsync(this.Appearance.Help);
-                }
-            }
-
-            await message.AddReactionAsync(this.Appearance.Stop);
-
-            return CreateEntityResult<IUserMessage>.FromSuccess(message);
-        }
-
-        /// <remarks>
-        /// This override forwards to the added handler, letting removed reactions act the same as added reactions.
-        /// </remarks>
-        /// <inheritdoc/>
-        protected override Task<OperationResult> OnInteractionRemovedAsync(SocketReaction reaction) =>
-            OnInteractionAddedAsync(reaction);
-
-        /// <inheritdoc/>
-        protected override async Task<OperationResult> OnInteractionAddedAsync(SocketReaction reaction)
-        {
-            if (this.Message is null || this.Channel is null)
-            {
-                return OperationResult.FromError("The message hasn't been sent yet.");
-            }
-
-            if (!reaction.User.IsSpecified)
-            {
-                // Ignore unspecified users
-                return OperationResult.FromError("The user was unspecified.");
-            }
-
-            var interactingUser = reaction.User.Value;
-            if (interactingUser.Id != this.SourceUser.Id)
-            {
-                if (interactingUser is IGuildUser guildUser)
-                {
-                    // If the user has permission to manage messages, they should be allowed to interact in all cases
-                    if (!guildUser.GetPermissions(this.Channel as IGuildChannel).ManageMessages)
-                    {
-                        return OperationResult.FromSuccess();
-                    }
-                }
-                else
-                {
-                    // We only allow interactions from the user who created the message
-                    return OperationResult.FromSuccess();
-                }
-            }
-
-            var emote = reaction.Emote;
-
-            if (emote.Equals(this.Appearance.First))
-            {
-                _currentPage = 1;
-            }
-            else if (emote.Equals(this.Appearance.Next))
-            {
-                if (_currentPage >= this.Pages.Count)
-                {
-                    return OperationResult.FromSuccess();
-                }
-
-                ++_currentPage;
-            }
-            else if (emote.Equals(this.Appearance.Back))
-            {
-                if (_currentPage <= 1)
-                {
-                    return OperationResult.FromSuccess();
-                }
-
-                --_currentPage;
-            }
-            else if (emote.Equals(this.Appearance.Last))
-            {
-                _currentPage = this.Pages.Count;
-            }
-            else if (emote.Equals(this.Appearance.Stop))
-            {
-                return await this.Interactivity.DeleteInteractiveMessageAsync(this);
-            }
-            else if (emote.Equals(this.Appearance.Jump))
-            {
-                bool Filter(IUserMessage m) => m.Author.Id == reaction.UserId;
-
-                var responseResult = await this.Interactivity.GetNextMessageAsync(this.Channel, Filter, TimeSpan.FromSeconds(15));
-                if (!responseResult.IsSuccess)
-                {
-                    return OperationResult.FromError(responseResult);
-                }
-
-                var response = responseResult.Entity;
-
-                if (!int.TryParse(response.Content, out var request) || request < 1 || request > this.Pages.Count)
-                {
-                    await response.DeleteAsync();
-
-                    var eb = this.Feedback.CreateFeedbackEmbed(response.Author, Color.DarkPurple, "Please specify a page to jump to.");
-
-                    await this.Feedback.SendEmbedAndDeleteAsync(this.Channel, eb);
-                    return OperationResult.FromSuccess();
-                }
-
-                _currentPage = request;
-                await response.DeleteAsync();
-            }
-            else if (emote.Equals(this.Appearance.Help))
-            {
-                var user = this.Interactivity.Client.GetUser(reaction.UserId);
-                var eb = this.Feedback.CreateFeedbackEmbed(user, Color.DarkPurple, this.Appearance.HelpText);
-
-                await this.Feedback.SendEmbedAndDeleteAsync(this.Channel, eb, this.Appearance.InfoTimeout);
-                return OperationResult.FromSuccess();
-            }
-
-            return await UpdateAsync();
-        }
-
-        private async Task<bool> CanManageMessages()
-        {
-            if (!(this.Channel is IGuildChannel guildChannel))
+            if (this.CurrentPage >= this.Pages.Count - 1)
             {
                 return false;
             }
 
-            var botUser = this.Interactivity.Client.CurrentUser;
-            var botGuildUser = await guildChannel.Guild.GetUserAsync(botUser.Id);
-
-            return botGuildUser.GetPermissions(guildChannel).ManageMessages;
+            this.CurrentPage += 1;
+            return true;
         }
 
-        /// <inheritdoc/>
-        protected override async Task<OperationResult> OnUpdateAsync()
+        /// <summary>
+        /// Moves the paginated message to the previous page.
+        /// </summary>
+        /// <returns>True if the page changed.</returns>
+        public bool MovePrevious()
         {
-            var embed = BuildEmbed(_currentPage - 1);
-
-            var userMessage = this.Message;
-            if (userMessage != null)
+            if (this.CurrentPage <= 0)
             {
-                await userMessage.ModifyAsync(m => m.Embed = embed);
+                return false;
             }
 
-            return OperationResult.FromSuccess();
+            this.CurrentPage -= 1;
+            return true;
+        }
+
+        /// <summary>
+        /// Moves the paginated message to the first page.
+        /// </summary>
+        /// <returns>True if the page changed.</returns>
+        public bool MoveFirst()
+        {
+            if (this.CurrentPage == 0)
+            {
+                return false;
+            }
+
+            this.CurrentPage = 0;
+            return true;
+        }
+
+        /// <summary>
+        /// Moves the paginated message to the last page.
+        /// </summary>
+        /// <returns>True if the page changed.</returns>
+        public bool MoveLast()
+        {
+            if (this.CurrentPage == this.Pages.Count - 1)
+            {
+                return false;
+            }
+
+            this.CurrentPage = this.Pages.Count - 1;
+            return true;
+        }
+
+        /// <summary>
+        /// Gets the current page.
+        /// </summary>
+        /// <returns>The page.</returns>
+        public Embed GetCurrentPage()
+        {
+            return this.Pages[this.CurrentPage] with
+            {
+                Footer = new EmbedFooter(string.Format(this.Appearance.FooterFormat, this.CurrentPage + 1, this.Pages.Count))
+            };
         }
     }
 }

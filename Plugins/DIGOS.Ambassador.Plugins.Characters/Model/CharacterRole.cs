@@ -24,7 +24,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
-using JetBrains.Annotations;
+using Remora.Discord.Core;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Characters.Model
@@ -32,7 +32,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
     /// <summary>
     /// Represents a role associated with a character, similar to a nickname.
     /// </summary>
-    [PublicAPI]
     [Table("CharacterRoles", Schema = "CharacterModule")]
     public class CharacterRole : EFEntity, IServerEntity
     {
@@ -45,7 +44,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         /// <summary>
         /// Gets the role ID, taken from Discord.
         /// </summary>
-        public long DiscordID { get; private set; }
+        public Snowflake DiscordID { get; private set; }
 
         /// <summary>
         /// Gets the access conditions of the role.
@@ -68,7 +67,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         /// <param name="server">The server the role is on.</param>
         /// <param name="discordID">The ID of the role.</param>
         /// <param name="access">The role's access settings.</param>
-        public CharacterRole(Server server, long discordID, RoleAccess access)
+        public CharacterRole(Server server, Snowflake discordID, RoleAccess access)
         {
             this.Server = server;
             this.DiscordID = discordID;

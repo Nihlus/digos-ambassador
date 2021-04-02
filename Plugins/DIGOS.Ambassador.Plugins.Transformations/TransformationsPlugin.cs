@@ -26,8 +26,6 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Discord.Interactivity.Behaviours;
-using DIGOS.Ambassador.Discord.TypeReaders.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations;
 using DIGOS.Ambassador.Plugins.Transformations.CommandModules;
 using DIGOS.Ambassador.Plugins.Transformations.Extensions;
@@ -36,15 +34,15 @@ using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Services;
 using DIGOS.Ambassador.Plugins.Transformations.Services.Lua;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
-using DIGOS.Ambassador.Plugins.Transformations.TypeReaders;
-using Discord.Commands;
+using DIGOS.Ambassador.Plugins.Transformations.TypeParsers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Remora.Behaviours;
-using Remora.Behaviours.Extensions;
-using Remora.Behaviours.Services;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Remora.Commands.Extensions;
+using Remora.Commands.Parsers;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
+using Remora.Results;
 
 [assembly: InternalsVisibleTo("DIGOS.Ambassador.Tests.Plugins.Transformations")]
 [assembly: RemoraPlugin(typeof(TransformationsPlugin))]
@@ -65,50 +63,42 @@ namespace DIGOS.Ambassador.Plugins.Transformations
         /// <inheritdoc />
         public override void ConfigureServices(IServiceCollection serviceCollection)
         {
-            serviceCollection
-                .AddSingleton<TransformationDescriptionBuilder>()
-                .AddSingleton(services =>
+            serviceCollection.TryAddSingleton<TransformationDescriptionBuilder>();
+            serviceCollection.TryAddSingleton(services =>
+            {
+                var contentService = services.GetRequiredService<ContentService>();
+                var getTransformationText = contentService.GetTransformationMessages();
+
+                if (!getTransformationText.IsSuccess)
                 {
-                    var contentService = services.GetRequiredService<ContentService>();
-                    var getTransformationText = contentService.GetTransformationMessages();
+                    throw new InvalidOperationException("Failed to load the transformation messages.");
+                }
 
-                    if (!getTransformationText.IsSuccess)
-                    {
-                        throw new InvalidOperationException("Failed to load the transformation messages.");
-                    }
+                return getTransformationText.Entity;
+            });
 
-                    return getTransformationText.Entity;
-                })
-                .AddScoped<LuaService>()
-                .AddScoped<TransformationService>()
-                .AddConfiguredSchemaAwareDbContextPool<TransformationsDatabaseContext>()
-                .AddBehaviour<InteractivityBehaviour>()
-                .AddBehaviour<DelayedActionBehaviour>();
+            serviceCollection.TryAddScoped<LuaService>();
+            serviceCollection.TryAddScoped<TransformationService>();
+            serviceCollection.AddConfiguredSchemaAwareDbContextPool<TransformationsDatabaseContext>();
+
+            serviceCollection.AddParser<Colour, ColourTypeParser>();
+            serviceCollection.AddParser<Pattern, EnumParser<Pattern>>();
+            serviceCollection.AddParser<Shade, EnumParser<Shade>>();
+            serviceCollection.AddParser<ShadeModifier, EnumParser<ShadeModifier>>();
+            serviceCollection.AddParser<ProtectionType, EnumParser<ProtectionType>>();
+            serviceCollection.AddParser<Chirality, EnumParser<Chirality>>();
+
+            serviceCollection.AddParser<Colour, ColourTypeParser>();
+            serviceCollection.AddCommandGroup<TransformationCommands>();
         }
 
         /// <inheritdoc />
-        public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
-        {
-            var commands = serviceProvider.GetRequiredService<CommandService>();
-
-            commands.AddTypeReader<Colour>(new ColourTypeReader());
-
-            commands.AddEnumReader<Bodypart>();
-            commands.AddEnumReader<Pattern>();
-
-            await commands.AddModuleAsync<TransformationCommands>(serviceProvider);
-
-            return true;
-        }
-
-        /// <inheritdoc />
-        public async Task<bool> MigratePluginAsync(IServiceProvider serviceProvider)
+        public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
         {
             var context = serviceProvider.GetRequiredService<TransformationsDatabaseContext>();
 
             await context.Database.MigrateAsync();
-
-            return true;
+            return Result.FromSuccess();
         }
 
         /// <inheritdoc />

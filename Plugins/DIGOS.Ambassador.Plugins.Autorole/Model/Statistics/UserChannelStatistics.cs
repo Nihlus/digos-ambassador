@@ -22,22 +22,21 @@
 
 using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Core.Database.Entities;
-using Discord;
 using JetBrains.Annotations;
+using Remora.Discord.Core;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Statistics
 {
     /// <summary>
     /// Represents a set of per-channel statistics for a user in a server.
     /// </summary>
-    [PublicAPI]
     [Table("UserChannelStatistics", Schema = "AutoroleModule")]
     public class UserChannelStatistics : EFEntity
     {
         /// <summary>
         /// Gets the Discord channel ID of the relevant channel.
         /// </summary>
-        public long ChannelID { get; private set; }
+        public Snowflake ChannelID { get; private set; }
 
         /// <summary>
         /// Gets the message count in this channel.
@@ -49,18 +48,9 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Statistics
         /// </summary>
         /// <param name="channelID">The channel ID.</param>
         [UsedImplicitly]
-        protected UserChannelStatistics(long channelID)
+        protected UserChannelStatistics(Snowflake channelID)
         {
             this.ChannelID = channelID;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserChannelStatistics"/> class.
-        /// </summary>
-        /// <param name="textChannel">The channel.</param>
-        public UserChannelStatistics(ITextChannel textChannel)
-            : this((long)textChannel.Id)
-        {
         }
     }
 }

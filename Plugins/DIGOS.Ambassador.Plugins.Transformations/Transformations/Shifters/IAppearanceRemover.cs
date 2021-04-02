@@ -22,6 +22,7 @@
 
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Transformations.Results;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
 {
@@ -36,6 +37,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         /// <param name="bodypart">The bodypart to remove.</param>
         /// <param name="chirality">The chirality of the bodypart.</param>
         /// <returns>A shifting result which may or may not have succeeded.</returns>
-        Task<ShiftBodypartResult> RemoveAsync(Bodypart bodypart, Chirality chirality);
+        Task<Result<ShiftBodypartResult>> RemoveAsync(Bodypart bodypart, Chirality chirality);
     }
 }

@@ -21,13 +21,12 @@
 //
 
 using System;
-using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Drone;
 using DIGOS.Ambassador.Plugins.Drone.CommandModules;
 using DIGOS.Ambassador.Plugins.Drone.Services;
-using Discord.Commands;
-using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Remora.Commands.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
 
@@ -38,7 +37,6 @@ namespace DIGOS.Ambassador.Plugins.Drone
     /// <summary>
     /// Describes the Drone plugin.
     /// </summary>
-    [PublicAPI]
     public sealed class DronePlugin : PluginDescriptor
     {
         /// <inheritdoc />
@@ -50,18 +48,10 @@ namespace DIGOS.Ambassador.Plugins.Drone
         /// <inheritdoc/>
         public override void ConfigureServices(IServiceCollection serviceCollection)
         {
-            serviceCollection
-                .AddScoped<DroneService>()
-                .AddSingleton<Random>();
-        }
+            serviceCollection.TryAddScoped<DroneService>();
+            serviceCollection.TryAddSingleton<Random>();
 
-        /// <inheritdoc/>
-        public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
-        {
-            var commandService = serviceProvider.GetRequiredService<CommandService>();
-            await commandService.AddModuleAsync<DroneCommands>(serviceProvider);
-
-            return true;
+            serviceCollection.AddCommandGroup<DroneCommands>();
         }
     }
 }

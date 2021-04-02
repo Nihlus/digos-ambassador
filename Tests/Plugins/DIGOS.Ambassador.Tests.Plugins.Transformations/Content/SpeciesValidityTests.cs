@@ -43,7 +43,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
         [ClassData(typeof(SpeciesDataProvider))]
         public void SpeciesFileIsInCorrectFolder(string speciesFile)
         {
-            var folderName = Directory.GetParent(speciesFile).Name;
+            var folderName = Directory.GetParent(speciesFile)?.Name;
             var species = Deserialize<Species>(speciesFile);
 
             Assert.Equal(species.Name, folderName);
@@ -65,7 +65,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             var result = this.Verifier.VerifyFile<Species>(speciesFile);
 
             // Guarding ErrorReason here, since it throws if the result was successful.
-            Assert.True(result.IsSuccess, result.IsSuccess ? string.Empty : result.ErrorReason);
+            Assert.True(result.IsSuccess, result.IsSuccess ? string.Empty : result.Unwrap().Message);
         }
     }
 }

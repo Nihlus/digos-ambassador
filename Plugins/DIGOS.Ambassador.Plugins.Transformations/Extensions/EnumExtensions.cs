@@ -45,12 +45,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         ) where T : Attribute
         {
             customAttribute = value.GetCustomAttribute<T>();
-            if (customAttribute is null)
-            {
-                return false;
-            }
-
-            return true;
+            return customAttribute is not null;
         }
 
         /// <summary>
@@ -63,12 +58,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         {
             var enumType = value.GetType();
             var name = Enum.GetName(enumType, value);
-            if (name is null)
-            {
-                return null;
-            }
-
-            return enumType.GetField(name)?.GetCustomAttributes(false).OfType<T>().SingleOrDefault();
+            return name is null
+                ? null
+                : enumType.GetField(name)?.GetCustomAttributes(false).OfType<T>().SingleOrDefault();
         }
 
         /// <summary>

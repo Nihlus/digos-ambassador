@@ -23,26 +23,25 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Core.Database.Entities;
-using JetBrains.Annotations;
+using Remora.Discord.Core;
 
 namespace DIGOS.Ambassador.Plugins.Permissions.Model
 {
     /// <summary>
     /// Represents a record of a permission associated with a user.
     /// </summary>
-    [PublicAPI]
     [Table("UserPermissions", Schema = "PermissionModule")]
     public class UserPermission : EFEntity
     {
         /// <summary>
         /// Gets the Discord ID of the server that the permission is associated with.
         /// </summary>
-        public long ServerID { get; private set; }
+        public Snowflake ServerID { get; private set; }
 
         /// <summary>
         /// Gets the user's Discord ID.
         /// </summary>
-        public long UserID { get; private set; }
+        public Snowflake UserID { get; private set; }
 
         /// <summary>
         /// Gets the permission's unique identifier.
@@ -66,7 +65,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Model
         /// <param name="userID">The ID of the user that the permission applies to.</param>
         /// <param name="permission">The unique identifier of the permission.</param>
         /// <param name="target">The allowed targets for the permission.</param>
-        public UserPermission(long serverID, long userID, Guid permission, PermissionTarget target)
+        public UserPermission(Snowflake serverID, Snowflake userID, Guid permission, PermissionTarget target)
         {
             this.UserID = userID;
             this.Permission = permission;

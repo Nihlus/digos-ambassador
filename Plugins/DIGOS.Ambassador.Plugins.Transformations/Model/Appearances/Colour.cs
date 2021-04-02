@@ -134,7 +134,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <param name="other">The other colour.</param>
         /// <returns>The copied colour.</returns>
         [Pure, JetBrains.Annotations.NotNull]
-        public static Colour CopyFrom([JetBrains.Annotations.NotNull] Colour other)
+        public static Colour CopyFrom(Colour other)
         {
             return other.Clone();
         }

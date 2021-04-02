@@ -33,7 +33,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     /// </summary>
     [PublicAPI]
     [TokenIdentifier("bodypart", "b")]
-    public sealed class BodypartToken : ReplacableTextToken<BodypartToken>
+    public sealed class BodypartToken : ReplaceableTextToken<BodypartToken>
     {
         /// <summary>
         /// Gets or sets a value indicating whether to pluralize the bodypart.
@@ -56,26 +56,26 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
                 throw new ArgumentNullException(nameof(component));
             }
 
-            if (this.Pluralize)
-            {
-                return component.Bodypart.Humanize().Pluralize().Transform(To.LowerCase);
-            }
-
-            return component.Bodypart.Humanize().Transform(To.LowerCase);
+            return this.Pluralize
+                ? component.Bodypart.Humanize().Pluralize().Transform(To.LowerCase)
+                : component.Bodypart.Humanize().Transform(To.LowerCase);
         }
 
         /// <inheritdoc/>
         protected override BodypartToken Initialize(string? data)
         {
-            if (data is null)
+            switch (data)
             {
-                this.Pluralize = false;
-                return this;
-            }
-
-            if (data.Equals("pluralize"))
-            {
-                this.Pluralize = true;
+                case null:
+                {
+                    this.Pluralize = false;
+                    return this;
+                }
+                case "pluralize":
+                {
+                    this.Pluralize = true;
+                    break;
+                }
             }
 
             return this;

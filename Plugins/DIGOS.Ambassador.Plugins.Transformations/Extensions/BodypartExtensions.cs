@@ -69,15 +69,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
             .Cast<Bodypart>()
             .SelectMany
             (
-                b =>
-                {
-                    if (b.TryGetCustomAttribute<CompositeAttribute>(out var compositeAttribute))
-                    {
-                        return compositeAttribute.ComposingParts;
-                    }
-
-                    return new Bodypart[] { };
-                }
+                b => b.TryGetCustomAttribute<CompositeAttribute>(out var compositeAttribute)
+                    ? compositeAttribute.ComposingParts
+                    : Array.Empty<Bodypart>()
             );
 
             return compositeParts.Contains(@this);

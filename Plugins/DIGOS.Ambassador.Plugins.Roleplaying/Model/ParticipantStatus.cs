@@ -20,14 +20,11 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using JetBrains.Annotations;
-
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
 {
     /// <summary>
     /// Represents the status of a participant in a roleplay.
     /// </summary>
-    [PublicAPI]
     public enum ParticipantStatus
     {
         /// <summary>

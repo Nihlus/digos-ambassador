@@ -24,8 +24,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Permissions;
 using DIGOS.Ambassador.Tests.Plugins.Permissions.Data;
-using DIGOS.Ambassador.Tests.Utility;
-using Discord;
+using Remora.Discord.Core;
 using Xunit;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
@@ -39,14 +38,14 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
     {
         public class GrantPermissionToUserAsync : PermissionServiceTestBase
         {
-            private readonly IGuild _discordGuild;
-            private readonly IUser _discordUser;
+            private readonly Snowflake _discordGuild;
+            private readonly Snowflake _discordUser;
             private readonly IPermission _permission;
 
             public GrantPermissionToUserAsync()
             {
-                _discordGuild = MockHelper.CreateDiscordGuild(0);
-                _discordUser = MockHelper.CreateDiscordUser(0);
+                _discordGuild = new Snowflake(0);
+                _discordUser = new Snowflake(0);
 
                 _permission = new TestPermission();
             }
@@ -76,11 +75,11 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.Self
                 );
 
-                var grantedPermission = this.Database.UserPermissions.FirstOrDefault();
+                var grantedPermission = this.Database.UserPermissions.First();
 
                 Assert.NotNull(grantedPermission);
-                Assert.Equal((long)_discordGuild.Id, grantedPermission.ServerID);
-                Assert.Equal((long)_discordUser.Id, grantedPermission.UserID);
+                Assert.Equal(_discordGuild, grantedPermission.ServerID);
+                Assert.Equal(_discordUser, grantedPermission.UserID);
                 Assert.Equal(_permission.UniqueIdentifier, grantedPermission.Permission);
                 Assert.Equal(PermissionTarget.Self, grantedPermission.Target);
                 Assert.True(grantedPermission.IsGranted);
@@ -149,14 +148,14 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.Other
                 );
 
-                var grantedPermission = this.Database.UserPermissions.FirstOrDefault
+                var grantedPermission = this.Database.UserPermissions.First
                 (
                     p => p.Target == PermissionTarget.Other
                 );
 
                 Assert.NotNull(grantedPermission);
-                Assert.Equal((long)_discordGuild.Id, grantedPermission.ServerID);
-                Assert.Equal((long)_discordUser.Id, grantedPermission.UserID);
+                Assert.Equal(_discordGuild, grantedPermission.ServerID);
+                Assert.Equal(_discordUser, grantedPermission.UserID);
                 Assert.Equal(_permission.UniqueIdentifier, grantedPermission.Permission);
                 Assert.Equal(PermissionTarget.Other, grantedPermission.Target);
                 Assert.True(grantedPermission.IsGranted);
@@ -187,26 +186,26 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.All
                 );
 
-                var grantedSelfPermission = this.Database.UserPermissions.FirstOrDefault
+                var grantedSelfPermission = this.Database.UserPermissions.First
                 (
                     p => p.Target == PermissionTarget.Self
                 );
 
                 Assert.NotNull(grantedSelfPermission);
-                Assert.Equal((long)_discordGuild.Id, grantedSelfPermission.ServerID);
-                Assert.Equal((long)_discordUser.Id, grantedSelfPermission.UserID);
+                Assert.Equal(_discordGuild, grantedSelfPermission.ServerID);
+                Assert.Equal(_discordUser, grantedSelfPermission.UserID);
                 Assert.Equal(_permission.UniqueIdentifier, grantedSelfPermission.Permission);
                 Assert.Equal(PermissionTarget.Self, grantedSelfPermission.Target);
                 Assert.True(grantedSelfPermission.IsGranted);
 
-                var grantedOtherPermission = this.Database.UserPermissions.FirstOrDefault
+                var grantedOtherPermission = this.Database.UserPermissions.First
                 (
                     p => p.Target == PermissionTarget.Other
                 );
 
                 Assert.NotNull(grantedOtherPermission);
-                Assert.Equal((long)_discordGuild.Id, grantedOtherPermission.ServerID);
-                Assert.Equal((long)_discordUser.Id, grantedOtherPermission.UserID);
+                Assert.Equal(_discordGuild, grantedOtherPermission.ServerID);
+                Assert.Equal(_discordUser, grantedOtherPermission.UserID);
                 Assert.Equal(_permission.UniqueIdentifier, grantedOtherPermission.Permission);
                 Assert.Equal(PermissionTarget.Other, grantedOtherPermission.Target);
                 Assert.True(grantedOtherPermission.IsGranted);
@@ -275,26 +274,26 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.All
                 );
 
-                var grantedSelfPermission = this.Database.UserPermissions.FirstOrDefault
+                var grantedSelfPermission = this.Database.UserPermissions.First
                 (
                     p => p.Target == PermissionTarget.Self
                 );
 
                 Assert.NotNull(grantedSelfPermission);
-                Assert.Equal((long)_discordGuild.Id, grantedSelfPermission.ServerID);
-                Assert.Equal((long)_discordUser.Id, grantedSelfPermission.UserID);
+                Assert.Equal(_discordGuild, grantedSelfPermission.ServerID);
+                Assert.Equal(_discordUser, grantedSelfPermission.UserID);
                 Assert.Equal(_permission.UniqueIdentifier, grantedSelfPermission.Permission);
                 Assert.Equal(PermissionTarget.Self, grantedSelfPermission.Target);
                 Assert.True(grantedSelfPermission.IsGranted);
 
-                var grantedOtherPermission = this.Database.UserPermissions.FirstOrDefault
+                var grantedOtherPermission = this.Database.UserPermissions.First
                 (
                     p => p.Target == PermissionTarget.Other
                 );
 
                 Assert.NotNull(grantedOtherPermission);
-                Assert.Equal((long)_discordGuild.Id, grantedOtherPermission.ServerID);
-                Assert.Equal((long)_discordUser.Id, grantedOtherPermission.UserID);
+                Assert.Equal(_discordGuild, grantedOtherPermission.ServerID);
+                Assert.Equal(_discordUser, grantedOtherPermission.UserID);
                 Assert.Equal(_permission.UniqueIdentifier, grantedOtherPermission.Permission);
                 Assert.Equal(PermissionTarget.Other, grantedOtherPermission.Target);
                 Assert.True(grantedOtherPermission.IsGranted);
@@ -319,26 +318,26 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.All
                 );
 
-                var grantedSelfPermission = this.Database.UserPermissions.FirstOrDefault
+                var grantedSelfPermission = this.Database.UserPermissions.First
                 (
                     p => p.Target == PermissionTarget.Self
                 );
 
                 Assert.NotNull(grantedSelfPermission);
-                Assert.Equal((long)_discordGuild.Id, grantedSelfPermission.ServerID);
-                Assert.Equal((long)_discordUser.Id, grantedSelfPermission.UserID);
+                Assert.Equal(_discordGuild, grantedSelfPermission.ServerID);
+                Assert.Equal(_discordUser, grantedSelfPermission.UserID);
                 Assert.Equal(_permission.UniqueIdentifier, grantedSelfPermission.Permission);
                 Assert.Equal(PermissionTarget.Self, grantedSelfPermission.Target);
                 Assert.True(grantedSelfPermission.IsGranted);
 
-                var grantedOtherPermission = this.Database.UserPermissions.FirstOrDefault
+                var grantedOtherPermission = this.Database.UserPermissions.First
                 (
                     p => p.Target == PermissionTarget.Other
                 );
 
                 Assert.NotNull(grantedOtherPermission);
-                Assert.Equal((long)_discordGuild.Id, grantedOtherPermission.ServerID);
-                Assert.Equal((long)_discordUser.Id, grantedOtherPermission.UserID);
+                Assert.Equal(_discordGuild, grantedOtherPermission.ServerID);
+                Assert.Equal(_discordUser, grantedOtherPermission.UserID);
                 Assert.Equal(_permission.UniqueIdentifier, grantedOtherPermission.Permission);
                 Assert.Equal(PermissionTarget.Other, grantedOtherPermission.Target);
                 Assert.True(grantedOtherPermission.IsGranted);
@@ -369,12 +368,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
 
         public class GrantPermissionToRoleAsync : PermissionServiceTestBase
         {
-            private readonly IRole _discordRole;
+            private readonly Snowflake _discordRole;
             private readonly IPermission _permission;
 
             public GrantPermissionToRoleAsync()
             {
-                _discordRole = MockHelper.CreateDiscordRole(0);
+                _discordRole = new Snowflake(0);
 
                 _permission = new TestPermission();
             }
@@ -402,10 +401,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.Self
                 );
 
-                var grantedPermission = this.Database.RolePermissions.FirstOrDefault();
+                var grantedPermission = this.Database.RolePermissions.First();
 
                 Assert.NotNull(grantedPermission);
-                Assert.Equal((long)_discordRole.Id, grantedPermission.RoleID);
+                Assert.Equal(_discordRole, grantedPermission.RoleID);
                 Assert.Equal(_permission.UniqueIdentifier, grantedPermission.Permission);
                 Assert.Equal(PermissionTarget.Self, grantedPermission.Target);
                 Assert.True(grantedPermission.IsGranted);
@@ -468,13 +467,13 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.Other
                 );
 
-                var grantedPermission = this.Database.RolePermissions.FirstOrDefault
+                var grantedPermission = this.Database.RolePermissions.First
                 (
                     p => p.Target == PermissionTarget.Other
                 );
 
                 Assert.NotNull(grantedPermission);
-                Assert.Equal((long)_discordRole.Id, grantedPermission.RoleID);
+                Assert.Equal(_discordRole, grantedPermission.RoleID);
                 Assert.Equal(_permission.UniqueIdentifier, grantedPermission.Permission);
                 Assert.Equal(PermissionTarget.Other, grantedPermission.Target);
                 Assert.True(grantedPermission.IsGranted);
@@ -503,24 +502,24 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.All
                 );
 
-                var grantedSelfPermission = this.Database.RolePermissions.FirstOrDefault
+                var grantedSelfPermission = this.Database.RolePermissions.First
                 (
                     p => p.Target == PermissionTarget.Self
                 );
 
                 Assert.NotNull(grantedSelfPermission);
-                Assert.Equal((long)_discordRole.Id, grantedSelfPermission.RoleID);
+                Assert.Equal(_discordRole, grantedSelfPermission.RoleID);
                 Assert.Equal(_permission.UniqueIdentifier, grantedSelfPermission.Permission);
                 Assert.Equal(PermissionTarget.Self, grantedSelfPermission.Target);
                 Assert.True(grantedSelfPermission.IsGranted);
 
-                var grantedOtherPermission = this.Database.RolePermissions.FirstOrDefault
+                var grantedOtherPermission = this.Database.RolePermissions.First
                 (
                     p => p.Target == PermissionTarget.Other
                 );
 
                 Assert.NotNull(grantedOtherPermission);
-                Assert.Equal((long)_discordRole.Id, grantedOtherPermission.RoleID);
+                Assert.Equal(_discordRole, grantedOtherPermission.RoleID);
                 Assert.Equal(_permission.UniqueIdentifier, grantedOtherPermission.Permission);
                 Assert.Equal(PermissionTarget.Other, grantedOtherPermission.Target);
                 Assert.True(grantedOtherPermission.IsGranted);
@@ -583,24 +582,24 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.All
                 );
 
-                var grantedSelfPermission = this.Database.RolePermissions.FirstOrDefault
+                var grantedSelfPermission = this.Database.RolePermissions.First
                 (
                     p => p.Target == PermissionTarget.Self
                 );
 
                 Assert.NotNull(grantedSelfPermission);
-                Assert.Equal((long)_discordRole.Id, grantedSelfPermission.RoleID);
+                Assert.Equal(_discordRole, grantedSelfPermission.RoleID);
                 Assert.Equal(_permission.UniqueIdentifier, grantedSelfPermission.Permission);
                 Assert.Equal(PermissionTarget.Self, grantedSelfPermission.Target);
                 Assert.True(grantedSelfPermission.IsGranted);
 
-                var grantedOtherPermission = this.Database.RolePermissions.FirstOrDefault
+                var grantedOtherPermission = this.Database.RolePermissions.First
                 (
                     p => p.Target == PermissionTarget.Other
                 );
 
                 Assert.NotNull(grantedOtherPermission);
-                Assert.Equal((long)_discordRole.Id, grantedOtherPermission.RoleID);
+                Assert.Equal(_discordRole, grantedOtherPermission.RoleID);
                 Assert.Equal(_permission.UniqueIdentifier, grantedOtherPermission.Permission);
                 Assert.Equal(PermissionTarget.Other, grantedOtherPermission.Target);
                 Assert.True(grantedOtherPermission.IsGranted);
@@ -623,24 +622,24 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.All
                 );
 
-                var grantedSelfPermission = this.Database.RolePermissions.FirstOrDefault
+                var grantedSelfPermission = this.Database.RolePermissions.First
                 (
                     p => p.Target == PermissionTarget.Self
                 );
 
                 Assert.NotNull(grantedSelfPermission);
-                Assert.Equal((long)_discordRole.Id, grantedSelfPermission.RoleID);
+                Assert.Equal(_discordRole, grantedSelfPermission.RoleID);
                 Assert.Equal(_permission.UniqueIdentifier, grantedSelfPermission.Permission);
                 Assert.Equal(PermissionTarget.Self, grantedSelfPermission.Target);
                 Assert.True(grantedSelfPermission.IsGranted);
 
-                var grantedOtherPermission = this.Database.RolePermissions.FirstOrDefault
+                var grantedOtherPermission = this.Database.RolePermissions.First
                 (
                     p => p.Target == PermissionTarget.Other
                 );
 
                 Assert.NotNull(grantedOtherPermission);
-                Assert.Equal((long)_discordRole.Id, grantedOtherPermission.RoleID);
+                Assert.Equal(_discordRole, grantedOtherPermission.RoleID);
                 Assert.Equal(_permission.UniqueIdentifier, grantedOtherPermission.Permission);
                 Assert.Equal(PermissionTarget.Other, grantedOtherPermission.Target);
                 Assert.True(grantedOtherPermission.IsGranted);

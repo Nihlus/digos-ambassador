@@ -43,33 +43,33 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
         /// <param name="file">The path to the file.</param>
         /// <typeparam name="T">The class to verify the file as.</typeparam>
         /// <returns>A condition result, which may or may not have succeeded.</returns>
-        public DetermineConditionResult VerifyFile<T>(string file)
+        public Result VerifyFile<T>(string file)
         {
             using var sr = new StreamReader(File.OpenRead(file));
-            var deserB = new DeserializerBuilder()
+            var builder = new DeserializerBuilder()
                 .WithTypeConverter(new ColourYamlConverter())
                 .WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
                 .WithNamingConvention(UnderscoredNamingConvention.Instance);
 
             if (typeof(T) != typeof(Species))
             {
-                deserB = deserB.WithTypeConverter(new RawSpeciesYamlConverter());
+                builder = builder.WithTypeConverter(new RawSpeciesYamlConverter());
             }
 
-            var deser = deserB.Build();
+            var deserializer = builder.Build();
 
             var content = sr.ReadToEnd();
 
             try
             {
-                deser.Deserialize<T>(content);
+                deserializer.Deserialize<T>(content);
             }
             catch (YamlException yex)
             {
-                return DetermineConditionResult.FromError(yex, Path.GetFileName(file));
+                return yex;
             }
 
-            return DetermineConditionResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -77,13 +77,13 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
         /// </summary>
         /// <param name="directory">The directory to load files from.</param>
         /// <returns>A condition result, which may or may not have succeeded.</returns>
-        public DetermineConditionResult VerifyFilesInDirectory(string directory)
+        public Result VerifyFilesInDirectory(string directory)
         {
             var files = Directory.EnumerateFiles(directory, "*.yml", SearchOption.AllDirectories).Where(p => !p.EndsWith("Species.yml")).ToList();
 
             if (files.Count <= 0)
             {
-                return DetermineConditionResult.FromError("No files to verify in input directory.");
+                return new GenericError("No files to verify in input directory.");
             }
 
             foreach (var file in files)
@@ -96,18 +96,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             }
 
             var speciesPath = Path.Combine(directory, "Species.yml");
-            if (!File.Exists(speciesPath))
-            {
-                return DetermineConditionResult.FromSuccess();
-            }
-
-            var speciesVerificationResult = VerifyFile<Species>(speciesPath);
-            if (!speciesVerificationResult.IsSuccess)
-            {
-                return speciesVerificationResult;
-            }
-
-            return DetermineConditionResult.FromSuccess();
+            return !File.Exists(speciesPath)
+                ? Result.FromSuccess()
+                : VerifyFile<Species>(speciesPath);
         }
     }
 }

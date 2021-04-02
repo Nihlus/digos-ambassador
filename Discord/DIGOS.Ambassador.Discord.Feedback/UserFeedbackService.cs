@@ -20,264 +20,199 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
+using System.Collections.Generic;
+using System.Drawing;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using Discord;
-using Discord.Commands;
+using DIGOS.Ambassador.Discord.Feedback.Results;
 using JetBrains.Annotations;
-using Remora.Behaviours.Services;
-
-#pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Objects;
+using Remora.Discord.Core;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Discord.Feedback
 {
     /// <summary>
     /// Handles sending formatted messages to the users.
     /// </summary>
-    [PublicAPI]
     public class UserFeedbackService
     {
-        private readonly DelayedActionService _delayedActions;
+        private readonly IDiscordRestChannelAPI _channelAPI;
+        private readonly IDiscordRestUserAPI _userAPI;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserFeedbackService"/> class.
         /// </summary>
-        /// <param name="delayedActions">The delayed actions service.</param>
-        public UserFeedbackService(DelayedActionService delayedActions)
+        /// <param name="channelAPI">The channel API.</param>
+        /// <param name="userAPI">The user API.</param>
+        public UserFeedbackService(IDiscordRestChannelAPI channelAPI, IDiscordRestUserAPI userAPI)
         {
-            _delayedActions = delayedActions;
-        }
-
-        /// <summary>
-        /// Sends an error message, and deletes it after a specified timeout.
-        /// </summary>
-        /// <param name="context">The context.</param>
-        /// <param name="contents">The contents of the message.</param>
-        /// <param name="timeout">The timeout after which the message should be deleted.</param>
-        public async Task SendErrorAndDeleteAsync
-        (
-            ICommandContext context,
-            string contents,
-            TimeSpan? timeout = null
-        )
-        {
-            await SendEmbedAndDeleteAsync(context, Color.Red, contents, timeout);
-        }
-
-        /// <summary>
-        /// Sends a warning message, and deletes it after a specified timeout.
-        /// </summary>
-        /// <param name="context">The context.</param>
-        /// <param name="contents">The contents of the message.</param>
-        /// <param name="timeout">The timeout after which the message should be deleted.</param>
-        public async Task SendWarningAndDeleteAsync
-        (
-            ICommandContext context,
-            string contents,
-            TimeSpan? timeout = null
-        )
-        {
-            await SendEmbedAndDeleteAsync(context, Color.Orange, contents, timeout);
-        }
-
-        /// <summary>
-        /// Sends a confirmation message, and deletes it after a specified timeout.
-        /// </summary>
-        /// <param name="context">The context.</param>
-        /// <param name="contents">The contents of the message.</param>
-        /// <param name="timeout">The timeout after which the message should be deleted.</param>
-        public async Task SendConfirmationAndDeleteAsync
-        (
-            ICommandContext context,
-            string contents,
-            TimeSpan? timeout = null
-        )
-        {
-            await SendEmbedAndDeleteAsync(context, Color.DarkPurple, contents, timeout);
-        }
-
-        /// <summary>
-        /// Sends an embed, and deletes it after a specified timeout.
-        /// </summary>
-        /// <param name="context">The context.</param>
-        /// <param name="colour">The colour of the embed.</param>
-        /// <param name="contents">The contents of the message.</param>
-        /// <param name="timeout">The timeout after which the message should be deleted.</param>
-        public async Task SendEmbedAndDeleteAsync
-        (
-            ICommandContext context,
-            Color colour,
-            string contents,
-            TimeSpan? timeout = null
-        )
-        {
-            var eb = CreateFeedbackEmbed(context.User, colour, contents);
-            await SendEmbedAndDeleteAsync(context.Channel, eb, timeout);
+            _channelAPI = channelAPI;
+            _userAPI = userAPI;
         }
 
         /// <summary>
         /// Send a positive confirmation message.
         /// </summary>
-        /// <param name="context">The context to send to.</param>
+        /// <param name="channel">The channel to send the message to.</param>
+        /// <param name="target">The target user to mention, if any.</param>
         /// <param name="contents">The contents of the message.</param>
-        public async Task SendConfirmationAsync(ICommandContext context, string contents)
-        {
-            await SendEmbedAsync(context, Color.DarkPurple, contents);
-        }
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public Task<Result<IReadOnlyList<IMessage>>> SendConfirmationAsync
+        (
+            Snowflake channel,
+            Snowflake? target,
+            string contents,
+            CancellationToken ct = default
+        )
+            => SendMessageAsync(channel, target, new ConfirmationMessage(contents), ct);
 
         /// <summary>
         /// Send a negative error message.
         /// </summary>
-        /// <param name="context">The context to send to.</param>
+        /// <param name="channel">The channel to send the message to.</param>
+        /// <param name="target">The target user to mention, if any.</param>
         /// <param name="contents">The contents of the message.</param>
-        public async Task SendErrorAsync(ICommandContext context, string contents)
-        {
-            await SendEmbedAsync(context, Color.Red, contents);
-        }
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public Task<Result<IReadOnlyList<IMessage>>> SendErrorAsync
+        (
+            Snowflake channel,
+            Snowflake? target,
+            string contents,
+            CancellationToken ct = default
+        )
+            => SendEmbedAsync(channel, target, Color.OrangeRed, contents, ct);
 
         /// <summary>
         /// Send an alerting warning message.
         /// </summary>
-        /// <param name="context">The context to send to.</param>
+        /// <param name="channel">The channel to send the message to.</param>
+        /// <param name="target">The target user to mention, if any.</param>
         /// <param name="contents">The contents of the message.</param>
-        public async Task SendWarningAsync(ICommandContext context, string contents)
-        {
-            await SendEmbedAsync(context, Color.Orange, contents);
-        }
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public Task<Result<IReadOnlyList<IMessage>>> SendWarningAsync
+        (
+            Snowflake channel,
+            Snowflake? target,
+            string contents,
+            CancellationToken ct = default
+        )
+            => SendMessageAsync(channel, target, new WarningMessage(contents), ct);
 
         /// <summary>
         /// Send an informational message.
         /// </summary>
-        /// <param name="context">The context to send to.</param>
+        /// <param name="channel">The channel to send the message to.</param>
+        /// <param name="target">The target user to mention, if any.</param>
         /// <param name="contents">The contents of the message.</param>
-        public async Task SendInfoAsync(ICommandContext context, string contents)
-        {
-            await SendEmbedAsync(context, Color.Blue, contents);
-        }
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public Task<Result<IReadOnlyList<IMessage>>> SendInfoAsync
+        (
+            Snowflake channel,
+            Snowflake? target,
+            string contents,
+            CancellationToken ct = default
+        )
+            => SendMessageAsync(channel, target, new InfoMessage(contents), ct);
 
         /// <summary>
-        /// Sends an embed.
+        /// Send a message.
         /// </summary>
-        /// <param name="channel">The context of the send operation.</param>
-        /// <param name="eb">The embed to send.</param>
-        public async Task SendEmbedAsync(IMessageChannel channel, Embed eb)
-        {
-            await channel.SendMessageAsync(string.Empty, false, eb);
-        }
+        /// <param name="channel">The channel to send the message to.</param>
+        /// <param name="target">The target user to mention, if any.</param>
+        /// <param name="message">The message to send.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public Task<Result<IReadOnlyList<IMessage>>> SendMessageAsync
+        (
+            Snowflake channel,
+            Snowflake? target,
+            UserMessage message,
+            CancellationToken ct = default
+        )
+            => SendEmbedAsync(channel, target, message.Colour, message.Message, ct);
 
         /// <summary>
-        /// Sends an embed to the given channel, and deletes it after a certain timeout.
+        /// Sends the given embed to the given channel.
         /// </summary>
         /// <param name="channel">The channel to send the embed to.</param>
-        /// <param name="eb">The embed.</param>
-        /// <param name="timeout">The timeout after which the embed will be deleted. Defaults to 15 seconds.</param>
+        /// <param name="embed">The embed.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task SendEmbedAndDeleteAsync
+        public Task<Result<IMessage>> SendEmbedAsync
         (
-            IMessageChannel channel,
-            Embed eb,
-            TimeSpan? timeout = null
+            Snowflake channel,
+            Embed embed,
+            CancellationToken ct = default
         )
         {
-            timeout ??= TimeSpan.FromSeconds(15.0);
+            return _channelAPI.CreateMessageAsync(channel, embed: embed, ct: ct);
+        }
 
-            var message = await channel.SendMessageAsync(string.Empty, embed: eb);
+        /// <summary>
+        /// Sends the given embed to the given user in their private DM channel.
+        /// </summary>
+        /// <param name="user">The ID of the user to send the embed to.</param>
+        /// <param name="embed">The embed.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task<Result<IMessage>> SendPrivateEmbedAsync
+        (
+            Snowflake user,
+            Embed embed,
+            CancellationToken ct = default
+        )
+        {
+            var getUserDM = await _userAPI.CreateDMAsync(user, ct);
+            if (!getUserDM.IsSuccess)
+            {
+                return Result<IMessage>.FromError(getUserDM);
+            }
 
-            _delayedActions.DelayUntil(() => message.DeleteAsync(), timeout.Value);
+            var dm = getUserDM.Entity;
+
+            return await SendEmbedAsync(dm.ID, embed, ct);
         }
 
         /// <summary>
         /// Sends the given string as one or more sequential embeds, chunked into sets of 1024 characters.
         /// </summary>
-        /// <param name="context">The context.</param>
+        /// <param name="channel">The channel to send the embed to.</param>
+        /// <param name="target">The target user to mention, if any.</param>
         /// <param name="color">The embed colour.</param>
         /// <param name="contents">The contents to send.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        private async Task SendEmbedAsync(ICommandContext context, Color color, string contents)
-        {
-            // Sometimes the content is > 2048 in length. We'll chunk it into embeds of 1024 here.
-            if (contents.Length < 1024)
-            {
-                var eb = CreateFeedbackEmbed(context.Message.Author, color, contents);
-                await SendEmbedAsync(context.Channel, eb);
-
-                return;
-            }
-
-            var words = contents.Split(' ');
-            var messageBuilder = new StringBuilder();
-            foreach (var word in words)
-            {
-                if (messageBuilder.Length >= 1024)
-                {
-                    var eb = CreateFeedbackEmbed(context.Message.Author, color, messageBuilder.ToString());
-                    await SendEmbedAsync(context.Channel, eb);
-
-                    messageBuilder.Clear();
-                }
-
-                messageBuilder.Append(word);
-                messageBuilder.Append(" ");
-            }
-
-            if (messageBuilder.Length > 0)
-            {
-                var eb = CreateFeedbackEmbed(context.Message.Author, color, messageBuilder.ToString());
-                await SendEmbedAsync(context.Channel, eb);
-            }
-        }
-
-        /// <summary>
-        /// Sends a private embed to a given user, alerting them in their current context if they're not already in a
-        /// DM.
-        /// </summary>
-        /// <param name="context">The context of the command.</param>
-        /// <param name="user">The user to send the embed to.</param>
-        /// <param name="eb">The embed to send.</param>
-        /// <param name="notify">Whether or not to notify the user that they've been sent a message.</param>
-        public async Task SendPrivateEmbedAsync
+        private async Task<Result<IReadOnlyList<IMessage>>> SendEmbedAsync
         (
-            ICommandContext context,
-            IUser user,
-            Embed eb,
-            bool notify = true
-        )
-        {
-            await user.SendMessageAsync(string.Empty, false, eb);
-
-            if (!(context.Channel is IDMChannel) && notify)
-            {
-                await SendConfirmationAsync(context, "Please check your private messages.");
-            }
-        }
-
-        /// <summary>
-        /// Sends a private embed to a given user, alerting them in their current context if they're not already in a
-        /// DM.
-        /// </summary>
-        /// <param name="context">The context of the command.</param>
-        /// <param name="user">The user to send the embed to.</param>
-        /// <param name="color">The color of the embed.</param>
-        /// <param name="contents">The contents of the embed to send.</param>
-        /// <param name="notify">Whether or not to notify the user that they've been sent a message.</param>
-        public async Task SendPrivateEmbedAsync
-        (
-            ICommandContext context,
-            IUser user,
+            Snowflake channel,
+            Snowflake? target,
             Color color,
             string contents,
-            bool notify = true
+            CancellationToken ct = default
         )
         {
+            var sendResults = new List<IMessage>();
+
             // Sometimes the content is > 2048 in length. We'll chunk it into embeds of 1024 here.
             if (contents.Length < 1024)
             {
-                var eb = CreateEmbedBase(color);
-                eb.WithDescription(contents);
+                var eb = CreateFeedbackEmbed(target, color, contents);
+                var send = await _channelAPI.CreateMessageAsync(channel, embed: eb, ct: ct);
+                if (!send.IsSuccess)
+                {
+                    return Result<IReadOnlyList<IMessage>>.FromError(send);
+                }
 
-                await user.SendMessageAsync(null, embed: eb.Build());
-                return;
+                sendResults.Add(send.Entity);
+                return sendResults;
             }
 
             var words = contents.Split(' ');
@@ -286,41 +221,53 @@ namespace DIGOS.Ambassador.Discord.Feedback
             {
                 if (messageBuilder.Length >= 1024)
                 {
-                    var eb = CreateEmbedBase(color);
-                    eb.WithDescription(messageBuilder.ToString());
+                    var eb = CreateFeedbackEmbed(target, color, messageBuilder.ToString());
+                    var send = await _channelAPI.CreateMessageAsync(channel, embed: eb, ct: ct);
+                    if (!send.IsSuccess)
+                    {
+                        return Result<IReadOnlyList<IMessage>>.FromError(send);
+                    }
 
-                    await user.SendMessageAsync(null, embed: eb.Build());
+                    sendResults.Add(send.Entity);
 
                     messageBuilder.Clear();
                 }
 
                 messageBuilder.Append(word);
-                messageBuilder.Append(" ");
+                messageBuilder.Append(' ');
             }
 
             if (messageBuilder.Length > 0)
             {
-                var eb = CreateEmbedBase(color);
-                eb.WithDescription(messageBuilder.ToString());
+                var eb = CreateFeedbackEmbed(target, color, messageBuilder.ToString());
+                var send = await _channelAPI.CreateMessageAsync(channel, embed: eb, ct: ct);
+                if (!send.IsSuccess)
+                {
+                    return Result<IReadOnlyList<IMessage>>.FromError(send);
+                }
 
-                await user.SendMessageAsync(null, embed: eb.Build());
+                sendResults.Add(send.Entity);
             }
+
+            return sendResults;
         }
 
         /// <summary>
         /// Creates a feedback embed.
         /// </summary>
-        /// <param name="invoker">The invoking mentionable.</param>
+        /// <param name="target">The invoking mentionable.</param>
         /// <param name="color">The colour of the embed.</param>
         /// <param name="contents">The contents of the embed.</param>
         /// <returns>A feedback embed.</returns>
         [Pure]
-        public Embed CreateFeedbackEmbed(IMentionable invoker, Color color, string contents)
+        public Embed CreateFeedbackEmbed(Snowflake? target, Color color, string contents)
         {
-            var eb = CreateEmbedBase(color);
-            eb.WithDescription($"{invoker.Mention} | {contents}");
+            if (target is null)
+            {
+                return CreateEmbedBase(color) with { Description = contents };
+            }
 
-            return eb.Build();
+            return CreateEmbedBase(color) with { Description = $"<@{target}> | {contents}" };
         }
 
         /// <summary>
@@ -329,13 +276,11 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="color">The colour of the embed. Optional.</param>
         /// <returns>A basic embed.</returns>
         [Pure]
-        public EmbedBuilder CreateEmbedBase(Color? color = null)
+        public Embed CreateEmbedBase(Color? color = null)
         {
-            color ??= Color.DarkPurple;
+            color ??= Color.MediumPurple;
 
-            var eb = new EmbedBuilder();
-            eb.WithColor(color.Value);
-
+            var eb = new Embed { Colour = color.Value };
             return eb;
         }
     }

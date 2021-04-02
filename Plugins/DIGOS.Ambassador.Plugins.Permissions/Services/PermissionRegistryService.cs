@@ -24,7 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using JetBrains.Annotations;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Results;
 
@@ -33,7 +33,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
     /// <summary>
     /// Handles runtime registration of available permissions.
     /// </summary>
-    [PublicAPI]
     public sealed class PermissionRegistryService
     {
         private readonly Dictionary<Type, IPermission> _registeredPermissions = new Dictionary<Type, IPermission>();
@@ -49,7 +48,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// <param name="assembly">The assembly to register permissions from.</param>
         /// <param name="services">The services.</param>
         /// <returns>true if all permissions were successfully registered; otherwise, false.</returns>
-        public ModifyEntityResult RegisterPermissions(Assembly assembly, IServiceProvider services)
+        public Result RegisterPermissions(Assembly assembly, IServiceProvider services)
         {
             var permissionTypes = assembly.DefinedTypes.Where
             (
@@ -63,11 +62,11 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
                 var result = RegisterPermission(permissionType, services);
                 if (!result.IsSuccess)
                 {
-                    return ModifyEntityResult.FromError(result);
+                    return Result.FromError(result);
                 }
             }
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -76,17 +75,15 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// <param name="services">The application's services.</param>
         /// <typeparam name="TPermission">The permission type.</typeparam>
         /// <returns>A creation result which may or may not have succeeded.</returns>
-        public CreateEntityResult<TPermission> RegisterPermission<TPermission>(IServiceProvider services)
+        public Result<TPermission> RegisterPermission<TPermission>(IServiceProvider services)
             where TPermission : class, IPermission
         {
             var permissionType = typeof(TPermission);
             var registerPermissionResult = RegisterPermission(permissionType, services);
-            if (!registerPermissionResult.IsSuccess)
-            {
-                return CreateEntityResult<TPermission>.FromError(registerPermissionResult);
-            }
 
-            return CreateEntityResult<TPermission>.FromSuccess((TPermission)registerPermissionResult.Entity);
+            return !registerPermissionResult.IsSuccess
+                ? Result<TPermission>.FromError(registerPermissionResult)
+                : Result<TPermission>.FromSuccess((TPermission)registerPermissionResult.Entity);
         }
 
         /// <summary>
@@ -95,7 +92,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// <param name="permissionType">The permission type.</param>
         /// <param name="services">The application's services.</param>
         /// <returns>A creation result which may or may not have succeeded.</returns>
-        public CreateEntityResult<IPermission> RegisterPermission
+        public Result<IPermission> RegisterPermission
         (
             Type permissionType,
             IServiceProvider services
@@ -103,7 +100,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         {
             if (_registeredPermissions.ContainsKey(permissionType))
             {
-                return CreateEntityResult<IPermission>.FromError("The given permission has already been registered.");
+                return new UserError("The given permission has already been registered.");
             }
 
             IPermission permissionInstance;
@@ -113,19 +110,19 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             }
             catch (Exception e)
             {
-                return CreateEntityResult<IPermission>.FromError(e);
+                return Result<IPermission>.FromError(e);
             }
 
             if (_registeredPermissions.Values.Any(p => p.UniqueIdentifier == permissionInstance.UniqueIdentifier))
             {
-                return CreateEntityResult<IPermission>.FromError
+                return new UserError
                 (
                     "A permission with that identifier has already been registered."
                 );
             }
 
             _registeredPermissions.Add(permissionType, permissionInstance);
-            return CreateEntityResult<IPermission>.FromSuccess(permissionInstance);
+            return Result<IPermission>.FromSuccess(permissionInstance);
         }
 
         /// <summary>
@@ -133,16 +130,14 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// </summary>
         /// <typeparam name="TPermission">The permission type.</typeparam>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public RetrieveEntityResult<TPermission> GetPermission<TPermission>()
+        public Result<TPermission> GetPermission<TPermission>()
             where TPermission : class, IPermission
         {
             var result = GetPermission(typeof(TPermission));
-            if (!result.IsSuccess)
-            {
-                return RetrieveEntityResult<TPermission>.FromError(result);
-            }
 
-            return RetrieveEntityResult<TPermission>.FromSuccess((TPermission)result.Entity);
+            return !result.IsSuccess
+                ? Result<TPermission>.FromError(result)
+                : Result<TPermission>.FromSuccess((TPermission)result.Entity);
         }
 
         /// <summary>
@@ -150,14 +145,11 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// </summary>
         /// <param name="permissionType">The permission type.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public RetrieveEntityResult<IPermission> GetPermission(Type permissionType)
+        public Result<IPermission> GetPermission(Type permissionType)
         {
-            if (!_registeredPermissions.TryGetValue(permissionType, out var permission))
-            {
-                return RetrieveEntityResult<IPermission>.FromError("No permission of that type has been registered.");
-            }
-
-            return RetrieveEntityResult<IPermission>.FromSuccess(permission);
+            return !_registeredPermissions.TryGetValue(permissionType, out var permission)
+                ? new UserError("No permission of that type has been registered.")
+                : Result<IPermission>.FromSuccess(permission);
         }
 
         /// <summary>
@@ -166,19 +158,16 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// </summary>
         /// <param name="permissionName">The friendly name of the permission type.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public RetrieveEntityResult<IPermission> GetPermission(string permissionName)
+        public Result<IPermission> GetPermission(string permissionName)
         {
             var permission = this.RegisteredPermissions.FirstOrDefault
             (
                 p => p.FriendlyName.Equals(permissionName, StringComparison.OrdinalIgnoreCase)
             );
 
-            if (permission is null)
-            {
-                return RetrieveEntityResult<IPermission>.FromError("No permission of that type has been registered.");
-            }
-
-            return RetrieveEntityResult<IPermission>.FromSuccess(permission);
+            return permission is null
+                ? new UserError("No permission of that type has been registered.")
+                : Result<IPermission>.FromSuccess(permission);
         }
     }
 }

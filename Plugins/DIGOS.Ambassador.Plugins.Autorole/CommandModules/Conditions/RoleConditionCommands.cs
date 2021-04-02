@@ -20,17 +20,19 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Extensions;
-using DIGOS.Ambassador.Discord.Extensions.Results;
+using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Permissions;
-using DIGOS.Ambassador.Plugins.Autorole.Services;
-using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
-using Discord;
-using Discord.Commands;
+using DIGOS.Ambassador.Plugins.Permissions.Conditions;
 using JetBrains.Annotations;
+using Remora.Commands.Attributes;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.Commands.Conditions;
+using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -42,99 +44,66 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         public partial class AutoroleConditionCommands
         {
             /// <summary>
-            /// Contains commands for adding or modifying a condition based on having a certain role.
+            /// Adds an instance of the condition to the role.
             /// </summary>
-            [Group("role")]
-            public class RoleConditionCommands : ModuleBase
+            /// <param name="autorole">The autorole configuration.</param>
+            /// <param name="role">The role.</param>
+            [UsedImplicitly]
+            [Command("add-role")]
+            [Description("Adds an instance of the condition to the role.")]
+            [RequireContext(ChannelContext.Guild)]
+            [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
+            public async Task<Result<UserMessage>> AddConditionAsync(AutoroleConfiguration autorole, IRole role)
             {
-                private readonly AutoroleService _autoroles;
+                var condition = _autoroles.CreateConditionProxy<RoleCondition>(role)
+                                ?? throw new InvalidOperationException();
 
-                /// <summary>
-                /// Initializes a new instance of the <see cref="RoleConditionCommands"/> class.
-                /// </summary>
-                /// <param name="autoroles">The autorole service.</param>
-                public RoleConditionCommands(AutoroleService autoroles)
-                {
-                    _autoroles = autoroles;
-                }
+                var addCondition = await _autoroles.AddConditionAsync(autorole, condition);
 
-                /// <summary>
-                /// Adds an instance of the condition to the role.
-                /// </summary>
-                /// <param name="autorole">The autorole configuration.</param>
-                /// <param name="role">The role.</param>
-                [UsedImplicitly]
-                [Command]
-                [Summary("Adds an instance of the condition to the role.")]
-                [RequireContext(ContextType.Guild)]
-                [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-                public async Task<RuntimeResult> AddConditionAsync(AutoroleConfiguration autorole, IRole role)
-                {
-                    var condition = _autoroles.CreateConditionProxy<RoleCondition>
-                    (
-                        role
-                    );
+                return !addCondition.IsSuccess
+                    ? Result<UserMessage>.FromError(addCondition)
+                    : new ConfirmationMessage("Condition added.");
+            }
 
-                    if (condition is null)
-                    {
-                        return RuntimeCommandResult.FromError("Failed to create a condition object. Yikes!");
-                    }
-
-                    var addCondition = await _autoroles.AddConditionAsync(autorole, condition);
-                    if (!addCondition.IsSuccess)
-                    {
-                        return addCondition.ToRuntimeResult();
-                    }
-
-                    return RuntimeCommandResult.FromSuccess("Condition added.");
-                }
-
-                /// <summary>
-                /// Modifies an instance of the condition on the role.
-                /// </summary>
-                /// <param name="autorole">The autorole configuration.</param>
-                /// <param name="conditionID">The ID of the condition.</param>
-                /// <param name="role">The discord role.</param>
-                [UsedImplicitly]
-                [Command]
-                [Summary("Modifies an instance of the condition on the role.")]
-                [RequireContext(ContextType.Guild)]
-                [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-                public async Task<RuntimeResult> ModifyConditionAsync
+            /// <summary>
+            /// Modifies an instance of the condition on the role.
+            /// </summary>
+            /// <param name="autorole">The autorole configuration.</param>
+            /// <param name="conditionID">The ID of the condition.</param>
+            /// <param name="role">The discord role.</param>
+            [UsedImplicitly]
+            [Command("set-role")]
+            [Description("Modifies an instance of the condition on the role.")]
+            [RequireContext(ChannelContext.Guild)]
+            [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
+            public async Task<Result<UserMessage>> ModifyConditionAsync
+            (
+                AutoroleConfiguration autorole,
+                long conditionID,
+                IRole role
+            )
+            {
+                var getCondition = _autoroles.GetCondition<RoleCondition>
                 (
-                    AutoroleConfiguration autorole,
-                    long conditionID,
-                    IRole role
-                )
+                    autorole,
+                    conditionID
+                );
+
+                if (!getCondition.IsSuccess)
                 {
-                    var getCondition = _autoroles.GetCondition<RoleCondition>
-                    (
-                        autorole,
-                        conditionID
-                    );
-
-                    if (!getCondition.IsSuccess)
-                    {
-                        return getCondition.ToRuntimeResult();
-                    }
-
-                    var condition = getCondition.Entity;
-                    var modifyResult = await _autoroles.ModifyConditionAsync
-                    (
-                        condition,
-                        c =>
-                        {
-                            condition.RoleID = (long)role.Id;
-                        }
-                    );
-
-                    if (!modifyResult.IsSuccess)
-                    {
-                        return modifyResult.ToRuntimeResult();
-                    }
-
-                    return RuntimeCommandResult.FromSuccess("Condition updated.");
+                    return Result<UserMessage>.FromError(getCondition);
                 }
+
+                var condition = getCondition.Entity;
+                var modifyResult = await _autoroles.ModifyConditionAsync
+                (
+                    condition,
+                    c => { c.RoleID = role.ID; }
+                );
+
+                return !modifyResult.IsSuccess
+                    ? Result<UserMessage>.FromError(modifyResult)
+                    : new ConfirmationMessage("Condition updated.");
             }
         }
     }

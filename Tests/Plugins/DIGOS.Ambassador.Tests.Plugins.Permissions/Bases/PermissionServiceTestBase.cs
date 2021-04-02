@@ -21,15 +21,21 @@
 //
 
 using System;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
-using DIGOS.Ambassador.Tests.Extensions;
 using DIGOS.Ambassador.Tests.TestBases;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.Core;
+using Remora.Results;
 using Xunit;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
@@ -56,8 +62,40 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
         {
             serviceCollection.AddDbContext<PermissionsDatabaseContext>(ConfigureOptions<PermissionsDatabaseContext>);
 
+            var guildMock = new Mock<IGuild>();
+            guildMock.SetupGet(g => g.OwnerID).Returns(new Snowflake(3));
+
+            var guildMemberMock = new Mock<IGuildMember>();
+            guildMemberMock.SetupGet(g => g.Roles).Returns(new List<Snowflake> { new Snowflake(2) });
+
+            var guildAPIMock = new Mock<IDiscordRestGuildAPI>();
+            guildAPIMock
+                .Setup
+                (
+                    a => a.GetGuildAsync
+                    (
+                        It.IsAny<Snowflake>(),
+                        It.IsAny<Optional<bool>>(),
+                        It.IsAny<CancellationToken>()
+                    )
+                )
+                .Returns(Task.FromResult(Result<IGuild>.FromSuccess(guildMock.Object)));
+
+            guildAPIMock
+                .Setup
+                (
+                    a => a.GetGuildMemberAsync
+                    (
+                        It.IsAny<Snowflake>(),
+                        It.IsAny<Snowflake>(),
+                        It.IsAny<CancellationToken>()
+                    )
+                )
+                .Returns(Task.FromResult(Result<IGuildMember>.FromSuccess(guildMemberMock.Object)));
+
             serviceCollection
                 .AddScoped<PermissionService>()
+                .AddSingleton(guildAPIMock.Object)
                 .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
         }
 
@@ -65,7 +103,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
         protected sealed override void ConfigureServices(IServiceProvider serviceProvider)
         {
             this.Database = serviceProvider.GetRequiredService<PermissionsDatabaseContext>();
-            this.Database.Database.Create();
+            this.Database.Database.EnsureCreated();
 
             this.Permissions = serviceProvider.GetRequiredService<PermissionService>();
         }

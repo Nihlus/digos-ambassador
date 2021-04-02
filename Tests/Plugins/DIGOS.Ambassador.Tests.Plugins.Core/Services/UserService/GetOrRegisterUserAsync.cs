@@ -21,8 +21,7 @@
 //
 
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Tests.Utility;
-using Discord;
+using Remora.Discord.Core;
 using Xunit;
 
 #pragma warning disable SA1600
@@ -35,11 +34,11 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
     {
         public class GetOrRegisterUserAsync : UserServiceTestBase
         {
-            private readonly IUser _discordUser;
+            private readonly Snowflake _discordUser;
 
             public GetOrRegisterUserAsync()
             {
-                _discordUser = MockHelper.CreateDiscordUser(0);
+                _discordUser = new Snowflake(0);
             }
 
             [Fact]
@@ -63,9 +62,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             public async Task ReturnsCorrectUserIfUserHasNotBeenRegistered()
             {
                 var result = await this.Users.GetOrRegisterUserAsync(_discordUser);
-                var user = result.Entity;
+                var user = result.Entity!;
 
-                Assert.Equal((long)_discordUser.Id, user.DiscordID);
+                Assert.Equal(_discordUser, user.DiscordID);
             }
 
             [Fact]
@@ -74,9 +73,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
                 await this.Users.AddUserAsync(_discordUser);
 
                 var result = await this.Users.GetOrRegisterUserAsync(_discordUser);
-                var user = result.Entity;
+                var user = result.Entity!;
 
-                Assert.Equal((long)_discordUser.Id, user.DiscordID);
+                Assert.Equal(_discordUser, user.DiscordID);
             }
 
             [Fact]

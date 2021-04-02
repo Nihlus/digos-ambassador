@@ -26,8 +26,7 @@
 
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Tests.Plugins.Moderation.Bases;
-using DIGOS.Ambassador.Tests.Utility;
-using Discord;
+using Remora.Discord.Core;
 using Xunit;
 
 namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.ModerationService
@@ -36,9 +35,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.ModerationService
     {
         public class SetMonitoringChannelAsync : ModerationServiceTestBase
         {
-            private readonly IGuild _guild = MockHelper.CreateDiscordGuild(0);
-            private readonly ITextChannel _channel = MockHelper.CreateDiscordTextChannel(0);
-            private readonly ITextChannel _anotherChannel = MockHelper.CreateDiscordTextChannel(1);
+            private readonly Snowflake _guild = new Snowflake(0);
+            private readonly Snowflake _channel = new Snowflake(0);
+            private readonly Snowflake _anotherChannel = new Snowflake(1);
 
             [Fact]
             public async Task ReturnsSuccessfulIfNoChannelIsSet()
@@ -73,9 +72,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.ModerationService
             {
                 await this.Moderation.SetMonitoringChannelAsync(_guild, _channel);
 
-                var settings = (await this.Moderation.GetServerSettingsAsync(_guild)).Entity;
+                var settings = (await this.Moderation.GetServerSettingsAsync(_guild)).Entity!;
 
-                Assert.Equal((long)_channel.Id, settings.MonitoringChannel);
+                Assert.Equal(_channel, settings.MonitoringChannel);
             }
         }
     }

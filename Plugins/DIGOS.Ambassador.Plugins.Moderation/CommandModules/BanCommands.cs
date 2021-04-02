@@ -21,20 +21,27 @@
 //
 
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
+using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Extensions;
-using DIGOS.Ambassador.Discord.Extensions.Results;
-using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Plugins.Moderation.Permissions;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
-using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
-using Discord;
-using Discord.Commands;
-using Discord.WebSocket;
-using JetBrains.Annotations;
-using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
+using DIGOS.Ambassador.Plugins.Permissions.Conditions;
+using DIGOS.Ambassador.Plugins.Permissions.Model;
+using Humanizer;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.API;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Contexts;
+using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
@@ -43,113 +50,42 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
     /// <summary>
     /// Ban-related commands, such as viewing or editing info about a specific ban.
     /// </summary>
-    [PublicAPI]
     [Group("ban")]
-    [Alias("ban", "warn")]
-    [Summary("Ban-related commands, such as viewing or editing info about a specific ban.")]
-    public partial class BanCommands : ModuleBase
+    [Description("Ban-related commands, such as viewing or editing info about a specific ban.")]
+    public partial class BanCommands : CommandGroup
     {
-        private readonly ModerationService _moderation;
         private readonly BanService _bans;
-        private readonly UserFeedbackService _feedback;
-        private readonly InteractivityService _interactivity;
         private readonly ChannelLoggingService _logging;
+        private readonly IDiscordRestGuildAPI _guildAPI;
+        private readonly ICommandContext _context;
+        private readonly IDiscordRestUserAPI _userAPI;
+        private readonly InteractivityService _interactivity;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BanCommands"/> class.
         /// </summary>
-        /// <param name="moderation">The moderation service.</param>
         /// <param name="bans">The ban service.</param>
-        /// <param name="feedback">The feedback service.</param>
-        /// <param name="interactivity">The interactivity service.</param>
         /// <param name="logging">The logging service.</param>
+        /// <param name="context">The command context.</param>
+        /// <param name="guildAPI">The guild API.</param>
+        /// <param name="interactivity">The interactivity service.</param>
+        /// <param name="userAPI">The user API.</param>
         public BanCommands
         (
-            ModerationService moderation,
             BanService bans,
-            UserFeedbackService feedback,
+            ChannelLoggingService logging,
+            ICommandContext context,
+            IDiscordRestGuildAPI guildAPI,
             InteractivityService interactivity,
-            ChannelLoggingService logging
+            IDiscordRestUserAPI userAPI
         )
         {
-            _moderation = moderation;
             _bans = bans;
-            _feedback = feedback;
-            _interactivity = interactivity;
             _logging = logging;
-        }
-
-        /// <summary>
-        /// Lists the bans on the server.
-        /// </summary>
-        [Command("list")]
-        [Summary("Lists the bans on the server.")]
-        [RequirePermission(typeof(ManageBans), PermissionTarget.Other)]
-        [RequireContext(ContextType.Guild)]
-        public async Task<RuntimeResult> ListBansAsync()
-        {
-            var bans = await _bans.GetBansAsync(this.Context.Guild);
-
-            var appearance = PaginatedAppearanceOptions.Default;
-            appearance.Title = "Bans";
-            appearance.Color = Color.Orange;
-
-            var paginatedEmbed = await PaginatedEmbedFactory.PagesFromCollectionAsync
-            (
-                _feedback,
-                _interactivity,
-                this.Context.User,
-                bans,
-                async (eb, ban) =>
-                {
-                    IUser? bannedUser = null;
-                    if (this.Context.Client is DiscordSocketClient socketClient)
-                    {
-                        bannedUser = await socketClient.Rest.GetUserAsync((ulong)ban.User.DiscordID);
-                    }
-
-                    if (bannedUser is null)
-                    {
-                        eb.WithTitle($"Ban #{ban.ID} for user with ID {ban.User.DiscordID}");
-                    }
-                    else
-                    {
-                        eb.WithTitle($"Ban #{ban.ID} for {bannedUser.Username}:{bannedUser.Discriminator}");
-                    }
-
-                    var author = await this.Context.Guild.GetUserAsync((ulong)ban.Author.DiscordID);
-                    eb.WithAuthor(author);
-
-                    eb.WithDescription(ban.Reason);
-
-                    eb.AddField("Created", ban.CreatedAt);
-
-                    if (ban.CreatedAt != ban.UpdatedAt)
-                    {
-                        eb.AddField("Last Updated", ban.UpdatedAt);
-                    }
-
-                    if (ban.IsTemporary)
-                    {
-                        eb.AddField("Expires On", ban.ExpiresOn);
-                    }
-
-                    if (!(ban.MessageID is null))
-                    {
-                        // TODO
-                    }
-                },
-                appearance: appearance
-            );
-
-            await _interactivity.SendInteractiveMessageAndDeleteAsync
-            (
-                this.Context.Channel,
-                paginatedEmbed,
-                TimeSpan.FromMinutes(5)
-            );
-
-            return RuntimeCommandResult.FromSuccess();
+            _context = context;
+            _guildAPI = guildAPI;
+            _interactivity = interactivity;
+            _userAPI = userAPI;
         }
 
         /// <summary>
@@ -158,15 +94,13 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         /// <param name="user">The user to add the ban to.</param>
         /// <param name="reason">The reason for the ban.</param>
         /// <param name="expiresAfter">The duration of the ban, if any.</param>
-        [Command]
-        [Summary("Bans the given user.")]
-        [Priority(int.MinValue)]
+        [Command("user")]
+        [Description("Bans the given user.")]
         [RequirePermission(typeof(ManageBans), PermissionTarget.All)]
-        [RequireBotPermission(GuildPermission.BanMembers)]
-        [RequireContext(ContextType.Guild)]
-        public async Task<RuntimeResult> AddBanAsync
+        [RequireContext(ChannelContext.Guild)]
+        public async Task<IResult> AddBanAsync
         (
-            IGuildUser user,
+            IUser user,
             string reason,
             TimeSpan? expiresAfter = null
         )
@@ -177,22 +111,119 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 expiresOn = DateTime.Now.Add(expiresAfter.Value);
             }
 
-            var addBan = await _bans.CreateBanAsync(this.Context.User, user, reason, expiresOn: expiresOn);
-            if (!addBan.IsSuccess)
+            var createBan = await _bans.CreateBanAsync
+            (
+                _context.User.ID,
+                user.ID,
+                _context.GuildID.Value,
+                reason,
+                expiresOn: expiresOn
+            );
+
+            if (!createBan.IsSuccess)
             {
-                return addBan.ToRuntimeResult();
+                return createBan;
             }
 
-            var ban = addBan.Entity;
+            var ban = createBan.Entity;
 
             var notifyResult = await _logging.NotifyUserBannedAsync(ban);
             if (!notifyResult.IsSuccess)
             {
-                return notifyResult.ToRuntimeResult();
+                return notifyResult;
             }
 
-            await this.Context.Guild.AddBanAsync((ulong)ban.User.DiscordID, reason: reason);
-            return RuntimeCommandResult.FromSuccess($"User banned (ban ID {ban.ID}).");
+            return await _guildAPI.CreateGuildBanAsync(_context.GuildID.Value, user.ID, reason: reason);
+        }
+
+        /// <summary>
+        /// Lists the bans on the server.
+        /// </summary>
+        [Command("list")]
+        [Description("Lists the bans on the server.")]
+        [RequirePermission(typeof(ManageBans), PermissionTarget.Other)]
+        [RequireContext(ChannelContext.Guild)]
+        public async Task<IResult> ListBansAsync()
+        {
+            var bans = await _bans.GetBansAsync(_context.GuildID.Value);
+            var createPages = await PaginatedEmbedFactory.PagesFromCollectionAsync
+            (
+                bans,
+                async ban =>
+                {
+                    var getBanAuthor = await _userAPI.GetUserAsync(ban.Author.DiscordID);
+                    if (!getBanAuthor.IsSuccess)
+                    {
+                        return Result<Embed>.FromError(getBanAuthor);
+                    }
+
+                    var banAuthor = getBanAuthor.Entity;
+
+                    var getBannedUser = await _userAPI.GetUserAsync(ban.User.DiscordID);
+                    if (!getBannedUser.IsSuccess)
+                    {
+                        return Result<Embed>.FromError(getBannedUser);
+                    }
+
+                    var bannedUser = getBanAuthor.Entity;
+
+                    var getBanAuthorAvatar = CDN.GetUserAvatarUrl(banAuthor);
+
+                    var embedFields = new List<IEmbedField>();
+                    var eb = new Embed
+                    {
+                        Title = $"Ban #{ban.ID} for {bannedUser.Username}:{bannedUser.Discriminator}",
+                        Colour = Color.Orange,
+                        Author = new EmbedAuthor
+                        {
+                            Name = banAuthor.Username,
+                            Url = getBanAuthorAvatar.IsSuccess ? getBanAuthorAvatar.Entity.ToString() : default
+                        },
+                        Description = ban.Reason,
+                        Fields = embedFields
+                    };
+
+                    embedFields.Add(new EmbedField("Created", ban.CreatedAt.Humanize()));
+
+                    if (ban.CreatedAt != ban.UpdatedAt)
+                    {
+                        embedFields.Add(new EmbedField("Last Updated", ban.UpdatedAt.Humanize()));
+                    }
+
+                    if (ban.ExpiresOn.HasValue)
+                    {
+                        embedFields.Add(new EmbedField("Expires On", ban.ExpiresOn.Humanize()));
+                    }
+
+                    if (!(ban.MessageID is null))
+                    {
+                        // TODO
+                    }
+
+                    return eb;
+                }
+            );
+
+            if (createPages.Any(p => !p.IsSuccess))
+            {
+                return createPages.First(p => !p.IsSuccess);
+            }
+
+            var pages = createPages.Select(p => p.Entity!).ToList();
+
+            await _interactivity.SendInteractiveMessageAsync
+            (
+                _context.ChannelID,
+                (channelID, messageID) => new PaginatedMessage
+                (
+                    channelID,
+                    messageID,
+                    _context.User.ID,
+                    pages
+                )
+            );
+
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -200,37 +231,34 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         /// </summary>
         /// <param name="banID">The ID of the ban to delete.</param>
         [Command("delete")]
-        [Summary("Deletes the given ban.")]
+        [Description("Deletes the given ban.")]
         [RequirePermission(typeof(ManageBans), PermissionTarget.All)]
-        [RequireBotPermission(GuildPermission.BanMembers)]
-        [RequireContext(ContextType.Guild)]
-        public async Task<RuntimeResult> DeleteBanAsync(long banID)
+        [RequireContext(ChannelContext.Guild)]
+        public async Task<IResult> DeleteBanAsync(long banID)
         {
-            var getBan = await _bans.GetBanAsync(this.Context.Guild, banID);
+            var getBan = await _bans.GetBanAsync(_context.GuildID.Value, banID);
             if (!getBan.IsSuccess)
             {
-                return getBan.ToRuntimeResult();
+                return getBan;
             }
 
             var ban = getBan.Entity;
 
             // This has to be done before the warning is actually deleted - otherwise, the lazy loader is removed and
             // navigation properties can't be evaluated
-            var rescinder = await this.Context.Guild.GetUserAsync(this.Context.User.Id);
-            var notifyResult = await _logging.NotifyUserUnbannedAsync(ban, rescinder);
+            var notifyResult = await _logging.NotifyUserUnbannedAsync(ban, _context.User.ID);
             if (!notifyResult.IsSuccess)
             {
-                return notifyResult.ToRuntimeResult();
+                return notifyResult;
             }
 
             var deleteBan = await _bans.DeleteBanAsync(ban);
             if (!deleteBan.IsSuccess)
             {
-                return deleteBan.ToRuntimeResult();
+                return deleteBan;
             }
 
-            await this.Context.Guild.RemoveBanAsync((ulong)ban.User.DiscordID);
-            return RuntimeCommandResult.FromSuccess("Ban rescinded.");
+            return await _guildAPI.RemoveGuildBanAsync(_context.GuildID.Value, ban.User.DiscordID);
         }
     }
 }

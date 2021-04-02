@@ -34,7 +34,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     /// </summary>
     [PublicAPI]
     [TokenIdentifier("script", "sc")]
-    public sealed class LuaScriptToken : ReplacableTextToken<LuaScriptToken>
+    public sealed class LuaScriptToken : ReplaceableTextToken<LuaScriptToken>
     {
         private readonly LuaService _lua;
 
@@ -75,12 +75,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
                 (nameof(component), component)
             );
 
-            if (!result.IsSuccess)
-            {
-                return $"[{result.ErrorReason}]";
-            }
-
-            return result.Entity;
+            return result.IsSuccess
+                ? result.Entity
+                : $"[{result.Unwrap().Message}]";
         }
 
         /// <inheritdoc />

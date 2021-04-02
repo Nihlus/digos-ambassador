@@ -20,20 +20,22 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
-using DIGOS.Ambassador.Discord;
-using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services.Interfaces;
-using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
-using Discord;
-using Discord.Commands;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Abstractions.Results;
+using Remora.Discord.Core;
+using Remora.Discord.Rest.Results;
 using Remora.Results;
 
 using Image = DIGOS.Ambassador.Plugins.Characters.Model.Data.Image;
@@ -49,11 +51,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         private readonly ICharacterEditor _characterEditor;
 
         private readonly CharacterRoleService _characterRoles;
-        private readonly CommandService _commands;
-        private readonly OwnedEntityService _ownedEntities;
         private readonly UserService _users;
         private readonly ServerService _servers;
-        private readonly DiscordService _discord;
+
+        private readonly IDiscordRestGuildAPI _guildAPI;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CharacterDiscordService"/> class.
@@ -62,56 +63,52 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="characterEditor">The character editor.</param>
         /// <param name="users">The user service.</param>
         /// <param name="servers">The server service.</param>
-        /// <param name="commands">The command service.</param>
-        /// <param name="ownedEntities">The owned entity service.</param>
-        /// <param name="discord">The Discord service.</param>
         /// <param name="characterRoles">The character role service.</param>
+        /// <param name="guildAPI">The guild API.</param>
         public CharacterDiscordService
         (
             ICharacterService characters,
             ICharacterEditor characterEditor,
             UserService users,
             ServerService servers,
-            CommandService commands,
-            OwnedEntityService ownedEntities,
-            DiscordService discord,
-            CharacterRoleService characterRoles
+            CharacterRoleService characterRoles,
+            IDiscordRestGuildAPI guildAPI
         )
         {
             _characters = characters;
             _characterEditor = characterEditor;
             _users = users;
             _servers = servers;
-            _commands = commands;
-            _ownedEntities = ownedEntities;
-            _discord = discord;
             _characterRoles = characterRoles;
+            _guildAPI = guildAPI;
         }
 
         /// <summary>
         /// Determines whether the given name is unique among the given user's characters.
         /// </summary>
-        /// <param name="guildUser">The user.</param>
+        /// <param name="guildID">The ID of the guild the user is on.</param>
+        /// <param name="userID">The ID of the discord user.</param>
         /// <param name="name">The name.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<bool>> IsNameUniqueForUserAsync
+        public async Task<Result<bool>> IsNameUniqueForUserAsync
         (
-            IGuildUser guildUser,
+            Snowflake guildID,
+            Snowflake userID,
             string name,
             CancellationToken ct = default
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
+            var getUser = await _users.GetOrRegisterUserAsync(userID, ct);
             if (!getUser.IsSuccess)
             {
-                return RetrieveEntityResult<bool>.FromError(getUser);
+                return Result<bool>.FromError(getUser);
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild, ct);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildID, ct);
             if (!getServer.IsSuccess)
             {
-                return RetrieveEntityResult<bool>.FromError(getServer);
+                return Result<bool>.FromError(getServer);
             }
 
             var user = getUser.Entity;
@@ -123,7 +120,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <summary>
         /// Creates a character with the given parameters.
         /// </summary>
-        /// <param name="guildUser">The owner of the character..</param>
+        /// <param name="guildID">The ID of the guild the user is on.</param>
+        /// <param name="userID">The ID of the discord user.</param>
         /// <param name="name">The name of the character.</param>
         /// <param name="avatarUrl">The character's avatar url.</param>
         /// <param name="nickname">The nickname that should be applied to the user when the character is active.</param>
@@ -132,9 +130,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="pronounFamily">The pronoun family of the character.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A creation result which may or may not have been successful.</returns>
-        public async Task<CreateEntityResult<Character>> CreateCharacterAsync
+        public async Task<Result<Character>> CreateCharacterAsync
         (
-            IGuildUser guildUser,
+            Snowflake guildID,
+            Snowflake userID,
             string name,
             string? avatarUrl = null,
             string? nickname = null,
@@ -144,16 +143,16 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
+            var getUser = await _users.GetOrRegisterUserAsync(userID, ct);
             if (!getUser.IsSuccess)
             {
-                return CreateEntityResult<Character>.FromError(getUser);
+                return Result<Character>.FromError(getUser);
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild, ct);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildID, ct);
             if (!getServer.IsSuccess)
             {
-                return CreateEntityResult<Character>.FromError(getServer);
+                return Result<Character>.FromError(getServer);
             }
 
             var user = getUser.Entity;
@@ -176,13 +175,15 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <summary>
         /// Deletes the given character.
         /// </summary>
-        /// <param name="guildUser">The user that owns the character.</param>
+        /// <param name="guildID">The ID of the guild the user is on.</param>
+        /// <param name="userID">The ID of the discord user.</param>
         /// <param name="character">The character to delete.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A deletion result which may or may not have succeeded.</returns>
-        public async Task<DeleteEntityResult> DeleteCharacterAsync
+        public async Task<Result> DeleteCharacterAsync
         (
-            IGuildUser guildUser,
+            Snowflake guildID,
+            Snowflake userID,
             Character character,
             CancellationToken ct = default
         )
@@ -202,59 +203,55 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             if (!getCurrentCharacter.IsSuccess)
             {
-                return DeleteEntityResult.FromSuccess();
+                return Result.FromSuccess();
             }
 
             var currentCharacter = getCurrentCharacter.Entity;
             if (currentCharacter != character)
             {
-                return DeleteEntityResult.FromSuccess();
+                return Result.FromSuccess();
             }
 
             // Update the user's nickname
-            var updateNickname = await UpdateUserNickname(guildUser, ct);
+            var updateNickname = await UpdateUserNickname(guildID, userID, ct);
             if (!updateNickname.IsSuccess)
             {
-                return DeleteEntityResult.FromError(updateNickname);
+                return updateNickname;
             }
 
-            var updateRoles = await _characterRoles.UpdateUserRolesAsync(guildUser, getCurrentCharacter.Entity, ct);
-            if (!updateRoles.IsSuccess)
-            {
-                return DeleteEntityResult.FromError(updateRoles);
-            }
-
-            return DeleteEntityResult.FromSuccess();
+            return await _characterRoles.UpdateUserRolesAsync(guildID, userID, getCurrentCharacter.Entity, ct);
         }
 
         /// <summary>
         /// Gets a queryable list of characters belonging to the given user on their guild.
         /// </summary>
-        /// <param name="guildUser">The user.</param>
+        /// <param name="guildID">The ID of the guild the user is on.</param>
+        /// <param name="userID">The ID of the discord user.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<IEnumerable<Character>>> GetUserCharactersAsync
+        public async Task<Result<IEnumerable<Character>>> GetUserCharactersAsync
         (
-            IGuildUser guildUser,
+            Snowflake guildID,
+            Snowflake userID,
             CancellationToken ct = default
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
+            var getUser = await _users.GetOrRegisterUserAsync(userID, ct);
             if (!getUser.IsSuccess)
             {
-                return RetrieveEntityResult<IEnumerable<Character>>.FromError(getUser);
+                return Result<IEnumerable<Character>>.FromError(getUser);
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild, ct);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildID, ct);
             if (!getServer.IsSuccess)
             {
-                return RetrieveEntityResult<IEnumerable<Character>>.FromError(getServer);
+                return Result<IEnumerable<Character>>.FromError(getServer);
             }
 
             var user = getUser.Entity;
             var server = getServer.Entity;
 
-            return RetrieveEntityResult<IEnumerable<Character>>.FromSuccess
+            return Result<IEnumerable<Character>>.FromSuccess
             (
                 await _characters.GetUserCharactersAsync(server, user, ct)
             );
@@ -263,25 +260,27 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <summary>
         /// Gets the current character of the given user.
         /// </summary>
-        /// <param name="guildUser">The user.</param>
+        /// <param name="guildID">The ID of the guild the user is on.</param>
+        /// <param name="userID">The ID of the discord user.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<Character>> GetCurrentCharacterAsync
+        public async Task<Result<Character>> GetCurrentCharacterAsync
         (
-            IGuildUser guildUser,
+            Snowflake guildID,
+            Snowflake userID,
             CancellationToken ct = default
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
+            var getUser = await _users.GetOrRegisterUserAsync(userID, ct);
             if (!getUser.IsSuccess)
             {
-                return RetrieveEntityResult<Character>.FromError(getUser);
+                return Result<Character>.FromError(getUser);
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild, ct);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildID, ct);
             if (!getServer.IsSuccess)
             {
-                return RetrieveEntityResult<Character>.FromError(getServer);
+                return Result<Character>.FromError(getServer);
             }
 
             var user = getUser.Entity;
@@ -293,21 +292,21 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <summary>
         /// Gets a character by its given name.
         /// </summary>
-        /// <param name="guild">The guild the character is on.</param>
+        /// <param name="guildID">The guild the character is on.</param>
         /// <param name="name">The name of the character.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<Character>> GetCharacterByNameAsync
+        public async Task<Result<Character>> GetCharacterByNameAsync
         (
-            IGuild guild,
+            Snowflake guildID,
             string name,
             CancellationToken ct = default
         )
         {
-            var getServer = await _servers.GetOrRegisterServerAsync(guild, ct);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildID, ct);
             if (!getServer.IsSuccess)
             {
-                return RetrieveEntityResult<Character>.FromError(getServer);
+                return Result<Character>.FromError(getServer);
             }
 
             var server = getServer.Entity;
@@ -318,27 +317,29 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <summary>
         /// Gets a character owned by the given user by its given name.
         /// </summary>
-        /// <param name="guildUser">The user.</param>
+        /// <param name="guildID">The ID of the guild the user is on.</param>
+        /// <param name="userID">The ID of the discord user.</param>
         /// <param name="name">The name of the character.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<Character>> GetUserCharacterByName
+        public async Task<Result<Character>> GetUserCharacterByName
         (
-            IGuildUser guildUser,
+            Snowflake guildID,
+            Snowflake userID,
             string name,
             CancellationToken ct = default
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
+            var getUser = await _users.GetOrRegisterUserAsync(userID, ct);
             if (!getUser.IsSuccess)
             {
-                return RetrieveEntityResult<Character>.FromError(getUser);
+                return Result<Character>.FromError(getUser);
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild, ct);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildID, ct);
             if (!getServer.IsSuccess)
             {
-                return RetrieveEntityResult<Character>.FromError(getServer);
+                return Result<Character>.FromError(getServer);
             }
 
             var user = getUser.Entity;
@@ -350,33 +351,37 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <summary>
         /// Gets a random character from the user's characters.
         /// </summary>
-        /// <param name="guildUser">The user.</param>
+        /// <param name="guildID">The ID of the guild the user is on.</param>
+        /// <param name="userID">The ID of the discord user.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<Character>> GetRandomUserCharacterAsync
+        public async Task<Result<Character>> GetRandomUserCharacterAsync
         (
-            IGuildUser guildUser,
+            Snowflake guildID,
+            Snowflake userID,
             CancellationToken ct = default
         )
         {
-            var getUserCharacters = await GetUserCharactersAsync(guildUser, ct);
+            var getUserCharacters = await GetUserCharactersAsync(guildID, userID, ct);
             if (!getUserCharacters.IsSuccess)
             {
-                return RetrieveEntityResult<Character>.FromError(getUserCharacters);
+                return Result<Character>.FromError(getUserCharacters);
             }
 
             var userCharacters = getUserCharacters.Entity.ToList();
-            if (userCharacters.Count == 0)
+            switch (userCharacters.Count)
             {
-                return RetrieveEntityResult<Character>.FromError("The user doesn't have any characters.");
+                case 0:
+                {
+                    return new UserError("The user doesn't have any characters.");
+                }
+                case 1:
+                {
+                    return new UserError("The user only has one character.");
+                }
             }
 
-            if (userCharacters.Count == 1)
-            {
-                return RetrieveEntityResult<Character>.FromError("The user only has one character.");
-            }
-
-            var getCurrentCharacter = await GetCurrentCharacterAsync(guildUser, ct);
+            var getCurrentCharacter = await GetCurrentCharacterAsync(guildID, userID, ct);
             if (!getCurrentCharacter.IsSuccess)
             {
                 return userCharacters.PickRandom();
@@ -391,36 +396,36 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// global list is searched for a unique name. If no name is provided, then the user's current character is
         /// used. If neither are set, no character will ever be returned.
         /// </summary>
-        /// <param name="guild">The guild the user is on.</param>
-        /// <param name="guildUser">The user.</param>
+        /// <param name="guildID">The ID of the guild the user is on.</param>
+        /// <param name="userID">The ID of the discord user.</param>
         /// <param name="name">The name of the character.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<Character>> GetBestMatchingCharacterAsync
+        public async Task<Result<Character>> GetBestMatchingCharacterAsync
         (
-            IGuild guild,
-            IGuildUser? guildUser,
+            Snowflake guildID,
+            Snowflake? userID,
             string? name,
             CancellationToken ct = default
         )
         {
-            var getServer = await _servers.GetOrRegisterServerAsync(guild, ct);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildID, ct);
             if (!getServer.IsSuccess)
             {
-                return RetrieveEntityResult<Character>.FromError(getServer);
+                return Result<Character>.FromError(getServer);
             }
 
             var server = getServer.Entity;
 
-            if (guildUser is null)
+            if (userID is null)
             {
                 return await _characters.GetBestMatchingCharacterAsync(server, null, name, ct);
             }
 
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
+            var getUser = await _users.GetOrRegisterUserAsync(userID.Value, ct);
             if (!getUser.IsSuccess)
             {
-                return RetrieveEntityResult<Character>.FromError(getUser);
+                return Result<Character>.FromError(getUser);
             }
 
             var user = getUser.Entity;
@@ -435,25 +440,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="name">The new name.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetCharacterNameAsync
+        public async Task<Result> SetCharacterNameAsync
         (
             Character character,
             string name,
             CancellationToken ct = default
         )
         {
-            var commandModule = _commands.Modules.FirstOrDefault(m => m.Name == "character");
-            if (commandModule is null)
-            {
-                return await _characterEditor.SetCharacterNameAsync(character, name, ct);
-            }
-
-            var validNameResult = _ownedEntities.IsEntityNameValid(commandModule.GetAllCommandNames(), name);
-            if (!validNameResult.IsSuccess)
-            {
-                return ModifyEntityResult.FromError(validNameResult);
-            }
-
             return await _characterEditor.SetCharacterNameAsync(character, name, ct);
         }
 
@@ -464,7 +457,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="avatarUrl">The new avatar.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetCharacterAvatarAsync
+        public async Task<Result> SetCharacterAvatarAsync
         (
             Character character,
             string avatarUrl,
@@ -477,14 +470,16 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <summary>
         /// Sets the nickname of the given character.
         /// </summary>
-        /// <param name="guildUser">The owner of the character.</param>
+        /// <param name="guildID">The ID of the guild the user is on.</param>
+        /// <param name="userID">The ID of the discord user.</param>
         /// <param name="character">The character.</param>
         /// <param name="nickname">The new nickname.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetCharacterNicknameAsync
+        public async Task<Result> SetCharacterNicknameAsync
         (
-            IGuildUser guildUser,
+            Snowflake guildID,
+            Snowflake userID,
             Character character,
             string nickname,
             CancellationToken ct = default
@@ -496,19 +491,19 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return setNickname;
             }
 
-            var getCurrentCharacter = await GetCurrentCharacterAsync(guildUser, ct);
+            var getCurrentCharacter = await GetCurrentCharacterAsync(guildID, userID, ct);
             if (!getCurrentCharacter.IsSuccess)
             {
-                return ModifyEntityResult.FromSuccess();
+                return Result.FromSuccess();
             }
 
             var currentCharacter = getCurrentCharacter.Entity;
             if (currentCharacter != character)
             {
-                return ModifyEntityResult.FromSuccess();
+                return Result.FromSuccess();
             }
 
-            return await UpdateUserNickname(guildUser, ct);
+            return await UpdateUserNickname(guildID, userID, ct);
         }
 
         /// <summary>
@@ -518,7 +513,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="summary">The new summary.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public Task<ModifyEntityResult> SetCharacterSummaryAsync
+        public Task<Result> SetCharacterSummaryAsync
         (
             Character character,
             string summary,
@@ -532,7 +527,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="description">The new description.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public Task<ModifyEntityResult> SetCharacterDescriptionAsync
+        public Task<Result> SetCharacterDescriptionAsync
         (
             Character character,
             string description,
@@ -546,7 +541,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="pronounFamily">The new pronoun family.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public Task<ModifyEntityResult> SetCharacterPronounsAsync
+        public Task<Result> SetCharacterPronounsAsync
         (
             Character character,
             string pronounFamily,
@@ -560,7 +555,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="isNSFW">Whether the character is NSFW.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public Task<ModifyEntityResult> SetCharacterIsNSFWAsync
+        public Task<Result> SetCharacterIsNSFWAsync
         (
             Character character,
             bool isNSFW,
@@ -577,7 +572,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="isNSFW">Whether or not the image is NSFW.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A creation result which may or may not have succeeded.</returns>
-        public Task<CreateEntityResult<Image>> AddImageToCharacterAsync
+        public Task<Result<Image>> AddImageToCharacterAsync
         (
             Character character,
             string imageName,
@@ -594,7 +589,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="image">The image.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A deletion result which may or may not have succeeded.</returns>
-        public Task<DeleteEntityResult> RemoveImageFromCharacterAsync
+        public Task<Result> RemoveImageFromCharacterAsync
         (
             Character character,
             Image image,
@@ -604,27 +599,29 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <summary>
         /// Makes the given character the given user's current character.
         /// </summary>
-        /// <param name="guildUser">The user.</param>
+        /// <param name="guildID">The ID of the guild the user is on.</param>
+        /// <param name="userID">The ID of the discord user.</param>
         /// <param name="character">The character.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> MakeCharacterCurrentAsync
+        public async Task<Result> MakeCharacterCurrentAsync
         (
-            IGuildUser guildUser,
+            Snowflake guildID,
+            Snowflake userID,
             Character character,
             CancellationToken ct = default
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
+            var getUser = await _users.GetOrRegisterUserAsync(userID, ct);
             if (!getUser.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getUser);
+                return Result.FromError(getUser);
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild, ct);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildID, ct);
             if (!getServer.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getServer);
+                return Result.FromError(getServer);
             }
 
             var user = getUser.Entity;
@@ -639,44 +636,43 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             // Update the user's nickname
-            var updateNickname = await UpdateUserNickname(guildUser, ct);
+            var updateNickname = await UpdateUserNickname(guildID, userID, ct);
             if (!updateNickname.IsSuccess)
             {
                 return updateNickname;
             }
 
-            var originalCharacter = getOriginalCharacter.IsSuccess ? getOriginalCharacter.Entity : null;
-            var updateRoles = await _characterRoles.UpdateUserRolesAsync(guildUser, originalCharacter, ct);
-            if (!updateRoles.IsSuccess)
-            {
-                return updateRoles;
-            }
+            var originalCharacter = getOriginalCharacter.IsSuccess
+                ? getOriginalCharacter.Entity
+                : null;
 
-            return ModifyEntityResult.FromSuccess();
+            return await _characterRoles.UpdateUserRolesAsync(guildID, userID, originalCharacter, ct);
         }
 
         /// <summary>
         /// Clears any current character in the server from the given user.
         /// </summary>
-        /// <param name="guildUser">The user.</param>
+        /// <param name="guildID">The ID of the guild the user is on.</param>
+        /// <param name="userID">The ID of the discord user.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> ClearCurrentCharacterAsync
+        public async Task<Result> ClearCurrentCharacterAsync
         (
-            IGuildUser guildUser,
+            Snowflake guildID,
+            Snowflake userID,
             CancellationToken ct = default
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
+            var getUser = await _users.GetOrRegisterUserAsync(userID, ct);
             if (!getUser.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getUser);
+                return Result.FromError(getUser);
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild, ct);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildID, ct);
             if (!getServer.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getServer);
+                return Result.FromError(getServer);
             }
 
             var user = getUser.Entity;
@@ -691,48 +687,56 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             // Update the user's nickname
-            var updateNickname = await UpdateUserNickname(guildUser, ct);
+            var updateNickname = await UpdateUserNickname(guildID, userID, ct);
             if (!updateNickname.IsSuccess)
             {
                 return updateNickname;
             }
 
             var originalCharacter = getOriginalCharacter.IsSuccess ? getOriginalCharacter.Entity : null;
-            var updateRoles = await _characterRoles.UpdateUserRolesAsync(guildUser, originalCharacter, ct);
-            if (!updateRoles.IsSuccess)
-            {
-                return updateRoles;
-            }
-
-            return ModifyEntityResult.FromSuccess();
+            return await _characterRoles.UpdateUserRolesAsync(guildID, userID, originalCharacter, ct);
         }
 
         /// <summary>
         /// Updates the user's current nickname based on their character.
         /// </summary>
-        /// <param name="guildUser">The user.</param>
+        /// <param name="guildID">The ID of the guild the user is on.</param>
+        /// <param name="userID">The ID of the discord user.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        private async Task<ModifyEntityResult> UpdateUserNickname
+        private async Task<Result> UpdateUserNickname
         (
-            IGuildUser guildUser,
+            Snowflake guildID,
+            Snowflake userID,
             CancellationToken ct = default
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
+            var getUser = await _users.GetOrRegisterUserAsync(userID, ct);
             if (!getUser.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getUser);
+                return Result.FromError(getUser);
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild, ct);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildID, ct);
             if (!getServer.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getServer);
+                return Result.FromError(getServer);
             }
 
             var user = getUser.Entity;
             var server = getServer.Entity;
+
+            var getMember = await _guildAPI.GetGuildMemberAsync(guildID, userID, ct);
+            if (!getMember.IsSuccess)
+            {
+                return Result.FromError(getMember);
+            }
+
+            var member = getMember.Entity;
+            if (!member.User.HasValue)
+            {
+                throw new InvalidOperationException();
+            }
 
             string newNick;
             var getNewCharacter = await _characters.GetCurrentCharacterAsync(user, server, ct);
@@ -740,45 +744,68 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             {
                 var newCharacter = getNewCharacter.Entity;
                 newNick = newCharacter.Nickname.IsNullOrWhitespace()
-                    ? guildUser.Username
+                    ? member.User.Value.Username
                     : newCharacter.Nickname;
             }
             else
             {
-                newNick = guildUser.Username;
+                newNick = member.User.Value.Username;
             }
 
-            var setNick = await _discord.SetUserNicknameAsync(guildUser, newNick);
-            if (!setNick.IsSuccess)
+            var modifyNickname = await _guildAPI.ModifyGuildMemberAsync(guildID, userID, newNick, ct: ct);
+            if (modifyNickname.IsSuccess)
             {
-                return setNick;
+                return modifyNickname;
             }
 
-            return ModifyEntityResult.FromSuccess();
+            if (modifyNickname.Unwrap() is DiscordRestResultError rre)
+            {
+                return rre.DiscordError.Code is not DiscordError.MissingPermission
+                    ? modifyNickname
+                    : new UserError("I don't have permission to set the user's nickname.");
+            }
+
+            if (modifyNickname.Unwrap() is not HttpResultError hre)
+            {
+                return modifyNickname;
+            }
+
+            if (hre.StatusCode is not HttpStatusCode.Forbidden)
+            {
+                return modifyNickname;
+            }
+
+            return new UserError
+            (
+                "I'm forbidden from setting the user's nickname - typically, this means the target was the " +
+                "server owner. This is a Discord limitation, and can't be fixed."
+            );
         }
 
         /// <summary>
         /// Determines whether the given user has a current character on the server.
         /// </summary>
-        /// <param name="guildUser">The user.</param>
+        /// <param name="guildID">The ID of the guild the user is on.</param>
+        /// <param name="userID">The ID of the discord user.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<bool>> HasCurrentCharacterAsync
+        public async Task<Result<bool>> HasCurrentCharacterAsync
         (
-            IGuildUser guildUser,
+            Snowflake guildID,
+            Snowflake userID,
             CancellationToken ct = default
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
+            var getUser = await _users.GetOrRegisterUserAsync(userID, ct);
             if (!getUser.IsSuccess)
             {
-                return RetrieveEntityResult<bool>.FromError(getUser);
+                return Result<bool>.FromError(getUser);
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild, ct);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildID, ct);
             if (!getServer.IsSuccess)
             {
-                return RetrieveEntityResult<bool>.FromError(getServer);
+                return Result<bool>.FromError(getServer);
             }
 
             var user = getUser.Entity;
@@ -790,27 +817,29 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <summary>
         /// Sets the given user's default character to the given character.
         /// </summary>
-        /// <param name="guildUser">The user.</param>
+        /// <param name="guildID">The ID of the guild the user is on.</param>
+        /// <param name="userID">The ID of the discord user.</param>
         /// <param name="character">The character.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetDefaultCharacterAsync
+        public async Task<Result> SetDefaultCharacterAsync
         (
-            IGuildUser guildUser,
+            Snowflake guildID,
+            Snowflake userID,
             Character character,
             CancellationToken ct = default
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
+            var getUser = await _users.GetOrRegisterUserAsync(userID, ct);
             if (!getUser.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getUser);
+                return Result.FromError(getUser);
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild, ct);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildID, ct);
             if (!getServer.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getServer);
+                return Result.FromError(getServer);
             }
 
             var user = getUser.Entity;
@@ -822,25 +851,27 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <summary>
         /// Gets the given user's default character.
         /// </summary>
-        /// <param name="guildUser">The user.</param>
+        /// <param name="guildID">The ID of the guild the user is on.</param>
+        /// <param name="userID">The ID of the discord user.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<Character>> GetDefaultCharacterAsync
+        public async Task<Result<Character>> GetDefaultCharacterAsync
         (
-            IGuildUser guildUser,
+            Snowflake guildID,
+            Snowflake userID,
             CancellationToken ct = default
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
+            var getUser = await _users.GetOrRegisterUserAsync(userID, ct);
             if (!getUser.IsSuccess)
             {
-                return RetrieveEntityResult<Character>.FromError(getUser);
+                return Result<Character>.FromError(getUser);
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild, ct);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildID, ct);
             if (!getServer.IsSuccess)
             {
-                return RetrieveEntityResult<Character>.FromError(getServer);
+                return Result<Character>.FromError(getServer);
             }
 
             var user = getUser.Entity;
@@ -852,25 +883,27 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <summary>
         /// Clears the given user's default character.
         /// </summary>
-        /// <param name="guildUser">The user.</param>
+        /// <param name="guildID">The ID of the guild the user is on.</param>
+        /// <param name="userID">The ID of the discord user.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> ClearDefaultCharacterAsync
+        public async Task<Result> ClearDefaultCharacterAsync
         (
-            IGuildUser guildUser,
+            Snowflake guildID,
+            Snowflake userID,
             CancellationToken ct = default
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
+            var getUser = await _users.GetOrRegisterUserAsync(userID, ct);
             if (!getUser.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getUser);
+                return Result.FromError(getUser);
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild, ct);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildID, ct);
             if (!getServer.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getServer);
+                return Result.FromError(getServer);
             }
 
             var user = getUser.Entity;
@@ -882,27 +915,29 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <summary>
         /// Transfers ownership of the given character to the specified user.
         /// </summary>
-        /// <param name="newOwner">The new owner.</param>
+        /// <param name="guildID">The ID of the guild the user is on.</param>
+        /// <param name="userID">The ID of the discord user.</param>
         /// <param name="character">The character to transfer.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> TransferCharacterOwnershipAsync
+        public async Task<Result> TransferCharacterOwnershipAsync
         (
-            IGuildUser newOwner,
+            Snowflake guildID,
+            Snowflake userID,
             Character character,
             CancellationToken ct = default
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(newOwner, ct);
+            var getUser = await _users.GetOrRegisterUserAsync(userID, ct);
             if (!getUser.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getUser);
+                return Result.FromError(getUser);
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(newOwner.Guild, ct);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildID, ct);
             if (!getServer.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getServer);
+                return Result.FromError(getServer);
             }
 
             var user = getUser.Entity;

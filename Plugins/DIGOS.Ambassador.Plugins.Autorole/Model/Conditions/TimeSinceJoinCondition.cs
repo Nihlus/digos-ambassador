@@ -24,8 +24,10 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
-using Discord;
 using Humanizer;
+using Microsoft.Extensions.DependencyInjection;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
@@ -51,27 +53,25 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         }
 
         /// <inheritdoc/>
-        public override Task<RetrieveEntityResult<bool>> IsConditionFulfilledForUserAsync
+        public override async Task<Result<bool>> IsConditionFulfilledForUserAsync
         (
             IServiceProvider services,
-            IGuildUser discordUser,
+            Snowflake guildID,
+            Snowflake userID,
             CancellationToken ct = default
         )
         {
-            if (discordUser.JoinedAt is null)
+            var guildAPI = services.GetRequiredService<IDiscordRestGuildAPI>();
+            var getMember = await guildAPI.GetGuildMemberAsync(guildID, userID, ct);
+            if (!getMember.IsSuccess)
             {
-                return Task.FromResult
-                (
-                    RetrieveEntityResult<bool>.FromError("Could not figure out when the user had joined.")
-                );
+                return Result<bool>.FromError(getMember);
             }
 
-            var timeSinceJoin = DateTime.UtcNow - discordUser.JoinedAt.Value.UtcDateTime;
+            var member = getMember.Entity;
 
-            return Task.FromResult
-            (
-                RetrieveEntityResult<bool>.FromSuccess(timeSinceJoin >= this.RequiredTime)
-            );
+            var timeSinceJoin = DateTime.UtcNow - member.JoinedAt.UtcDateTime;
+            return timeSinceJoin >= this.RequiredTime;
         }
     }
 }

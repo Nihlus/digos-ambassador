@@ -33,7 +33,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     /// </summary>
     [PublicAPI]
     [TokenIdentifier("snippet", "lua", "sn")]
-    public sealed class LuaSnippetToken : ReplacableTextToken<LuaSnippetToken>
+    public sealed class LuaSnippetToken : ReplaceableTextToken<LuaSnippetToken>
     {
         private readonly LuaService _lua;
 
@@ -68,12 +68,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
                 (nameof(component), component)
             );
 
-            if (!result.IsSuccess)
-            {
-                return $"[{result.ErrorReason}]";
-            }
-
-            return result.Entity;
+            return result.IsSuccess
+                ? result.Entity
+                : $"[{result.Unwrap().Message}]";
         }
 
         /// <inheritdoc />

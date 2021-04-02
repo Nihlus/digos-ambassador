@@ -84,7 +84,7 @@ namespace DIGOS.Ambassador.Core.Services
         /// Retrieves the database credentials.
         /// </summary>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public RetrieveEntityResult<Stream> GetDatabaseCredentialStream()
+        public Result<Stream> GetDatabaseCredentialStream()
         {
             return OpenLocalStream(this.DatabaseCredentialsPath);
         }
@@ -95,30 +95,27 @@ namespace DIGOS.Ambassador.Core.Services
         /// <exception cref="FileNotFoundException">Thrown if the bot token file can't be found.</exception>
         /// <exception cref="InvalidDataException">Thrown if no token exists in the file.</exception>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<string>> GetBotTokenAsync()
+        public async Task<Result<string>> GetBotTokenAsync()
         {
             var tokenPath = UPath.Combine(UPath.Root, "Discord", "bot.token");
 
             if (!this.FileSystem.FileExists(tokenPath))
             {
-                return RetrieveEntityResult<string>.FromError("The token file could not be found.");
+                return new GenericError("The token file could not be found.");
             }
 
             var getTokenStream = OpenLocalStream(tokenPath);
             if (!getTokenStream.IsSuccess)
             {
-                return RetrieveEntityResult<string>.FromError("The token file could not be opened.");
+                return new GenericError("The token file could not be opened.");
             }
 
             await using var tokenStream = getTokenStream.Entity;
             var token = await AsyncIO.ReadAllTextAsync(tokenStream);
 
-            if (string.IsNullOrEmpty(token))
-            {
-                return RetrieveEntityResult<string>.FromError("The token file did not contain a valid token.");
-            }
-
-            return RetrieveEntityResult<string>.FromSuccess(token);
+            return string.IsNullOrEmpty(token)
+                ? new GenericError("The token file did not contain a valid token.")
+                : Result<string>.FromSuccess(token);
         }
 
         /// <summary>
@@ -131,7 +128,7 @@ namespace DIGOS.Ambassador.Core.Services
         /// <returns>A <see cref="FileStream"/> with the file data.</returns>
         [Pure]
         [MustUseReturnValue("The resulting file stream must be disposed.")]
-        public RetrieveEntityResult<Stream> OpenLocalStream
+        public Result<Stream> OpenLocalStream
         (
             [PathReference] UPath path,
             FileMode fileMode = FileMode.Open,
@@ -141,17 +138,17 @@ namespace DIGOS.Ambassador.Core.Services
         {
             if (!path.IsAbsolute)
             {
-                return RetrieveEntityResult<Stream>.FromError("Content paths must be absolute.");
+                return new GenericError("Content paths must be absolute.");
             }
 
             try
             {
                 var file = this.FileSystem.OpenFile(path, fileMode, fileAccess, fileShare);
-                return RetrieveEntityResult<Stream>.FromSuccess(file);
+                return Result<Stream>.FromSuccess(file);
             }
             catch (IOException iex)
             {
-                return RetrieveEntityResult<Stream>.FromError(iex);
+                return Result<Stream>.FromError(iex);
             }
         }
     }

@@ -40,14 +40,14 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
         {
             var result = this.Verifier.VerifyFile<Transformation>(transformationFile);
 
-            Assert.True(result.IsSuccess, result.Exception?.Message ?? "Unknown failure.");
+            Assert.True(result.IsSuccess, result.IsSuccess ? string.Empty : result.Unwrap().Message);
         }
 
         [Theory]
         [ClassData(typeof(TransformationDataProvider))]
         public void TransformationFileIsInCorrectFolder(string transformationFile)
         {
-            var folderName = Directory.GetParent(transformationFile).Name;
+            var folderName = Directory.GetParent(transformationFile)?.Name;
             var transformation = Deserialize<Transformation>(transformationFile);
 
             Assert.Equal(transformation.Species.Name, folderName);

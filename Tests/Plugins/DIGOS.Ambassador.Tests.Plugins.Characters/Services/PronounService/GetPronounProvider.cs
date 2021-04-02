@@ -25,6 +25,7 @@ using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
+using Remora.Discord.Core;
 using Xunit;
 
 #pragma warning disable SA1600
@@ -43,8 +44,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             {
                 _character = new Character
                 (
-                    new User(0),
-                    new Server(0),
+                    new User(new Snowflake(0)),
+                    new Server(new Snowflake(0)),
                     string.Empty,
                     string.Empty,
                     string.Empty,

@@ -40,7 +40,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Interfaces
         /// <param name="name">The new name.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        Task<ModifyEntityResult> SetCharacterNameAsync
+        Task<Result> SetCharacterNameAsync
         (
             Character character,
             string name,
@@ -54,7 +54,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Interfaces
         /// <param name="avatarUrl">The new avatar.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        Task<ModifyEntityResult> SetCharacterAvatarAsync
+        Task<Result> SetCharacterAvatarAsync
         (
             Character character,
             string avatarUrl,
@@ -68,7 +68,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Interfaces
         /// <param name="nickname">The new nickname.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        Task<ModifyEntityResult> SetCharacterNicknameAsync
+        Task<Result> SetCharacterNicknameAsync
         (
             Character character,
             string nickname,
@@ -82,7 +82,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Interfaces
         /// <param name="summary">The new summary.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        Task<ModifyEntityResult> SetCharacterSummaryAsync
+        Task<Result> SetCharacterSummaryAsync
         (
             Character character,
             string summary,
@@ -96,7 +96,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Interfaces
         /// <param name="description">The new description.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        Task<ModifyEntityResult> SetCharacterDescriptionAsync
+        Task<Result> SetCharacterDescriptionAsync
         (
             Character character,
             string description,
@@ -110,7 +110,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Interfaces
         /// <param name="pronounFamily">The pronoun family.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        Task<ModifyEntityResult> SetCharacterPronounsAsync
+        Task<Result> SetCharacterPronounsAsync
         (
             Character character,
             string pronounFamily,
@@ -124,7 +124,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Interfaces
         /// <param name="isNSFW">Whether or not the character is NSFW.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A task that must be awaited.</returns>
-        Task<ModifyEntityResult> SetCharacterIsNSFWAsync
+        Task<Result> SetCharacterIsNSFWAsync
         (
             Character character,
             bool isNSFW,
@@ -141,7 +141,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Interfaces
         /// <param name="isNSFW">Whether or not the image is NSFW.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
-        Task<CreateEntityResult<Image>> AddImageToCharacterAsync
+        Task<Result<Image>> AddImageToCharacterAsync
         (
             Character character,
             string imageName,
@@ -158,7 +158,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Interfaces
         /// <param name="image">The image.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
-        Task<DeleteEntityResult> RemoveImageFromCharacterAsync
+        Task<Result> RemoveImageFromCharacterAsync
         (
             Character character,
             Image image,

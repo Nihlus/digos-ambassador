@@ -32,7 +32,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     /// </summary>
     [PublicAPI]
     [TokenIdentifier("species", "s")]
-    public sealed class SpeciesToken : ReplacableTextToken<SpeciesToken>
+    public sealed class SpeciesToken : ReplaceableTextToken<SpeciesToken>
     {
         /// <inheritdoc />
         public override string GetText(Appearance appearance, AppearanceComponent? component)
@@ -61,10 +61,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
             var totalPoints = speciesShares.Values.Sum();
 
             // pick the species with the largest share
-            var largestSpecies = speciesShares.OrderByDescending(kvp => kvp.Value).FirstOrDefault();
-            var shareByPercentage = largestSpecies.Value / (double)totalPoints;
+            var (species, componentCount) = speciesShares.OrderByDescending(kvp => kvp.Value).FirstOrDefault();
+            var shareByPercentage = componentCount / (double)totalPoints;
 
-            return $"{largestSpecies.Key}{(shareByPercentage <= 0.50 ? "-morph" : string.Empty)}";
+            return $"{species}{(shareByPercentage <= 0.50 ? "-morph" : string.Empty)}";
         }
 
         /// <inheritdoc />

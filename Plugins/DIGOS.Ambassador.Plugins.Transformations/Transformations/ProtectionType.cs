@@ -31,7 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
     public enum ProtectionType
     {
         /// <summary>
-        /// Blacklist-based protection·
+        /// Blacklist-based protection.
         /// </summary>
         Blacklist,
 

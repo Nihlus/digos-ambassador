@@ -25,20 +25,19 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
-using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Plugins.Core.Services.Servers;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Roleplaying.Extensions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters;
-using Discord;
-using Discord.Net;
-using Discord.WebSocket;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Remora.Discord.Behaviours;
+using Remora.Behaviours.Bases;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Objects;
+using Remora.Discord.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
@@ -47,7 +46,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
     /// Continuously archives old roleplays.
     /// </summary>
     [UsedImplicitly]
-    public class RoleplayArchivalBehaviour : ContinuousDiscordBehaviour<RoleplayArchivalBehaviour>
+    public class RoleplayArchivalBehaviour : ContinuousBehaviour<RoleplayArchivalBehaviour>
     {
         private readonly UserFeedbackService _feedback;
 
@@ -60,98 +59,76 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleplayArchivalBehaviour"/> class.
         /// </summary>
-        /// <param name="client">The Discord client.</param>
         /// <param name="services">The services.</param>
         /// <param name="logger">The logging instance for this type.</param>
         /// <param name="feedback">The feedback service.</param>
         public RoleplayArchivalBehaviour
         (
-            DiscordSocketClient client,
             IServiceProvider services,
             ILogger<RoleplayArchivalBehaviour> logger,
             UserFeedbackService feedback
         )
-            : base(client, services, logger)
+            : base(services, logger)
         {
             _feedback = feedback;
         }
 
         /// <inheritdoc />
-        protected override async Task<OperationResult> OnTickAsync(CancellationToken ct, IServiceProvider tickServices)
+        protected override async Task<Result> OnTickAsync(CancellationToken ct, IServiceProvider tickServices)
         {
             var roleplayService = tickServices.GetRequiredService<RoleplayDiscordService>();
-            var serverService = tickServices.GetRequiredService<ServerService>();
             var serverSettings = tickServices.GetRequiredService<RoleplayServerSettingsService>();
             var dedicatedChannels = tickServices.GetRequiredService<DedicatedChannelService>();
 
-            foreach (var guild in this.Client.Guilds)
-            {
-                if (ct.IsCancellationRequested)
-                {
-                    return OperationResult.FromError("Operation was cancelled.");
-                }
-
-                var getGuildRoleplays = await roleplayService.GetRoleplaysAsync(guild);
-                if (!getGuildRoleplays.IsSuccess)
-                {
-                    continue;
-                }
-
-                var guildRoleplays = getGuildRoleplays.Entity;
-
-                var roleplays = guildRoleplays
+            var roleplays = await roleplayService.QueryRoleplaysAsync
+            (
+                q => q
                     .Where(r => r.DedicatedChannelID.HasValue)
                     .Where(r => r.LastUpdated.HasValue)
                     .Where(r => DateTime.Now - r.LastUpdated > TimeSpan.FromDays(28))
-                    .ToList();
+            );
 
-                foreach (var roleplay in roleplays)
+            foreach (var roleplay in roleplays)
+            {
+                ct.ThrowIfCancellationRequested();
+
+                // We'll use a transaction per action to avoid timeouts
+                using var archivalTransaction = new TransactionScope
+                (
+                    TransactionScopeOption.Required,
+                    this.TransactionOptions,
+                    TransactionScopeAsyncFlowOption.Enabled
+                );
+
+                var archiveResult = await ArchiveRoleplayAsync
+                (
+                    tickServices,
+                    roleplayService,
+                    dedicatedChannels,
+                    serverSettings,
+                    roleplay
+                );
+
+                if (!archiveResult.IsSuccess)
                 {
-                    if (ct.IsCancellationRequested)
-                    {
-                        return OperationResult.FromError("Operation was cancelled.");
-                    }
-
-                    // We'll use a transaction per warning to avoid timeouts
-                    using var archivalTransaction = new TransactionScope
-                    (
-                        TransactionScopeOption.Required,
-                        this.TransactionOptions,
-                        TransactionScopeAsyncFlowOption.Enabled
-                    );
-
-                    var archiveResult = await ArchiveRoleplayAsync
-                    (
-                        guild,
-                        serverService,
-                        roleplayService,
-                        dedicatedChannels,
-                        serverSettings,
-                        roleplay
-                    );
-
-                    if (!archiveResult.IsSuccess)
-                    {
-                        return OperationResult.FromError(archiveResult);
-                    }
-
-                    var notifyResult = await NotifyOwnerAsync(roleplay);
-                    if (!notifyResult.IsSuccess)
-                    {
-                        return OperationResult.FromError(notifyResult);
-                    }
-
-                    archivalTransaction.Complete();
+                    return archiveResult;
                 }
+
+                var notifyResult = await NotifyOwnerAsync(roleplay);
+                if (!notifyResult.IsSuccess)
+                {
+                    return notifyResult;
+                }
+
+                archivalTransaction.Complete();
             }
 
-            return OperationResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
-        private async Task<OperationResult> ArchiveRoleplayAsync
+        private async Task<Result> ArchiveRoleplayAsync
         (
-            SocketGuild guild,
-            ServerService serverService,
+            IServiceProvider services,
             RoleplayDiscordService roleplayService,
             DedicatedChannelService dedicatedChannels,
             RoleplayServerSettingsService serverSettings,
@@ -160,144 +137,94 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         {
             if (roleplay.DedicatedChannelID is null)
             {
-                return OperationResult.FromError("The roleplay doesn't have a dedicated channel.");
+                return new UserError("The roleplay doesn't have a dedicated channel.");
             }
 
             if (roleplay.IsPublic)
             {
-                var postResult = await PostArchivedRoleplayAsync(guild, serverService, serverSettings, roleplay);
+                var postResult = await PostArchivedRoleplayAsync(services, serverSettings, roleplay);
                 if (!postResult.IsSuccess)
                 {
-                    return OperationResult.FromError(postResult);
+                    return postResult;
                 }
             }
 
-            var dedicatedChannel = guild.GetTextChannel((ulong)roleplay.DedicatedChannelID);
-            if (dedicatedChannel is null)
+            var ensureLogged = await roleplayService.EnsureAllMessagesAreLoggedAsync(roleplay);
+            if (!ensureLogged.IsSuccess)
             {
-                // Something's gone wrong in the database. Who the fuck knows why. We'll do an extra delete to be
-                // on the safe side.
-                await dedicatedChannels.DeleteChannelAsync(guild, roleplay);
-
-                return OperationResult.FromSuccess();
+                return Result.FromError(ensureLogged);
             }
 
-            // Ensure the messages are all caught up
-            foreach (var message in await dedicatedChannel.GetMessagesAsync().FlattenAsync())
-            {
-                if (!(message is IUserMessage userMessage))
-                {
-                    continue;
-                }
-
-                // We don't care about the results here.
-                await roleplayService.ConsumeMessageAsync(userMessage);
-            }
-
-            await dedicatedChannels.DeleteChannelAsync(guild, roleplay);
-            return OperationResult.FromSuccess();
+            return await dedicatedChannels.DeleteChannelAsync(roleplay);
         }
 
-        /// <summary>
-        /// Posts the archived roleplay to the guild's archive channel, if it has one.
-        /// </summary>
-        /// <param name="guild">The guild.</param>
-        /// <param name="serverService">The server service.</param>
-        /// <param name="serverSettings">The server settings service.</param>
-        /// <param name="roleplay">The roleplay.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        private async Task<OperationResult> PostArchivedRoleplayAsync
+        private async Task<Result> PostArchivedRoleplayAsync
         (
-            SocketGuild guild,
-            ServerService serverService,
+            IServiceProvider services,
             RoleplayServerSettingsService serverSettings,
             Roleplay roleplay
         )
         {
-            var getServer = await serverService.GetOrRegisterServerAsync(guild);
-            if (!getServer.IsSuccess)
-            {
-                return OperationResult.FromError(getServer);
-            }
+            var channelAPI = services.GetRequiredService<IDiscordRestChannelAPI>();
 
-            var server = getServer.Entity;
-
-            var getSettings = await serverSettings.GetOrCreateServerRoleplaySettingsAsync(server);
+            var getSettings = await serverSettings.GetOrCreateServerRoleplaySettingsAsync(roleplay.Server.DiscordID);
             if (!getSettings.IsSuccess)
             {
-                return OperationResult.FromError(getSettings);
+                return Result.FromError(getSettings);
             }
 
             var settings = getSettings.Entity;
 
             if (settings.ArchiveChannel is null)
             {
-                return OperationResult.FromError("No archive channel has been set.");
+                return new UserError("No archive channel has been set.");
             }
 
-            var archiveChannel = guild.GetTextChannel((ulong)settings.ArchiveChannel);
-            if (archiveChannel is null)
+            var exporter = new PDFRoleplayExporter();
+            using var exportedRoleplay = await exporter.ExportAsync(services, roleplay);
+
+            var eb = _feedback.CreateEmbedBase() with
             {
-                return OperationResult.FromError("Failed to get the archive channel. Deleted?");
-            }
+                Title = $"{exportedRoleplay.Title} - Archived",
+                Description = roleplay.Summary,
+                Footer = new EmbedFooter($"Archived on {DateTime.Now:d}.")
+            };
 
-            var exporter = new PDFRoleplayExporter(guild);
-            using var exportedRoleplay = await exporter.ExportAsync(roleplay);
-
-            var eb = _feedback.CreateEmbedBase();
-            eb.WithTitle($"{exportedRoleplay.Title} - Archived");
-            eb.WithDescription(roleplay.Summary);
-            eb.WithFooter($"Archived on {DateTime.Now:d}.");
-
-            await archiveChannel.SendFileAsync
+            var fileData = new FileData
             (
-                exportedRoleplay.Data,
                 $"{exportedRoleplay.Title}.{exportedRoleplay.Format.GetFileExtension()}",
-                string.Empty,
-                embed: eb.Build()
+                exportedRoleplay.Data
             );
 
-            return OperationResult.FromSuccess();
+            var send = await channelAPI.CreateMessageAsync
+            (
+                settings.ArchiveChannel.Value,
+                embed: eb,
+                file: fileData
+            );
+
+            return send.IsSuccess
+                ? Result.FromSuccess()
+                : Result.FromError(send);
         }
 
-        /// <summary>
-        /// Notifies the owner of the roleplay that it was stopped because it timed out.
-        /// </summary>
-        /// <param name="roleplay">The roleplay.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        private async Task<OperationResult> NotifyOwnerAsync(Roleplay roleplay)
+        private async Task<Result> NotifyOwnerAsync(Roleplay roleplay)
         {
-            var owner = this.Client.GetUser((ulong)roleplay.Owner.DiscordID);
-            if (owner is null)
+            var notification = _feedback.CreateEmbedBase() with
             {
-                return OperationResult.FromError("Could not retrieve the owner of the roleplay.");
-            }
-
-            var notification = _feedback.CreateEmbedBase();
-            notification.WithDescription
-            (
+                Description =
                 $"Your roleplay \"{roleplay.Name}\" has been inactive for more than 28 days, and has been " +
-                $"archived.\n" +
-                $"\n" +
-                $"This means that the dedicated channel that the roleplay had has been deleted. All messages in the " +
-                $"roleplay have been saved, and can be exported or replayed as normal."
-            );
+                "archived.\n" +
+                "\n" +
+                "This means that the dedicated channel that the roleplay had has been deleted. All messages in the " +
+                "roleplay have been saved, and can be exported or replayed as normal.",
+                Footer = new EmbedFooter($"You can export it by running !rp export \"{roleplay.Name}\".")
+            };
 
-            notification.WithFooter
-            (
-                $"You can export it by running !rp export \"{roleplay.Name}\"."
-            );
-
-            try
-            {
-                await owner.SendMessageAsync(string.Empty, embed: notification.Build());
-            }
-            catch (HttpException hex) when (hex.WasCausedByDMsNotAccepted())
-            {
-                // Nom nom nom
-            }
-
-            return OperationResult.FromSuccess();
+            var send = await _feedback.SendPrivateEmbedAsync(roleplay.Owner.DiscordID, notification);
+            return send.IsSuccess
+                ? Result.FromSuccess()
+                : Result.FromError(send);
         }
     }
 }

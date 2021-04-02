@@ -22,21 +22,20 @@
 
 using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Core.Database.Entities;
-using JetBrains.Annotations;
+using Remora.Discord.Core;
 
 namespace DIGOS.Ambassador.Plugins.Core.Model.Users
 {
     /// <summary>
     /// Holds information about whether or not a user has granted consent to store user data.
     /// </summary>
-    [PublicAPI]
     [Table("UserConsents", Schema = "Core")]
     public class UserConsent : EFEntity
     {
         /// <summary>
         /// Gets the Discord ID of the user.
         /// </summary>
-        public long DiscordID { get; private set; }
+        public Snowflake DiscordID { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether or not the user has consented.
@@ -47,7 +46,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Users
         /// Initializes a new instance of the <see cref="UserConsent"/> class.
         /// </summary>
         /// <param name="discordID">The Discord ID of the user.</param>
-        public UserConsent(long discordID)
+        public UserConsent(Snowflake discordID)
         {
             this.DiscordID = discordID;
         }

@@ -20,8 +20,9 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using Discord.Commands;
-using JetBrains.Annotations;
+using System.ComponentModel;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
@@ -30,11 +31,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
     /// <summary>
     /// Moderation-related commands for viewing, editing, and performing moderation actions on users.
     /// </summary>
-    [PublicAPI]
     [Group("moderation")]
-    [Alias("moderation", "mod", "m")]
-    [Summary("Moderation-related commands for viewing, editing, and performing moderation actions on users.")]
-    public partial class ModerationCommands : ModuleBase
+    [Description("Moderation-related commands for viewing, editing, and performing moderation actions on users.")]
+    public partial class ModerationCommands : CommandGroup
     {
     }
 }

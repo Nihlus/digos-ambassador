@@ -21,17 +21,17 @@
 //
 
 using DIGOS.Ambassador.Core.Database.Services;
-using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Remora.EntityFrameworkCore.Modular;
 using Remora.EntityFrameworkCore.Modular.Extensions;
+using Remora.EntityFrameworkCore.Modular.Services;
 
 namespace DIGOS.Ambassador.Core.Database.Extensions
 {
     /// <summary>
     /// Contains extension methods for the <see cref="IServiceCollection"/> interface.
     /// </summary>
-    [PublicAPI]
     public static class ServiceCollectionExtensions
     {
         /// <summary>
@@ -40,13 +40,15 @@ namespace DIGOS.Ambassador.Core.Database.Extensions
         /// <param name="this">The service collection.</param>
         /// <typeparam name="TContext">The context type.</typeparam>
         /// <returns>The service collection, with the pool added.</returns>
-        [PublicAPI]
-        public static IServiceCollection AddConfiguredSchemaAwareDbContextPool<TContext>
+            public static IServiceCollection AddConfiguredSchemaAwareDbContextPool<TContext>
         (
             this IServiceCollection @this
         )
             where TContext : SchemaAwareDbContext
         {
+            @this.TryAddSingleton<SchemaAwareDbContextService>();
+            @this.TryAddSingleton<ContextConfigurationService>();
+
             return @this.AddSchemaAwareDbContextPool<TContext>((provider, builder) =>
             {
                 var configurationService = provider.GetRequiredService<ContextConfigurationService>();
