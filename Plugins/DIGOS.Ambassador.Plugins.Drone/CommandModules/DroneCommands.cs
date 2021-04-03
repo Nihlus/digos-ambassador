@@ -107,7 +107,7 @@ namespace DIGOS.Ambassador.Plugins.Drone.CommandModules
             var droneResult = await _drone.DroneUserAsync
             (
                 _context.GuildID.Value,
-                member.User.Value.ID,
+                _context.User.ID,
                 this.CancellationToken
             );
 
