@@ -204,7 +204,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 }
                 case null:
                 {
-                    return await GetCharacterByNameAsync(server, name!, ct);
+                    return await GetCharacterByNameAsync(server, name, ct);
                 }
             }
 
@@ -213,7 +213,14 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return await GetCurrentCharacterAsync(user, server, ct);
             }
 
-            return await GetUserCharacterByNameAsync(user, server, name, ct);
+            var getUserCharacter = await GetUserCharacterByNameAsync(user, server, name, ct);
+            if (!getUserCharacter.IsSuccess)
+            {
+                // Search again, but this time globally
+                return await GetBestMatchingCharacterAsync(server, null, name, ct);
+            }
+
+            return getUserCharacter;
         }
 
         /// <inheritdoc />

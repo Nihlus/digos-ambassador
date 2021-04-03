@@ -74,7 +74,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.TypeReaders
                 (
                     _context.ChannelID,
                     _context.GuildID.Value,
-                    null,
+                    _context.User.ID,
                     value
                 );
             }

@@ -545,7 +545,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 }
                 case null:
                 {
-                    return await _roleplays.GetNamedRoleplayAsync(roleplayName!, guildID);
+                    return await _roleplays.GetNamedRoleplayAsync(roleplayName, guildID);
                 }
             }
 
@@ -554,7 +554,20 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 return await GetActiveRoleplayAsync(channelID);
             }
 
-            return await _roleplays.GetUserRoleplayByNameAsync(guildID, roleplayOwnerID.Value, roleplayName);
+            var getUserRoleplay = await _roleplays.GetUserRoleplayByNameAsync
+            (
+                guildID,
+                roleplayOwnerID.Value,
+                roleplayName
+            );
+
+            if (!getUserRoleplay.IsSuccess)
+            {
+                // Search again, but this time globally
+                return await GetBestMatchingRoleplayAsync(channelID, guildID, null, roleplayName);
+            }
+
+            return getUserRoleplay;
         }
 
         /// <summary>
