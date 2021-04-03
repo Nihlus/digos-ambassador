@@ -241,7 +241,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             {
                 return new UserError
                 (
-                    "There's more than one roleplay with that name. Please specify which user it belongs to."
+                    "There's more than one roleplay with that name. " +
+                    "Please specify which user it belongs to by searching like this: \"@someone:name\"."
                 );
             }
 

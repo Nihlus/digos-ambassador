@@ -271,7 +271,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             {
                 return new UserError
                 (
-                    "There's more than one character with that name. Please specify which user it belongs to."
+                    "There's more than one character with that name. " +
+                    "Please specify which user it belongs to by searching like this: \"@someone:name\"."
                 );
             }
 

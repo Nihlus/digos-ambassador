@@ -24,10 +24,13 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
 using Remora.Commands.Parsers;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
+using Remora.Discord.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.TypeReaders
@@ -60,17 +63,48 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.TypeReaders
                 throw new InvalidOperationException();
             }
 
-            if (!value.IsNullOrWhitespace() && string.Equals(value, "current", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(value, "current", StringComparison.OrdinalIgnoreCase))
             {
                 return await _roleplays.GetActiveRoleplayAsync(_context.ChannelID);
             }
+
+            if (!value.Contains(':'))
+            {
+                return await _roleplays.GetBestMatchingRoleplayAsync
+                (
+                    _context.ChannelID,
+                    _context.GuildID.Value,
+                    null,
+                    value
+                );
+            }
+
+            var parts = value.Split(':');
+            if (parts.Length != 2)
+            {
+                return new UserError
+                (
+                    "When searching a specific user, the name must be in the form \"@someone:name\"."
+                );
+            }
+
+            var rawUser = parts[0];
+            if (!Snowflake.TryParse(rawUser.Unmention(), out var parsedUser))
+            {
+                return new UserError
+                (
+                    "I couldn't parse whatever you gave me as a user-scoped roleplay search. Try again?"
+                );
+            }
+
+            var rawName = parts[1];
 
             return await _roleplays.GetBestMatchingRoleplayAsync
             (
                 _context.ChannelID,
                 _context.GuildID.Value,
-                _context.User.ID,
-                value
+                parsedUser,
+                rawName
             );
         }
     }
