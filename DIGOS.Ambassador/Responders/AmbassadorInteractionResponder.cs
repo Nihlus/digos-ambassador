@@ -168,7 +168,7 @@ namespace DIGOS.Ambassador.Responders
             );
         }
 
-        private async Task<Result> TryExecuteCommandAsync
+        private async Task<IResult> TryExecuteCommandAsync
         (
             ICommandContext context,
             IApplicationCommandInteractionData data,
@@ -219,7 +219,7 @@ namespace DIGOS.Ambassador.Responders
                 transaction.Complete();
             }
 
-            return Result.FromSuccess();
+            return executeResult.Entity;
         }
 
         private async Task<Result> RelayResultToUserAsync<TResult>
@@ -228,7 +228,7 @@ namespace DIGOS.Ambassador.Responders
             TResult commandResult,
             CancellationToken ct = default
         )
-            where TResult : struct, IResult
+            where TResult : IResult
         {
             if (commandResult.IsSuccess)
             {
