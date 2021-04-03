@@ -250,15 +250,16 @@ namespace DIGOS.Ambassador.Responders
                 }
 
                 // All good? Erase the original interaction message
-                var eraseOriginal = await _webhookAPI.DeleteOriginalInteractionResponseAsync
+                var eraseOriginal = await _webhookAPI.EditOriginalInteractionResponseAsync
                 (
                     _identityInformation.ApplicationID,
                     context.Token,
-                    ct
+                    "\u200B",
+                    ct: ct
                 );
 
                 return !eraseOriginal.IsSuccess
-                    ? eraseOriginal
+                    ? Result.FromError(eraseOriginal)
                     : Result.FromSuccess();
             }
 
