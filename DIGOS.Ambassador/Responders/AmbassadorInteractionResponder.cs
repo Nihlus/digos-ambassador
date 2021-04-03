@@ -232,32 +232,33 @@ namespace DIGOS.Ambassador.Responders
         {
             if (commandResult.IsSuccess)
             {
-                if (commandResult is not Result<UserMessage> messageResult)
+                if (commandResult is Result<UserMessage> messageResult)
                 {
-                    // All good? Erase the original interaction message
-                    var eraseOriginal = await _webhookAPI.DeleteOriginalInteractionResponseAsync
+                    // Relay the message to the user
+                    var sendMessage = await _userFeedback.SendMessageAsync
                     (
-                        _identityInformation.ApplicationID,
-                        context.Token,
+                        context.ChannelID,
+                        context.User.ID,
+                        messageResult.Entity!,
                         ct
                     );
 
-                    return !eraseOriginal.IsSuccess
-                        ? eraseOriginal
-                        : Result.FromSuccess();
+                    if (!sendMessage.IsSuccess)
+                    {
+                        return Result.FromError(sendMessage);
+                    }
                 }
 
-                // Relay the message to the user
-                var sendMessage = await _userFeedback.SendMessageAsync
+                // All good? Erase the original interaction message
+                var eraseOriginal = await _webhookAPI.DeleteOriginalInteractionResponseAsync
                 (
-                    context.ChannelID,
-                    context.User.ID,
-                    messageResult.Entity!,
+                    _identityInformation.ApplicationID,
+                    context.Token,
                     ct
                 );
 
-                return !sendMessage.IsSuccess
-                    ? Result.FromError(sendMessage)
+                return !eraseOriginal.IsSuccess
+                    ? eraseOriginal
                     : Result.FromSuccess();
             }
 
