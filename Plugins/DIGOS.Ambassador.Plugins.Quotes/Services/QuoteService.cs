@@ -100,7 +100,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Services
                 return embed;
             }
 
-            if (firstAttachment.Height is not null)
+            if (firstAttachment.Height.HasValue && firstAttachment.Height.Value is not null)
             {
                 return embed with { Image = new EmbedImage(firstAttachment.Url) };
             }
