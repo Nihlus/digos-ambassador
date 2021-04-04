@@ -61,7 +61,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions
         public override void ConfigureServices(IServiceCollection serviceCollection)
         {
             // Dependencies
-            serviceCollection.TryAddSingleton<UserFeedbackService>();
+            serviceCollection.TryAddScoped<UserFeedbackService>();
             serviceCollection.AddInteractivity();
             serviceCollection.TryAddInteractivityResponder<PaginatedMessageResponder>();
 

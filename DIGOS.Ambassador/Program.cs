@@ -109,6 +109,12 @@ namespace DIGOS.Ambassador
                 .UseSystemd()
                 .ConfigureServices(services =>
                 {
+                    services.Configure<ServiceProviderOptions>(s =>
+                    {
+                        s.ValidateScopes = true;
+                        s.ValidateOnBuild = true;
+                    });
+
                     services.AddSingleton<BehaviourService>();
 
                     services

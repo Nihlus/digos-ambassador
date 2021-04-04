@@ -43,8 +43,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
     [UsedImplicitly]
     internal sealed class RoleplayTimeoutBehaviour : ContinuousBehaviour<RoleplayTimeoutBehaviour>
     {
-        private readonly UserFeedbackService _feedback;
-
         /// <inheritdoc/>
         protected override TimeSpan TickDelay => TimeSpan.FromMinutes(1);
 
@@ -56,21 +54,19 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// </summary>
         /// <param name="services">The services.</param>
         /// <param name="logger">The logging instance for this type.</param>
-        /// <param name="feedback">The feedback service.</param>
         public RoleplayTimeoutBehaviour
         (
             IServiceProvider services,
-            ILogger<RoleplayTimeoutBehaviour> logger,
-            UserFeedbackService feedback
+            ILogger<RoleplayTimeoutBehaviour> logger
         )
             : base(services, logger)
         {
-            _feedback = feedback;
         }
 
         /// <inheritdoc/>
         protected override async Task<Result> OnTickAsync(CancellationToken ct, IServiceProvider tickServices)
         {
+            var feedback = tickServices.GetRequiredService<UserFeedbackService>();
             var roleplayService = tickServices.GetRequiredService<RoleplayDiscordService>();
 
             var timedOutRoleplays = await roleplayService.QueryRoleplaysAsync
@@ -99,7 +95,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                     return stopRoleplay;
                 }
 
-                var notifyResult = await NotifyOwnerAsync(roleplay);
+                var notifyResult = await NotifyOwnerAsync(feedback, roleplay);
                 if (!notifyResult.IsSuccess)
                 {
                     return notifyResult;
@@ -114,17 +110,18 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// <summary>
         /// Notifies the owner of the roleplay that it was stopped because it timed out.
         /// </summary>
+        /// <param name="feedback">The feedback service.</param>
         /// <param name="roleplay">The roleplay.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        private async Task<Result> NotifyOwnerAsync(Roleplay roleplay)
+        private async Task<Result> NotifyOwnerAsync(UserFeedbackService feedback, Roleplay roleplay)
         {
-            var notification = _feedback.CreateEmbedBase() with
+            var notification = feedback.CreateEmbedBase() with
             {
                 Description = $"Due to inactivity, your roleplay \"{roleplay.Name}\" has been stopped.",
                 Footer = new EmbedFooter($"You can restart it by running !rp start \"{roleplay.Name}\".")
             };
 
-            var send = await _feedback.SendPrivateEmbedAsync(roleplay.Owner.DiscordID, notification);
+            var send = await feedback.SendPrivateEmbedAsync(roleplay.Owner.DiscordID, notification);
             return send.IsSuccess
                 ? Result.FromSuccess()
                 : Result.FromError(send);

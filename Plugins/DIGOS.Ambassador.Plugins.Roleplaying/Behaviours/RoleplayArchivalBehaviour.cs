@@ -48,8 +48,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
     [UsedImplicitly]
     public class RoleplayArchivalBehaviour : ContinuousBehaviour<RoleplayArchivalBehaviour>
     {
-        private readonly UserFeedbackService _feedback;
-
         /// <inheritdoc />
         protected override TimeSpan TickDelay => TimeSpan.FromMinutes(1);
 
@@ -61,21 +59,19 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// </summary>
         /// <param name="services">The services.</param>
         /// <param name="logger">The logging instance for this type.</param>
-        /// <param name="feedback">The feedback service.</param>
         public RoleplayArchivalBehaviour
         (
             IServiceProvider services,
-            ILogger<RoleplayArchivalBehaviour> logger,
-            UserFeedbackService feedback
+            ILogger<RoleplayArchivalBehaviour> logger
         )
             : base(services, logger)
         {
-            _feedback = feedback;
         }
 
         /// <inheritdoc />
         protected override async Task<Result> OnTickAsync(CancellationToken ct, IServiceProvider tickServices)
         {
+            var feedback = tickServices.GetRequiredService<UserFeedbackService>();
             var roleplayService = tickServices.GetRequiredService<RoleplayDiscordService>();
             var serverSettings = tickServices.GetRequiredService<RoleplayServerSettingsService>();
             var dedicatedChannels = tickServices.GetRequiredService<DedicatedChannelService>();
@@ -103,6 +99,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 var archiveResult = await ArchiveRoleplayAsync
                 (
                     tickServices,
+                    feedback,
                     roleplayService,
                     dedicatedChannels,
                     serverSettings,
@@ -114,7 +111,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                     return archiveResult;
                 }
 
-                var notifyResult = await NotifyOwnerAsync(roleplay);
+                var notifyResult = await NotifyOwnerAsync(feedback, roleplay);
                 if (!notifyResult.IsSuccess)
                 {
                     return notifyResult;
@@ -129,6 +126,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         private async Task<Result> ArchiveRoleplayAsync
         (
             IServiceProvider services,
+            UserFeedbackService feedback,
             RoleplayDiscordService roleplayService,
             DedicatedChannelService dedicatedChannels,
             RoleplayServerSettingsService serverSettings,
@@ -142,7 +140,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 
             if (roleplay.IsPublic)
             {
-                var postResult = await PostArchivedRoleplayAsync(services, serverSettings, roleplay);
+                var postResult = await PostArchivedRoleplayAsync(services, feedback, serverSettings, roleplay);
                 if (!postResult.IsSuccess)
                 {
                     return postResult;
@@ -161,6 +159,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         private async Task<Result> PostArchivedRoleplayAsync
         (
             IServiceProvider services,
+            UserFeedbackService feedback,
             RoleplayServerSettingsService serverSettings,
             Roleplay roleplay
         )
@@ -183,7 +182,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             var exporter = new PDFRoleplayExporter();
             using var exportedRoleplay = await exporter.ExportAsync(services, roleplay);
 
-            var eb = _feedback.CreateEmbedBase() with
+            var eb = feedback.CreateEmbedBase() with
             {
                 Title = $"{exportedRoleplay.Title} - Archived",
                 Description = roleplay.Summary,
@@ -208,9 +207,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 : Result.FromError(send);
         }
 
-        private async Task<Result> NotifyOwnerAsync(Roleplay roleplay)
+        private async Task<Result> NotifyOwnerAsync(UserFeedbackService feedback, Roleplay roleplay)
         {
-            var notification = _feedback.CreateEmbedBase() with
+            var notification = feedback.CreateEmbedBase() with
             {
                 Description =
                 $"Your roleplay \"{roleplay.Name}\" has been inactive for more than 28 days, and has been " +
@@ -221,7 +220,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 Footer = new EmbedFooter($"You can export it by running !rp export \"{roleplay.Name}\".")
             };
 
-            var send = await _feedback.SendPrivateEmbedAsync(roleplay.Owner.DiscordID, notification);
+            var send = await feedback.SendPrivateEmbedAsync(roleplay.Owner.DiscordID, notification);
             return send.IsSuccess
                 ? Result.FromSuccess()
                 : Result.FromError(send);
