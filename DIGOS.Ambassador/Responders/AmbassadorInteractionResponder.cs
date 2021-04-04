@@ -235,7 +235,13 @@ namespace DIGOS.Ambassador.Responders
             {
                 if (commandResult is not Result<UserMessage> messageResult)
                 {
-                    return Result.FromSuccess();
+                    // Erase the original interaction
+                    return await _webhookAPI.DeleteOriginalInteractionResponseAsync
+                    (
+                        _identityInformation.ApplicationID,
+                        context.Token,
+                        ct
+                    );
                 }
 
                 // Relay the message to the user
