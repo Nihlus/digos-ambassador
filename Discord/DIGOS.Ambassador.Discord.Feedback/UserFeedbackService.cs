@@ -86,7 +86,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
             string contents,
             CancellationToken ct = default
         )
-            => SendEmbedAsync(channel, target, Color.OrangeRed, contents, ct);
+            => SendContentAsync(channel, target, Color.OrangeRed, contents, ct);
 
         /// <summary>
         /// Send an alerting warning message.
@@ -137,7 +137,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
             UserMessage message,
             CancellationToken ct = default
         )
-            => SendEmbedAsync(channel, target, message.Colour, message.Message, ct);
+            => SendContentAsync(channel, target, message.Colour, message.Message, ct);
 
         /// <summary>
         /// Sends the given embed to the given channel.
@@ -190,7 +190,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="contents">The contents to send.</param>
         /// <param name="ct">The cancellation token for this operation.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        private async Task<Result<IReadOnlyList<IMessage>>> SendEmbedAsync
+        private async Task<Result<IReadOnlyList<IMessage>>> SendContentAsync
         (
             Snowflake channel,
             Snowflake? target,
@@ -200,47 +200,9 @@ namespace DIGOS.Ambassador.Discord.Feedback
         )
         {
             var sendResults = new List<IMessage>();
-
-            // Sometimes the content is > 2048 in length. We'll chunk it into embeds of 1024 here.
-            if (contents.Length < 1024)
+            foreach (var chunk in CreateContentChunks(target, color, contents))
             {
-                var eb = CreateFeedbackEmbed(target, color, contents);
-                var send = await _channelAPI.CreateMessageAsync(channel, embed: eb, ct: ct);
-                if (!send.IsSuccess)
-                {
-                    return Result<IReadOnlyList<IMessage>>.FromError(send);
-                }
-
-                sendResults.Add(send.Entity);
-                return sendResults;
-            }
-
-            var words = contents.Split(' ');
-            var messageBuilder = new StringBuilder();
-            foreach (var word in words)
-            {
-                if (messageBuilder.Length >= 1024)
-                {
-                    var eb = CreateFeedbackEmbed(target, color, messageBuilder.ToString());
-                    var send = await _channelAPI.CreateMessageAsync(channel, embed: eb, ct: ct);
-                    if (!send.IsSuccess)
-                    {
-                        return Result<IReadOnlyList<IMessage>>.FromError(send);
-                    }
-
-                    sendResults.Add(send.Entity);
-
-                    messageBuilder.Clear();
-                }
-
-                messageBuilder.Append(word);
-                messageBuilder.Append(' ');
-            }
-
-            if (messageBuilder.Length > 0)
-            {
-                var eb = CreateFeedbackEmbed(target, color, messageBuilder.ToString());
-                var send = await _channelAPI.CreateMessageAsync(channel, embed: eb, ct: ct);
+                var send = await _channelAPI.CreateMessageAsync(channel, embed: new Optional<IEmbed>(chunk), ct: ct);
                 if (!send.IsSuccess)
                 {
                     return Result<IReadOnlyList<IMessage>>.FromError(send);
@@ -250,6 +212,43 @@ namespace DIGOS.Ambassador.Discord.Feedback
             }
 
             return sendResults;
+        }
+
+        /// <summary>
+        /// Chunks an input string into one or more embeds. Discord places an internal limit on embed lengths of 2048
+        /// characters, and we collapse that into 1024 for readability's sake.
+        /// </summary>
+        /// <param name="target">The target user, if any.</param>
+        /// <param name="color">The color of the embed.</param>
+        /// <param name="contents">The complete contents of the message.</param>
+        /// <returns>The chunked embeds.</returns>
+        private IEnumerable<IEmbed> CreateContentChunks(Snowflake? target, Color color, string contents)
+        {
+            // Sometimes the content is > 2048 in length. We'll chunk it into embeds of 1024 here.
+            if (contents.Length < 1024)
+            {
+                yield return CreateFeedbackEmbed(target, color, contents.Trim());
+                yield break;
+            }
+
+            var words = contents.Split(' ');
+            var messageBuilder = new StringBuilder();
+            foreach (var word in words)
+            {
+                if (messageBuilder.Length >= 1024)
+                {
+                    yield return CreateFeedbackEmbed(target, color, messageBuilder.ToString().Trim());
+                    messageBuilder.Clear();
+                }
+
+                messageBuilder.Append(word);
+                messageBuilder.Append(' ');
+            }
+
+            if (messageBuilder.Length > 0)
+            {
+                yield return CreateFeedbackEmbed(target, color, messageBuilder.ToString().Trim());
+            }
         }
 
         /// <summary>
