@@ -182,6 +182,38 @@ namespace DIGOS.Ambassador.Discord.Feedback
         }
 
         /// <summary>
+        /// Creates a feedback embed.
+        /// </summary>
+        /// <param name="target">The invoking mentionable.</param>
+        /// <param name="color">The colour of the embed.</param>
+        /// <param name="contents">The contents of the embed.</param>
+        /// <returns>A feedback embed.</returns>
+        [Pure]
+        public Embed CreateFeedbackEmbed(Snowflake? target, Color color, string contents)
+        {
+            if (target is null)
+            {
+                return CreateEmbedBase(color) with { Description = contents };
+            }
+
+            return CreateEmbedBase(color) with { Description = $"<@{target}> | {contents}" };
+        }
+
+        /// <summary>
+        /// Creates a base embed.
+        /// </summary>
+        /// <param name="color">The colour of the embed. Optional.</param>
+        /// <returns>A basic embed.</returns>
+        [Pure]
+        public Embed CreateEmbedBase(Color? color = null)
+        {
+            color ??= Color.MediumPurple;
+
+            var eb = new Embed { Colour = color.Value };
+            return eb;
+        }
+
+        /// <summary>
         /// Sends the given string as one or more sequential embeds, chunked into sets of 1024 characters.
         /// </summary>
         /// <param name="channel">The channel to send the embed to.</param>
@@ -222,6 +254,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="color">The color of the embed.</param>
         /// <param name="contents">The complete contents of the message.</param>
         /// <returns>The chunked embeds.</returns>
+        [Pure]
         private IEnumerable<Embed> CreateContentChunks(Snowflake? target, Color color, string contents)
         {
             // Sometimes the content is > 2048 in length. We'll chunk it into embeds of 1024 here.
@@ -249,38 +282,6 @@ namespace DIGOS.Ambassador.Discord.Feedback
             {
                 yield return CreateFeedbackEmbed(target, color, messageBuilder.ToString().Trim());
             }
-        }
-
-        /// <summary>
-        /// Creates a feedback embed.
-        /// </summary>
-        /// <param name="target">The invoking mentionable.</param>
-        /// <param name="color">The colour of the embed.</param>
-        /// <param name="contents">The contents of the embed.</param>
-        /// <returns>A feedback embed.</returns>
-        [Pure]
-        public Embed CreateFeedbackEmbed(Snowflake? target, Color color, string contents)
-        {
-            if (target is null)
-            {
-                return CreateEmbedBase(color) with { Description = contents };
-            }
-
-            return CreateEmbedBase(color) with { Description = $"<@{target}> | {contents}" };
-        }
-
-        /// <summary>
-        /// Creates a base embed.
-        /// </summary>
-        /// <param name="color">The colour of the embed. Optional.</param>
-        /// <returns>A basic embed.</returns>
-        [Pure]
-        public Embed CreateEmbedBase(Color? color = null)
-        {
-            color ??= Color.MediumPurple;
-
-            var eb = new Embed { Colour = color.Value };
-            return eb;
         }
     }
 }
