@@ -52,9 +52,9 @@ namespace DIGOS.Ambassador.Discord.Feedback
         private readonly IdentityInformationService _identity;
 
         /// <summary>
-        /// Holds a value indicating whether the original interaction message (if any) has been edited.
+        /// Gets a value indicating whether the original interaction message (if any) has been edited.
         /// </summary>
-        private bool _hasEditedOriginalInteraction;
+        public bool HasEditedOriginalInteraction { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserFeedbackService"/> class.
@@ -282,7 +282,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
                 }
                 case InteractionContext interactionContext:
                 {
-                    if (_hasEditedOriginalInteraction)
+                    if (this.HasEditedOriginalInteraction)
                     {
                         return await _webhookAPI.CreateFollowupMessageAsync
                         (
@@ -303,7 +303,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
 
                     if (edit.IsSuccess)
                     {
-                        _hasEditedOriginalInteraction = true;
+                        this.HasEditedOriginalInteraction = true;
                     }
 
                     return edit;
