@@ -138,6 +138,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 return new UserError("The roleplay doesn't have a dedicated channel.");
             }
 
+            var ensureLogged = await roleplayService.EnsureAllMessagesAreLoggedAsync(roleplay);
+            if (!ensureLogged.IsSuccess)
+            {
+                return Result.FromError(ensureLogged);
+            }
+
             if (roleplay.IsPublic)
             {
                 var postResult = await PostArchivedRoleplayAsync(services, feedback, serverSettings, roleplay);
@@ -145,12 +151,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 {
                     return postResult;
                 }
-            }
-
-            var ensureLogged = await roleplayService.EnsureAllMessagesAreLoggedAsync(roleplay);
-            if (!ensureLogged.IsSuccess)
-            {
-                return Result.FromError(ensureLogged);
             }
 
             return await dedicatedChannels.DeleteChannelAsync(roleplay);
