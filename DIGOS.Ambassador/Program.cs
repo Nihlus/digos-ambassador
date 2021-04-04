@@ -29,6 +29,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using DIGOS.Ambassador.Core.Services;
+using DIGOS.Ambassador.Discord.Feedback.Responders;
+using DIGOS.Ambassador.Discord.Feedback.Services;
 using DIGOS.Ambassador.Responders;
 using log4net;
 using log4net.Config;
@@ -116,6 +118,9 @@ namespace DIGOS.Ambassador
                     });
 
                     services.AddSingleton<BehaviourService>();
+
+                    services.TryAddSingleton<IdentityInformationService>();
+                    services.AddResponder<ReadyResponder>();
 
                     services
                         .AddSingleton(pluginService)

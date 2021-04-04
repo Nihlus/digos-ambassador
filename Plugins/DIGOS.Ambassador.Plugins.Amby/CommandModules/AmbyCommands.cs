@@ -26,6 +26,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Discord.Feedback.Results;
+using DIGOS.Ambassador.Discord.Feedback.Services;
 using DIGOS.Ambassador.Plugins.Amby.Services;
 using DIGOS.Ambassador.Plugins.Core.Services;
 using JetBrains.Annotations;
@@ -174,7 +175,7 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
                 Image = new EmbedImage(_portraits.MowUri.ToString())
             };
 
-            return await _feedback.SendEmbedAsync(_context.ChannelID, eb);
+            return await _feedback.SendContextualEmbedAsync(eb);
         }
 
         /// <summary>
@@ -190,7 +191,7 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
                 Image = new EmbedImage(_portraits.BwehUri.ToString())
             };
 
-            return await _feedback.SendEmbedAsync(_context.ChannelID, eb);
+            return await _feedback.SendContextualEmbedAsync(eb);
         }
 
         /// <summary>
@@ -229,9 +230,8 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
                 return new ConfirmationMessage($"*boops <@{target.ID}>*");
             }
 
-            var sendAnnoyed = await _feedback.SendConfirmationAsync
+            var sendAnnoyed = await _feedback.SendContextualConfirmationAsync
             (
-                _context.ChannelID,
                 _context.User.ID,
                 "...seriously?",
                 this.CancellationToken
@@ -256,9 +256,8 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
                 return new ConfirmationMessage($"**baps <@{target.ID}>**");
             }
 
-            var sendAnnoyed = await _feedback.SendConfirmationAsync
+            var sendAnnoyed = await _feedback.SendContextualConfirmationAsync
             (
-                _context.ChannelID,
                 _context.User.ID,
                 "...seriously?",
                 this.CancellationToken

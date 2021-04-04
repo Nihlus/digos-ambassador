@@ -20,16 +20,21 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Discord.Feedback.Results;
+using DIGOS.Ambassador.Discord.Feedback.Services;
 using JetBrains.Annotations;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Services;
 using Remora.Discord.Core;
 using Remora.Results;
 
@@ -40,18 +45,39 @@ namespace DIGOS.Ambassador.Discord.Feedback
     /// </summary>
     public class UserFeedbackService
     {
+        private readonly ContextInjectionService _contextInjection;
         private readonly IDiscordRestChannelAPI _channelAPI;
         private readonly IDiscordRestUserAPI _userAPI;
+        private readonly IDiscordRestWebhookAPI _webhookAPI;
+        private readonly IdentityInformationService _identity;
+
+        /// <summary>
+        /// Holds a value indicating whether the original interaction message (if any) has been edited.
+        /// </summary>
+        private bool _hasEditedOriginalInteraction;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserFeedbackService"/> class.
         /// </summary>
         /// <param name="channelAPI">The channel API.</param>
         /// <param name="userAPI">The user API.</param>
-        public UserFeedbackService(IDiscordRestChannelAPI channelAPI, IDiscordRestUserAPI userAPI)
+        /// <param name="contextInjection">The context injection service.</param>
+        /// <param name="webhookAPI">The webhook API.</param>
+        /// <param name="identity">The identity service.</param>
+        public UserFeedbackService
+        (
+            IDiscordRestChannelAPI channelAPI,
+            IDiscordRestUserAPI userAPI,
+            ContextInjectionService contextInjection,
+            IDiscordRestWebhookAPI webhookAPI,
+            IdentityInformationService identity
+        )
         {
             _channelAPI = channelAPI;
             _userAPI = userAPI;
+            _contextInjection = contextInjection;
+            _webhookAPI = webhookAPI;
+            _identity = identity;
         }
 
         /// <summary>
@@ -72,6 +98,21 @@ namespace DIGOS.Ambassador.Discord.Feedback
             => SendMessageAsync(channel, target, new ConfirmationMessage(contents), ct);
 
         /// <summary>
+        /// Send a positive confirmation message.
+        /// </summary>
+        /// <param name="target">The target user to mention, if any.</param>
+        /// <param name="contents">The contents of the message.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public Task<Result<IReadOnlyList<IMessage>>> SendContextualConfirmationAsync
+        (
+            Snowflake? target,
+            string contents,
+            CancellationToken ct = default
+        )
+            => SendContextualMessageAsync(target, new ConfirmationMessage(contents), ct);
+
+        /// <summary>
         /// Send a negative error message.
         /// </summary>
         /// <param name="channel">The channel to send the message to.</param>
@@ -87,6 +128,21 @@ namespace DIGOS.Ambassador.Discord.Feedback
             CancellationToken ct = default
         )
             => SendContentAsync(channel, target, Color.OrangeRed, contents, ct);
+
+        /// <summary>
+        /// Send a negative error message.
+        /// </summary>
+        /// <param name="target">The target user to mention, if any.</param>
+        /// <param name="contents">The contents of the message.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public Task<Result<IReadOnlyList<IMessage>>> SendContextualErrorAsync
+        (
+            Snowflake? target,
+            string contents,
+            CancellationToken ct = default
+        )
+            => SendContextualContentAsync(target, Color.OrangeRed, contents, ct);
 
         /// <summary>
         /// Send an alerting warning message.
@@ -106,6 +162,21 @@ namespace DIGOS.Ambassador.Discord.Feedback
             => SendMessageAsync(channel, target, new WarningMessage(contents), ct);
 
         /// <summary>
+        /// Send an alerting warning message.
+        /// </summary>
+        /// <param name="target">The target user to mention, if any.</param>
+        /// <param name="contents">The contents of the message.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public Task<Result<IReadOnlyList<IMessage>>> SendContextualWarningAsync
+        (
+            Snowflake? target,
+            string contents,
+            CancellationToken ct = default
+        )
+            => SendContextualMessageAsync(target, new WarningMessage(contents), ct);
+
+        /// <summary>
         /// Send an informational message.
         /// </summary>
         /// <param name="channel">The channel to send the message to.</param>
@@ -121,6 +192,21 @@ namespace DIGOS.Ambassador.Discord.Feedback
             CancellationToken ct = default
         )
             => SendMessageAsync(channel, target, new InfoMessage(contents), ct);
+
+        /// <summary>
+        /// Send an informational message.
+        /// </summary>
+        /// <param name="target">The target user to mention, if any.</param>
+        /// <param name="contents">The contents of the message.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public Task<Result<IReadOnlyList<IMessage>>> SendContextualInfoAsync
+        (
+            Snowflake? target,
+            string contents,
+            CancellationToken ct = default
+        )
+            => SendContextualMessageAsync(target, new InfoMessage(contents), ct);
 
         /// <summary>
         /// Send a message.
@@ -140,6 +226,21 @@ namespace DIGOS.Ambassador.Discord.Feedback
             => SendContentAsync(channel, target, message.Colour, message.Message, ct);
 
         /// <summary>
+        /// Send a contextual message.
+        /// </summary>
+        /// <param name="target">The target user to mention, if any.</param>
+        /// <param name="message">The message to send.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public Task<Result<IReadOnlyList<IMessage>>> SendContextualMessageAsync
+        (
+            Snowflake? target,
+            UserMessage message,
+            CancellationToken ct = default
+        )
+            => SendContextualContentAsync(target, message.Colour, message.Message, ct);
+
+        /// <summary>
         /// Sends the given embed to the given channel.
         /// </summary>
         /// <param name="channel">The channel to send the embed to.</param>
@@ -154,6 +255,64 @@ namespace DIGOS.Ambassador.Discord.Feedback
         )
         {
             return _channelAPI.CreateMessageAsync(channel, embed: embed, ct: ct);
+        }
+
+        /// <summary>
+        /// Sends the given embed to current context.
+        /// </summary>
+        /// <param name="embed">The embed.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task<Result<IMessage>> SendContextualEmbedAsync
+        (
+            Embed embed,
+            CancellationToken ct = default
+        )
+        {
+            if (_contextInjection.Context is null)
+            {
+                return new UserError("Contextual sends require a context to be available.");
+            }
+
+            switch (_contextInjection.Context)
+            {
+                case MessageContext messageContext:
+                {
+                    return await _channelAPI.CreateMessageAsync(messageContext.ChannelID, embed: embed, ct: ct);
+                }
+                case InteractionContext interactionContext:
+                {
+                    if (_hasEditedOriginalInteraction)
+                    {
+                        return await _webhookAPI.CreateFollowupMessageAsync
+                        (
+                            _identity.ApplicationID,
+                            interactionContext.Token,
+                            embeds: new[] { embed },
+                            ct: ct
+                        );
+                    }
+
+                    var edit = await _webhookAPI.EditOriginalInteractionResponseAsync
+                    (
+                        _identity.ApplicationID,
+                        interactionContext.Token,
+                        embeds: new[] { embed },
+                        ct: ct
+                    );
+
+                    if (edit.IsSuccess)
+                    {
+                        _hasEditedOriginalInteraction = true;
+                    }
+
+                    return edit;
+                }
+                default:
+                {
+                    throw new InvalidOperationException();
+                }
+            }
         }
 
         /// <summary>
@@ -235,6 +394,37 @@ namespace DIGOS.Ambassador.Discord.Feedback
             foreach (var chunk in CreateContentChunks(target, color, contents))
             {
                 var send = await SendEmbedAsync(channel, chunk, ct);
+                if (!send.IsSuccess)
+                {
+                    return Result<IReadOnlyList<IMessage>>.FromError(send);
+                }
+
+                sendResults.Add(send.Entity);
+            }
+
+            return sendResults;
+        }
+
+        /// <summary>
+        /// Sends the given string as one or more sequential embeds, chunked into sets of 1024 characters.
+        /// </summary>
+        /// <param name="target">The target user to mention, if any.</param>
+        /// <param name="color">The embed colour.</param>
+        /// <param name="contents">The contents to send.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        private async Task<Result<IReadOnlyList<IMessage>>> SendContextualContentAsync
+        (
+            Snowflake? target,
+            Color color,
+            string contents,
+            CancellationToken ct = default
+        )
+        {
+            var sendResults = new List<IMessage>();
+            foreach (var chunk in CreateContentChunks(target, color, contents))
+            {
+                var send = await SendContextualEmbedAsync(chunk, ct);
                 if (!send.IsSuccess)
                 {
                     return Result<IReadOnlyList<IMessage>>.FromError(send);

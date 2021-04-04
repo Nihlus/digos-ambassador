@@ -121,7 +121,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
 
                 embedFields.Add(new EmbedField("Warning Threshold", settings.WarningThreshold.ToString()));
 
-                return await _feedback.SendEmbedAsync(_context.ChannelID, eb);
+                return await _feedback.SendContextualEmbedAsync(eb);
             }
         }
     }

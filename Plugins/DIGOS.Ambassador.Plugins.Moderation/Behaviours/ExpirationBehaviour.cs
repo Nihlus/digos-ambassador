@@ -26,6 +26,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
+using DIGOS.Ambassador.Discord.Feedback.Services;
 using DIGOS.Ambassador.Plugins.Core.Services;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
 using JetBrains.Annotations;

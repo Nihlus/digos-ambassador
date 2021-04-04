@@ -91,9 +91,8 @@ namespace DIGOS.Ambassador.Plugins.Drone.CommandModules
                 ? _content.GetRandomSelfDroneMessage()
                 : _content.GetRandomTurnTheTablesMessage();
 
-            var sendMessage = await _feedback.SendConfirmationAsync
+            var sendMessage = await _feedback.SendContextualConfirmationAsync
             (
-                _context.ChannelID,
                 _context.User.ID,
                 droneMessage,
                 this.CancellationToken

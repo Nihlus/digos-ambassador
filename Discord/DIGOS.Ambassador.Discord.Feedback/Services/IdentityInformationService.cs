@@ -22,7 +22,7 @@
 
 using Remora.Discord.Core;
 
-namespace DIGOS.Ambassador.Plugins.Core.Services
+namespace DIGOS.Ambassador.Discord.Feedback.Services
 {
     /// <summary>
     /// Contains identity information about the bot itself.

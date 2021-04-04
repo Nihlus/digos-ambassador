@@ -256,7 +256,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         [RequireOwner]
         public async Task<Result<UserMessage>> UpdateKinkDatabaseAsync()
         {
-            var send = await _feedback.SendConfirmationAsync(_context.ChannelID, _context.User.ID, "Updating kinks...");
+            var send = await _feedback.SendContextualConfirmationAsync(_context.User.ID, "Updating kinks...");
             if (!send.IsSuccess)
             {
                 return Result<UserMessage>.FromError(send);

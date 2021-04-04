@@ -292,9 +292,8 @@ namespace DIGOS.Ambassador.Responders
                 }
 
                 // Relay the message to the user
-                var sendMessage = await _userFeedback.SendMessageAsync
+                var sendMessage = await _userFeedback.SendContextualMessageAsync
                 (
-                    context.ChannelID,
                     context.User.ID,
                     messageResult.Entity!,
                     ct
@@ -322,9 +321,8 @@ namespace DIGOS.Ambassador.Responders
                               error.GetType().GetGenericTypeDefinition() == typeof(ParsingError<>):
                 {
                     // Alert the user, and don't complete the transaction
-                    var sendError = await _userFeedback.SendErrorAsync
+                    var sendError = await _userFeedback.SendContextualErrorAsync
                     (
-                        context.ChannelID,
                         context.User.ID,
                         error.Message,
                         ct

@@ -28,6 +28,7 @@ using System.Transactions;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Discord.Feedback.Results;
+using DIGOS.Ambassador.Discord.Feedback.Services;
 using DIGOS.Ambassador.Plugins.Core.Services;
 using JetBrains.Annotations;
 using Remora.Commands.Results;
@@ -232,34 +233,21 @@ namespace DIGOS.Ambassador.Responders
         {
             if (commandResult.IsSuccess)
             {
-                if (commandResult is Result<UserMessage> messageResult)
+                if (commandResult is not Result<UserMessage> messageResult)
                 {
-                    // Relay the message to the user
-                    var sendMessage = await _userFeedback.SendMessageAsync
-                    (
-                        context.ChannelID,
-                        context.User.ID,
-                        messageResult.Entity!,
-                        ct
-                    );
-
-                    if (!sendMessage.IsSuccess)
-                    {
-                        return Result.FromError(sendMessage);
-                    }
+                    return Result.FromSuccess();
                 }
 
-                // All good? Erase the original interaction message
-                var eraseOriginal = await _webhookAPI.EditOriginalInteractionResponseAsync
+                // Relay the message to the user
+                var sendMessage = await _userFeedback.SendContextualMessageAsync
                 (
-                    _identityInformation.ApplicationID,
-                    context.Token,
-                    "\u200B",
-                    ct: ct
+                    context.User.ID,
+                    messageResult.Entity!,
+                    ct
                 );
 
-                return !eraseOriginal.IsSuccess
-                    ? Result.FromError(eraseOriginal)
+                return !sendMessage.IsSuccess
+                    ? Result.FromError(sendMessage)
                     : Result.FromSuccess();
             }
 
@@ -279,21 +267,7 @@ namespace DIGOS.Ambassador.Responders
                 case { } when error.GetType().IsGenericType &&
                               error.GetType().GetGenericTypeDefinition() == typeof(ParsingError<>):
                 {
-                    // Alert the user, and don't complete the transaction
-                    var sendError = await _webhookAPI.EditOriginalInteractionResponseAsync
-                    (
-                        _identityInformation.ApplicationID,
-                        context.Token,
-                        embeds: new[]
-                        {
-                            _userFeedback.CreateEmbedBase(Color.OrangeRed) with
-                            {
-                                Description = error.Message
-                            }
-                        },
-                        ct: ct
-                    );
-
+                    var sendError = await _userFeedback.SendContextualErrorAsync(context.User.ID, error.Message, ct);
                     return sendError.IsSuccess
                         ? Result.FromSuccess()
                         : Result.FromError(sendError);

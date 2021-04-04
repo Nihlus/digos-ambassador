@@ -266,9 +266,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 return new ConfirmationMessage($"Warning added (ID {warning.ID}).");
             }
 
-            var sendAlert = await _feedback.SendWarningAsync
+            var sendAlert = await _feedback.SendContextualWarningAsync
             (
-                _context.ChannelID,
                 _context.User.ID,
                 $"The warned user now has {warnings.Count} warnings. Consider further action."
             );

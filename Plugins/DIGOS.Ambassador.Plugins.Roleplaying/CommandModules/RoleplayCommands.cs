@@ -130,7 +130,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             }
 
             var eb = CreateRoleplayInfoEmbed(roleplay);
-            return await _feedback.SendEmbedAsync(_context.ChannelID, eb);
+            return await _feedback.SendContextualEmbedAsync(eb);
         }
 
         private Embed CreateRoleplayInfoEmbed(Roleplay roleplay)
@@ -451,7 +451,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 Description = "Setting up dedicated channel..."
             };
 
-            var send = await _feedback.SendEmbedAsync(_context.ChannelID, workingMessage);
+            var send = await _feedback.SendContextualEmbedAsync(workingMessage);
             if (!send.IsSuccess)
             {
                 return Result<UserMessage>.FromError(send);
@@ -612,7 +612,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 "Compiling the roleplay..."
             );
 
-            var send = await _feedback.SendEmbedAsync(_context.ChannelID, message);
+            var send = await _feedback.SendContextualEmbedAsync(message);
             if (!send.IsSuccess)
             {
                 return Result<UserMessage>.FromError(send);
@@ -788,7 +788,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 var reset = await _dedicatedChannels.ResetChannelPermissionsAsync(roleplay);
                 if (!reset.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(_context.ChannelID, _context.User.ID, reset.Unwrap().Message);
+                    await _feedback.SendContextualErrorAsync(_context.User.ID, reset.Unwrap().Message);
                 }
             }
 
@@ -843,9 +843,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                     $"I couldn't add <@{participant.ID}> to the roleplay ({addParticipantAsync.Unwrap().Message}. " +
                     "Please try to invite them manually.";
 
-                var sendWarning = await _feedback.SendWarningAsync
+                var sendWarning = await _feedback.SendContextualWarningAsync
                 (
-                    _context.ChannelID,
                     _context.User.ID,
                     message
                 );

@@ -98,13 +98,7 @@ namespace DIGOS.Ambassador.Plugins.Statistics.CommandGroups
             var guild = getGuild.Entity;
 
             var eb = CreateGuildInfoEmbed(guild);
-
-            return await _feedback.SendEmbedAsync
-            (
-                _context.ChannelID,
-                eb,
-                this.CancellationToken
-            );
+            return await _feedback.SendContextualEmbedAsync(eb, this.CancellationToken);
         }
 
         /// <summary>

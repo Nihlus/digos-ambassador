@@ -187,7 +187,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             {
                 embedFields.Add(new EmbedField("Conditions", "No conditions"));
 
-                var send = await _feedback.SendEmbedAsync(_context.ChannelID, embed);
+                var send = await _feedback.SendContextualEmbedAsync(embed);
                 return send.IsSuccess
                     ? Result.FromSuccess()
                     : Result.FromError(send);

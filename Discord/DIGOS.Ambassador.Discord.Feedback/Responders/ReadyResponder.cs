@@ -22,13 +22,13 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Plugins.Core.Services;
+using DIGOS.Ambassador.Discord.Feedback.Services;
 using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Core.Responders
+namespace DIGOS.Ambassador.Discord.Feedback.Responders
 {
     /// <summary>
     /// Responds to the <see cref="IReady"/> event, storing connection information in a singleton service.

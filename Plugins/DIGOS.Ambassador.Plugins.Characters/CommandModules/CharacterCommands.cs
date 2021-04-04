@@ -199,7 +199,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 return Result.FromError(createEmbed);
             }
 
-            var send = await _feedback.SendEmbedAsync(_context.ChannelID, createEmbed.Entity, this.CancellationToken);
+            var send = await _feedback.SendContextualEmbedAsync(createEmbed.Entity, this.CancellationToken);
             return send.IsSuccess
                 ? Result.FromSuccess()
                 : Result.FromError(send);
