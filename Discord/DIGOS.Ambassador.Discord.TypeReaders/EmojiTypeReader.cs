@@ -20,6 +20,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -30,6 +32,7 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Discord.TypeReaders
@@ -70,27 +73,34 @@ namespace DIGOS.Ambassador.Discord.TypeReaders
         /// <inheritdoc />
         public override async ValueTask<Result<IEmoji>> TryParse(string value, CancellationToken ct)
         {
-            var getChannel = await _channelAPI.GetChannelAsync(_context.ChannelID, ct);
-            if (!getChannel.IsSuccess)
+            if (TryParseEmoji(value, out var parsedEmoji))
             {
-                return Result<IEmoji>.FromError(getChannel);
-            }
-
-            var channel = getChannel.Entity;
-            if (channel.GuildID.HasValue)
-            {
-                var getGuild = await _guildAPI.GetGuildAsync(channel.GuildID.Value, ct: ct);
-                if (!getGuild.IsSuccess)
+                var getChannel = await _channelAPI.GetChannelAsync(_context.ChannelID, ct);
+                if (!getChannel.IsSuccess)
                 {
-                    return Result<IEmoji>.FromError(getGuild);
+                    return Result<IEmoji>.FromError(getChannel);
                 }
 
-                var guild = getGuild.Entity;
-
-                var guildEmoji = guild.Emojis.FirstOrDefault(e => e.Name == value || e.ID?.ToString() == value);
-                if (guildEmoji is not null)
+                var channel = getChannel.Entity;
+                if (channel.GuildID.HasValue)
                 {
-                    return Result<IEmoji>.FromSuccess(guildEmoji);
+                    var getGuild = await _guildAPI.GetGuildAsync(channel.GuildID.Value, ct: ct);
+                    if (!getGuild.IsSuccess)
+                    {
+                        return Result<IEmoji>.FromError(getGuild);
+                    }
+
+                    var guild = getGuild.Entity;
+
+                    var guildEmoji = guild.Emojis.FirstOrDefault
+                    (
+                        e => e.Name == parsedEmoji.Name && e.ID == parsedEmoji.ID
+                    );
+
+                    if (guildEmoji is not null)
+                    {
+                        return Result<IEmoji>.FromSuccess(guildEmoji);
+                    }
                 }
             }
 
@@ -101,6 +111,32 @@ namespace DIGOS.Ambassador.Discord.TypeReaders
                 > 1 => new ParsingError<IEmoji>(value, "Multiple matching emoji found."),
                 _ => new Emoji(null, regexMatches.First().Value)
             };
+        }
+
+        private bool TryParseEmoji(string input, [NotNullWhen(true)] out IEmoji? emoji)
+        {
+            emoji = null;
+
+            if (input.Length < 2)
+            {
+                return false;
+            }
+
+            input = input[1..^1];
+            var inputParts = input.Split(':', StringSplitOptions.RemoveEmptyEntries);
+
+            if (inputParts.Length != 2)
+            {
+                return false;
+            }
+
+            if (!Snowflake.TryParse(inputParts[1], out var emojiID))
+            {
+                return false;
+            }
+
+            emoji = new Emoji(emojiID, inputParts[0]);
+            return true;
         }
     }
 }
