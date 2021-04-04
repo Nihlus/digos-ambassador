@@ -22,6 +22,7 @@
 
 using System.IO;
 using DIGOS.Ambassador.Plugins.Transformations.Model;
+using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -50,6 +51,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             using var sr = new StreamReader(File.OpenRead(file));
             var builder = new DeserializerBuilder()
                 .WithTypeConverter(new ColourYamlConverter())
+                .WithTypeConverter(new EnumYamlConverter<Pattern>())
+                .WithTypeConverter(new NullableEnumYamlConverter<Pattern>())
                 .WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
                 .WithNamingConvention(UnderscoredNamingConvention.Instance);
 
