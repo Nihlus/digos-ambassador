@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Async;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Plugins.Transformations.Model;
+using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Services;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages;
@@ -185,6 +186,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
             var deserializer = new DeserializerBuilder()
                 .WithTypeConverter(new ColourYamlConverter())
                 .WithTypeConverter(new SpeciesYamlConverter(transformation))
+                .WithTypeConverter(new EnumYamlConverter<Pattern>())
+                .WithTypeConverter(new NullableEnumYamlConverter<Pattern>())
                 .WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
                 .WithNamingConvention(UnderscoredNamingConvention.Instance)
                 .Build();
