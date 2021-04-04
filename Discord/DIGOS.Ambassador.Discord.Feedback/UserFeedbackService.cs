@@ -202,7 +202,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
             var sendResults = new List<IMessage>();
             foreach (var chunk in CreateContentChunks(target, color, contents))
             {
-                var send = await _channelAPI.CreateMessageAsync(channel, embed: new Optional<IEmbed>(chunk), ct: ct);
+                var send = await SendEmbedAsync(channel, chunk, ct);
                 if (!send.IsSuccess)
                 {
                     return Result<IReadOnlyList<IMessage>>.FromError(send);
@@ -222,7 +222,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="color">The color of the embed.</param>
         /// <param name="contents">The complete contents of the message.</param>
         /// <returns>The chunked embeds.</returns>
-        private IEnumerable<IEmbed> CreateContentChunks(Snowflake? target, Color color, string contents)
+        private IEnumerable<Embed> CreateContentChunks(Snowflake? target, Color color, string contents)
         {
             // Sometimes the content is > 2048 in length. We'll chunk it into embeds of 1024 here.
             if (contents.Length < 1024)
