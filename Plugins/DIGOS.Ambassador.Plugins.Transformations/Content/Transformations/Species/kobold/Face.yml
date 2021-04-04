@@ -1,0 +1,9 @@
+part: Face
+species: kobold
+description: "Transforms the target's face into that of a common kobold."
+default_base_colour: "white"
+is_nsfw: false
+shift_message: "{@target} begins to feel an all-over itch, something akin to that of a thousand tiny pin-pricks. {@f|They} feel an urge to scratch, but no amount of it makes the itch go away. The surface gives way to a smooth hide of scales, {@colour} in appearance. The mouth shifts and settles into the shape of a short, defined snout."
+grow_message: "{@target} quickly begins to notice that {@f|their} featureless expression is pushing outward, feeling little bumps push out as {@colour} scales start forming upon {@target}'s face. A short, reptilian snout stretches forward and stops abruptly."
+single_description: "{@f|Their} face bears a short, reptilian snout with {@colour} scales."
+uniform_description: null

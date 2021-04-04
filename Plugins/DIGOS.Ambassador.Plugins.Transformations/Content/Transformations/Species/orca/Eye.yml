@@ -1,0 +1,14 @@
+part: eye
+species: orca
+description: "Transforms the targets eyes into black eyes of an orca."
+default_base_colour: "black"
+default_pattern: "patchy"
+default_pattern_colour: "white"
+is_nsfw: false
+
+shift_message: "{@Target}'s {@side} eye begins to swell, enlarge, as the iris begins to grow and widen. The rest of the colour vanishes as {@colour} takes over tinting the {@side} eye. {f@Their} socket begins to form and shape into that of an orca."
+grow_message: "{@Target} begins to grow a {@side} eye. The iris begins to grow and widen. There's only but a {@colour} iris visible in the eye socket as it keeps growing. {f@Their} {@side} eye begins to form into that of an orca's eye."
+uniform_shift_message: "{@Target}'s eyes begin to swell, enlarge, as the irises begin to grow and widen. The rest of the colour vanishes as {@colour} takes over tinting the eyes. {f@Their} sockets begin to form and shape into those of an orca."
+uniform_grow_message: "{@Target} begins to grow a pair of eyes. The irises begin growing and widen. There's only but a {@colour} iris visible in each eye socket as it keeps swelling. {f@Their} eyes begin to take shape, forming into those of an orca."
+single_description: "{@Target}'s {@side} eye large and seemingly deep like the ocean. The {@colour} iris sparkling like a gem in it's complexity and beauty."
+uniform_description: "{@Target}'s eyes large and seemingly deep like the ocean. The {@colour} irises sparkling like a gem in their complexity and beauty."

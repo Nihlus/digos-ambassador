@@ -1,0 +1,11 @@
+part: Eye
+species: kobold
+description: "Transforms the target's eye into that of a common kobold."
+default_base_colour: "orange"
+is_nsfw: false
+shift_message: "{@target} begins to feel a sharp irritation in {@f|their} {@side} eye, and can't hold back the urge to squint. Slowly, something can be heard cracking, and as {@target} opens their {@side} eye again, it's seen to be slitted, a vibrant {@colour} hue having surrounded and overtaken its appearance. Blinking, a second inner eyelid could be seen closing from a vertical direction. {@target} can see colors in this {@side} eye that {@f|they} never thought possible."
+grow_message: "A crack forms in {@target}'s face, slowly creasing its way open. It reveals to be a {@side} eye of reptilian origin, complete with a second, vertial eyelid. As the eye opens, {@target} is treated to a dazzling array of colors with their newfound eyesight."
+uniform_shift_message: "{@target} begins to feel a sharp irritation in {@f|their} eyes, and can't hold back the urge to squint. Slowly, something can be heard cracking, and as {@target} opens their eyes again, they appear to be slitted, a vibrant {@colour} hue having surrounded and overtaken their appearance. Blinking, a second pair of inner eyelids could be seen closing from a vertical direction. {@target} can see colors in these eyes that {@f|they} never thought possible."
+uniform_grow_message: "Cracks form in {@target}'s face, slowly creasing their way open. They reveal to be eyes of reptilian origin, complete with a second pair of vertial eyelids. As the eyes open, {@target} is treated to a dazzling array of colors with their newfound eyesight."
+single_description: "{@target}'s {@side} eye is slitted and like a reptile, {@colour} in color."
+uniform_description: "{@target}'s eyes are slitted and like a reptile, {@colour} in color."

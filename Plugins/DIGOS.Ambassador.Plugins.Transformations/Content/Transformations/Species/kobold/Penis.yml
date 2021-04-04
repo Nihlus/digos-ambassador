@@ -1,0 +1,9 @@
+part: Penis
+species: kobold
+description: "Transforms the target's penis into that of a common kobold."
+default_base_colour: "soft pink"
+is_nsfw: true
+shift_message: "{@target} begins to feel a surge of arousal, as {@colour} ridges of flesh shift and settle. A thick, reptilian knot adorns the base of {@f|their} new penis, dribbling excitedly before sliding into {@target}'s body. What's left visible is an unassuming slit, but a quick experimental touch summons the knotted length to reappear."
+grow_message: "Sprouting from {@target}'s empty crotch, it initially seems like the thin slit that's opened up suggests that {@target} was given a vagina by mistake. But {@f|they} quickly discover otherwise, as an achingly-sensitive, knotted length rises from inside their body, the {@colour} member dripping eagerly to be tried out."
+single_description: "An innocent-looking slit houses a knotted, {@colour} penis, eager to be used."
+uniform_description: null

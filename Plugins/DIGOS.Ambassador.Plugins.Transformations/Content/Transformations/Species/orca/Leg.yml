@@ -1,0 +1,16 @@
+part: leg
+species: orca
+description: "Transforms the targets legs into strong anthro orca ones."
+default_base_colour: "black"
+default_pattern: "patchy"
+default_pattern_colour: "white"
+is_nsfw: false
+
+shift_message: "{@Target}'s {@side} leg begins to grow. Gaining strong flexible muscles as the leg began to make {@target}'s {@side} taller. {@Colour} smoothness began to cover the skin leaving behind a leathery gloss finish only seen on none other than of an orca."
+grow_message: "{@Target}'s {@side} leg begins to sprout out. Growing strong flexible muscles as the leg began to form and give height to {@target}. {@Colour} smoothness covered the skin, the changes leaving behind a leathery gloss finish only seen on none other than of an orca."
+
+uniform_shift_message: "{@Target}'s legs begin to grow. Gaining strong flexible muscles as they began to make {@target} taller. {@Colour} smoothness began to cover the skin leaving behind a leathery gloss finish only seen on none other than of an orca."
+uniform_grow_message: "{@Target}'s legs begin to sprout out. Growing strong flexible muscles as they began to form and give height to {@target}. {@Colour} smoothness covered the skin, the changes leaving behind a leathery gloss finish only seen on none other than of an orca."
+
+single_description: "{@Target} has a strong powerful {@side} leg. {@f|Their} skin is tough yet smooth in texture and {@colour} in colour. Besides a good show, toned muscles on {@f|their} {@side} allow {@target} to achieve great many things."
+uniform_description: "{@Target} has strong powerful legs. {@f|Their} skin is tough yet smooth in texture and {@colour} in colour. Besides a good show, toned muscles on {@f|their} legs allow {@target} to achieve great many things."

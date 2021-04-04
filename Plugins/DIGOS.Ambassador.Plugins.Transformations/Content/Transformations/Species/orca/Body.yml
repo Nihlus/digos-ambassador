@@ -1,0 +1,12 @@
+part: body
+species: orca
+description: "Transforms the targets body into that of an orca."
+default_base_colour: "black"
+default_pattern: "patchy"
+default_pattern_colour: "white"
+is_nsfw: false
+
+shift_message: "{@Target}'s body starts to change its colour to {@colour}. It begins to bulk up with toned muscles and a powerful frame. From {f@their} back, a {@colour} bump begins to sprout out, growing, shaping, and finally turning itself into a fin. Smooth leather begins to cover {@target}'s skin leaving them a nice {@colour} finish and a {@colour|pattern} belly {@pattern}."
+grow_message: "{@Target} begins to grow, a body starts to shape into place. {@Colour} in colour. It begins to bulk up with toned muscles and a powerful frame. From the newly formed back back, a {@colour} bump begins to sprout out, growing, shaping, and finally turning itself into a fin. Smooth leather accompanies the changes covering {@target}'s skin leaving them a nice leathery {@colour} finish and a {@colour|pattern} belly {@pattern}."
+
+single_description: "{@Target} sports an orca's body. toned muscles from top to bottom, a strong and large frame towering over anyone. {f@Their} skin has a smooth {@colour} leathery feel to it with a {@colour|pattern} belly {@pattern} leaving a pattern on {@target}'s chest and tummy."

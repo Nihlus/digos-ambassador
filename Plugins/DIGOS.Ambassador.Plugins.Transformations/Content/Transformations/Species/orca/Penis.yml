@@ -1,0 +1,12 @@
+part: penis
+species: orca
+description: "Transforms the targets penis into that of an orca's penis."
+default_base_colour: "pink"
+default_pattern: "patchy"
+default_pattern_colour: "white"
+is_nsfw: true
+
+shift_message: "{@Target}'s penis begins to smoothen out. A glossy smooth {@colour} was beginning to replace what was previously there. The shape of it forming more of a tapered flare. It was proportionately large and very soft. It slowly began to sink into {@target}'s body neatly tucking away behind a slit."
+grow_message: "{@Target} began to feel changes in their lower body. A smooth slit was beginning to form down there showing the end of a {@colour}-ish coloured tapered end. forming from within. {@f|they} could feel it, how big, soft and glossy it was in there as well as how much it was packing with it."
+
+single_description: "{@Target} has a smooth {@colour|pattern} slit hiding away a large and tapered {@colour} penis. The muscle like penis is smooth and glossy on touch yet very firm."

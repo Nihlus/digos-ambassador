@@ -1,0 +1,13 @@
+part: tail
+species: orca
+description: "Transforms the targets tail or lack their of into a finned orca tail."
+default_base_colour: "black"
+default_pattern: "patchy"
+default_pattern_colour: "white"
+is_nsfw: false
+
+shift_message: "{@Traget}'s tail beings to shift. Bulking up with toned muscles. It began to grow bigger and thicker. The tail was a smooth and glossy leathery {@colour} with a {colour|pattern} {@pattern} on it's bottom, as the end of the tail flattened out and split into a strong orca's tailfin."
+grow_message: "{@Traget}'s tail beings to grow. Slowly growing out from {@f|their} back and seemingly not stopping. It was a bulky heavy mass growing new bone and strong toned muscles. It began to grow bigger and thicker. The colour of it was a smooth and glossy leathery {@colour} with a {colour|pattern} {@pattern} on its bottom. The end of the tail flattened out and split into a strong orca's tailfin."
+
+single_description: "{@Target} has a strong {@colour} tail. Smooth and leathery with toned muscles allowing {@f|them} to swim well. A {@colour|pattern} {@pattern} decorated their lower half with a strong tailfin, perfect for swimming."
+

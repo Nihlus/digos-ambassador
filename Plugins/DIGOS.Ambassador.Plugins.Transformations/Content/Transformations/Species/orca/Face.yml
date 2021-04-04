@@ -1,0 +1,12 @@
+part: face
+species: orca
+description: "Transforms the targets face into a smooth anthro orca face."
+default_base_colour: "black"
+default_pattern: "patchy"
+default_pattern_colour: "white"
+is_nsfw: false
+
+shift_message: "{@Target}'s head begins to tint {@colour} in colour. {@f|Their} head begins to morph and expand with a smooth leathery feel beginning to replace what was formerly there. Soon {@f|their} head smoothened out leaving {@Target} with a glossy {@colour} coloured head and a {@colour|pattern} chin {@pattern}."
+grow_message: "{@Target}'s head begins to grow. Morphing from {@f|their} body. A {@colour} dome soon gaining pretty gemlike sparkling eyes and a stubby snout, smooth yet hard in texture. {@f|Their} head begins to morph and expand with a leathery feel. Soon {@f|their} head smoothened out leaving {@Target} with a glossy {@colour} coloured head and a {@colour|pattern} chin {@pattern}."
+
+single_description: "{@Target} has an orca's head. Leathery smooth and {@bolour} in colour, with a {@colour|pattern} {@pattern} marking their chin."

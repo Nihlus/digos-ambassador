@@ -1,0 +1,12 @@
+part: vagina
+species: orca
+description: "Transforms the targets sex into that of an orca's."
+default_base_colour: "pink"
+default_pattern: "patchy"
+default_pattern_colour: "white"
+is_nsfw: true
+
+shift_message: "{@Target}'s pussy begins to smoothen with a {@colour|pattern} colour {@pattern} starting to cover {@f|their} folds. Small flaps began to form covering the slit and keeping it covered from the elements."
+grow_message: "{@Target}'s pussy begins to form with a {@colour|pattern} colour {@pattern} covering {@f|their} folds. Small flaps formed covering the slit and keeping {@f|their} entrance protected from the elements."
+
+single_description: "{@Target} has a smooth {@colour|pattern} pussy. {@f|Their} folds are covered by two flaps to protect them from the elements."

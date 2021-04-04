@@ -1,0 +1,11 @@
+part: Arm
+species: kobold
+description: "Transforms the target's arm into that of a common kobold."
+default_base_colour: "white"
+is_nsfw: false
+shift_message: "An unsettling cracking sound begins to erupt from {@target}'s {@side} arm, reshaping and narrowing. Resisting the urge to scratch, {@colour} scales begin expanding out from beneath, settling over the {@side} arm from shoulder to fingertips. And speaking of fingertips, small claws shape at the nails, pushing inward and becoming like the very tips of {@target}'s digits."
+grow_message: "A rush of {@colour} scales and leathery hide erupts from {@target}'s {@side} shoulder, quickly becoming a brand new arm. {@f|Their} fingers end in a set of small, sharp claws."
+uniform_shift_message: "An unsettling cracking sound begins to erupt from {@target}'s arms, reshaping and narrowing. Resisting the urge to scratch, {@colour} scales begin expanding out from beneath, settling over the arms from shoulders to fingertips. And speaking of fingertips, small claws shape at the nails, pushing inward and becoming like the very tips of {@target}'s digits."
+uniform_grow_message: "A rush of {@colour} scales and leathery hide erupts from {@target}'s shoulders, quickly becoming a pair of brand new arms. {@f|Their} fingers end in a set of small, sharp claws."
+single_description: "{@f|Their} {@side} arm is covered in {@colour} scales, fingers tipped off with sharply-clawed digits."
+uniform_description: "{@f|Their} arms are covered in {@colour} scales, fingers tipped off with sharply-clawed digits."

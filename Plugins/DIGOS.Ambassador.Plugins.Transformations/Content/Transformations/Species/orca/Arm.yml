@@ -1,0 +1,14 @@
+part: Arm
+species: orca
+description: "Transforms the target's arm into that of an anthro orca."
+default_base_colour: "black"
+default_pattern: "patchy"
+default_pattern_colour: "white"
+is_nsfw: false
+
+shift_message: "{@target}'s {@side} arm starts to turn leathery smooth. {@colour} tint begins to darken the skin as {@f|their} arm slightly thickens, {@f|their} bones become light, yet strong and powerful, growing with each passing moment. As time passes {@target}'s {@side} arm turns completely {@colour}, it weighs heavy yet feels like it could take on the world."
+grow_message: "{@target}'s {@side} arm begins to grow. A {@colour} leathery limb begins to sprout out building muscle and bone density. Not long before {@target}'s limb resembled an arm heavy and large. Feeling powerful and very much smooth."
+uniform_shift_message: "{@Target}'s arms start to turn leathery smooth. {@colour} tint begins to darken the skin as {@f|their} arms slightly thicken, {@f|their} bones become light, yet strong and powerful, growing with each passing moment. As time passes {@target}'s arms turn completely {@colour}, they weigh heavy on the shoulders yet feel like they could take on the world."
+uniform_grow_message: "{@Target}'s arms begins to grow. {@colour} leathery lumps begin to sprout out from {f@their} sides building muscle and bone density. Not long before {@target}'s limbs resembled arms heavy and large. Feeling powerful and very much smooth and dense."
+single_description: "{@f|They have} a strong-orca like {@side} arm. Smooth {@colour} leather covering dense and toned muscle. Thick and strong fingers allowing for a firm grip."
+uniform_description: "{@f|They have} strong orca-like arms. Smooth {@colour} leather covering dense and toned muscles. Thick and strong fingers allowing for a firm grip."

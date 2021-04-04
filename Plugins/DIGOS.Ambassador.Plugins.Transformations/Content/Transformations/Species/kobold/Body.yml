@@ -1,0 +1,9 @@
+part: Body
+species: kobold
+description: "Transforms the target's body into that of a common kobold."
+default_base_colour: "white"
+is_nsfw: false
+shift_message: "{@target} feels a sudden tightening sensation emanating from {@f|their} chest. As it spreads out, it seems to compress, and it's as if the world around begins to feel just a bit bigger. Small {@colour} scales begin spreading across, front to back, interlacing and resulting in a smooth texture."
+grow_message: "From {@target}'s featureless chest, {@colour} scales begin to form, shaping the blank canvas into a wealth of defined details."
+single_description: "{@f|Their} chest is covered in smooth {@colour} scales, small and lizard-like."
+uniform_description: null
