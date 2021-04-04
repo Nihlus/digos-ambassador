@@ -37,6 +37,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         Swirly,
         Checkered,
         Splotchy,
+        Patchy,
         Banded,
     }
 }
