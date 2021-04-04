@@ -24,6 +24,7 @@ using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Feedback.Services;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Tests.TestBases;
@@ -32,6 +33,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.Commands.Services;
 using Xunit;
 
 #pragma warning disable SA1648
@@ -61,14 +63,18 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
 
             var channelAPIMock = new Mock<IDiscordRestChannelAPI>();
             var userAPIMock = new Mock<IDiscordRestUserAPI>();
+            var webhookAPIMock = new Mock<IDiscordRestWebhookAPI>();
 
             serviceCollection
                 .AddSingleton(FileSystemFactory.CreateContentFileSystem())
                 .AddScoped<ContentService>()
                 .AddScoped<UserFeedbackService>()
                 .AddScoped<PrivacyService>()
+                .AddScoped<ContextInjectionService>()
+                .AddSingleton<IdentityInformationService>()
                 .AddSingleton(channelAPIMock.Object)
                 .AddSingleton(userAPIMock.Object)
+                .AddSingleton(webhookAPIMock.Object)
                 .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
         }
 
