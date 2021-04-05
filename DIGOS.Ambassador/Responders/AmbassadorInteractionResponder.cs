@@ -21,7 +21,6 @@
 //
 
 using System;
-using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -29,7 +28,6 @@ using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Discord.Feedback.Services;
-using DIGOS.Ambassador.Plugins.Core.Services;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using JetBrains.Annotations;
 using Remora.Commands.Results;
