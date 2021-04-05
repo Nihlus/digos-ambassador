@@ -28,6 +28,7 @@ using System.Transactions;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Discord.Feedback.Results;
+using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Options;
 using Remora.Commands.Results;
@@ -57,6 +58,7 @@ namespace DIGOS.Ambassador.Responders
         private readonly IServiceProvider _services;
         private readonly UserFeedbackService _userFeedback;
         private readonly ContextInjectionService _contextInjection;
+        private readonly PrivacyService _privacy;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AmbassadorCommandResponder"/> class.
@@ -67,6 +69,7 @@ namespace DIGOS.Ambassador.Responders
         /// <param name="services">The available services.</param>
         /// <param name="userFeedback">The user feedback service.</param>
         /// <param name="contextInjection">The context injection service.</param>
+        /// <param name="privacy">The privacy service.</param>
         public AmbassadorCommandResponder
         (
             CommandService commandService,
@@ -74,13 +77,15 @@ namespace DIGOS.Ambassador.Responders
             ExecutionEventCollectorService eventCollector,
             IServiceProvider services,
             UserFeedbackService userFeedback,
-            ContextInjectionService contextInjection
+            ContextInjectionService contextInjection,
+            PrivacyService privacy
         )
         {
             _commandService = commandService;
             _services = services;
             _userFeedback = userFeedback;
             _contextInjection = contextInjection;
+            _privacy = privacy;
             _eventCollector = eventCollector;
             _options = options.Value;
         }
@@ -150,6 +155,7 @@ namespace DIGOS.Ambassador.Responders
                 )
             );
 
+            _contextInjection.Context = context;
             return await RelayResultToUserAsync
             (
                 context,
@@ -207,6 +213,7 @@ namespace DIGOS.Ambassador.Responders
                 gatewayEvent
             );
 
+            _contextInjection.Context = context;
             return await RelayResultToUserAsync
             (
                 context,
@@ -222,9 +229,20 @@ namespace DIGOS.Ambassador.Responders
             CancellationToken ct = default
         )
         {
-            _contextInjection.Context = commandContext;
-
             using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            // First of all, check user consent
+            var hasConsented = await _privacy.HasUserConsentedAsync(commandContext.User.ID, ct);
+            if (!hasConsented)
+            {
+                var requestConsent = await _privacy.RequestConsentAsync(commandContext.User.ID, ct);
+                if (!requestConsent.IsSuccess)
+                {
+                    return requestConsent;
+                }
+
+                return Result.FromSuccess();
+            }
 
             // Strip off the prefix
             if (_options.Prefix is not null)

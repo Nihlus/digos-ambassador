@@ -30,6 +30,7 @@ using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Discord.Feedback.Services;
 using DIGOS.Ambassador.Plugins.Core.Services;
+using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using JetBrains.Annotations;
 using Remora.Commands.Results;
 using Remora.Commands.Services;
@@ -61,6 +62,7 @@ namespace DIGOS.Ambassador.Responders
         private readonly IDiscordRestWebhookAPI _webhookAPI;
         private readonly IdentityInformationService _identityInformation;
         private readonly ContextInjectionService _contextInjection;
+        private readonly PrivacyService _privacy;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AmbassadorInteractionResponder"/> class.
@@ -73,6 +75,7 @@ namespace DIGOS.Ambassador.Responders
         /// <param name="webhookAPI">The webhook API.</param>
         /// <param name="identityInformation">The identity information.</param>
         /// <param name="contextInjection">The context injection service.</param>
+        /// <param name="privacy">The privacy service.</param>
         public AmbassadorInteractionResponder
         (
             CommandService commandService,
@@ -82,7 +85,8 @@ namespace DIGOS.Ambassador.Responders
             UserFeedbackService userFeedback,
             IDiscordRestWebhookAPI webhookAPI,
             IdentityInformationService identityInformation,
-            ContextInjectionService contextInjection
+            ContextInjectionService contextInjection,
+            PrivacyService privacy
         )
         {
             _commandService = commandService;
@@ -93,6 +97,7 @@ namespace DIGOS.Ambassador.Responders
             _webhookAPI = webhookAPI;
             _identityInformation = identityInformation;
             _contextInjection = contextInjection;
+            _privacy = privacy;
         }
 
         /// <inheritdoc />
@@ -162,7 +167,6 @@ namespace DIGOS.Ambassador.Responders
             );
 
             _contextInjection.Context = context;
-
             return await RelayResultToUserAsync
             (
                 context,
@@ -179,6 +183,20 @@ namespace DIGOS.Ambassador.Responders
         )
         {
             using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            // First of all, check user consent
+            var hasConsented = await _privacy.HasUserConsentedAsync(context.User.ID, ct);
+            if (!hasConsented)
+            {
+                var requestConsent = await _privacy.RequestConsentAsync(context.User.ID, ct);
+                if (!requestConsent.IsSuccess)
+                {
+                    return requestConsent;
+                }
+
+                return Result.FromSuccess();
+            }
+
             data.UnpackInteraction(out var command, out var parameters);
 
             // Run any user-provided pre execution events

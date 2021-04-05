@@ -105,19 +105,25 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
             };
 
             var openDM = await _userAPI.CreateDMAsync(discordUser, ct);
-            if (!openDM.IsSuccess)
+            if (openDM.IsSuccess)
             {
-                return Result.FromError(openDM);
+                var channel = openDM.Entity;
+                var sendMessage = await _channelAPI.CreateMessageAsync(channel.ID, embed: embed, ct: ct);
+                if (sendMessage.IsSuccess)
+                {
+                    return await SendPrivacyPolicyAsync(channel.ID, ct);
+                }
             }
 
-            var channel = openDM.Entity;
-            var sendMessage = await _channelAPI.CreateMessageAsync(channel.ID, embed: embed, ct: ct);
-            if (!sendMessage.IsSuccess)
-            {
-                return Result.FromError(sendMessage);
-            }
+            var warningMessage = "I was unable to send you some initial privacy policy information for " +
+                                 "first-time users of the bot. In order to use the bot, please read the " +
+                                 "privacy policy (which can be requested by running the `!privacy policy` command) " +
+                                 "and agree to it by sending `!privacy grant-consent` to the bot over DM.";
 
-            return await SendPrivacyPolicyAsync(channel.ID, ct);
+            var sendWarning = await _feedback.SendContextualWarningAsync(discordUser, warningMessage, ct);
+            return !sendWarning.IsSuccess
+                ? Result.FromError(sendWarning)
+                : Result.FromSuccess();
         }
 
         /// <summary>
