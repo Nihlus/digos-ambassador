@@ -148,7 +148,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                             ? "open to everyone"
                             : "restricted";
 
-                        var name = $"{guildRole?.Name ?? "???"} ({r.DiscordID} - this role appears to be deleted.)";
+                        string name = guildRole is null
+                            ? $"??? ({r.DiscordID} - this role appears to be deleted.)"
+                            : $"{guildRole.Name} ({r.DiscordID})";
+
                         var value = $"*This role is {roleStatus}.*";
 
                         return new EmbedField(name, value);
