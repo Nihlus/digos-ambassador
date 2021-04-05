@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="RIDER_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$USER_HOME$/.nuget/packages/keralua/1.2.12/runtimes/linux-x64/native/liblua54.so" />
+    <content url="file://$USER_HOME$/.nuget/packages/keralua/1.2.12/runtimes/osx/native/liblua54.dylib" />
+    <content url="file://$USER_HOME$/.nuget/packages/keralua/1.2.12/runtimes/win-x64/native/lua54.dll" />
+    <content url="file://$USER_HOME$/.nuget/packages/keralua/1.2.12/runtimes/win-x86/native/lua54.dll" />
+    <content url="file://$USER_HOME$/.nuget/packages/microsoft.net.test.sdk/16.9.4/build/netcoreapp2.1" />
+    <content url="file://$USER_HOME$/.nuget/packages/microsoft.testplatform.testhost/16.9.4/build/netcoreapp2.1/Microsoft.TestPlatform.PlatformAbstractions.dll" />
+    <content url="file://$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.4.3/build/netcoreapp2.1/xunit.runner.reporters.netcoreapp10.dll" />
+    <content url="file://$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.4.3/build/netcoreapp2.1/xunit.runner.utility.netcoreapp10.dll" />
+    <content url="file://$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.4.3/build/netcoreapp2.1/xunit.runner.visualstudio.dotnetcore.testadapter.dll" />
+    <content url="file://$MODULE_DIR$/../.." />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>

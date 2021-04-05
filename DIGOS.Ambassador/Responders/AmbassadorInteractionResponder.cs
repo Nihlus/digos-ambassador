@@ -156,7 +156,9 @@ namespace DIGOS.Ambassador.Responders
                 user,
                 gatewayEvent.Member,
                 gatewayEvent.Token,
-                gatewayEvent.ID
+                gatewayEvent.ID,
+                gatewayEvent.ApplicationID,
+                gatewayEvent.Data.Value.Resolved
             );
 
             _contextInjection.Context = context;
