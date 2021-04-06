@@ -73,47 +73,56 @@ namespace DIGOS.Ambassador.Discord.TypeReaders
         /// <inheritdoc />
         public override async ValueTask<Result<IEmoji>> TryParse(string value, CancellationToken ct)
         {
-            if (TryParseEmoji(value, out var parsedEmoji))
+            var regexMatches = EmojiRegex.Matches(value);
+            if (regexMatches.Count != 0)
             {
-                var getChannel = await _channelAPI.GetChannelAsync(_context.ChannelID, ct);
-                if (!getChannel.IsSuccess)
+                return regexMatches.Count switch
                 {
-                    return Result<IEmoji>.FromError(getChannel);
-                }
-
-                var channel = getChannel.Entity;
-                if (channel.GuildID.HasValue)
-                {
-                    var getGuild = await _guildAPI.GetGuildAsync(channel.GuildID.Value, ct: ct);
-                    if (!getGuild.IsSuccess)
-                    {
-                        return Result<IEmoji>.FromError(getGuild);
-                    }
-
-                    var guild = getGuild.Entity;
-
-                    var guildEmoji = guild.Emojis.FirstOrDefault
-                    (
-                        e => e.Name == parsedEmoji.Name && e.ID == parsedEmoji.ID
-                    );
-
-                    if (guildEmoji is not null)
-                    {
-                        return Result<IEmoji>.FromSuccess(guildEmoji);
-                    }
-
-                    // Probably an external emoji - it's not great, but it's the best we can do.
-                    return Result<IEmoji>.FromSuccess(parsedEmoji);
-                }
+                    < 1 => new ParsingError<IEmoji>(value, "No matching emoji found."),
+                    > 1 => new ParsingError<IEmoji>(value, "Multiple matching emoji found."),
+                    _ => new Emoji(null, regexMatches.First().Value)
+                };
             }
 
-            var regexMatches = EmojiRegex.Matches(value);
-            return regexMatches.Count switch
+            var getChannel = await _channelAPI.GetChannelAsync(_context.ChannelID, ct);
+            if (!getChannel.IsSuccess)
             {
-                < 1 => new ParsingError<IEmoji>(value, "No matching emoji found."),
-                > 1 => new ParsingError<IEmoji>(value, "Multiple matching emoji found."),
-                _ => new Emoji(null, regexMatches.First().Value)
-            };
+                return Result<IEmoji>.FromError(getChannel);
+            }
+
+            var channel = getChannel.Entity;
+            if (!channel.GuildID.HasValue)
+            {
+                return new ParsingError<IEmoji>(value, "No matching emoji found.");
+            }
+
+            var getGuild = await _guildAPI.GetGuildAsync(channel.GuildID.Value, ct: ct);
+            if (!getGuild.IsSuccess)
+            {
+                return Result<IEmoji>.FromError(getGuild);
+            }
+
+            var guild = getGuild.Entity;
+
+            IEmoji? guildEmoji;
+            if (TryParseEmoji(value, out var parsedEmoji))
+            {
+                guildEmoji = guild.Emojis.FirstOrDefault
+                (
+                    e => e.Name == parsedEmoji.Name && e.ID == parsedEmoji.ID
+                );
+            }
+            else
+            {
+                guildEmoji = guild.Emojis.FirstOrDefault
+                (
+                    e => e.Name == value
+                );
+            }
+
+            return guildEmoji is not null
+                ? Result<IEmoji>.FromSuccess(guildEmoji)
+                : new ParsingError<IEmoji>(value, "No matching emoji found.");
         }
 
         private bool TryParseEmoji(string input, [NotNullWhen(true)] out IEmoji? emoji)
@@ -128,17 +137,17 @@ namespace DIGOS.Ambassador.Discord.TypeReaders
             input = input[1..^1];
             var inputParts = input.Split(':', StringSplitOptions.RemoveEmptyEntries);
 
-            if (inputParts.Length != 2)
+            if (inputParts.Length is < 2 or > 3)
             {
                 return false;
             }
 
-            if (!Snowflake.TryParse(inputParts[1], out var emojiID))
+            if (!Snowflake.TryParse(inputParts[^1], out var emojiID))
             {
                 return false;
             }
 
-            emoji = new Emoji(emojiID, inputParts[0]);
+            emoji = new Emoji(emojiID, inputParts[^2], IsAnimated: inputParts.Length == 3 && inputParts[0] == "a");
             return true;
         }
     }
