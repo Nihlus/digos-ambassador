@@ -101,6 +101,9 @@ namespace DIGOS.Ambassador.Discord.TypeReaders
                     {
                         return Result<IEmoji>.FromSuccess(guildEmoji);
                     }
+
+                    // Probably an external emoji - it's not great, but it's the best we can do.
+                    return Result<IEmoji>.FromSuccess(parsedEmoji);
                 }
             }
 
