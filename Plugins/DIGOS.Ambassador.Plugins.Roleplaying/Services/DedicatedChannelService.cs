@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback.Errors;
@@ -189,13 +190,28 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             bool isVisible
         )
         {
-            var userPermissions = new DiscordPermissionSet(SendMessages, AddReactions);
+            var createPermissions = await CreateUpdatedAllowDenyValuesAsync
+            (
+                channelID,
+                userID,
+                isVisible,
+                SendMessages,
+                AddReactions
+            );
+
+            if (!createPermissions.IsSuccess)
+            {
+                return Result.FromError(createPermissions);
+            }
+
+            var (allow, deny) = createPermissions.Entity;
+
             return await _channelAPI.EditChannelPermissionsAsync
             (
                 channelID,
                 userID,
-                isVisible ? userPermissions : default,
-                isVisible ? default : userPermissions,
+                allow,
+                deny,
                 PermissionOverwriteType.Member
             );
         }
@@ -214,15 +230,89 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             bool isVisible
         )
         {
-            var userPermissions = new DiscordPermissionSet(ReadMessageHistory, ViewChannel);
+            var createPermissions = await CreateUpdatedAllowDenyValuesAsync
+            (
+                channelID,
+                userID,
+                isVisible,
+                ReadMessageHistory,
+                ViewChannel
+            );
+
+            if (!createPermissions.IsSuccess)
+            {
+                return Result.FromError(createPermissions);
+            }
+
+            var (allow, deny) = createPermissions.Entity;
+
             return await _channelAPI.EditChannelPermissionsAsync
             (
                 channelID,
                 userID,
-                isVisible ? userPermissions : default,
-                isVisible ? default : userPermissions,
+                allow,
+                deny,
                 PermissionOverwriteType.Member
             );
+        }
+
+        private async Task<Result<(DiscordPermissionSet Allow, DiscordPermissionSet Deny)>> CreateUpdatedAllowDenyValuesAsync
+        (
+            Snowflake channelID,
+            Snowflake userID,
+            bool addPermissions,
+            params DiscordPermission[] permissions
+        )
+        {
+            var getChannel = await _channelAPI.GetChannelAsync(channelID);
+            if (!getChannel.IsSuccess)
+            {
+                return Result<(DiscordPermissionSet Allow, DiscordPermissionSet Deny)>.FromError(getChannel);
+            }
+
+            var channel = getChannel.Entity;
+
+            var existingAllow = BigInteger.Zero;
+            var existingDeny = BigInteger.Zero;
+            if (channel.PermissionOverwrites.HasValue)
+            {
+                var overwrites = channel.PermissionOverwrites.Value;
+                var relevantOverwrite = overwrites.FirstOrDefault(o => o.ID == userID);
+                if (relevantOverwrite is not null)
+                {
+                    existingAllow = relevantOverwrite.Allow.Value;
+                    existingDeny = relevantOverwrite.Deny.Value;
+                }
+            }
+
+            DiscordPermissionSet newAllow;
+            DiscordPermissionSet newDeny;
+            if (addPermissions)
+            {
+                newAllow = new DiscordPermissionSet
+                (
+                    existingAllow | new DiscordPermissionSet(permissions).Value
+                );
+
+                newDeny = new DiscordPermissionSet
+                (
+                    existingDeny & ~new DiscordPermissionSet(permissions).Value
+                );
+            }
+            else
+            {
+                newAllow = new DiscordPermissionSet
+                (
+                    existingAllow & ~new DiscordPermissionSet(ReadMessageHistory, ViewChannel).Value
+                );
+
+                newDeny = new DiscordPermissionSet
+                (
+                    existingDeny | new DiscordPermissionSet(ReadMessageHistory, ViewChannel).Value
+                );
+            }
+
+            return (newAllow, newDeny);
         }
 
         /// <summary>
@@ -271,31 +361,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             }
 
             return roleplay.DedicatedChannelID.Value;
-        }
-
-        /// <summary>
-        /// Sets the visibility of the given dedicated channel for the given user.
-        /// </summary>
-        /// <param name="channelID">The roleplay's dedicated channel.</param>
-        /// <param name="roleID">The role to grant access to.</param>
-        /// <param name="isVisible">Whether or not the channel should be visible.</param>
-        /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<Result> SetChannelVisibilityForRoleAsync
-        (
-            Snowflake channelID,
-            Snowflake roleID,
-            bool isVisible
-        )
-        {
-            var userPermissions = new DiscordPermissionSet(ReadMessageHistory, ViewChannel);
-            return await _channelAPI.EditChannelPermissionsAsync
-            (
-                channelID,
-                roleID,
-                isVisible ? userPermissions : default,
-                isVisible ? default : userPermissions,
-                PermissionOverwriteType.Role
-            );
         }
 
         /// <summary>
