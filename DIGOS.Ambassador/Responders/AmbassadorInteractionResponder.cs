@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -28,8 +29,10 @@ using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Discord.Feedback.Services;
+using DIGOS.Ambassador.Plugins.Core.Attributes;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using JetBrains.Annotations;
+using Remora.Commands.Extensions;
 using Remora.Commands.Results;
 using Remora.Commands.Services;
 using Remora.Commands.Trees;
@@ -181,10 +184,19 @@ namespace DIGOS.Ambassador.Responders
         )
         {
             using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+            data.UnpackInteraction(out var command, out var parameters);
 
             // First of all, check user consent
             var hasConsented = await _privacy.HasUserConsentedAsync(context.User.ID, ct);
-            if (!hasConsented)
+
+            var potentialCommands = _commandService.Tree.Search(command, parameters).ToList();
+            var atLeastOneRequiresConsent = potentialCommands.Any
+            (
+                c =>
+                    c.Node.CommandMethod.GetCustomAttribute<PrivacyExemptAttribute>() is null
+            );
+
+            if (!hasConsented && atLeastOneRequiresConsent)
             {
                 var requestConsent = await _privacy.RequestConsentAsync(context.User.ID, ct);
                 if (!requestConsent.IsSuccess)
@@ -194,8 +206,6 @@ namespace DIGOS.Ambassador.Responders
 
                 return Result.FromSuccess();
             }
-
-            data.UnpackInteraction(out var command, out var parameters);
 
             // Run any user-provided pre execution events
             var preExecution = await _eventCollector.RunPreExecutionEvents(context, ct);

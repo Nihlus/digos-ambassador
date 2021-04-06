@@ -22,12 +22,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Discord.Feedback.Results;
+using DIGOS.Ambassador.Plugins.Core.Attributes;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Options;
@@ -231,9 +234,26 @@ namespace DIGOS.Ambassador.Responders
         {
             using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
+            // Strip off the prefix
+            if (_options.Prefix is not null)
+            {
+                content = content
+                [
+                    (content.IndexOf(_options.Prefix, StringComparison.Ordinal) + _options.Prefix.Length)..
+                ];
+            }
+
             // First of all, check user consent
             var hasConsented = await _privacy.HasUserConsentedAsync(commandContext.User.ID, ct);
-            if (!hasConsented)
+
+            var potentialCommands = _commandService.Tree.Search(content).ToList();
+            var atLeastOneRequiresConsent = potentialCommands.Any
+            (
+                c =>
+                c.Node.CommandMethod.GetCustomAttribute<PrivacyExemptAttribute>() is null
+            );
+
+            if (!hasConsented && atLeastOneRequiresConsent)
             {
                 var requestConsent = await _privacy.RequestConsentAsync(commandContext.User.ID, ct);
                 if (!requestConsent.IsSuccess)
@@ -242,15 +262,6 @@ namespace DIGOS.Ambassador.Responders
                 }
 
                 return Result.FromSuccess();
-            }
-
-            // Strip off the prefix
-            if (_options.Prefix is not null)
-            {
-                content = content
-                [
-                    (content.IndexOf(_options.Prefix, StringComparison.Ordinal) + _options.Prefix.Length)..
-                ];
             }
 
             // Run any user-provided pre execution events
