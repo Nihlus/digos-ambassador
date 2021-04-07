@@ -26,6 +26,7 @@ using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
 using Remora.Commands.Parsers;
 using Remora.Commands.Results;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Core;
 using Remora.Results;
 
@@ -50,7 +51,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Parsers
         /// <inheritdoc />
         public override async ValueTask<Result<AutoroleConfiguration>> TryParse(string value, CancellationToken ct)
         {
-            if (!Snowflake.TryParse(value, out var roleID))
+            if (!Snowflake.TryParse(value.Unmention(), out var roleID))
             {
                 return new ParsingError<AutoroleConfiguration>(value);
             }
