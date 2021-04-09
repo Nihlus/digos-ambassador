@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Drawing;
 using System.Linq;
 using System.Threading;
@@ -48,6 +49,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
         private readonly IdentityInformationService _identityInformation;
         private readonly IDiscordRestGuildAPI _guildAPI;
+        private readonly IDiscordRestAuditLogAPI _auditLogAPI;
+        private readonly IDiscordRestUserAPI _userAPI;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelLoggingService"/> class.
@@ -57,13 +60,17 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="quotes">The quote service.</param>
         /// <param name="identityInformation">The identity information service.</param>
         /// <param name="guildAPI">The guild API.</param>
+        /// <param name="auditLogAPI">The audit log API.</param>
+        /// <param name="userAPI">The user API.</param>
         public ChannelLoggingService
         (
             ModerationService moderation,
             UserFeedbackService feedback,
             QuoteService quotes,
             IdentityInformationService identityInformation,
-            IDiscordRestGuildAPI guildAPI
+            IDiscordRestGuildAPI guildAPI,
+            IDiscordRestAuditLogAPI auditLogAPI,
+            IDiscordRestUserAPI userAPI
         )
         {
             _moderation = moderation;
@@ -71,6 +78,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             _quotes = quotes;
             _identityInformation = identityInformation;
             _guildAPI = guildAPI;
+            _auditLogAPI = auditLogAPI;
+            _userAPI = userAPI;
         }
 
         /// <summary>
@@ -428,7 +437,20 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             var extra = string.Empty;
             if (botPermissions.HasPermission(DiscordPermission.ViewAuditLog))
             {
-                var mostProbableDeleter = await FindMostProbableDeleterAsync(message);
+                var getMostProbableDeleter = await FindMostProbableDeleterAsync(message);
+                if (!getMostProbableDeleter.IsSuccess)
+                {
+                    return Result.FromError(getMostProbableDeleter);
+                }
+
+                var userID = getMostProbableDeleter.Entity;
+                var getUser = await _userAPI.GetUserAsync(userID);
+                if (!getUser.IsSuccess)
+                {
+                    return Result.FromError(getUser);
+                }
+
+                var mostProbableDeleter = getUser.Entity;
 
                 var isNonUserDeleter = (mostProbableDeleter.IsBot.HasValue && mostProbableDeleter.IsBot.Value) ||
                                        (mostProbableDeleter.IsSystem.HasValue && mostProbableDeleter.IsSystem.Value);
@@ -436,7 +458,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                 // We don't care about bot deletions
                 if (!isNonUserDeleter)
                 {
-                    extra = $" by <@{mostProbableDeleter.ID}>";
+                    extra = $" (probably) by <@{mostProbableDeleter.ID}>";
                 }
             }
 
@@ -506,34 +528,83 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         }
 
         // ReSharper disable once UnusedParameter.Local
-        private Task<IUser> FindMostProbableDeleterAsync(IMessage message)
+        private async Task<Result<Snowflake>> FindMostProbableDeleterAsync(IMessage message)
         {
-            // TODO: Wait for a hotfix from Discord.NET
-            /*
-            bool AreDateTimeOffsetsCloseEnough(DateTimeOffset first, DateTimeOffset second)
+            if (!message.GuildID.HasValue)
             {
-                return (first - second) < TimeSpan.FromSeconds(5);
+                return message.Author.ID;
             }
 
-            var deletionTime = DateTimeOffset.UtcNow;
+            var now = Snowflake.CreateTimestampSnowflake();
+            var before = now;
+            var after = message.ID;
 
-            var auditLogs = await channel.Guild.GetAuditLogsAsync();
-            var deletionEntry = auditLogs.FirstOrDefault
-            (
-                e => e.Data is MessageDeleteAuditLogData deleteAuditLogData &&
-                     deleteAuditLogData.AuthorId == message.Author.Id &&
-                     deleteAuditLogData.ChannelId == message.Channel.Id
-                     && AreDateTimeOffsetsCloseEnough(deletionTime, e.CreatedAt)
-            );
-
-            if (!(deletionEntry is null))
+            while (true)
             {
-                return deletionEntry.User;
+                var getAuditLogEntries = await _auditLogAPI.GetAuditLogAsync
+                (
+                    message.GuildID.Value,
+                    actionType: AuditLogEvent.MessageDelete,
+                    before: before
+                );
+
+                if (!getAuditLogEntries.IsSuccess)
+                {
+                    return Result<Snowflake>.FromError(getAuditLogEntries);
+                }
+
+                var entries = getAuditLogEntries.Entity;
+                if (entries.AuditLogEntries.Count == 0)
+                {
+                    break;
+                }
+
+                var match = entries.AuditLogEntries.OrderByDescending(i => i.ID.Timestamp).FirstOrDefault
+                (
+                    e =>
+                    {
+                        if (!e.Options.HasValue)
+                        {
+                            return false;
+                        }
+
+                        var options = e.Options.Value;
+                        if (!options.ChannelID.HasValue)
+                        {
+                            return false;
+                        }
+
+                        var channel = options.ChannelID.Value;
+                        if (channel != message.ChannelID)
+                        {
+                            return false;
+                        }
+
+                        // Discard entries that are unreasonably old
+                        if (now.Timestamp - e.ID.Timestamp > TimeSpan.FromMinutes(1))
+                        {
+                            return false;
+                        }
+
+                        return e.TargetID == message.Author.ID.ToString();
+                    }
+                );
+
+                if (match is not null)
+                {
+                    return match.UserID;
+                }
+
+                before = entries.AuditLogEntries.OrderBy(i => i.ID.Timestamp).First().ID;
+                if (before.Timestamp < after.Timestamp)
+                {
+                    // No more entries that are relevant
+                    break;
+                }
             }
-            */
 
             // No audit entries are generated when the user deletes a message themselves
-            return Task.FromResult(message.Author);
+            return message.Author.ID;
         }
     }
 }
