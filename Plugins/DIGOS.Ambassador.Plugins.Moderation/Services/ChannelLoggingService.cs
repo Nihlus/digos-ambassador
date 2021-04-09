@@ -442,7 +442,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             eb = eb with
             {
-                Description = $"A message was deleted from <#{channel}>{extra}."
+                Description = $"A message was deleted from <#{message.ChannelID}>{extra}."
             };
 
             var quote = _quotes.CreateMessageQuote(message, _identityInformation.ID);
