@@ -590,9 +590,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                     }
                 );
 
-                if (match is not null)
+                if (match?.UserID != null)
                 {
-                    return match.UserID;
+                    return match.UserID.Value;
                 }
 
                 before = entries.AuditLogEntries.OrderBy(i => i.ID.Timestamp).First().ID;
