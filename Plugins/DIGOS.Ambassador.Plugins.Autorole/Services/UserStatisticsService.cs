@@ -141,6 +141,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             var server = getServer.Entity;
+            server = _database.NormalizeReference(server);
 
             var newServerStatistics = _database.CreateProxy<UserServerStatistics>(server);
 

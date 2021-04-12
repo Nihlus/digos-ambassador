@@ -38,6 +38,7 @@ using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;
@@ -117,7 +118,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Description("Deletes an existing autorole configuration for the given Discord role.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(DeleteAutorole), PermissionTarget.Self)]
-        public async Task<Result<UserMessage>> DeleteAutoroleAsync(AutoroleConfiguration autorole)
+        public async Task<Result<UserMessage>> DeleteAutoroleAsync
+        (
+            [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole
+        )
         {
             var deleteAutorole = await _autoroles.DeleteAutoroleAsync(autorole);
             return !deleteAutorole.IsSuccess
@@ -134,7 +138,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Description("Enables the given autorole, allowing it to be added to users.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-        public async Task<Result<UserMessage>> EnableAutoroleAsync(AutoroleConfiguration autorole)
+        public async Task<Result<UserMessage>> EnableAutoroleAsync
+        (
+            [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole
+        )
         {
             var enableAutorole = await _autoroles.EnableAutoroleAsync(autorole);
 
@@ -152,7 +159,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Description("Disables the given autorole, preventing it from being added to users.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-        public async Task<Result<UserMessage>> DisableAutoroleAsync(AutoroleConfiguration autorole)
+        public async Task<Result<UserMessage>> DisableAutoroleAsync
+        (
+            [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole
+        )
         {
             var disableAutorole = await _autoroles.DisableAutoroleAsync(autorole);
 
@@ -170,7 +180,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Description("Show the settings for the given autorole.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(ViewAutorole), PermissionTarget.Self)]
-        public async Task<Result> ShowAutoroleAsync(AutoroleConfiguration autorole)
+        public async Task<Result> ShowAutoroleAsync
+        (
+            [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole
+        )
         {
             var embedFields = new List<IEmbedField>();
             var embed = _feedback.CreateEmbedBase() with
@@ -262,7 +275,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [RequirePermission(typeof(AffirmDenyAutorole), PermissionTarget.All)]
         public async Task<Result<UserMessage>> AffirmAutoroleForUserAsync
         (
-            AutoroleConfiguration autorole,
+            [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole,
             IUser user
         )
         {
@@ -282,7 +295,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Description("Confirms all currently qualifying users for the given autorole.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(AffirmDenyAutorole), PermissionTarget.All)]
-        public async Task<Result<UserMessage>> AffirmAutoroleForAllAsync(AutoroleConfiguration autorole)
+        public async Task<Result<UserMessage>> AffirmAutoroleForAllAsync
+        (
+            [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole
+        )
         {
             var affirmResult = await _autoroles.AffirmAutoroleForAllAsync(autorole);
 
@@ -303,7 +319,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [RequirePermission(typeof(AffirmDenyAutorole), PermissionTarget.Self)]
         public async Task<Result<UserMessage>> DenyAutoroleForUserAsync
         (
-            AutoroleConfiguration autorole,
+            [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole,
             IUser user
         )
         {
@@ -326,7 +342,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
         public async Task<Result<UserMessage>> SetAffirmationRequirementAsync
         (
-            AutoroleConfiguration autorole,
+            [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole,
             bool requireAffirmation = true
         )
         {
@@ -353,7 +369,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Description("Lists users that haven't been confirmed yet for the given autorole.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(AffirmDenyAutorole), PermissionTarget.All)]
-        public async Task<Result> ListUnconfirmedUsersAsync(AutoroleConfiguration autorole)
+        public async Task<Result> ListUnconfirmedUsersAsync
+        (
+            [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole
+        )
         {
             var getUsers = await _autoroles.GetUnconfirmedUsersAsync(autorole);
             if (!getUsers.IsSuccess)

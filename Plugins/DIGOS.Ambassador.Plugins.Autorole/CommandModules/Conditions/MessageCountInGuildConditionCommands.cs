@@ -30,6 +30,7 @@ using DIGOS.Ambassador.Plugins.Autorole.Permissions;
 using DIGOS.Ambassador.Plugins.Permissions.Conditions;
 using JetBrains.Annotations;
 using Remora.Commands.Attributes;
+using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Conditions;
 using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
@@ -52,7 +53,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             [Description("Adds an instance of the condition to the role.")]
             [RequireContext(ChannelContext.Guild)]
             [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-            public async Task<Result<UserMessage>> AddConditionAsync(AutoroleConfiguration autorole, long count)
+            public async Task<Result<UserMessage>> AddConditionAsync
+            (
+                [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole,
+                long count
+            )
             {
                 var condition = _autoroles.CreateConditionProxy<MessageCountInGuildCondition>
                 (
@@ -81,7 +86,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
             public async Task<Result<UserMessage>> ModifyConditionAsync
             (
-                AutoroleConfiguration autorole,
+                [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole,
                 long conditionID,
                 long count
             )

@@ -31,6 +31,7 @@ using DIGOS.Ambassador.Plugins.Permissions.Model;
 using JetBrains.Annotations;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
+using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;
 
@@ -71,7 +72,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
             public async Task<Result<UserMessage>> RemoveConditionAsync
             (
-                AutoroleConfiguration autorole,
+                [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole,
                 long conditionID
             )
             {

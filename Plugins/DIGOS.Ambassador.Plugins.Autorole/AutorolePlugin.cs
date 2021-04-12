@@ -32,6 +32,7 @@ using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Plugins.Autorole;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Parsers;
+using DIGOS.Ambassador.Plugins.Autorole.Responders;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
 using Microsoft.EntityFrameworkCore;
@@ -39,6 +40,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Remora.Commands.Extensions;
 using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.Gateway.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
 using Remora.Results;
@@ -73,6 +75,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole
             serviceCollection.AddCommandGroup<AutoroleCommands>();
 
             serviceCollection.AddConfiguredSchemaAwareDbContextPool<AutoroleDatabaseContext>();
+
+            serviceCollection.AddResponder<MessageCountConditionResponder>();
+            serviceCollection.AddResponder<ReactionConditionResponder>();
+            serviceCollection.AddResponder<UserActivityResponder>();
+            serviceCollection.AddResponder<RoleConditionResponder>();
         }
 
         /// <inheritdoc />

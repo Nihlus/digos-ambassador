@@ -31,6 +31,7 @@ using System.Xml;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord.Feedback.Responders;
 using DIGOS.Ambassador.Discord.Feedback.Services;
+using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Responders;
 using log4net;
 using log4net.Config;
@@ -187,7 +188,8 @@ namespace DIGOS.Ambassador
                         .AddParser<IGuildMember, GuildMemberParser>()
                         .AddParser<IRole, RoleParser>()
                         .AddParser<IUser, UserParser>()
-                        .AddParser<Snowflake, SnowflakeParser>();
+                        .AddParser<Snowflake, SnowflakeParser>()
+                        .AddParser<IMessage, MessageReader>();
 
                     services.TryAddScoped<ExecutionEventCollectorService>();
                     services.TryAddSingleton<SlashService>();
@@ -206,8 +208,9 @@ namespace DIGOS.Ambassador
 
                     l.AddLog4Net()
                         .AddFilter("Microsoft.EntityFrameworkCore.Infrastructure", LogLevel.Warning)
-                        .AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning)
-                        .AddFilter("Microsoft.EntityFrameworkCore.Migrations", LogLevel.Warning);
+                        .AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Critical)
+                        .AddFilter("Microsoft.EntityFrameworkCore.Migrations", LogLevel.Warning)
+                        .AddFilter("Microsoft.EntityFrameworkCore.Update", LogLevel.Critical);
                 });
 
             var host = hostBuilder.Build();

@@ -31,6 +31,7 @@ using DIGOS.Ambassador.Plugins.Permissions.Conditions;
 using JetBrains.Annotations;
 using Remora.Commands.Attributes;
 using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Conditions;
 using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
@@ -56,7 +57,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
             public async Task<Result<UserMessage>> AddConditionAsync
             (
-                AutoroleConfiguration autorole,
+                [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole,
                 IMessage message,
                 IEmoji emote
             )
@@ -85,7 +86,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
             public async Task<Result<UserMessage>> ModifyConditionAsync
             (
-                AutoroleConfiguration autorole,
+                [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole,
                 long conditionID,
                 IMessage message,
                 IEmoji emote

@@ -31,6 +31,7 @@ using DIGOS.Ambassador.Plugins.Permissions.Conditions;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
 using JetBrains.Annotations;
 using Remora.Commands.Attributes;
+using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Conditions;
 using Remora.Results;
 
@@ -54,7 +55,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
             public async Task<Result<UserMessage>> AddLastActivityConditionAsync
             (
-                AutoroleConfiguration autorole,
+                [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole,
                 TimeSpan time
             )
             {
@@ -81,7 +82,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
             public async Task<Result<UserMessage>> ModifyLastActivityConditionAsync
             (
-                AutoroleConfiguration autorole,
+                [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole,
                 long conditionID,
                 TimeSpan time
             )
