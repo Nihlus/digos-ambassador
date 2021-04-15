@@ -143,7 +143,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                     i => i.Name.ToLower().Equals(newCharacterAvatarUrl.ToLower())
                 );
 
-                if (!(galleryImage is null))
+                if (galleryImage is not null)
                 {
                     newCharacterAvatarUrl = galleryImage.Url;
                 }

@@ -73,7 +73,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                     .SingleOrDefaultAsync()
             );
 
-            if (!(settings is null))
+            if (settings is not null)
             {
                 return settings;
             }

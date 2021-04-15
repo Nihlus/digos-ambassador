@@ -236,7 +236,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
                     .SingleOrDefaultAsync(ct)
             );
 
-            if (!(userKink is null))
+            if (userKink is not null)
             {
                 return Result<UserKink>.FromSuccess(userKink);
             }
@@ -337,7 +337,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
                     .SingleOrDefaultAsync(ct)
             );
 
-            if (!(kink is null))
+            if (kink is not null)
             {
                 return kink;
             }

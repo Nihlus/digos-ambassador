@@ -114,7 +114,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         /// Gets a value indicating whether the character has a role.
         /// </summary>
         [NotMapped]
-        public bool HasRole => !(this.Role is null);
+        public bool HasRole => this.Role is not null;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Character"/> class.

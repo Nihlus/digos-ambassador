@@ -191,7 +191,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         )
         {
             server = _database.NormalizeReference(server);
-            if (!(user is null))
+            if (user is not null)
             {
                 user = _database.NormalizeReference(user);
             }
@@ -248,7 +248,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                     .SingleOrDefaultAsync(ct)
             );
 
-            if (!(currentCharacter is null))
+            if (currentCharacter is not null)
             {
                 return currentCharacter;
             }
@@ -285,7 +285,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             var character = characters.SingleOrDefault();
 
-            if (!(character is null))
+            if (character is not null)
             {
                 return character;
             }
@@ -314,7 +314,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                     .SingleOrDefaultAsync(ct)
             );
 
-            if (!(character is null))
+            if (character is not null)
             {
                 return character;
             }
@@ -415,7 +415,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                     .SingleOrDefaultAsync(ct)
             );
 
-            if (!(defaultCharacter is null))
+            if (defaultCharacter is not null)
             {
                 return defaultCharacter;
             }

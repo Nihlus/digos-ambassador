@@ -428,7 +428,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
                     p.Target == target
             );
 
-            if (!(rolePermission is null))
+            if (rolePermission is not null)
             {
                 hasPermission = rolePermission.IsGranted;
             }
@@ -444,7 +444,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
                     .SingleOrDefaultAsync(ct)
             );
 
-            if (!(userPermission is null))
+            if (userPermission is not null)
             {
                 hasPermission = userPermission.IsGranted;
             }
@@ -538,7 +538,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
 
             var rolePermission = rolePermissions.SingleOrDefault();
 
-            if (!(rolePermission is null))
+            if (rolePermission is not null)
             {
                 return rolePermission;
             }
@@ -596,7 +596,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
 
             var userPermission = userPermissions.SingleOrDefault();
 
-            if (!(userPermission is null))
+            if (userPermission is not null)
             {
                 return userPermission;
             }

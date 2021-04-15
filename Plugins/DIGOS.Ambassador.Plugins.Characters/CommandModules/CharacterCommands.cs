@@ -308,7 +308,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 new("Preferred pronouns", character.PronounProviderFamily)
             };
 
-            if (!(character.Role is null))
+            if (character.Role is not null)
             {
                 embedFields.Add(new EmbedField("Role", $"<@&{character.Role.DiscordID}>"));
             }
@@ -335,7 +335,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             }
 
             // Override the colour if a role is set
-            if (!(character.Role is null))
+            if (character.Role is not null)
             {
                 var getGuildRoles = await _guildAPI.GetGuildRolesAsync(_context.GuildID.Value, this.CancellationToken);
                 if (!getGuildRoles.IsSuccess)

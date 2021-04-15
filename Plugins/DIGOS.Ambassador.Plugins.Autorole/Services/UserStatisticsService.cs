@@ -82,7 +82,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                     .SingleOrDefaultAsync(ct)
             );
 
-            if (!(statistics is null))
+            if (statistics is not null)
             {
                 return statistics;
             }
@@ -129,7 +129,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 s => s.Server.DiscordID == guildID
             );
 
-            if (!(existingServerStatistics is null))
+            if (existingServerStatistics is not null)
             {
                 return existingServerStatistics;
             }
@@ -181,7 +181,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 s => s.ChannelID == channelID
             );
 
-            if (!(existingStats is null))
+            if (existingStats is not null)
             {
                 return existingStats;
             }

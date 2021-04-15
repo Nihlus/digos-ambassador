@@ -78,7 +78,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
         {
             var transformation = Deserialize<Transformation>(transformationFile);
 
-            if (!(transformation.DefaultPattern is null))
+            if (transformation.DefaultPattern is not null)
             {
                 Assert.NotNull(transformation.DefaultPatternColour);
             }

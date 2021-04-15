@@ -115,7 +115,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
                     .SingleOrDefaultAsync(ct)
             );
 
-            if (!(server is null))
+            if (server is not null)
             {
                 return server;
             }

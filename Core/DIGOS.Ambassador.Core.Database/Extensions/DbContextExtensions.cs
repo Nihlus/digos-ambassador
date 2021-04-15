@@ -46,7 +46,7 @@ namespace DIGOS.Ambassador.Core.Database.Extensions
                 e => e.Entity.ID == entity.ID
             );
 
-            if (!(existingEntityEntry is null))
+            if (existingEntityEntry is not null)
             {
                 return existingEntityEntry.Entity;
             }

@@ -48,7 +48,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
         /// <inheritdoc />
         public override bool HasSameConditionsAs(IAutoroleCondition autoroleCondition)
         {
-            if (!(autoroleCondition is TActualCondition actualCondition))
+            if (autoroleCondition is not TActualCondition actualCondition)
             {
                 return false;
             }

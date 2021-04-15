@@ -135,7 +135,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                     .SingleOrDefaultAsync(ct)
             );
 
-            if (!(appearance is null))
+            if (appearance is not null)
             {
                 return appearance;
             }
@@ -200,7 +200,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                     .SingleOrDefaultAsync(ct)
             );
 
-            if (!(appearance is null))
+            if (appearance is not null)
             {
                 return appearance;
             }
@@ -929,7 +929,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                     .SingleOrDefaultAsync(cancellationToken: ct)
             );
 
-            if (!(protection is null))
+            if (protection is not null)
             {
                 return protection;
             }
@@ -971,7 +971,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                     .SingleOrDefaultAsync(ct)
             );
 
-            if (!(protection is null))
+            if (protection is not null)
             {
                 return protection;
             }
@@ -1231,7 +1231,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                 s => string.Equals(s.Name.ToLower(), speciesName.ToLower())
             );
 
-            if (!(species is null))
+            if (species is not null)
             {
                 return species;
             }
@@ -1261,7 +1261,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                     )
             );
 
-            if (!(species is null))
+            if (species is not null)
             {
                 return species;
             }

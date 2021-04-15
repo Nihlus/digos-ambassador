@@ -123,7 +123,7 @@ namespace DIGOS.Ambassador.Plugins.Drone.Services
                 r => r.Name.Contains("Drone") || r.Name.Contains("Dronies")
             );
 
-            if (!(droneRole is null))
+            if (droneRole is not null)
             {
                 var getCharacterRole = await _characterRoles.GetCharacterRoleAsync(guildID, droneRole.ID, ct);
                 if (getCharacterRole.IsSuccess)

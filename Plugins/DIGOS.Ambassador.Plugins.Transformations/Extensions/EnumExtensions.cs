@@ -71,7 +71,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         /// <returns>true if the value has an attribute; otherwise, false.</returns>
         public static bool HasCustomAttribute<T>(this Enum value) where T : Attribute
         {
-            return !(value.GetCustomAttribute<T>() is null);
+            return value.GetCustomAttribute<T>() is not null;
         }
     }
 }

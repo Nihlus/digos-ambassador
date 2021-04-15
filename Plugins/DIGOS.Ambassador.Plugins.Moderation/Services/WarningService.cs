@@ -211,7 +211,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                 return Result<UserWarning>.FromError(setReason);
             }
 
-            if (!(messageID is null))
+            if (messageID is not null)
             {
                 var setMessage = await SetWarningContextMessageAsync(warning, messageID.Value, ct);
                 if (!setMessage.IsSuccess)
@@ -220,7 +220,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                 }
             }
 
-            if (!(expiresOn is null))
+            if (expiresOn is not null)
             {
                 var setExpiry = await SetWarningExpiryDateAsync(warning, expiresOn.Value, ct);
                 if (!setExpiry.IsSuccess)

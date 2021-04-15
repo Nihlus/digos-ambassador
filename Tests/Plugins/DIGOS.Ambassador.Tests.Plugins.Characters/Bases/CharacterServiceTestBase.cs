@@ -122,7 +122,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 pronouns ?? "They" // a real value is used here to avoid having to set it in the majority of cases
             );
 
-            if (!(isNSFW is null))
+            if (isNSFW is not null)
             {
                 character.IsNSFW = isNSFW.Value;
             }

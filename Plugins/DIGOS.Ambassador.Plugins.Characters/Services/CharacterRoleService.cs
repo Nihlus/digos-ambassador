@@ -181,7 +181,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                     .SingleOrDefaultAsync(ct)
             );
 
-            if (!(characterRole is null))
+            if (characterRole is not null)
             {
                 return characterRole;
             }
@@ -263,7 +263,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             if (character.IsCurrent)
             {
-                if (!(character.Role is null))
+                if (character.Role is not null)
                 {
                     var removeRole = await _guildAPI.RemoveGuildMemberRoleAsync
                     (
@@ -419,13 +419,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             var newCharacter = getNewCharacter.Entity;
 
             // First, quick sanity check - do we need to remove the role?
-            if (!(previousCharacter?.Role is null) && newCharacter.Role == previousCharacter.Role)
+            if (previousCharacter?.Role is not null && newCharacter.Role == previousCharacter.Role)
             {
                 return Result.FromSuccess();
             }
 
             // Clear any old role
-            if (!(previousCharacter?.Role is null))
+            if (previousCharacter?.Role is not null)
             {
                 var removeRole = await _guildAPI.RemoveGuildMemberRoleAsync
                 (

@@ -51,7 +51,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
                     m => m.Author == roleplay.Owner
                 );
 
-                if (!(messageByUser is null))
+                if (messageByUser is not null)
                 {
                     ownerNickname = messageByUser.AuthorNickname;
                 }

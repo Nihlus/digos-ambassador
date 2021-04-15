@@ -183,7 +183,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
                     .SingleOrDefaultAsync(ct)
             );
 
-            return !(consent is null) && consent.HasConsented;
+            return consent is not null && consent.HasConsented;
         }
 
         /// <summary>
@@ -205,7 +205,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
                     .SingleOrDefaultAsync(ct)
             );
 
-            if (!(consent is null))
+            if (consent is not null)
             {
                 return consent;
             }

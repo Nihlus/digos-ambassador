@@ -184,7 +184,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             author = _database.NormalizeReference(author);
 
             var existingMessage = roleplay.Messages.FirstOrDefault(m => m.DiscordMessageID == messageID);
-            if (!(existingMessage is null))
+            if (existingMessage is not null)
             {
                 // Edit the existing message
                 if (existingMessage.Contents.Equals(contents))
@@ -248,7 +248,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             var roleplay = enumeratedRoleplays.SingleOrDefault();
 
-            if (!(roleplay is null))
+            if (roleplay is not null)
             {
                 return roleplay;
             }
@@ -342,7 +342,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                     .SingleOrDefaultAsync(ct)
             );
 
-            if (!(roleplay is null))
+            if (roleplay is not null)
             {
                 return roleplay;
             }

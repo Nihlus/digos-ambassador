@@ -218,12 +218,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
 
                     var result = lua["output"] as string;
                     var ranSuccessfully = lua["status"] is bool b && b;
-                    if (!(result is null) && ranSuccessfully)
+                    if (result is not null && ranSuccessfully)
                     {
                         return Result<string>.FromSuccess(result);
                     }
 
-                    if (!(result is null) && result.EndsWith("timeout!"))
+                    if (result is not null && result.EndsWith("timeout!"))
                     {
                         return new GenericError
                         (

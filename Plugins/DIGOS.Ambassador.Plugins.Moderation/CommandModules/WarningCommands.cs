@@ -226,7 +226,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         )
         {
             DateTime? expiresOn = null;
-            if (!(expiresAfter is null))
+            if (expiresAfter is not null)
             {
                 expiresOn = DateTime.Now.Add(expiresAfter.Value);
             }

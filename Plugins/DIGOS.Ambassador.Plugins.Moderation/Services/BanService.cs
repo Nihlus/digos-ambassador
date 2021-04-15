@@ -184,7 +184,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                 return Result<UserBan>.FromError(setReason);
             }
 
-            if (!(messageID is null))
+            if (messageID is not null)
             {
                 var setMessage = await SetBanContextMessageAsync(ban, messageID.Value, ct);
                 if (!setMessage.IsSuccess)
@@ -193,7 +193,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                 }
             }
 
-            if (!(expiresOn is null))
+            if (expiresOn is not null)
             {
                 var setExpiry = await SetBanExpiryDateAsync(ban, expiresOn.Value, ct);
                 if (!setExpiry.IsSuccess)

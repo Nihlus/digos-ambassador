@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
                 t =>
                     t.ImplementedInterfaces.Contains(typeof(IReplaceableTextToken))
                     && !t.IsInterface
-                    && !(t.BaseType is null)
+                    && t.BaseType is not null
                     && t.BaseType.IsGenericType
                     &&
                         (t.BaseType.GetGenericTypeDefinition() == typeof(ReplaceableTextToken<>)

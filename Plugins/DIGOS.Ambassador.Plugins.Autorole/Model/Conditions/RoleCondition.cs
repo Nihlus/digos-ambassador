@@ -72,7 +72,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         /// <inheritdoc />
         public override bool HasSameConditionsAs(IAutoroleCondition autoroleCondition)
         {
-            if (!(autoroleCondition is RoleCondition roleCondition))
+            if (autoroleCondition is not RoleCondition roleCondition)
             {
                 return false;
             }

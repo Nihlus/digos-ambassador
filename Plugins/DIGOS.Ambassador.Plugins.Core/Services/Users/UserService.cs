@@ -115,7 +115,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
                     .SingleOrDefaultAsync(ct)
             );
 
-            if (!(user is null))
+            if (user is not null)
             {
                 return user;
             }

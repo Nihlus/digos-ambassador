@@ -108,7 +108,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                     .SingleOrDefaultAsync(ct)
             );
 
-            if (!(autorole is null))
+            if (autorole is not null)
             {
                 return autorole;
             }
@@ -312,7 +312,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 );
             }
 
-            if (!(condition is TCondition))
+            if (condition is not TCondition)
             {
                 return new UserError
                 (
@@ -371,7 +371,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                     .SingleOrDefaultAsync(ct)
             );
 
-            if (!(confirmation is null))
+            if (confirmation is not null)
             {
                 return confirmation;
             }
@@ -572,7 +572,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         {
             query ??= q => q;
 
-            if (!(guildID is null))
+            if (guildID is not null)
             {
                 query = q => q.Where(a => a.Server.DiscordID == guildID);
             }
@@ -631,7 +631,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                     .SingleOrDefaultAsync(ct)
             );
 
-            if (!(settings is null))
+            if (settings is not null)
             {
                 return settings;
             }

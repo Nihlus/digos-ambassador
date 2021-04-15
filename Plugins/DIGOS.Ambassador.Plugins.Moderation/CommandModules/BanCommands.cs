@@ -106,7 +106,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         )
         {
             DateTime? expiresOn = null;
-            if (!(expiresAfter is null))
+            if (expiresAfter is not null)
             {
                 expiresOn = DateTime.Now.Add(expiresAfter.Value);
             }
@@ -195,7 +195,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                         embedFields.Add(new EmbedField("Expires On", ban.ExpiresOn.Humanize()));
                     }
 
-                    if (!(ban.MessageID is null))
+                    if (ban.MessageID is not null)
                     {
                         // TODO
                     }

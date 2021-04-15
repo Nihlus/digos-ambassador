@@ -93,7 +93,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         /// <inheritdoc />
         public override bool HasSameConditionsAs(IAutoroleCondition autoroleCondition)
         {
-            if (!(autoroleCondition is ReactionCondition reactionCondition))
+            if (autoroleCondition is not ReactionCondition reactionCondition)
             {
                 return false;
             }

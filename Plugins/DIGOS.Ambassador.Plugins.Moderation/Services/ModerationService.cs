@@ -100,7 +100,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                     .SingleOrDefaultAsync(ct)
             );
 
-            if (!(settings is null))
+            if (settings is not null)
             {
                 return settings;
             }

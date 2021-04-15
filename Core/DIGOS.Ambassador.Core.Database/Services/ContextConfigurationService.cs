@@ -65,7 +65,7 @@ namespace DIGOS.Ambassador.Core.Database.Services
             }
 
             var dummyOptions = new DbContextOptionsBuilder<TContext>().Options;
-            if (!(Activator.CreateInstance(typeof(TContext), dummyOptions) is TContext dummyContext))
+            if (Activator.CreateInstance(typeof(TContext), dummyOptions) is not TContext dummyContext)
             {
                 return;
             }
