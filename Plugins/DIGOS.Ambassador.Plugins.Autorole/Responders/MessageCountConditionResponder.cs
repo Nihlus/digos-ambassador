@@ -23,12 +23,13 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Transactions;
+using DIGOS.Ambassador.Core.Database;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
 using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
+using static System.Transactions.IsolationLevel;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Responders
 {
@@ -67,7 +68,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
                 return Result.FromSuccess();
             }
 
-            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+            using var transaction = TransactionFactory.Create();
 
             var user = gatewayEvent.Author.ID;
             var guild = gatewayEvent.GuildID.Value;

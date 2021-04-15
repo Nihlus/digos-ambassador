@@ -24,14 +24,16 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Transactions;
+using DIGOS.Ambassador.Core.Database;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
+using Microsoft.Extensions.Logging;
 using Npgsql;
 using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.Core;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
+using static System.Transactions.IsolationLevel;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Responders
 {
@@ -46,6 +48,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
         IResponder<IVoiceStateUpdate>,
         IResponder<IPresenceUpdate>
     {
+        private readonly ILogger<UserActivityResponder> _log;
         private readonly AutoroleService _autoroles;
         private readonly AutoroleUpdateService _autoroleUpdates;
         private readonly UserStatisticsService _statistics;
@@ -56,16 +59,19 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
         /// <param name="autoroles">The autorole service.</param>
         /// <param name="autoroleUpdates">The autorole update service.</param>
         /// <param name="statistics">The statistics service.</param>
+        /// <param name="log">The logging instance.</param>
         public UserActivityResponder
         (
             AutoroleService autoroles,
             AutoroleUpdateService autoroleUpdates,
-            UserStatisticsService statistics
+            UserStatisticsService statistics,
+            ILogger<UserActivityResponder> log
         )
         {
             _autoroles = autoroles;
             _autoroleUpdates = autoroleUpdates;
             _statistics = statistics;
+            _log = log;
         }
 
         /// <inheritdoc />
@@ -154,41 +160,24 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
 
         private async Task<Result> UpdateTimestampAndRelevantAutorolesAsync(CancellationToken ct, Snowflake guild, Snowflake user)
         {
-            // Since these events usually come in rapid succession, we'll retry a couple of times here.
-            var retry = 0;
-            while (true)
             {
-                using var timestampTransaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+                using var timestampTransaction = TransactionFactory.Create(ReadCommitted);
 
-                try
+                var getServerStatistics = await _statistics.GetOrCreateUserServerStatisticsAsync(guild, user, ct);
+                if (!getServerStatistics.IsSuccess)
                 {
-                    var getServerStatistics = await _statistics.GetOrCreateUserServerStatisticsAsync(guild, user, ct);
-                    if (!getServerStatistics.IsSuccess)
-                    {
-                        return Result.FromError(getServerStatistics);
-                    }
-
-                    var serverStatistics = getServerStatistics.Entity;
-
-                    var updateTimestamp = await _statistics.UpdateTimestampAsync(serverStatistics, ct);
-                    if (!updateTimestamp.IsSuccess)
-                    {
-                        return updateTimestamp;
-                    }
-
-                    timestampTransaction.Complete();
-                    break;
+                    return Result.FromError(getServerStatistics);
                 }
-                catch (Exception e) when (e.GetBaseException() is PostgresException { SqlState: "40001" })
+
+                var serverStatistics = getServerStatistics.Entity;
+
+                var updateTimestamp = await _statistics.UpdateTimestampAsync(serverStatistics, ct);
+                if (!updateTimestamp.IsSuccess)
                 {
-                    // retry
-                    retry++;
-
-                    if (retry >= 6)
-                    {
-                        throw;
-                    }
+                    return updateTimestamp;
                 }
+
+                timestampTransaction.Complete();
             }
 
             var autoroles = await _autoroles.GetAutorolesAsync
@@ -210,7 +199,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
 
             foreach (var autorole in autoroles)
             {
-                using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+                using var transaction = TransactionFactory.Create();
 
                 var updateAutorole = await _autoroleUpdates.UpdateAutoroleForUserAsync(autorole, guild, user, ct);
                 if (!updateAutorole.IsSuccess)

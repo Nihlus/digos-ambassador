@@ -189,7 +189,8 @@ namespace DIGOS.Ambassador
                         .AddParser<IRole, RoleParser>()
                         .AddParser<IUser, UserParser>()
                         .AddParser<Snowflake, SnowflakeParser>()
-                        .AddParser<IMessage, MessageReader>();
+                        .AddParser<IMessage, MessageReader>()
+                        .AddParser<TimeSpan, HumanTimeSpanReader>();
 
                     services.TryAddScoped<ExecutionEventCollectorService>();
                     services.TryAddSingleton<SlashService>();

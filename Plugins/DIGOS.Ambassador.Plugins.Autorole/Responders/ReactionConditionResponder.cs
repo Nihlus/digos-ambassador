@@ -24,7 +24,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Transactions;
+using DIGOS.Ambassador.Core.Database;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
 using Remora.Discord.API.Abstractions.Gateway.Events;
@@ -32,6 +32,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Core;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
+using static System.Transactions.IsolationLevel;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Responders
 {
@@ -97,7 +98,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
             var user = gatewayEvent.UserID;
             foreach (var autorole in autoroles)
             {
-                using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+                using var transaction = TransactionFactory.Create();
 
                 var updateAutorole = await _autoroleUpdates.UpdateAutoroleForUserAsync(autorole, guild, user, ct);
                 if (!updateAutorole.IsSuccess)
@@ -142,7 +143,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
             var user = gatewayEvent.UserID;
             foreach (var autorole in autoroles)
             {
-                using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+                using var transaction = TransactionFactory.Create();
 
                 var updateAutorole = await _autoroleUpdates.UpdateAutoroleForUserAsync(autorole, guild, user, ct);
                 if (!updateAutorole.IsSuccess)
@@ -199,7 +200,13 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
                     break;
                 }
 
-                users.AddRange(listMembers.Entity.Select(m => m.User.Value!.ID));
+                users.AddRange
+                (
+                    listMembers.Entity
+                        .Where(m => !m.User.Value!.IsBot.HasValue || !m.User.Value!.IsBot.Value)
+                        .Select(m => m.User.Value!.ID)
+                );
+
                 after = users.Last();
             }
 
@@ -207,7 +214,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
             {
                 foreach (var user in users)
                 {
-                    using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+                    using var transaction = TransactionFactory.Create();
 
                     var updateAutorole = await _autoroleUpdates.UpdateAutoroleForUserAsync(autorole, guild, user, ct);
                     if (!updateAutorole.IsSuccess)
@@ -274,7 +281,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
             {
                 foreach (var user in users)
                 {
-                    using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+                    using var transaction = TransactionFactory.Create();
 
                     var updateAutorole = await _autoroleUpdates.UpdateAutoroleForUserAsync(autorole, guild, user, ct);
                     if (!updateAutorole.IsSuccess)

@@ -25,6 +25,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
+using DIGOS.Ambassador.Core.Database;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Discord.Feedback.Results;
@@ -183,7 +184,7 @@ namespace DIGOS.Ambassador.Responders
             CancellationToken ct = default
         )
         {
-            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+            using var transaction = TransactionFactory.Create();
             data.UnpackInteraction(out var command, out var parameters);
 
             // First of all, check user consent

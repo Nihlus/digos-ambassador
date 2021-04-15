@@ -116,6 +116,16 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
 
             var member = getMember.Entity;
 
+            if (!member.User.HasValue)
+            {
+                return Unqualified;
+            }
+
+            if (member.User.Value.IsBot.HasValue && member.User.Value.IsBot.Value)
+            {
+                return Unqualified;
+            }
+
             var userHasRole = member.Roles.Contains(autorole.DiscordRoleID);
 
             switch (isUserQualified)

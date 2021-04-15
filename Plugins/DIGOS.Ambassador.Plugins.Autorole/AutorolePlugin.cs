@@ -39,7 +39,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Remora.Commands.Extensions;
+using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.Gateway;
 using Remora.Discord.Gateway.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
@@ -80,6 +82,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole
             serviceCollection.AddResponder<ReactionConditionResponder>();
             serviceCollection.AddResponder<UserActivityResponder>();
             serviceCollection.AddResponder<RoleConditionResponder>();
+
+            serviceCollection.Configure<DiscordGatewayClientOptions>(o => o.Intents |= GatewayIntents.GuildPresences);
         }
 
         /// <inheritdoc />
