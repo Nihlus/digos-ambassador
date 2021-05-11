@@ -263,7 +263,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             var warnings = await _warnings.GetWarningsAsync(user.ID);
             if (warnings.Count < settings.WarningThreshold)
             {
-                return new ConfirmationMessage($"Warning added (ID {warning.ID}).");
+                return new ConfirmationMessage($"Warning added (ID {warning.ID}): {warning.Reason}.");
             }
 
             var sendAlert = await _feedback.SendContextualWarningAsync
@@ -274,7 +274,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
 
             return !sendAlert.IsSuccess
                 ? Result<UserMessage>.FromError(sendAlert)
-                : new ConfirmationMessage($"Warning added (ID {warning.ID}).");
+                : new ConfirmationMessage($"Warning added (ID {warning.ID}): {warning.Reason}.");
         }
     }
 }
