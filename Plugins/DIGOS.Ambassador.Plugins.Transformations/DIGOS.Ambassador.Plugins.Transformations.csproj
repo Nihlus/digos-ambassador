@@ -7,7 +7,7 @@
 
     <ItemGroup>
         <PackageReference Include="YamlDotNet" Version="11.1.1" />
-        <PackageReference Include="NLua" Version="1.5.7" />
+        <PackageReference Include="NLua" Version="1.5.8" />
     </ItemGroup>
 
     <!-- Workaround for a problem with EF Core -->

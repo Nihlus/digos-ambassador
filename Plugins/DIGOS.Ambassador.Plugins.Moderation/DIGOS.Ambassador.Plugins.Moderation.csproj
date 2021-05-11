@@ -15,7 +15,7 @@
 
     <ItemGroup>
         <PackageReference Include="Remora.Behaviours" Version="6.1.0" />
-        <PackageReference Include="Remora.Discord.Caching" Version="2.0.0" />
+        <PackageReference Include="Remora.Discord.Caching" Version="3.0.0" />
     </ItemGroup>
 
     <ItemGroup>

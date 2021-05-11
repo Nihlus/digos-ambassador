@@ -140,7 +140,7 @@ namespace DIGOS.Ambassador.Responders
             // Signal Discord that we'll be handling this one asynchronously
             var response = new InteractionResponse
             (
-                InteractionResponseType.DeferredChannelMessageWithSource
+                InteractionCallbackType.DeferredChannelMessageWithSource
             );
 
             var interactionResponse = await _interactionAPI.CreateInteractionResponseAsync

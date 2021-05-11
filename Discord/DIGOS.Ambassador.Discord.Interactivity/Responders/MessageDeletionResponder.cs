@@ -54,7 +54,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Responders
         /// <inheritdoc />
         public async Task<Result> RespondAsync(IMessageDeleteBulk gatewayEvent, CancellationToken ct = default)
         {
-            var deletions = gatewayEvent.MessageIDs.Select(id => _interactivity.OnMessageDeletedAsync(id, ct));
+            var deletions = gatewayEvent.IDs.Select(id => _interactivity.OnMessageDeletedAsync(id, ct));
             var results = await Task.WhenAll(deletions);
 
             var firstFail = results.FirstOrDefault(r => !r.IsSuccess);
