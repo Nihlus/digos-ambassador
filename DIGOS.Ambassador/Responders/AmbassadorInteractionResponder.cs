@@ -114,6 +114,11 @@ namespace DIGOS.Ambassador.Responders
                 return Result.FromSuccess();
             }
 
+            if (gatewayEvent.Type != InteractionType.ApplicationCommand)
+            {
+                return Result.FromSuccess();
+            }
+
             if (!gatewayEvent.Data.HasValue)
             {
                 return Result.FromSuccess();

@@ -154,8 +154,14 @@ namespace DIGOS.Ambassador.Responders
                     gatewayEvent.Type,
                     gatewayEvent.Activity,
                     gatewayEvent.Application,
+                    gatewayEvent.ApplicationID,
                     gatewayEvent.MessageReference,
-                    gatewayEvent.Flags
+                    gatewayEvent.Flags,
+                    gatewayEvent.Stickers,
+                    gatewayEvent.ReferencedMessage,
+                    gatewayEvent.Interaction,
+                    gatewayEvent.Thread,
+                    gatewayEvent.Components
                 )
             );
 

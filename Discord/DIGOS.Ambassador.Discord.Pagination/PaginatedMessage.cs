@@ -35,9 +35,9 @@ namespace DIGOS.Ambassador.Discord.Pagination
     public class PaginatedMessage : InteractiveMessage
     {
         /// <summary>
-        /// Gets the names of the reactions, mapped to their emoji.
+        /// Gets the nonces of the buttons this message responds to.
         /// </summary>
-        public IReadOnlyDictionary<string, IEmoji> ReactionNames { get; }
+        public IReadOnlyList<string> ButtonNonces { get; }
 
         /// <summary>
         /// Gets the pages in the message.
@@ -83,14 +83,14 @@ namespace DIGOS.Ambassador.Discord.Pagination
             this.Pages = pages;
             this.Appearance = appearance;
 
-            this.ReactionNames = new Dictionary<string, IEmoji>
+            this.ButtonNonces = new List<string>
             {
-                { appearance.First.GetEmojiName(), appearance.First },
-                { appearance.Back.GetEmojiName(), appearance.Back },
-                { appearance.Next.GetEmojiName(), appearance.Next },
-                { appearance.Last.GetEmojiName(), appearance.Last },
-                { appearance.Close.GetEmojiName(), appearance.Close },
-                { appearance.Help.GetEmojiName(), appearance.Help }
+                appearance.First,
+                appearance.Back,
+                appearance.Next,
+                appearance.Last,
+                appearance.Close,
+                appearance.Help
             };
         }
 

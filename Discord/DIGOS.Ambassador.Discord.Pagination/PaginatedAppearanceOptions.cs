@@ -30,12 +30,12 @@ namespace DIGOS.Ambassador.Discord.Pagination
     /// </summary>
     public sealed record PaginatedAppearanceOptions
     (
-        IEmoji First,
-        IEmoji Back,
-        IEmoji Next,
-        IEmoji Last,
-        IEmoji Close,
-        IEmoji Help,
+        string First,
+        string Back,
+        string Next,
+        string Last,
+        string Close,
+        string Help,
         string FooterFormat = "Page {0}/{1}",
         string HelpText = "This is a paginated message. React with the respective icons to change page."
     )
@@ -45,12 +45,12 @@ namespace DIGOS.Ambassador.Discord.Pagination
         /// </summary>
         public static readonly PaginatedAppearanceOptions Default = new
         (
-            new Emoji(null, "⏮"),
-            new Emoji(null, "◀"),
-            new Emoji(null, "▶"),
-            new Emoji(null, "⏭"),
-            new Emoji(null, "\x23F9"),
-            new Emoji(null, "ℹ")
+            "⏮",
+            "◀",
+            "▶",
+            "⏭",
+            "\x23F9",
+            "ℹ"
         );
     }
 }

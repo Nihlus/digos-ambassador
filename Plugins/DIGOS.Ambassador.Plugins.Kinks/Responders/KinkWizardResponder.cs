@@ -52,12 +52,12 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
     /// </summary>
     public class KinkWizardResponder :
         InteractivityResponder,
-        IResponder<IMessageReactionAdd>,
-        IResponder<IMessageReactionRemove>
+        IResponder<IInteractionCreate>
     {
         private readonly KinkService _kinks;
         private readonly UserFeedbackService _feedback;
         private readonly IDiscordRestChannelAPI _channelAPI;
+        private readonly IDiscordRestInteractionAPI _interactionAPI;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KinkWizardResponder"/> class.
@@ -66,18 +66,117 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
         /// <param name="kinks">The kink service.</param>
         /// <param name="channelAPI">The channel API.</param>
         /// <param name="feedback">The user feedback service.</param>
+        /// <param name="interactionAPI">The interaction API.</param>
         public KinkWizardResponder
         (
             InteractivityService interactivity,
             KinkService kinks,
             IDiscordRestChannelAPI channelAPI,
-            UserFeedbackService feedback
+            UserFeedbackService feedback,
+            IDiscordRestInteractionAPI interactionAPI
         )
             : base(interactivity)
         {
             _kinks = kinks;
             _channelAPI = channelAPI;
             _feedback = feedback;
+            _interactionAPI = interactionAPI;
+        }
+
+        /// <inheritdoc />
+        public async Task<Result> RespondAsync(IInteractionCreate gatewayEvent, CancellationToken ct = default)
+        {
+            if (gatewayEvent.Type != InteractionType.MessageComponent)
+            {
+                return Result.FromSuccess();
+            }
+
+            var data = gatewayEvent.Data.Value ?? throw new InvalidOperationException();
+            var type = data.ComponentType.Value;
+
+            if (type != ComponentType.Button)
+            {
+                return Result.FromSuccess();
+            }
+
+            var interactedMessage = gatewayEvent.Message.Value ?? throw new InvalidOperationException();
+            var messageID = interactedMessage.ID.ToString();
+
+            if (!this.Interactivity.TryGetInteractiveEntity<KinkWizard>(messageID, out var wizard))
+            {
+                return Result.FromSuccess();
+            }
+
+            // This is something we're supposed to handle
+            var respondDeferred = await _interactionAPI.CreateInteractionResponseAsync
+            (
+                gatewayEvent.ID,
+                gatewayEvent.Token,
+                new InteractionResponse(InteractionCallbackType.DeferredUpdateMessage),
+                ct
+            );
+
+            if (!respondDeferred.IsSuccess)
+            {
+                return respondDeferred;
+            }
+
+            var user = gatewayEvent.User.HasValue
+                ? gatewayEvent.User.Value
+                : gatewayEvent.Member.HasValue
+                    ? gatewayEvent.Member.Value.User.HasValue
+                        ? gatewayEvent.Member.Value.User.Value
+                        : null
+                    : null;
+
+            if (user is null)
+            {
+                return Result.FromSuccess();
+            }
+
+            var userID = user.ID;
+
+            var buttonNonce = data.CustomID.Value ?? throw new InvalidOperationException();
+
+            try
+            {
+                await wizard.Semaphore.WaitAsync(ct);
+
+                if (userID != wizard.SourceUserID)
+                {
+                    // We handled it, but we won't react
+                    return Result.FromSuccess();
+                }
+
+                var button = wizard.Buttons.FirstOrDefault(b => b.CustomID.HasValue && b.CustomID.Value == buttonNonce);
+                if (button is null)
+                {
+                    // This isn't a button we react to
+                    return Result.FromSuccess();
+                }
+
+                // Special actions
+                if (button == wizard.Exit)
+                {
+                    return await _channelAPI.DeleteMessageAsync(wizard.ChannelID, wizard.MessageID, ct);
+                }
+
+                if (button == wizard.Info)
+                {
+                    return await DisplayHelpTextAsync(wizard, ct);
+                }
+
+                return wizard.State switch
+                {
+                    KinkWizardState.CategorySelection => await ConsumeCategoryInteractionAsync(wizard, button, ct),
+                    KinkWizardState.KinkPreference => await ConsumePreferenceInteractionAsync(wizard, button, ct),
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+            }
+            finally
+            {
+                wizard.Semaphore.Release();
+            }
         }
 
         /// <inheritdoc />
@@ -103,108 +202,26 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
             }
         }
 
-        /// <inheritdoc />
-        public Task<Result> RespondAsync(IMessageReactionAdd gatewayEvent, CancellationToken ct = default)
-            => OnReactionAsync(gatewayEvent.UserID, gatewayEvent.MessageID, gatewayEvent.Emoji, ct);
-
-        /// <inheritdoc />
-        public Task<Result> RespondAsync(IMessageReactionRemove gatewayEvent, CancellationToken ct = default)
-            => OnReactionAsync
-            (
-                gatewayEvent.UserID,
-                gatewayEvent.MessageID,
-                gatewayEvent.Emoji,
-                ct
-            );
-
-        /// <summary>
-        /// Handles an added reaction.
-        /// </summary>
-        /// <param name="userID">The ID of the reacting user.</param>
-        /// <param name="messageID">The ID of the message.</param>
-        /// <param name="emoji">The emoji used.</param>
-        /// <param name="ct">The cancellation token for this operation.</param>
-        /// <returns>A result which may or may not have succeeded.</returns>
-        private async Task<Result> OnReactionAsync
-        (
-            Snowflake userID,
-            Snowflake messageID,
-            IPartialEmoji emoji,
-            CancellationToken ct = default
-        )
-        {
-            if (!this.Interactivity.TryGetInteractiveEntity<KinkWizard>(messageID.ToString(), out var wizard))
-            {
-                return Result.FromSuccess();
-            }
-
-            try
-            {
-                await wizard.Semaphore.WaitAsync(ct);
-
-                if (userID != wizard.SourceUserID)
-                {
-                    // We handled it, but we won't react
-                    return Result.FromSuccess();
-                }
-
-                var reactionName = emoji.GetEmojiName();
-                if (!wizard.ReactionNames.TryGetValue(reactionName, out var knownEmoji))
-                {
-                    // This isn't an emoji we react to
-                    return Result.FromSuccess();
-                }
-
-                if (!wizard.GetCurrentPageEmotes().Contains(knownEmoji))
-                {
-                    // This isn't an emoji we react to (on this page)
-                    return Result.FromSuccess();
-                }
-
-                // Special actions
-                if (knownEmoji.Equals(wizard.Exit))
-                {
-                    return await _channelAPI.DeleteMessageAsync(wizard.ChannelID, wizard.MessageID, ct);
-                }
-
-                if (knownEmoji.Equals(wizard.Info))
-                {
-                    return await DisplayHelpTextAsync(wizard, ct);
-                }
-
-                return wizard.State switch
-                {
-                    KinkWizardState.CategorySelection => await ConsumeCategoryInteractionAsync(wizard, knownEmoji, ct),
-                    KinkWizardState.KinkPreference => await ConsumePreferenceInteractionAsync(wizard, knownEmoji, ct),
-                    _ => throw new ArgumentOutOfRangeException()
-                };
-            }
-            finally
-            {
-                wizard.Semaphore.Release();
-            }
-        }
-
         private async Task<Result> ConsumePreferenceInteractionAsync
         (
             KinkWizard wizard,
-            IEmoji emoji,
+            ButtonComponent button,
             CancellationToken ct = default
         )
         {
-            if (emoji.Equals(wizard.Back))
+            if (button == wizard.Back)
             {
                 wizard.State = KinkWizardState.CategorySelection;
                 return await UpdateAsync(wizard, ct);
             }
 
-            var preference = emoji switch
+            var preference = button switch
             {
-                _ when emoji.Equals(wizard.Fave) => KinkPreference.Favourite,
-                _ when emoji.Equals(wizard.Like) => KinkPreference.Like,
-                _ when emoji.Equals(wizard.Maybe) => KinkPreference.Maybe,
-                _ when emoji.Equals(wizard.Never) => KinkPreference.No,
-                _ when emoji.Equals(wizard.NoPreference) => KinkPreference.NoPreference,
+                _ when button == wizard.Fave => KinkPreference.Favourite,
+                _ when button == wizard.Like => KinkPreference.Like,
+                _ when button == wizard.Maybe => KinkPreference.Maybe,
+                _ when button == wizard.Never => KinkPreference.No,
+                _ when button == wizard.NoPreference => KinkPreference.NoPreference,
                 _ => throw new ArgumentOutOfRangeException()
             };
 
@@ -249,28 +266,28 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
         private async Task<Result> ConsumeCategoryInteractionAsync
         (
             KinkWizard wizard,
-            IEmoji emoji,
+            ButtonComponent button,
             CancellationToken ct = default
         )
         {
             var didPageChange = false;
-            if (emoji.Equals(wizard.Next))
+            if (button == wizard.Next)
             {
                 didPageChange = wizard.MoveNext();
             }
-            else if (emoji.Equals(wizard.Previous))
+            else if (button == wizard.Previous)
             {
                 didPageChange = wizard.MovePrevious();
             }
-            else if (emoji.Equals(wizard.First))
+            else if (button == wizard.First)
             {
                 didPageChange = wizard.MoveFirst();
             }
-            else if (emoji.Equals(wizard.Last))
+            else if (button == wizard.Last)
             {
                 didPageChange = wizard.MoveLast();
             }
-            else if (emoji.Equals(wizard.EnterCategory))
+            else if (button == wizard.EnterCategory)
             {
                 if (!wizard.Categories.Any())
                 {
@@ -392,11 +409,11 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
                         (
                             "Usage",
                             "Use the navigation buttons to scroll through the available categories. Select a " +
-                            $"category by pressing :{wizard.EnterCategory.GetEmojiName()}: and typing in the name. " +
+                            $"category by pressing :{wizard.EnterCategory.Label}: and typing in the name. " +
                             "The search algorithm is quite lenient, so you may find that things work fine even with " +
                             "typos.\n" +
                             "\n" +
-                            $"You can quit at any point by pressing :{wizard.Exit.GetEmojiName()}:."
+                            $"You can quit at any point by pressing :{wizard.Exit.Label}:."
                         )
                     };
 
@@ -416,14 +433,14 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
                         (
                             "Usage",
                             "Set your preference for this kink by pressing one of the following buttons:" +
-                            $"\n{wizard.Fave.GetEmojiName()} : Favourite" +
-                            $"\n{wizard.Like.GetEmojiName()} : Like" +
-                            $"\n{wizard.Maybe.GetEmojiName()} : Maybe" +
-                            $"\n{wizard.Never.GetEmojiName()} : Never" +
-                            $"\n{wizard.NoPreference.GetEmojiName()} : No preference\n" +
+                            $"\n{wizard.Fave.Label} : Favourite" +
+                            $"\n{wizard.Like.Label} : Like" +
+                            $"\n{wizard.Maybe.Label} : Maybe" +
+                            $"\n{wizard.Never.Label} : Never" +
+                            $"\n{wizard.NoPreference.Label} : No preference\n" +
                             "\n" +
-                            $"\nPress {wizard.Back.GetEmojiName()} to go back to the categories." +
-                            $"\nYou can quit at any point by pressing {wizard.Exit.GetEmojiName()}."
+                            $"\nPress {wizard.Back.Label} to go back to the categories." +
+                            $"\nYou can quit at any point by pressing {wizard.Exit.Label}."
                         )
                     };
 
@@ -581,87 +598,13 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
                 wizard.ChannelID,
                 wizard.MessageID,
                 embed: page,
+                components: new Optional<IReadOnlyList<IMessageComponent>>(wizard.GetCurrentPageComponents()),
                 ct: ct
             );
 
-            if (!modifyMessage.IsSuccess)
-            {
-                return Result.FromError(modifyMessage);
-            }
-
-            return await UpdateReactionButtonsAsync(wizard, ct);
-        }
-
-        /// <summary>
-        /// Updates the displayed buttons.
-        /// </summary>
-        /// <param name="wizard">The wizard.</param>
-        /// <param name="ct">The cancellation token for this operation.</param>
-        /// <returns>A result which may or may not have succeeded.</returns>
-        private async Task<Result> UpdateReactionButtonsAsync(KinkWizard wizard, CancellationToken ct = default)
-        {
-            var getMessage = await _channelAPI.GetChannelMessageAsync(wizard.ChannelID, wizard.MessageID, ct);
-            if (!getMessage.IsSuccess)
-            {
-                return Result.FromError(getMessage);
-            }
-
-            var message = getMessage.Entity;
-            var existingReactions = message.Reactions;
-
-            foreach (var reaction in wizard.GetCurrentPageEmotes().Select(e => e.GetEmojiName()))
-            {
-                if (existingReactions.HasValue)
-                {
-                    if (existingReactions.Value!.Any(r => r.Emoji.GetEmojiName() == reaction))
-                    {
-                        // This one is already added; skip it
-                        continue;
-                    }
-                }
-
-                var addReaction = await _channelAPI.CreateReactionAsync
-                (
-                    wizard.ChannelID,
-                    wizard.MessageID,
-                    reaction,
-                    ct
-                );
-
-                if (!addReaction.IsSuccess)
-                {
-                    return addReaction;
-                }
-            }
-
-            if (!existingReactions.HasValue)
-            {
-                return Result.FromSuccess();
-            }
-
-            // Remove other reactions
-            foreach (var reaction in existingReactions.Value)
-            {
-                if (wizard.GetCurrentPageEmotes().Any(e => e.GetEmojiName() == reaction.Emoji.GetEmojiName()))
-                {
-                    continue;
-                }
-
-                var removeReaction = await _channelAPI.DeleteOwnReactionAsync
-                (
-                    wizard.ChannelID,
-                    wizard.MessageID,
-                    reaction.Emoji.GetEmojiName(),
-                    ct
-                );
-
-                if (!removeReaction.IsSuccess)
-                {
-                    return removeReaction;
-                }
-            }
-
-            return Result.FromSuccess();
+            return !modifyMessage.IsSuccess
+                ? Result.FromError(modifyMessage)
+                : Result.FromSuccess();
         }
     }
 }

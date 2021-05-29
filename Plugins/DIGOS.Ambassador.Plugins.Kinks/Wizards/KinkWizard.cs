@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using DIGOS.Ambassador.Discord.Interactivity.Messages;
 using DIGOS.Ambassador.Discord.Pagination.Extensions;
 using DIGOS.Ambassador.Plugins.Kinks.Model;
+using Humanizer;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Core;
@@ -39,72 +40,150 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
         /// <summary>
         /// Gets the emoji used to move the wizard to the next page.
         /// </summary>
-        public Emoji Next { get; } = new(default, "\x25B6");
+        public ButtonComponent Next => new
+        (
+            ButtonComponentStyle.Primary,
+            nameof(this.Next),
+            new PartialEmoji(Name: "\x25B6"),
+            nameof(this.Next).ToLowerInvariant()
+        );
 
         /// <summary>
         /// Gets the emoji used to move the wizard to the previous page.
         /// </summary>
-        public Emoji Previous { get; } = new(default, "\x25C0");
+        public ButtonComponent Previous => new
+        (
+            ButtonComponentStyle.Primary,
+            nameof(this.Previous),
+            new PartialEmoji(Name: "\x25C0"),
+            nameof(this.Previous).ToLowerInvariant()
+        );
 
         /// <summary>
         /// Gets the emoji used to move the wizard to the first page.
         /// </summary>
-        public Emoji First { get; } = new(default, "\x23EE");
+        public ButtonComponent First => new
+        (
+            ButtonComponentStyle.Primary,
+            nameof(this.First),
+            new PartialEmoji(Name: "\x23EE"),
+            nameof(this.First).ToLowerInvariant()
+        );
 
         /// <summary>
         /// Gets the emoji used to move the wizard to the last page.
         /// </summary>
-        public Emoji Last { get; } = new(default, "\x23ED");
+        public ButtonComponent Last => new
+        (
+            ButtonComponentStyle.Primary,
+            nameof(this.Last),
+            new PartialEmoji(Name: "\x23ED"),
+            nameof(this.Last).ToLowerInvariant()
+        );
 
         /// <summary>
         /// Gets the emoji used to enter a kink category.
         /// </summary>
-        public Emoji EnterCategory { get; } = new(default, "\xD83D\xDD22");
+        public ButtonComponent EnterCategory => new
+        (
+            ButtonComponentStyle.Primary,
+            nameof(this.EnterCategory).Humanize(),
+            new PartialEmoji(Name: "\xD83D\xDD22"),
+            nameof(this.EnterCategory).ToLowerInvariant()
+        );
 
         /// <summary>
         /// Gets the emoji used to set a kink's preference to <see cref="KinkPreference.Favourite"/>.
         /// </summary>
-        public Emoji Fave { get; } = new(default, "\x2764");
+        public ButtonComponent Fave => new
+        (
+            ButtonComponentStyle.Primary,
+            nameof(this.Fave),
+            new PartialEmoji(Name: "\x2764"),
+            nameof(this.Fave).ToLowerInvariant()
+        );
 
         /// <summary>
         /// Gets the emoji used to set a kink's preference to <see cref="KinkPreference.Like"/>.
         /// </summary>
-        public Emoji Like { get; } = new(default, "\x2705");
+        public ButtonComponent Like => new
+        (
+            ButtonComponentStyle.Primary,
+            nameof(this.Like),
+            new PartialEmoji(Name: "\x2705"),
+            nameof(this.Like).ToLowerInvariant()
+        );
 
         /// <summary>
         /// Gets the emoji used to set a kink's preference to <see cref="KinkPreference.Maybe"/>.
         /// </summary>
-        public Emoji Maybe { get; } = new(default, "\x26A0");
+        public ButtonComponent Maybe => new
+        (
+            ButtonComponentStyle.Primary,
+            nameof(this.Maybe),
+            new PartialEmoji(Name: "\x26A0"),
+            nameof(this.Maybe).ToLowerInvariant()
+        );
 
         /// <summary>
         /// Gets the emoji used to set a kink's preference to <see cref="KinkPreference.No"/>.
         /// </summary>
-        public Emoji Never { get; } = new(default, "\x26D4");
+        public ButtonComponent Never => new
+        (
+            ButtonComponentStyle.Primary,
+            nameof(this.Never),
+            new PartialEmoji(Name: "\x26D4"),
+            nameof(this.Never).ToLowerInvariant()
+        );
 
         /// <summary>
         /// Gets the emoji used to set a kink's preference to <see cref="KinkPreference.NoPreference"/>.
         /// </summary>
-        public Emoji NoPreference { get; } = new(default, "🤷");
+        public ButtonComponent NoPreference => new
+        (
+            ButtonComponentStyle.Primary,
+            nameof(this.NoPreference).Humanize(),
+            new PartialEmoji(Name: "🤷"),
+            nameof(this.NoPreference).ToLowerInvariant()
+        );
 
         /// <summary>
         /// Gets the emoji used to move the wizard back out of a category.
         /// </summary>
-        public Emoji Back { get; } = new(default, "\x23EB");
+        public ButtonComponent Back => new
+        (
+            ButtonComponentStyle.Primary,
+            nameof(this.Back),
+            new PartialEmoji(Name: "\x23EB"),
+            nameof(this.Back).ToLowerInvariant()
+        );
 
         /// <summary>
         /// Gets the emoji used to exit the wizard.
         /// </summary>
-        public Emoji Exit { get; } = new(default, "\x23F9");
+        public ButtonComponent Exit => new
+        (
+            ButtonComponentStyle.Primary,
+            nameof(this.Exit),
+            new PartialEmoji(Name: "\x23F9"),
+            nameof(this.Exit).ToLowerInvariant()
+        );
 
         /// <summary>
         /// Gets the emoji used to print a help message.
         /// </summary>
-        public Emoji Info { get; } = new(default, "\x2139");
+        public ButtonComponent Info => new
+        (
+            ButtonComponentStyle.Primary,
+            nameof(this.Info),
+            new PartialEmoji(Name: "\x2139"),
+            nameof(this.Info).ToLowerInvariant()
+        );
 
         /// <summary>
-        /// Gets the names of the reactions, mapped to their emoji.
+        /// Gets the buttons that the wizard responds to.
         /// </summary>
-        public IReadOnlyDictionary<string, IEmoji> ReactionNames { get; }
+        public IReadOnlyList<ButtonComponent> Buttons { get; }
 
         /// <summary>
         /// Gets the ID of the source user.
@@ -149,21 +228,21 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
 
             this.State = KinkWizardState.CategorySelection;
 
-            this.ReactionNames = new Dictionary<string, IEmoji>
+            this.Buttons = new List<ButtonComponent>
             {
-                { this.Next.GetEmojiName(), this.Next },
-                { this.Previous.GetEmojiName(), this.Previous },
-                { this.First.GetEmojiName(), this.First },
-                { this.Last.GetEmojiName(), this.Last },
-                { this.EnterCategory.GetEmojiName(), this.EnterCategory },
-                { this.Fave.GetEmojiName(), this.Fave },
-                { this.Like.GetEmojiName(), this.Like },
-                { this.Maybe.GetEmojiName(), this.Maybe },
-                { this.Never.GetEmojiName(), this.Never },
-                { this.NoPreference.GetEmojiName(), this.NoPreference },
-                { this.Back.GetEmojiName(), this.Back },
-                { this.Exit.GetEmojiName(), this.Exit },
-                { this.Info.GetEmojiName(), this.Info }
+                this.Next,
+                this.Previous,
+                this.First,
+                this.Last,
+                this.EnterCategory,
+                this.Fave,
+                this.Like,
+                this.Maybe,
+                this.Never,
+                this.NoPreference,
+                this.Back,
+                this.Exit,
+                this.Info
             };
         }
 
@@ -171,12 +250,57 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
         /// Gets the emojis that are associated with the current page.
         /// </summary>
         /// <returns>A set of emojis.</returns>
-        public IEnumerable<IEmoji> GetCurrentPageEmotes()
+        public IReadOnlyList<IMessageComponent> GetCurrentPageComponents()
         {
             return this.State switch
             {
-                KinkWizardState.CategorySelection => new[] { this.Exit, this.Info, this.First, this.Previous, this.Next, this.Last, this.EnterCategory },
-                KinkWizardState.KinkPreference => new[] { this.Exit, this.Info, this.Back, this.Fave, this.Like, this.Maybe, this.Never, this.NoPreference },
+                KinkWizardState.CategorySelection => new[]
+                {
+                    new ActionRowComponent
+                    (
+                        new[]
+                        {
+                            this.First,
+                            this.Previous,
+                            this.Next,
+                            this.Last
+                        }
+                    ),
+                    new ActionRowComponent
+                    (
+                        new[]
+                        {
+                            this.Info,
+                            this.EnterCategory,
+                            this.Exit,
+                        }
+                    )
+                },
+
+                KinkWizardState.KinkPreference => new[]
+                {
+                    new ActionRowComponent
+                    (
+                        new[]
+                        {
+                            this.Fave,
+                            this.Like,
+                            this.Maybe,
+                            this.Never,
+                            this.NoPreference
+                        }
+                    ),
+                    new ActionRowComponent
+                    (
+                        new[]
+                        {
+                            this.Info,
+                            this.Back,
+                            this.Exit,
+                        }
+                    )
+                },
+
                 _ => throw new ArgumentOutOfRangeException()
             };
         }

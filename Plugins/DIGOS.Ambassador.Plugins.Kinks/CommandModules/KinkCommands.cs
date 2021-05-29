@@ -238,9 +238,9 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         [Description("Runs an interactive wizard for setting kink preferences.")]
         public async Task<Result> RunKinkWizardAsync()
         {
-            return await _interactivity.SendPrivateInteractiveMessageAsync
+            return await _interactivity.SendInteractiveMessageAsync
             (
-                _context.User.ID,
+                _context.ChannelID,
                 (c, m) => new KinkWizard(c, m, _context.User.ID)
             );
         }
