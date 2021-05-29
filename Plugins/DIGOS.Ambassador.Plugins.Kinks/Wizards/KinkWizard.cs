@@ -42,7 +42,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
         /// </summary>
         public ButtonComponent Next => new
         (
-            ButtonComponentStyle.Primary,
+            ButtonComponentStyle.Secondary,
             nameof(this.Next),
             new PartialEmoji(Name: "\x25B6"),
             nameof(this.Next).ToLowerInvariant()
@@ -53,7 +53,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
         /// </summary>
         public ButtonComponent Previous => new
         (
-            ButtonComponentStyle.Primary,
+            ButtonComponentStyle.Secondary,
             nameof(this.Previous),
             new PartialEmoji(Name: "\x25C0"),
             nameof(this.Previous).ToLowerInvariant()
@@ -64,7 +64,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
         /// </summary>
         public ButtonComponent First => new
         (
-            ButtonComponentStyle.Primary,
+            ButtonComponentStyle.Secondary,
             nameof(this.First),
             new PartialEmoji(Name: "\x23EE"),
             nameof(this.First).ToLowerInvariant()
@@ -75,7 +75,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
         /// </summary>
         public ButtonComponent Last => new
         (
-            ButtonComponentStyle.Primary,
+            ButtonComponentStyle.Secondary,
             nameof(this.Last),
             new PartialEmoji(Name: "\x23ED"),
             nameof(this.Last).ToLowerInvariant()
@@ -97,7 +97,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
         /// </summary>
         public ButtonComponent Fave => new
         (
-            ButtonComponentStyle.Primary,
+            ButtonComponentStyle.Success,
             nameof(this.Fave),
             new PartialEmoji(Name: "\x2764"),
             nameof(this.Fave).ToLowerInvariant()
@@ -108,7 +108,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
         /// </summary>
         public ButtonComponent Like => new
         (
-            ButtonComponentStyle.Primary,
+            ButtonComponentStyle.Secondary,
             nameof(this.Like),
             new PartialEmoji(Name: "\x2705"),
             nameof(this.Like).ToLowerInvariant()
@@ -119,7 +119,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
         /// </summary>
         public ButtonComponent Maybe => new
         (
-            ButtonComponentStyle.Primary,
+            ButtonComponentStyle.Secondary,
             nameof(this.Maybe),
             new PartialEmoji(Name: "\x26A0"),
             nameof(this.Maybe).ToLowerInvariant()
@@ -130,7 +130,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
         /// </summary>
         public ButtonComponent Never => new
         (
-            ButtonComponentStyle.Primary,
+            ButtonComponentStyle.Danger,
             nameof(this.Never),
             new PartialEmoji(Name: "\x26D4"),
             nameof(this.Never).ToLowerInvariant()
@@ -141,7 +141,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
         /// </summary>
         public ButtonComponent NoPreference => new
         (
-            ButtonComponentStyle.Primary,
+            ButtonComponentStyle.Secondary,
             nameof(this.NoPreference).Humanize(),
             new PartialEmoji(Name: "🤷"),
             nameof(this.NoPreference).ToLowerInvariant()
@@ -152,7 +152,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
         /// </summary>
         public ButtonComponent Back => new
         (
-            ButtonComponentStyle.Primary,
+            ButtonComponentStyle.Secondary,
             nameof(this.Back),
             new PartialEmoji(Name: "\x23EB"),
             nameof(this.Back).ToLowerInvariant()
@@ -163,7 +163,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
         /// </summary>
         public ButtonComponent Exit => new
         (
-            ButtonComponentStyle.Primary,
+            ButtonComponentStyle.Secondary,
             nameof(this.Exit),
             new PartialEmoji(Name: "\x23F9"),
             nameof(this.Exit).ToLowerInvariant()

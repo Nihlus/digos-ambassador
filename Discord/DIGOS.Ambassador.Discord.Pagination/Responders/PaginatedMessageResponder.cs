@@ -32,6 +32,7 @@ using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
+using Remora.Discord.Core;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
 
@@ -118,19 +119,20 @@ namespace DIGOS.Ambassador.Discord.Pagination.Responders
                     return Result.FromSuccess();
                 }
 
-                if (!message.ButtonNonces.Contains(buttonNonce))
+                var button = message.Buttons.FirstOrDefault(b => b.CustomID.HasValue && b.CustomID.Value == buttonNonce);
+                if (button is null)
                 {
-                    // This isn't a button we respond to
+                    // This isn't a button we react to
                     return Result.FromSuccess();
                 }
 
                 // Special actions
-                if (buttonNonce == message.Appearance.Close)
+                if (button == message.Appearance.Close)
                 {
                     return await _channelAPI.DeleteMessageAsync(message.ChannelID, message.MessageID, ct);
                 }
 
-                if (buttonNonce == message.Appearance.Help)
+                if (button == message.Appearance.Help)
                 {
                     var embed = new Embed { Colour = Color.Cyan, Description = message.Appearance.HelpText };
                     var sendHelp = await _channelAPI.CreateMessageAsync(message.ChannelID, embed: embed, ct: ct);
@@ -141,22 +143,22 @@ namespace DIGOS.Ambassador.Discord.Pagination.Responders
 
                 // Page movement actions
                 var didPageUpdate = false;
-                if (buttonNonce == message.Appearance.First)
+                if (button == message.Appearance.First)
                 {
                     didPageUpdate = message.MoveFirst();
                 }
 
-                if (buttonNonce == message.Appearance.Back)
+                if (button == message.Appearance.Back)
                 {
                     didPageUpdate = message.MovePrevious();
                 }
 
-                if (buttonNonce == message.Appearance.Next)
+                if (button == message.Appearance.Next)
                 {
                     didPageUpdate = message.MoveNext();
                 }
 
-                if (buttonNonce == message.Appearance.Last)
+                if (button == message.Appearance.Last)
                 {
                     didPageUpdate = message.MoveLast();
                 }
@@ -190,6 +192,31 @@ namespace DIGOS.Ambassador.Discord.Pagination.Responders
             }
         }
 
+        private IReadOnlyList<IMessageComponent> GetCurrentPageComponents(PaginatedMessage message)
+        {
+            return new List<IMessageComponent>
+            {
+                new ActionRowComponent
+                (
+                    new[]
+                    {
+                        message.Appearance.First,
+                        message.Appearance.Back,
+                        message.Appearance.Next,
+                        message.Appearance.Last,
+                    }
+                ),
+                new ActionRowComponent
+                (
+                    new[]
+                    {
+                        message.Appearance.Close,
+                        message.Appearance.Help
+                    }
+                )
+            };
+        }
+
         /// <summary>
         /// Updates the contents of the interactive message.
         /// </summary>
@@ -200,55 +227,12 @@ namespace DIGOS.Ambassador.Discord.Pagination.Responders
         {
             var page = message.GetCurrentPage();
 
-            var buttons = new List<ButtonComponent>
-            {
-                new
-                (
-                    ButtonComponentStyle.Primary,
-                    nameof(message.Appearance.First),
-                    CustomID: nameof(message.Appearance.First)
-                ),
-                new
-                (
-                    ButtonComponentStyle.Primary,
-                    nameof(message.Appearance.Back),
-                    CustomID: nameof(message.Appearance.Back)
-                ),
-                new
-                (
-                    ButtonComponentStyle.Primary,
-                    nameof(message.Appearance.Next),
-                    CustomID: nameof(message.Appearance.Next)
-                ),
-                new
-                (
-                    ButtonComponentStyle.Primary,
-                    nameof(message.Appearance.Last),
-                    CustomID: nameof(message.Appearance.Last)
-                ),
-                new
-                (
-                    ButtonComponentStyle.Primary,
-                    nameof(message.Appearance.Close),
-                    CustomID: nameof(message.Appearance.Close)
-                ),
-                new
-                (
-                    ButtonComponentStyle.Primary,
-                    nameof(message.Appearance.Help),
-                    CustomID: nameof(message.Appearance.Help)
-                )
-            };
-
-            var actionRow = new ActionRowComponent(buttons);
-            var components = new List<IMessageComponent> { actionRow };
-
             var modifyMessage = await _channelAPI.EditMessageAsync
             (
                 message.ChannelID,
                 message.MessageID,
                 embed: page,
-                components: components,
+                components: new Optional<IReadOnlyList<IMessageComponent>>(GetCurrentPageComponents(message)),
                 ct: ct
             );
 

@@ -64,6 +64,10 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Model
             modelBuilder
                 .ConfigurePermissionConversions()
                 .ConfigureCoreConversions();
+
+            modelBuilder.Entity<Kink>()
+                .HasIndex(u => u.FListID)
+                .IsUnique();
         }
     }
 }

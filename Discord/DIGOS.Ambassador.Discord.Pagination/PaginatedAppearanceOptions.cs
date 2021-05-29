@@ -30,12 +30,12 @@ namespace DIGOS.Ambassador.Discord.Pagination
     /// </summary>
     public sealed record PaginatedAppearanceOptions
     (
-        string First,
-        string Back,
-        string Next,
-        string Last,
-        string Close,
-        string Help,
+        ButtonComponent First,
+        ButtonComponent Back,
+        ButtonComponent Next,
+        ButtonComponent Last,
+        ButtonComponent Close,
+        ButtonComponent Help,
         string FooterFormat = "Page {0}/{1}",
         string HelpText = "This is a paginated message. React with the respective icons to change page."
     )
@@ -45,12 +45,48 @@ namespace DIGOS.Ambassador.Discord.Pagination
         /// </summary>
         public static readonly PaginatedAppearanceOptions Default = new
         (
-            "⏮",
-            "◀",
-            "▶",
-            "⏭",
-            "\x23F9",
-            "ℹ"
+            new ButtonComponent
+            (
+                ButtonComponentStyle.Secondary,
+                nameof(First),
+                new PartialEmoji(Name: "⏮"),
+                nameof(First)
+            ),
+            new ButtonComponent
+            (
+                ButtonComponentStyle.Secondary,
+                nameof(Back),
+                new PartialEmoji(Name: "◀"),
+                nameof(Back)
+            ),
+            new ButtonComponent
+            (
+                ButtonComponentStyle.Secondary,
+                nameof(Next),
+                new PartialEmoji(Name: "▶"),
+                nameof(Next)
+            ),
+            new ButtonComponent
+            (
+                ButtonComponentStyle.Secondary,
+                nameof(Last),
+                new PartialEmoji(Name: "⏭"),
+                nameof(Last)
+            ),
+            new ButtonComponent
+            (
+                ButtonComponentStyle.Secondary,
+                nameof(Close),
+                new PartialEmoji(Name: "\x23F9"),
+                nameof(Close)
+            ),
+            new ButtonComponent
+            (
+                ButtonComponentStyle.Secondary,
+                nameof(Help),
+                new PartialEmoji(Name: "ℹ"),
+                nameof(Help)
+            )
         );
     }
 }

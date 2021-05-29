@@ -22,8 +22,6 @@
 
 using System.Collections.Generic;
 using DIGOS.Ambassador.Discord.Interactivity.Messages;
-using DIGOS.Ambassador.Discord.Pagination.Extensions;
-using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Core;
 
@@ -37,7 +35,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
         /// <summary>
         /// Gets the nonces of the buttons this message responds to.
         /// </summary>
-        public IReadOnlyList<string> ButtonNonces { get; }
+        public IReadOnlyList<ButtonComponent> Buttons { get; }
 
         /// <summary>
         /// Gets the pages in the message.
@@ -83,7 +81,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
             this.Pages = pages;
             this.Appearance = appearance;
 
-            this.ButtonNonces = new List<string>
+            this.Buttons = new List<ButtonComponent>
             {
                 appearance.First,
                 appearance.Back,
