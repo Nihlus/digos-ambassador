@@ -104,7 +104,19 @@ namespace DIGOS.Ambassador.Discord.Pagination.Responders
                 return respondDeferred;
             }
 
-            var user = gatewayEvent.User.Value ?? throw new InvalidOperationException();
+            var user = gatewayEvent.User.HasValue
+                ? gatewayEvent.User.Value
+                : gatewayEvent.Member.HasValue
+                    ? gatewayEvent.Member.Value.User.HasValue
+                        ? gatewayEvent.Member.Value.User.Value
+                        : null
+                    : null;
+
+            if (user is null)
+            {
+                return Result.FromSuccess();
+            }
+
             var userID = user.ID;
 
             var buttonNonce = data.CustomID.Value ?? throw new InvalidOperationException();
