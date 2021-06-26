@@ -142,7 +142,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         public async Task<IResult> DisplayContactAsync()
         {
             const string avatarURL = "https://i.imgur.com/2E334jS.jpg";
-            var eb = _feedback.CreateEmbedBase() with
+            var embed = _feedback.CreateEmbedBase() with
             {
                 Title = "Privacy Contact",
                 Author = new EmbedAuthor("Jarl Gullberg", IconUrl: avatarURL, Url: "https://github.com/Nihlus/"),
@@ -161,7 +161,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             var sendEmbed = await _channelAPI.CreateMessageAsync
             (
                 _context.ChannelID,
-                embed: eb,
+                embeds: new[] { embed },
                 ct: this.CancellationToken
             );
 

@@ -105,14 +105,14 @@ namespace DIGOS.Ambassador.Plugins.JoinMessages.Responders
 
             var userChannel = openDM.Entity;
 
-            var eb = _feedback.CreateEmbedBase() with
+            var embed = _feedback.CreateEmbedBase() with
             {
                 Description = $"Welcome, <@{gatewayEvent.User.Value.ID}>!\n" +
                               "\n" +
                               $"{getJoinMessageResult.Entity}"
             };
 
-            var sendEmbed = await _channelAPI.CreateMessageAsync(userChannel.ID, embed: eb, ct: ct);
+            var sendEmbed = await _channelAPI.CreateMessageAsync(userChannel.ID, embeds: new[] { embed }, ct: ct);
             if (sendEmbed.IsSuccess)
             {
                 return Result.FromSuccess();
@@ -154,7 +154,7 @@ namespace DIGOS.Ambassador.Plugins.JoinMessages.Responders
             var sendNotification = await _channelAPI.CreateMessageAsync
             (
                 guild.SystemChannelID.Value,
-                embed: welcomeMessage,
+                embeds: new[] { welcomeMessage },
                 ct: ct
             );
 

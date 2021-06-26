@@ -41,6 +41,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Core;
 using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -177,7 +178,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                         Author = new EmbedAuthor
                         {
                             Name = banAuthor.Username,
-                            Url = getBanAuthorAvatar.IsSuccess ? getBanAuthorAvatar.Entity.ToString() : default
+                            Url = getBanAuthorAvatar.IsSuccess
+                                ? getBanAuthorAvatar.Entity.ToString()
+                                : default(Optional<string>)
                         },
                         Description = ban.Reason,
                         Fields = embedFields

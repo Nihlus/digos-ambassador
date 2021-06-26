@@ -182,7 +182,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             var exporter = new PDFRoleplayExporter();
             using var exportedRoleplay = await exporter.ExportAsync(services, roleplay);
 
-            var eb = feedback.CreateEmbedBase() with
+            var embed = feedback.CreateEmbedBase() with
             {
                 Title = $"{exportedRoleplay.Title} - Archived",
                 Description = roleplay.Summary,
@@ -198,7 +198,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             var send = await channelAPI.CreateMessageAsync
             (
                 settings.ArchiveChannel.Value,
-                embed: eb,
+                embeds: new[] { embed },
                 file: fileData
             );
 

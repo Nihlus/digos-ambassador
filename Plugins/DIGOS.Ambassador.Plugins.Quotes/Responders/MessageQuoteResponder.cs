@@ -173,7 +173,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Responders
 
             foreach (var embed in embeds)
             {
-                var sendQuote = await _channelAPI.CreateMessageAsync(channelID, embed: embed, ct: ct);
+                var sendQuote = await _channelAPI.CreateMessageAsync(channelID, embeds: new[] { embed }, ct: ct);
                 if (!sendQuote.IsSuccess)
                 {
                     return Result.FromError(sendQuote);

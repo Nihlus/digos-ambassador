@@ -43,6 +43,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Core;
 using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 using User = DIGOS.Ambassador.Plugins.Core.Model.Users.User;
@@ -109,20 +110,20 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             var embedFields = new List<IEmbedField>();
 
             var getUserAvatar = CDN.GetUserAvatarUrl(discordUser);
-            var eb = new Embed
+            var embed = new Embed
             {
                 Author = new EmbedAuthor
                 (
                     $"{discordUser.Username}#{discordUser.Discriminator}",
                     IconUrl: getUserAvatar.IsSuccess
                         ? getUserAvatar.Entity.ToString()
-                        : default
+                        : default(Optional<string>)
                 ),
                 Thumbnail = new EmbedThumbnail
                 (
                     getUserAvatar.IsSuccess
                         ? getUserAvatar.Entity.ToString()
-                        : default
+                        : default(Optional<string>)
                 ),
                 Fields = embedFields
             };
@@ -152,7 +153,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
 
                     var roles = getRoles.Entity;
                     var primaryRole = roles.OrderByDescending(r => r.Position).First(r => member.Roles.Contains(r.ID));
-                    eb = eb with
+                    embed = embed with
                     {
                         Colour = primaryRole.Colour
                     };
@@ -160,7 +161,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             }
             else
             {
-                eb = eb with
+                embed = embed with
                 {
                     Colour = Color.LightSlateGray
                 };
@@ -208,7 +209,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             var sendEmbed = await _channelAPI.CreateMessageAsync
             (
                 _context.ChannelID,
-                embed: eb,
+                embeds: new[] { embed },
                 ct: this.CancellationToken
             );
 

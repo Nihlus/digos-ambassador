@@ -116,7 +116,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
                             }
 
                             var participant = getParticipant.Entity;
-                            return participant.Nickname.HasValue
+                            return participant.Nickname.HasValue && participant.Nickname.Value is not null
                                 ? participant.Nickname.Value
                                 : participant.User.HasValue
                                     ? participant.User.Value.Username

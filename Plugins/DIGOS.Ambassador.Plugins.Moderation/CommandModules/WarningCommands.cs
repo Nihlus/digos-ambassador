@@ -42,6 +42,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Core;
 using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
@@ -129,7 +130,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                         Author = new EmbedAuthor
                         {
                             Name = author.Username,
-                            IconUrl = getAuthorAvatar.IsSuccess ? getAuthorAvatar.Entity.ToString() : default
+                            IconUrl = getAuthorAvatar.IsSuccess
+                                ? getAuthorAvatar.Entity.ToString()
+                                : default(Optional<string>)
                         },
                         Description = warning.Reason,
                         Fields = embedFields

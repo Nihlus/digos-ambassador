@@ -131,7 +131,11 @@ namespace DIGOS.Ambassador.Discord.Pagination.Responders
                     return Result.FromSuccess();
                 }
 
-                var button = message.Buttons.FirstOrDefault(b => b.CustomID.HasValue && b.CustomID.Value == buttonNonce);
+                var button = message.Buttons.FirstOrDefault
+                (
+                    b => b.CustomID.HasValue && b.CustomID.Value == buttonNonce
+                );
+
                 if (button is null)
                 {
                     // This isn't a button we react to
@@ -147,7 +151,13 @@ namespace DIGOS.Ambassador.Discord.Pagination.Responders
                 if (button == message.Appearance.Help)
                 {
                     var embed = new Embed { Colour = Color.Cyan, Description = message.Appearance.HelpText };
-                    var sendHelp = await _channelAPI.CreateMessageAsync(message.ChannelID, embed: embed, ct: ct);
+                    var sendHelp = await _channelAPI.CreateMessageAsync
+                    (
+                        message.ChannelID,
+                        embeds: new[] { embed },
+                        ct: ct
+                    );
+
                     return !sendHelp.IsSuccess
                         ? Result.FromError(sendHelp)
                         : Result.FromSuccess();
@@ -243,7 +253,7 @@ namespace DIGOS.Ambassador.Discord.Pagination.Responders
             (
                 message.ChannelID,
                 message.MessageID,
-                embed: page,
+                embeds: new[] { page },
                 components: new Optional<IReadOnlyList<IMessageComponent>>(GetCurrentPageComponents(message)),
                 ct: ct
             );

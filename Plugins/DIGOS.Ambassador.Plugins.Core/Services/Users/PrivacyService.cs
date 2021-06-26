@@ -108,7 +108,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
             if (openDM.IsSuccess)
             {
                 var channel = openDM.Entity;
-                var sendMessage = await _channelAPI.CreateMessageAsync(channel.ID, embed: embed, ct: ct);
+                var sendMessage = await _channelAPI.CreateMessageAsync(channel.ID, embeds: new[] { embed }, ct: ct);
                 if (sendMessage.IsSuccess)
                 {
                     return await SendPrivacyPolicyAsync(channel.ID, ct);
@@ -137,14 +137,14 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
             var result = _content.OpenLocalStream(UPath.Combine(UPath.Root, "Privacy", "PrivacyPolicy.pdf"));
             if (!result.IsSuccess)
             {
-                var errorBuilder = _feedback.CreateEmbedBase(Color.Red) with
+                var embed = _feedback.CreateEmbedBase(Color.Red) with
                 {
                     Description = "Oops. Something went wrong, and I couldn't grab the privacy policy. Please report " +
                                   "this to the developer, don't agree to anything, and read it online instead.",
                     Fields = new[] { new EmbedField("Privacy Policy", _content.PrivacyPolicyUri.ToString()) }
                 };
 
-                var sendError = await _channelAPI.CreateMessageAsync(channel, embed: errorBuilder, ct: ct);
+                var sendError = await _channelAPI.CreateMessageAsync(channel, embeds: new[] { embed }, ct: ct);
                 return sendError.IsSuccess
                     ? Result.FromSuccess()
                     : Result.FromError(sendError);

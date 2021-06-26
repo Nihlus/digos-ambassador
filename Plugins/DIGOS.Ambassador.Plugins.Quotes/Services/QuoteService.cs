@@ -220,7 +220,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Services
                 Name = $"{message.Author.Username}#{message.Author.Discriminator}",
                 IconUrl = getUserAvatar.IsSuccess
                     ? getUserAvatar.Entity.ToString()
-                    : default
+                    : default(Optional<string>)
             };
 
             return embed with

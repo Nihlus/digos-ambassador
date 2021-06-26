@@ -254,7 +254,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
             CancellationToken ct = default
         )
         {
-            return _channelAPI.CreateMessageAsync(channel, embed: embed, ct: ct);
+            return _channelAPI.CreateMessageAsync(channel, embeds: new[] { embed }, ct: ct);
         }
 
         /// <summary>
@@ -278,7 +278,12 @@ namespace DIGOS.Ambassador.Discord.Feedback
             {
                 case MessageContext messageContext:
                 {
-                    return await _channelAPI.CreateMessageAsync(messageContext.ChannelID, embed: embed, ct: ct);
+                    return await _channelAPI.CreateMessageAsync
+                    (
+                        messageContext.ChannelID,
+                        embeds: new[] { embed },
+                        ct: ct
+                    );
                 }
                 case InteractionContext interactionContext:
                 {

@@ -126,7 +126,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity
                 Description = "Loading..."
             };
 
-            var sendMessage = await _channelAPI.CreateMessageAsync(channelID, embed: initialEmbed, ct: ct);
+            var sendMessage = await _channelAPI.CreateMessageAsync(channelID, embeds: new[] { initialEmbed }, ct: ct);
             if (!sendMessage.IsSuccess)
             {
                 return Result.FromError(sendMessage);

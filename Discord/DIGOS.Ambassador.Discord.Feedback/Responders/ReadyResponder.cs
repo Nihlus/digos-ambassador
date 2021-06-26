@@ -62,6 +62,11 @@ namespace DIGOS.Ambassador.Discord.Feedback.Responders
 
             var application = getApplication.Entity;
 
+            if (application.Owner is null)
+            {
+                return new GenericError("The application's owner was not present.");
+            }
+
             _identityInformation.ApplicationID = application.ID;
             _identityInformation.OwnerID = application.Owner.ID.Value;
 

@@ -112,7 +112,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                 )
             };
 
-            var eb = _feedback.CreateEmbedBase() with
+            var embed = _feedback.CreateEmbedBase() with
             {
                 Title = guild.Name,
                 Fields = fields
@@ -121,7 +121,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             var getGuildSplash = CDN.GetGuildSplashUrl(guild);
             if (getGuildSplash.IsSuccess)
             {
-                eb = eb with
+                embed = embed with
                 {
                     Thumbnail = new EmbedThumbnail(getGuildSplash.Entity.ToString())
                 };
@@ -131,7 +131,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                 var getGuildIcon = CDN.GetGuildIconUrl(guild);
                 if (getGuildIcon.IsSuccess)
                 {
-                    eb = eb with
+                    embed = embed with
                     {
                         Thumbnail = new EmbedThumbnail(getGuildIcon.Entity.ToString())
                     };
@@ -139,7 +139,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             }
 
             var getDescription = _servers.GetDescription(server);
-            eb = eb with
+            embed = embed with
             {
                 Description = getDescription.IsSuccess
                     ? getDescription.Entity
@@ -149,7 +149,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             var sendResult = await _channelAPI.CreateMessageAsync
             (
                 _context.ChannelID,
-                embed: eb,
+                embeds: new[] { embed },
                 ct: this.CancellationToken
             );
 
@@ -182,7 +182,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                 return getJoinMessageResult;
             }
 
-            var eb = _feedback.CreateEmbedBase() with
+            var embed = _feedback.CreateEmbedBase() with
             {
                 Title = "Welcome!",
                 Description = getJoinMessageResult.Entity
@@ -191,7 +191,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             var sendResult = await _channelAPI.CreateMessageAsync
             (
                 _context.ChannelID,
-                embed: eb,
+                embeds: new[] { embed },
                 ct: this.CancellationToken
             );
 

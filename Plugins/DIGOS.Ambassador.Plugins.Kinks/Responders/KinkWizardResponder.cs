@@ -373,7 +373,12 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
                 return new ParsingError<KinkCategory>("Could not parse kink category.");
             }
 
-            var getKinkResult = await _kinks.GetFirstKinkWithoutPreferenceInCategoryAsync(wizard.SourceUserID, category);
+            var getKinkResult = await _kinks.GetFirstKinkWithoutPreferenceInCategoryAsync
+            (
+                wizard.SourceUserID,
+                category
+            );
+
             if (!getKinkResult.IsSuccess)
             {
                 getKinkResult = await _kinks.GetFirstKinkInCategoryAsync(category);
@@ -597,7 +602,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
             (
                 wizard.ChannelID,
                 wizard.MessageID,
-                embed: page,
+                embeds: new[] { page },
                 components: new Optional<IReadOnlyList<IMessageComponent>>(wizard.GetCurrentPageComponents()),
                 ct: ct
             );

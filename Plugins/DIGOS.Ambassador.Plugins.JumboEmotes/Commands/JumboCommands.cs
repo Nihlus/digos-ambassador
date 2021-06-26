@@ -140,7 +140,7 @@ namespace DIGOS.Ambassador.Plugins.JumboEmotes.Commands
                 return Result.FromError(new UserError("Sorry, I couldn't find that emote."));
             }
 
-            var eb = new Embed
+            var embed = new Embed
             {
                 Colour = Color.MediumPurple,
                 Image = new EmbedImage { Url = emoteUrl }
@@ -149,7 +149,7 @@ namespace DIGOS.Ambassador.Plugins.JumboEmotes.Commands
             var sendEmoji = await _channelAPI.CreateMessageAsync
             (
                 _context.ChannelID,
-                embed: eb,
+                embeds: new[] { embed },
                 ct: this.CancellationToken
             );
 

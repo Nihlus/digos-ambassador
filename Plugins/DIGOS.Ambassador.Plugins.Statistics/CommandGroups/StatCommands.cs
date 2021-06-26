@@ -211,7 +211,7 @@ namespace DIGOS.Ambassador.Plugins.Statistics.CommandGroups
                 Name = guild.Name,
                 IconUrl = getGuildAuthorIcon.IsSuccess
                     ? getGuildAuthorIcon.Entity.ToString()
-                    : default
+                    : default(Optional<string>)
             };
 
             eb = eb with

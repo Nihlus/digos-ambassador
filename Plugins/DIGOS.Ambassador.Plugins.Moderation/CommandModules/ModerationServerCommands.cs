@@ -28,10 +28,12 @@ using DIGOS.Ambassador.Plugins.Moderation.Services;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.API;
+using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Core;
 using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -103,7 +105,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 var eb = _feedback.CreateEmbedBase() with
                 {
                     Title = guild.Name,
-                    Thumbnail = getGuildIcon.IsSuccess ? new EmbedThumbnail(getGuildIcon.Entity.ToString()) : default,
+                    Thumbnail = getGuildIcon.IsSuccess
+                        ? new EmbedThumbnail(getGuildIcon.Entity.ToString())
+                        : default(Optional<IEmbedThumbnail>),
                     Fields = embedFields
                 };
 
