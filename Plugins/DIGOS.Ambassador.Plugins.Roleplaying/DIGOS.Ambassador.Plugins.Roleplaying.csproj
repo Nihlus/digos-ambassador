@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Humanizer.Core" Version="2.10.1" />
+        <PackageReference Include="Humanizer.Core" Version="2.11.10" />
         <PackageReference Include="iTextSharp.LGPLv2.Core" Version="1.7.1" />
         <PackageReference Include="Remora.Behaviours" Version="6.1.0" />
     </ItemGroup>

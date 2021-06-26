@@ -9,7 +9,7 @@
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
         <PackageReference Include="morelinq" Version="3.3.2" />
         <PackageReference Include="Remora.Results" Version="4.0.1" />
-        <PackageReference Include="Zio" Version="0.11.0" />
+        <PackageReference Include="Zio" Version="0.12.0" />
     </ItemGroup>
 
 </Project>

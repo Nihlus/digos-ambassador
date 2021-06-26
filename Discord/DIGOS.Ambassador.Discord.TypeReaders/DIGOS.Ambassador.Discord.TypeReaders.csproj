@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Humanizer.Core" Version="2.10.1" />
+        <PackageReference Include="Humanizer.Core" Version="2.11.10" />
         <PackageReference Include="Remora.Discord.Commands" Version="3.10.10" />
     </ItemGroup>
 
