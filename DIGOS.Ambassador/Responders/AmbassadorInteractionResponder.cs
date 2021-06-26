@@ -195,7 +195,8 @@ namespace DIGOS.Ambassador.Responders
             // First of all, check user consent
             var hasConsented = await _privacy.HasUserConsentedAsync(context.User.ID, ct);
 
-            var potentialCommands = _commandService.Tree.Search(command, parameters).ToList();
+            var searchOptions = new TreeSearchOptions(StringComparison.OrdinalIgnoreCase);
+            var potentialCommands = _commandService.Tree.Search(command, parameters, searchOptions).ToList();
             var atLeastOneRequiresConsent = potentialCommands.Any
             (
                 c =>
@@ -221,7 +222,6 @@ namespace DIGOS.Ambassador.Responders
             }
 
             // Run the actual command
-            var searchOptions = new TreeSearchOptions(StringComparison.OrdinalIgnoreCase);
             var executeResult = await _commandService.TryExecuteAsync
             (
                 command,

@@ -153,7 +153,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             var dedicatedChannel = createChannel.Entity;
             roleplay.DedicatedChannelID = dedicatedChannel.ID;
 
-            // This can fail in all manner of ways because of Discord.NET. Try, catch, etc...
             var resetPermissions = await ResetChannelPermissionsAsync(roleplay);
             if (!resetPermissions.IsSuccess)
             {

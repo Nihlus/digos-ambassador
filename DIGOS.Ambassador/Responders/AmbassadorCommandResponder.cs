@@ -37,6 +37,7 @@ using JetBrains.Annotations;
 using Microsoft.Extensions.Options;
 using Remora.Commands.Results;
 using Remora.Commands.Services;
+using Remora.Commands.Trees;
 using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
@@ -253,7 +254,8 @@ namespace DIGOS.Ambassador.Responders
             // First of all, check user consent
             var hasConsented = await _privacy.HasUserConsentedAsync(commandContext.User.ID, ct);
 
-            var potentialCommands = _commandService.Tree.Search(content).ToList();
+            var searchOptions = new TreeSearchOptions(StringComparison.OrdinalIgnoreCase);
+            var potentialCommands = _commandService.Tree.Search(content, searchOptions).ToList();
             var atLeastOneRequiresConsent = potentialCommands.Any
             (
                 c =>
@@ -282,7 +284,8 @@ namespace DIGOS.Ambassador.Responders
             var executeResult = await _commandService.TryExecuteAsync
             (
                 content,
-                _services,
+                searchOptions: searchOptions,
+                services: _services,
                 ct: ct
             );
 
