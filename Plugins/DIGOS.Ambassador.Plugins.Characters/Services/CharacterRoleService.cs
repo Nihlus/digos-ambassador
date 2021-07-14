@@ -275,7 +275,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
                     if (!removeRole.IsSuccess)
                     {
-                        if (removeRole.Unwrap() is not DiscordRestResultError rre)
+                        if (removeRole.Error is not DiscordRestResultError rre)
                         {
                             return removeRole;
                         }
@@ -333,7 +333,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             if (!removeRole.IsSuccess)
             {
-                if (removeRole.Unwrap() is not DiscordRestResultError rre)
+                if (removeRole.Error is not DiscordRestResultError rre)
                 {
                     return removeRole;
                 }
@@ -405,7 +405,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                     return Result.FromSuccess();
                 }
 
-                if (removeRole.Unwrap() is not DiscordRestResultError rre)
+                if (removeRole.Error is not DiscordRestResultError rre)
                 {
                     return removeRole;
                 }
@@ -437,7 +437,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
                 if (!removeRole.IsSuccess)
                 {
-                    if (removeRole.Unwrap() is not DiscordRestResultError rre)
+                    if (removeRole.Error is not DiscordRestResultError rre)
                     {
                         return removeRole;
                     }

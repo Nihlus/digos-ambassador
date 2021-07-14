@@ -346,7 +346,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
                 (
                     wizard.ChannelID,
                     wizard.SourceUserID,
-                    tryStartCategoryResult.Unwrap().Message,
+                    tryStartCategoryResult.Error.Message,
                     ct
                 );
 

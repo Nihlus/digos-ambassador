@@ -40,7 +40,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
         {
             var result = this.Verifier.VerifyFile<Transformation>(transformationFile);
 
-            Assert.True(result.IsSuccess, result.IsSuccess ? string.Empty : result.Unwrap().Message);
+            Assert.True(result.IsSuccess, result.IsSuccess ? string.Empty : result.Error.Message);
         }
 
         [Theory]

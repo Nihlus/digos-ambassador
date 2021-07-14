@@ -235,7 +235,7 @@ namespace DIGOS.Ambassador
             var checkSlashSupport = slashService.SupportsSlashCommands();
             if (!checkSlashSupport.IsSuccess)
             {
-                var error = checkSlashSupport.Unwrap();
+                var error = checkSlashSupport.Error;
                 if (error is UnsupportedFeatureError ufe)
                 {
                     var location = ufe.Node is not null
@@ -260,7 +260,7 @@ namespace DIGOS.Ambassador
                 var updateSlash = await slashService.UpdateSlashCommandsAsync(debugServer, cancellationSource.Token);
                 if (!updateSlash.IsSuccess)
                 {
-                    log.LogWarning("Failed to update slash commands: {Reason}", updateSlash.Unwrap().Message);
+                    log.LogWarning("Failed to update slash commands: {Reason}", updateSlash.Error.Message);
                 }
             }
 
@@ -274,7 +274,7 @@ namespace DIGOS.Ambassador
                     (
                         "Failed to initialize plugin {Name}: {Error}",
                         plugin.Name,
-                        initializePlugin.Unwrap().Message
+                        initializePlugin.Error.Message
                     );
 
                     return;
@@ -297,7 +297,7 @@ namespace DIGOS.Ambassador
                 (
                     "Failed to migrate plugin {Name}: {Error}",
                     plugin.Name,
-                    migratePlugin.Unwrap().Message
+                    migratePlugin.Error.Message
                 );
 
                 return;

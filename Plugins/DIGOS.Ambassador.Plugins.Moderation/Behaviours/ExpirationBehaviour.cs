@@ -114,14 +114,14 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
 
                 if (!notifyResult.IsSuccess)
                 {
-                    this.Log.LogWarning("Failed to rescind warning: {Reason}", notifyResult.Unwrap().Message);
+                    this.Log.LogWarning("Failed to rescind warning: {Reason}", notifyResult.Error.Message);
                     return notifyResult;
                 }
 
                 var deleteResult = await warningService.DeleteWarningAsync(expiredWarning, ct);
                 if (!deleteResult.IsSuccess)
                 {
-                    this.Log.LogWarning("Failed to rescind warning: {Reason}", deleteResult.Unwrap().Message);
+                    this.Log.LogWarning("Failed to rescind warning: {Reason}", deleteResult.Error.Message);
                     return deleteResult;
                 }
 
@@ -159,7 +159,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
 
                 if (!removeBan.IsSuccess)
                 {
-                    if (removeBan.Unwrap() is DiscordRestResultError dre)
+                    if (removeBan.Error is DiscordRestResultError dre)
                     {
                         switch (dre.DiscordError.Code)
                         {
@@ -175,14 +175,14 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                             }
                             default:
                             {
-                                this.Log.LogWarning("Failed to rescind ban: {Reason}", removeBan.Unwrap().Message);
+                                this.Log.LogWarning("Failed to rescind ban: {Reason}", removeBan.Error.Message);
                                 return removeBan;
                             }
                         }
                     }
                     else
                     {
-                        this.Log.LogWarning("Failed to rescind ban: {Reason}", removeBan.Unwrap().Message);
+                        this.Log.LogWarning("Failed to rescind ban: {Reason}", removeBan.Error.Message);
                         return removeBan;
                     }
                 }
@@ -190,14 +190,14 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                 var notifyResult = await loggingService.NotifyUserUnbannedAsync(expiredBan, identityService.ID);
                 if (!notifyResult.IsSuccess)
                 {
-                    this.Log.LogWarning("Failed to rescind ban: {Reason}", removeBan.Unwrap().Message);
+                    this.Log.LogWarning("Failed to rescind ban: {Reason}", notifyResult.Error.Message);
                     return notifyResult;
                 }
 
                 var deleteResult = await banService.DeleteBanAsync(expiredBan, ct);
                 if (!deleteResult.IsSuccess)
                 {
-                    this.Log.LogWarning("Failed to rescind ban: {Reason}", removeBan.Unwrap().Message);
+                    this.Log.LogWarning("Failed to rescind ban: {Reason}", deleteResult.Error.Message);
                     return deleteResult;
                 }
 

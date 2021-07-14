@@ -758,14 +758,14 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return modifyNickname;
             }
 
-            if (modifyNickname.Unwrap() is DiscordRestResultError rre)
+            if (modifyNickname.Error is DiscordRestResultError rre)
             {
                 return rre.DiscordError.Code is not DiscordError.MissingPermission
                     ? modifyNickname
                     : new UserError("I don't have permission to set the user's nickname.");
             }
 
-            if (modifyNickname.Unwrap() is not HttpResultError hre)
+            if (modifyNickname.Error is not HttpResultError hre)
             {
                 return modifyNickname;
             }

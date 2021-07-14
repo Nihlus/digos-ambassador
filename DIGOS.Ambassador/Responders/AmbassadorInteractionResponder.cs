@@ -297,13 +297,7 @@ namespace DIGOS.Ambassador.Responders
                     : Result.FromSuccess();
             }
 
-            IResult result = commandResult;
-            while (result.Inner is not null)
-            {
-                result = result.Inner;
-            }
-
-            var error = result.Unwrap();
+            var error = commandResult.Error;
             switch (error)
             {
                 case ParameterParsingError:
@@ -320,7 +314,7 @@ namespace DIGOS.Ambassador.Responders
                 }
                 default:
                 {
-                    return Result.FromError(commandResult.Unwrap());
+                    return Result.FromError(commandResult.Error!);
                 }
             }
         }

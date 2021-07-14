@@ -158,11 +158,11 @@ namespace DIGOS.Ambassador.Responders
                     gatewayEvent.ApplicationID,
                     gatewayEvent.MessageReference,
                     gatewayEvent.Flags,
-                    gatewayEvent.Stickers,
                     gatewayEvent.ReferencedMessage,
                     gatewayEvent.Interaction,
                     gatewayEvent.Thread,
-                    gatewayEvent.Components
+                    gatewayEvent.Components,
+                    gatewayEvent.StickerItems
                 )
             );
 
@@ -343,13 +343,7 @@ namespace DIGOS.Ambassador.Responders
                     : Result.FromSuccess();
             }
 
-            IResult result = commandResult;
-            while (result.Inner is not null)
-            {
-                result = result.Inner;
-            }
-
-            var error = result.Unwrap();
+            var error = commandResult.Error;
             switch (error)
             {
                 case ParameterParsingError:
@@ -373,7 +367,7 @@ namespace DIGOS.Ambassador.Responders
                 }
                 default:
                 {
-                    return Result.FromError(commandResult.Unwrap());
+                    return Result.FromError(commandResult.Error!);
                 }
             }
         }

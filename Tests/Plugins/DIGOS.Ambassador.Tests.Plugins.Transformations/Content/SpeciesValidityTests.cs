@@ -65,7 +65,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             var result = this.Verifier.VerifyFile<Species>(speciesFile);
 
             // Guarding ErrorReason here, since it throws if the result was successful.
-            Assert.True(result.IsSuccess, result.IsSuccess ? string.Empty : result.Unwrap().Message);
+            Assert.True(result.IsSuccess, result.IsSuccess ? string.Empty : result.Error.Message);
         }
     }
 }

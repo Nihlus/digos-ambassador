@@ -118,7 +118,7 @@ namespace DIGOS.Ambassador.Plugins.JoinMessages.Responders
                 return Result.FromSuccess();
             }
 
-            if (sendEmbed.Unwrap() is not DiscordRestResultError dre)
+            if (sendEmbed.Error is not DiscordRestResultError dre)
             {
                 return Result.FromError(sendEmbed);
             }

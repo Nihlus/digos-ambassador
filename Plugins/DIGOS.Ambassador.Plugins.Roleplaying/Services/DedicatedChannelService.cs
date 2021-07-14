@@ -120,7 +120,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             if (!createChannel.IsSuccess)
             {
-                if (createChannel.Unwrap() is not DiscordRestResultError rre)
+                if (createChannel.Error is not DiscordRestResultError rre)
                 {
                     return Result<IChannel>.FromError(createChannel);
                 }
@@ -332,7 +332,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             var deleteChannel = await _channelAPI.DeleteChannelAsync(channel);
             if (!deleteChannel.IsSuccess)
             {
-                if (deleteChannel.Unwrap() is not DiscordRestResultError)
+                if (deleteChannel.Error is not DiscordRestResultError)
                 {
                     return deleteChannel;
                 }

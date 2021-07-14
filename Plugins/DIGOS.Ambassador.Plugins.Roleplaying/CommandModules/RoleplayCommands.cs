@@ -788,7 +788,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 var reset = await _dedicatedChannels.ResetChannelPermissionsAsync(roleplay);
                 if (!reset.IsSuccess)
                 {
-                    await _feedback.SendContextualErrorAsync(_context.User.ID, reset.Unwrap().Message);
+                    await _feedback.SendContextualErrorAsync(_context.User.ID, reset.Error.Message);
                 }
             }
 
@@ -840,7 +840,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 }
 
                 var message =
-                    $"I couldn't add <@{participant.ID}> to the roleplay ({addParticipantAsync.Unwrap().Message}. " +
+                    $"I couldn't add <@{participant.ID}> to the roleplay ({addParticipantAsync.Error.Message}. " +
                     "Please try to invite them manually.";
 
                 var sendWarning = await _feedback.SendContextualWarningAsync
