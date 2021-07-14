@@ -160,13 +160,15 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <returns>A deletion result which may or may not have succeeded.</returns>
         public async Task<Result> DeleteRoleplayAsync(Roleplay roleplay)
         {
-            if (roleplay.DedicatedChannelID.HasValue)
+            if (!roleplay.DedicatedChannelID.HasValue)
             {
-                var deleteChannel = await _dedicatedChannels.DeleteChannelAsync(roleplay);
-                if (!deleteChannel.IsSuccess)
-                {
-                    return deleteChannel;
-                }
+                return await _roleplays.DeleteRoleplayAsync(roleplay);
+            }
+
+            var deleteChannel = await _dedicatedChannels.DeleteChannelAsync(roleplay);
+            if (!deleteChannel.IsSuccess)
+            {
+                return deleteChannel;
             }
 
             return await _roleplays.DeleteRoleplayAsync(roleplay);

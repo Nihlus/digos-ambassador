@@ -25,7 +25,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Errors;
 using DIGOS.Ambassador.Discord.Interactivity;
@@ -271,17 +270,12 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
             string json;
             using (var web = new HttpClient())
             {
-                web.Timeout = TimeSpan.FromSeconds(3);
-
-                var cts = new CancellationTokenSource();
-                cts.CancelAfter(web.Timeout);
-
                 try
                 {
                     using var response = await web.GetAsync
                     (
                         new Uri("https://www.f-list.net/json/api/kink-list.php"),
-                        cts.Token
+                        this.CancellationToken
                     );
 
                     json = await response.Content.ReadAsStringAsync();

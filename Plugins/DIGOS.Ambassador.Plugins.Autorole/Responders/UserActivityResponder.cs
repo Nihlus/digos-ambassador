@@ -26,7 +26,6 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
-using Microsoft.Extensions.Logging;
 using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.Core;
 using Remora.Discord.Gateway.Responders;
@@ -46,7 +45,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
         IResponder<IVoiceStateUpdate>,
         IResponder<IPresenceUpdate>
     {
-        private readonly ILogger<UserActivityResponder> _log;
         private readonly AutoroleService _autoroles;
         private readonly AutoroleUpdateService _autoroleUpdates;
         private readonly UserStatisticsService _statistics;
@@ -57,19 +55,16 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
         /// <param name="autoroles">The autorole service.</param>
         /// <param name="autoroleUpdates">The autorole update service.</param>
         /// <param name="statistics">The statistics service.</param>
-        /// <param name="log">The logging instance.</param>
         public UserActivityResponder
         (
             AutoroleService autoroles,
             AutoroleUpdateService autoroleUpdates,
-            UserStatisticsService statistics,
-            ILogger<UserActivityResponder> log
+            UserStatisticsService statistics
         )
         {
             _autoroles = autoroles;
             _autoroleUpdates = autoroleUpdates;
             _statistics = statistics;
-            _log = log;
         }
 
         /// <inheritdoc />
