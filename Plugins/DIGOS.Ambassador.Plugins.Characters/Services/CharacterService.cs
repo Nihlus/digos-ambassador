@@ -504,6 +504,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return new UserError("The name may not contain double quotes.");
             }
 
+            if (name.Contains(":"))
+            {
+                return new UserError("The name may not contain colons.");
+            }
+
             if (!await IsNameUniqueForUserAsync(character.Owner, character.Server, name, ct))
             {
                 return new UserError("The user already has a character with that name.");
