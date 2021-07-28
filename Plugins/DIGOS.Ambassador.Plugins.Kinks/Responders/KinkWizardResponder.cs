@@ -158,7 +158,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
                 // Special actions
                 if (button == wizard.Exit)
                 {
-                    return await _channelAPI.DeleteMessageAsync(wizard.ChannelID, wizard.MessageID, ct);
+                    return await _channelAPI.DeleteMessageAsync(wizard.ChannelID, wizard.MessageID, ct: ct);
                 }
 
                 if (button == wizard.Info)

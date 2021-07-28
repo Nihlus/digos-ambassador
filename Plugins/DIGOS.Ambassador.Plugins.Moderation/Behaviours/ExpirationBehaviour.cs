@@ -154,7 +154,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                 (
                     expiredBan.Server.DiscordID,
                     expiredBan.User.DiscordID,
-                    ct
+                    ct: ct
                 );
 
                 if (!removeBan.IsSuccess)

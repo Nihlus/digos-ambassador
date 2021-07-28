@@ -145,7 +145,7 @@ namespace DIGOS.Ambassador.Discord.Pagination.Responders
                 // Special actions
                 if (button == message.Appearance.Close)
                 {
-                    return await _channelAPI.DeleteMessageAsync(message.ChannelID, message.MessageID, ct);
+                    return await _channelAPI.DeleteMessageAsync(message.ChannelID, message.MessageID, ct: ct);
                 }
 
                 if (button == message.Appearance.Help)

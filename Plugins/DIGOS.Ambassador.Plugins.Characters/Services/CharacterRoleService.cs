@@ -147,7 +147,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                     role.Server.DiscordID,
                     characterOwner.DiscordID,
                     role.DiscordID,
-                    ct
+                    ct: ct
                 );
 
                 if (!removeRole.IsSuccess)
@@ -270,7 +270,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                         guildID,
                         userID,
                         character.Role.DiscordID,
-                        ct
+                        ct: ct
                     );
 
                     if (!removeRole.IsSuccess)
@@ -289,7 +289,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                     }
                 }
 
-                var addRole = await _guildAPI.AddGuildMemberRoleAsync(guildID, userID, characterRole.DiscordID, ct);
+                var addRole = await _guildAPI.AddGuildMemberRoleAsync(guildID, userID, characterRole.DiscordID, ct: ct);
                 if (!addRole.IsSuccess)
                 {
                     return addRole;
@@ -328,7 +328,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 guildID,
                 userID,
                 character.Role.DiscordID,
-                ct
+                ct: ct
             );
 
             if (!removeRole.IsSuccess)
@@ -397,7 +397,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                     guildID,
                     userID,
                     previousCharacter.Role.DiscordID,
-                    ct
+                    ct: ct
                 );
 
                 if (removeRole.IsSuccess)
@@ -432,7 +432,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                     guildID,
                     userID,
                     previousCharacter.Role.DiscordID,
-                    ct
+                    ct: ct
                 );
 
                 if (!removeRole.IsSuccess)
@@ -457,7 +457,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             // Apply any new role
-            return await _guildAPI.AddGuildMemberRoleAsync(guildID, userID, newCharacter.Role.DiscordID, ct);
+            return await _guildAPI.AddGuildMemberRoleAsync(guildID, userID, newCharacter.Role.DiscordID, ct: ct);
         }
     }
 }

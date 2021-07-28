@@ -141,7 +141,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                         guildID,
                         userID,
                         autorole.DiscordRoleID,
-                        ct
+                        ct: ct
                     );
 
                     if (!removeRole.IsSuccess)
@@ -199,7 +199,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 }
             }
 
-            var addRole = await _guildAPI.AddGuildMemberRoleAsync(guildID, userID, autorole.DiscordRoleID, ct);
+            var addRole = await _guildAPI.AddGuildMemberRoleAsync(guildID, userID, autorole.DiscordRoleID, ct: ct);
 
             return !addRole.IsSuccess
                 ? Result<AutoroleUpdateStatus>.FromError(addRole)
