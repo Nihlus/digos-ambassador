@@ -197,6 +197,7 @@ namespace DIGOS.Ambassador
 
                     services.AddResponder<AmbassadorCommandResponder>();
                     services.AddResponder<AmbassadorInteractionResponder>();
+                    services.AddResponder<ThreadJoinResponder>();
 
                     foreach (var plugin in plugins)
                     {
