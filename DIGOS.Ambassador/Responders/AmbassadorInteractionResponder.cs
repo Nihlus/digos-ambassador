@@ -285,17 +285,27 @@ namespace DIGOS.Ambassador.Responders
                     : Result.FromSuccess();
             }
 
-            var error = commandResult.Error;
+            IResult result = commandResult;
+            while (result.Error is ParameterParsingError or ConditionNotSatisfiedError && result.Inner is not null)
+            {
+                result = result.Inner;
+            }
+
+            var error = result.Error;
             switch (error)
             {
-                case ParameterParsingError:
                 case AmbiguousCommandInvocationError:
-                case ConditionNotSatisfiedError:
                 case UserError:
-                case { } when error.GetType().IsGenericType &&
-                              error.GetType().GetGenericTypeDefinition() == typeof(ParsingError<>):
+                case { } e when
+                    e.GetType().IsGenericType && e.GetType().GetGenericTypeDefinition() == typeof(ParsingError<>):
                 {
-                    var sendError = await _userFeedback.SendContextualErrorAsync(error.Message, context.User.ID, ct);
+                    var sendError = await _userFeedback.SendContextualErrorAsync
+                    (
+                        error.Message,
+                        context.User.ID,
+                        ct
+                    );
+
                     return sendError.IsSuccess
                         ? Result.FromSuccess()
                         : Result.FromError(sendError);

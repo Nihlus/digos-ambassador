@@ -342,7 +342,13 @@ namespace DIGOS.Ambassador.Responders
                     : Result.FromSuccess();
             }
 
-            var error = commandResult.Error;
+            IResult result = commandResult;
+            while (result.Error is ParameterParsingError or ConditionNotSatisfiedError && result.Inner is not null)
+            {
+                result = result.Inner;
+            }
+
+            var error = result.Error;
             switch (error)
             {
                 case ParameterParsingError:
