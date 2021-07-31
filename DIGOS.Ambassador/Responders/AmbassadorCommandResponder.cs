@@ -26,11 +26,8 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Transactions;
 using DIGOS.Ambassador.Core.Database;
-using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Discord.Feedback.Errors;
-using DIGOS.Ambassador.Discord.Feedback.Results;
+using DIGOS.Ambassador.Core.Errors;
 using DIGOS.Ambassador.Plugins.Core.Attributes;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using JetBrains.Annotations;
@@ -42,6 +39,8 @@ using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Feedback.Messages;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Commands.Responders;
 using Remora.Discord.Commands.Results;
 using Remora.Discord.Commands.Services;
@@ -61,7 +60,7 @@ namespace DIGOS.Ambassador.Responders
         private readonly ICommandResponderOptions _options;
         private readonly ExecutionEventCollectorService _eventCollector;
         private readonly IServiceProvider _services;
-        private readonly UserFeedbackService _userFeedback;
+        private readonly FeedbackService _userFeedback;
         private readonly ContextInjectionService _contextInjection;
         private readonly PrivacyService _privacy;
 
@@ -81,7 +80,7 @@ namespace DIGOS.Ambassador.Responders
             IOptions<AmbassadorCommandResponderOptions> options,
             ExecutionEventCollectorService eventCollector,
             IServiceProvider services,
-            UserFeedbackService userFeedback,
+            FeedbackService userFeedback,
             ContextInjectionService contextInjection,
             PrivacyService privacy
         )
@@ -325,7 +324,7 @@ namespace DIGOS.Ambassador.Responders
         {
             if (commandResult.IsSuccess)
             {
-                if (commandResult is not Result<UserMessage> messageResult)
+                if (commandResult is not Result<FeedbackMessage> messageResult)
                 {
                     return Result.FromSuccess();
                 }
@@ -333,8 +332,8 @@ namespace DIGOS.Ambassador.Responders
                 // Relay the message to the user
                 var sendMessage = await _userFeedback.SendContextualMessageAsync
                 (
-                    context.User.ID,
                     messageResult.Entity!,
+                    context.User.ID,
                     ct
                 );
 
@@ -356,8 +355,8 @@ namespace DIGOS.Ambassador.Responders
                     // Alert the user, and don't complete the transaction
                     var sendError = await _userFeedback.SendContextualErrorAsync
                     (
-                        context.User.ID,
                         error.Message,
+                        context.User.ID,
                         ct
                     );
 

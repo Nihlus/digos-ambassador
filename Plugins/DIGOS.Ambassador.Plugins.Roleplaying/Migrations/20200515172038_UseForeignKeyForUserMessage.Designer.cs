@@ -16,7 +16,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Migrations
 {
     [DbContext(typeof(RoleplayingDatabaseContext))]
     [Migration("20200515172038_UseForeignKeyForUserMessage")]
-    partial class UseForeignKeyForUserMessage
+    partial class UseForeignKeyForFeedbackMessage
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

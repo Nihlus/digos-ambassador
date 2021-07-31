@@ -23,7 +23,6 @@
 using System;
 using System.Collections.Generic;
 using DIGOS.Ambassador.Discord.Interactivity.Messages;
-using DIGOS.Ambassador.Discord.Pagination.Extensions;
 using DIGOS.Ambassador.Plugins.Kinks.Model;
 using Humanizer;
 using Remora.Discord.API.Abstractions.Objects;

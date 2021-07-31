@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -29,8 +30,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Discord.Feedback.Responders;
-using DIGOS.Ambassador.Discord.Feedback.Services;
 using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Responders;
 using log4net;
@@ -47,6 +46,9 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Caching.Extensions;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Feedback.Messages;
+using Remora.Discord.Commands.Feedback.Services;
+using Remora.Discord.Commands.Feedback.Themes;
 using Remora.Discord.Commands.Parsers;
 using Remora.Discord.Commands.Results;
 using Remora.Discord.Commands.Services;
@@ -120,9 +122,6 @@ namespace DIGOS.Ambassador
 
                     services.AddSingleton<BehaviourService>();
 
-                    services.TryAddSingleton<IdentityInformationService>();
-                    services.AddResponder<ReadyResponder>();
-
                     services
                         .AddSingleton(pluginService)
                         .AddSingleton(contentService)
@@ -193,6 +192,16 @@ namespace DIGOS.Ambassador
                         .AddParser<TimeSpan, HumanTimeSpanReader>();
 
                     services.TryAddScoped<ExecutionEventCollectorService>();
+
+                    services.TryAddScoped<FeedbackService>();
+
+                    var theme = (FeedbackTheme)FeedbackTheme.DiscordDark with
+                    {
+                        Secondary = Color.MediumPurple
+                    };
+
+                    services.AddSingleton<IFeedbackTheme>(theme);
+
                     services.TryAddSingleton<SlashService>();
 
                     services.AddResponder<AmbassadorCommandResponder>();

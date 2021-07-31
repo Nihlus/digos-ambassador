@@ -25,7 +25,6 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
 using JetBrains.Annotations;
@@ -37,6 +36,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Core;
 using Remora.Results;
 
@@ -49,7 +49,7 @@ namespace DIGOS.Ambassador.Plugins.Statistics.CommandGroups
     [Description("Various statistics-related commands.")]
     public class StatCommands : CommandGroup
     {
-        private readonly UserFeedbackService _feedback;
+        private readonly FeedbackService _feedback;
         private readonly InteractivityService _interactivity;
         private readonly ICommandContext _context;
         private readonly IDiscordRestGuildAPI _guildAPI;
@@ -65,7 +65,7 @@ namespace DIGOS.Ambassador.Plugins.Statistics.CommandGroups
         /// <param name="userAPI">The user API.</param>
         public StatCommands
         (
-            UserFeedbackService feedback,
+            FeedbackService feedback,
             InteractivityService interactivity,
             ICommandContext context,
             IDiscordRestGuildAPI guildAPI,
@@ -183,7 +183,7 @@ namespace DIGOS.Ambassador.Plugins.Statistics.CommandGroups
         /// <returns>The embed.</returns>
         private Embed CreateGuildInfoEmbed(IGuild guild)
         {
-            var eb = _feedback.CreateEmbedBase();
+            var eb = new Embed();
 
             var getGuildSplash = CDN.GetGuildSplashUrl(guild);
             if (getGuildSplash.IsSuccess)

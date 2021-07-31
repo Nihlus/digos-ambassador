@@ -25,7 +25,6 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Plugins.Moderation.Permissions;
@@ -41,6 +40,8 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Feedback.Messages;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Core;
 using Remora.Results;
 
@@ -60,6 +61,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         private readonly ChannelLoggingService _logging;
         private readonly ICommandContext _context;
         private readonly IDiscordRestUserAPI _userAPI;
+        private readonly FeedbackService _feedback;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NoteCommands"/> class.
@@ -69,13 +71,15 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         /// <param name="logging">The logging service.</param>
         /// <param name="context">The command context.</param>
         /// <param name="userAPI">The user API.</param>
+        /// <param name="feedback">The feedback service.</param>
         public NoteCommands
         (
             NoteService notes,
             InteractivityService interactivity,
             ChannelLoggingService logging,
             ICommandContext context,
-            IDiscordRestUserAPI userAPI
+            IDiscordRestUserAPI userAPI,
+            FeedbackService feedback
         )
         {
             _notes = notes;
@@ -83,6 +87,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             _logging = logging;
             _context = context;
             _userAPI = userAPI;
+            _feedback = feedback;
         }
 
         /// <summary>
@@ -170,18 +175,18 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [Description("Adds a note to the given user.")]
         [RequirePermission(typeof(ManageNotes), PermissionTarget.All)]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> AddNoteAsync(IUser user, string content)
+        public async Task<Result<FeedbackMessage>> AddNoteAsync(IUser user, string content)
         {
             var addNote = await _notes.CreateNoteAsync(_context.User.ID, user.ID, _context.GuildID.Value, content);
             if (!addNote.IsSuccess)
             {
-                return Result<UserMessage>.FromError(addNote);
+                return Result<FeedbackMessage>.FromError(addNote);
             }
 
             var note = addNote.Entity;
 
             await _logging.NotifyUserNoteAddedAsync(note);
-            return new ConfirmationMessage($"Note added (ID {note.ID}).");
+            return new FeedbackMessage($"Note added (ID {note.ID}).", _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -192,12 +197,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [Description("Deletes the given note.")]
         [RequirePermission(typeof(ManageNotes), PermissionTarget.All)]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> DeleteNoteAsync(long noteID)
+        public async Task<Result<FeedbackMessage>> DeleteNoteAsync(long noteID)
         {
             var getNote = await _notes.GetNoteAsync(_context.GuildID.Value, noteID);
             if (!getNote.IsSuccess)
             {
-                return Result<UserMessage>.FromError(getNote);
+                return Result<FeedbackMessage>.FromError(getNote);
             }
 
             var note = getNote.Entity;
@@ -207,16 +212,16 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             var notifyResult = await _logging.NotifyUserNoteRemovedAsync(note, _context.User.ID);
             if (!notifyResult.IsSuccess)
             {
-                return Result<UserMessage>.FromError(notifyResult);
+                return Result<FeedbackMessage>.FromError(notifyResult);
             }
 
             var deleteNote = await _notes.DeleteNoteAsync(note);
             if (!deleteNote.IsSuccess)
             {
-                return Result<UserMessage>.FromError(deleteNote);
+                return Result<FeedbackMessage>.FromError(deleteNote);
             }
 
-            return new ConfirmationMessage("Note deleted.");
+            return new FeedbackMessage("Note deleted.", _feedback.Theme.Secondary);
         }
     }
 }

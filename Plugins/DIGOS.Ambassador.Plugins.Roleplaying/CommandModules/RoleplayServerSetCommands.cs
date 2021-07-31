@@ -22,14 +22,15 @@
 
 using System.ComponentModel;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Permissions.Conditions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Permissions;
 using JetBrains.Annotations;
 using Remora.Commands.Attributes;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Results;
+
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -52,7 +53,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             [Description("Sets the channel category to use for dedicated roleplays.")]
             [RequireContext(ChannelContext.Guild)]
             [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
-            public async Task<Result<UserMessage>> SetDedicatedRoleplayChannelCategory(IChannel category)
+            public async Task<Result<FeedbackMessage>> SetDedicatedRoleplayChannelCategory(IChannel category)
             {
                 var result = await _serverSettings.SetDedicatedChannelCategoryAsync
                 (
@@ -61,8 +62,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 );
 
                 return !result.IsSuccess
-                    ? Result<UserMessage>.FromError(result)
-                    : new ConfirmationMessage("Dedicated channel category set.");
+                    ? Result<FeedbackMessage>.FromError(result)
+                    : new FeedbackMessage("Dedicated channel category set.", _feedback.Theme.Secondary);
             }
 
             /// <summary>
@@ -74,7 +75,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             [Description("Sets the channel to use for archival of roleplays.")]
             [RequireContext(ChannelContext.Guild)]
             [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
-            public async Task<Result<UserMessage>> SetArchiveChannelAsync(IChannel channel)
+            public async Task<Result<FeedbackMessage>> SetArchiveChannelAsync(IChannel channel)
             {
                 var result = await _serverSettings.SetArchiveChannelAsync
                 (
@@ -83,8 +84,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 );
 
                 return !result.IsSuccess
-                    ? Result<UserMessage>.FromError(result)
-                    : new ConfirmationMessage("Archive channel set.");
+                    ? Result<FeedbackMessage>.FromError(result)
+                    : new FeedbackMessage("Archive channel set.", _feedback.Theme.Secondary);
             }
 
             /// <summary>
@@ -96,7 +97,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             [Description("Sets the role to use as a default @everyone role in dynamic roleplays.")]
             [RequireContext(ChannelContext.Guild)]
             [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
-            public async Task<Result<UserMessage>> SetDefaultUserRole(IRole role)
+            public async Task<Result<FeedbackMessage>> SetDefaultUserRole(IRole role)
             {
                 var result = await _serverSettings.SetDefaultUserRoleAsync
                 (
@@ -105,8 +106,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 );
 
                 return !result.IsSuccess
-                    ? Result<UserMessage>.FromError(result)
-                    : new ConfirmationMessage("Default user role set.");
+                    ? Result<FeedbackMessage>.FromError(result)
+                    : new FeedbackMessage("Default user role set.", _feedback.Theme.Secondary);
             }
         }
     }

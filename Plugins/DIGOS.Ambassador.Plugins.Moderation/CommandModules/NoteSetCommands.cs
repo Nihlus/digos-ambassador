@@ -22,7 +22,6 @@
 
 using System.ComponentModel;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Moderation.Permissions;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
 using DIGOS.Ambassador.Plugins.Permissions.Conditions;
@@ -31,6 +30,8 @@ using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Feedback.Messages;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -47,20 +48,24 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         {
             private readonly NoteService _notes;
             private readonly ICommandContext _context;
+            private readonly FeedbackService _feedback;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="NoteSetCommands"/> class.
             /// </summary>
             /// <param name="notes">The moderation service.</param>
             /// <param name="context">The command context.</param>
+            /// <param name="feedback">The feedback service.</param>
             public NoteSetCommands
             (
                 NoteService notes,
-                ICommandContext context
+                ICommandContext context,
+                FeedbackService feedback
             )
             {
                 _notes = notes;
                 _context = context;
+                _feedback = feedback;
             }
 
             /// <summary>
@@ -72,12 +77,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             [Description("Sets the contents of the note.")]
             [RequirePermission(typeof(ManageNotes), PermissionTarget.All)]
             [RequireContext(ChannelContext.Guild)]
-            public async Task<Result<UserMessage>> SetNoteContentsAsync(long noteID, string newContents)
+            public async Task<Result<FeedbackMessage>> SetNoteContentsAsync(long noteID, string newContents)
             {
                 var getNote = await _notes.GetNoteAsync(_context.GuildID.Value, noteID);
                 if (!getNote.IsSuccess)
                 {
-                    return Result<UserMessage>.FromError(getNote);
+                    return Result<FeedbackMessage>.FromError(getNote);
                 }
 
                 var note = getNote.Entity;
@@ -85,10 +90,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 var setContents = await _notes.SetNoteContentsAsync(note, newContents);
                 if (!setContents.IsSuccess)
                 {
-                    return Result<UserMessage>.FromError(setContents);
+                    return Result<FeedbackMessage>.FromError(setContents);
                 }
 
-                return new ConfirmationMessage("Note contents updated.");
+                return new FeedbackMessage("Note contents updated.", _feedback.Theme.Secondary);
             }
         }
     }

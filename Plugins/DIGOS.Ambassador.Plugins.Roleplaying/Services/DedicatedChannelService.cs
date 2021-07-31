@@ -23,8 +23,7 @@
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback.Errors;
-using DIGOS.Ambassador.Discord.Feedback.Services;
+using DIGOS.Ambassador.Core.Errors;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
@@ -44,32 +43,32 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
     {
         private readonly RoleplayingDatabaseContext _database;
         private readonly RoleplayServerSettingsService _serverSettings;
-        private readonly IdentityInformationService _identityInformation;
         private readonly IDiscordRestGuildAPI _guildAPI;
         private readonly IDiscordRestChannelAPI _channelAPI;
+        private readonly IDiscordRestUserAPI _userAPI;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DedicatedChannelService"/> class.
         /// </summary>
         /// <param name="serverSettings">The server settings service.</param>
         /// <param name="database">The database context.</param>
-        /// <param name="identityInformation">The identity information service.</param>
         /// <param name="guildAPI">The guild API.</param>
         /// <param name="channelAPI">The channel API.</param>
+        /// <param name="userAPI">The user API.</param>
         public DedicatedChannelService
         (
             RoleplayServerSettingsService serverSettings,
             RoleplayingDatabaseContext database,
-            IdentityInformationService identityInformation,
             IDiscordRestGuildAPI guildAPI,
-            IDiscordRestChannelAPI channelAPI
+            IDiscordRestChannelAPI channelAPI,
+            IDiscordRestUserAPI userAPI
         )
         {
             _serverSettings = serverSettings;
             _database = database;
-            _identityInformation = identityInformation;
             _guildAPI = guildAPI;
             _channelAPI = channelAPI;
+            _userAPI = userAPI;
         }
 
         /// <summary>
@@ -572,9 +571,17 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 SendMessages
             );
 
+            var getSelf = await _userAPI.GetCurrentUserAsync();
+            if (!getSelf.IsSuccess)
+            {
+                return Result.FromError(getSelf);
+            }
+
+            var self = getSelf.Entity;
+
             var botOverwrite = new PermissionOverwrite
             (
-                _identityInformation.ID,
+                self.ID,
                 PermissionOverwriteType.Member,
                 botPermissions,
                 new DiscordPermissionSet(BigInteger.Zero)

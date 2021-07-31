@@ -22,7 +22,6 @@
 
 using System.ComponentModel;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Permissions;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
@@ -33,6 +32,8 @@ using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Feedback.Messages;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -49,16 +50,24 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         {
             private readonly AutoroleService _autoroles;
             private readonly ICommandContext _context;
+            private readonly FeedbackService _feedback;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="AutoroleConditionCommands"/> class.
             /// </summary>
             /// <param name="autoroles">The autorole service.</param>
             /// <param name="context">The command context.</param>
-            public AutoroleConditionCommands(AutoroleService autoroles, ICommandContext context)
+            /// <param name="feedback">The feedback service.</param>
+            public AutoroleConditionCommands
+            (
+                AutoroleService autoroles,
+                ICommandContext context,
+                FeedbackService feedback
+            )
             {
                 _autoroles = autoroles;
                 _context = context;
+                _feedback = feedback;
             }
 
             /// <summary>
@@ -70,7 +79,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             [Command("remove")]
             [Description("Removes the condition from the role.")]
             [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-            public async Task<Result<UserMessage>> RemoveConditionAsync
+            public async Task<Result<FeedbackMessage>> RemoveConditionAsync
             (
                 [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole,
                 long conditionID
@@ -79,8 +88,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 var removeCondition = await _autoroles.RemoveConditionAsync(autorole, conditionID);
 
                 return !removeCondition.IsSuccess
-                    ? Result<UserMessage>.FromError(removeCondition)
-                    : new ConfirmationMessage("Condition removed.");
+                    ? Result<FeedbackMessage>.FromError(removeCondition)
+                    : new FeedbackMessage("Condition removed.", _feedback.Theme.Secondary);
             }
         }
     }

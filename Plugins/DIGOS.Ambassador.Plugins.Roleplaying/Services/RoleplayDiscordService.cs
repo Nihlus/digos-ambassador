@@ -24,8 +24,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Errors;
 using DIGOS.Ambassador.Core.Extensions;
-using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
@@ -660,27 +660,27 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         {
             if (!message.ID.HasValue)
             {
-                return new GenericError("Unable to process messages without IDs.");
+                return new InvalidOperationError("Unable to process messages without IDs.");
             }
 
             if (!message.Timestamp.HasValue)
             {
-                return new GenericError("Unable to process messages without timestamps.");
+                return new InvalidOperationError("Unable to process messages without timestamps.");
             }
 
             if (!message.Content.HasValue)
             {
-                return new GenericError("Unable to process messages without content.");
+                return new InvalidOperationError("Unable to process messages without content.");
             }
 
             if (!message.ChannelID.HasValue)
             {
-                return new GenericError("Unable to process messages without channel IDs.");
+                return new InvalidOperationError("Unable to process messages without channel IDs.");
             }
 
             if (!message.Author.HasValue)
             {
-                return new GenericError("Unable to process messages without authors.");
+                return new InvalidOperationError("Unable to process messages without authors.");
             }
 
             var result = await GetActiveRoleplayAsync(message.ChannelID.Value);

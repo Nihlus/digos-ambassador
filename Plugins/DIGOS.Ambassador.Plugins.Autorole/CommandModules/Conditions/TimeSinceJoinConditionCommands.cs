@@ -23,7 +23,6 @@
 using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Permissions;
@@ -33,6 +32,7 @@ using JetBrains.Annotations;
 using Remora.Commands.Attributes;
 using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -53,7 +53,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             [Description("Adds an instance of the condition to the role.")]
             [RequireContext(ChannelContext.Guild)]
             [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-            public async Task<Result<UserMessage>> AddSinceJoinConditionAsync
+            public async Task<Result<FeedbackMessage>> AddSinceJoinConditionAsync
             (
                 [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole,
                 TimeSpan time
@@ -65,8 +65,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 var addCondition = await _autoroles.AddConditionAsync(autorole, condition);
 
                 return !addCondition.IsSuccess
-                    ? Result<UserMessage>.FromError(addCondition)
-                    : new ConfirmationMessage("Condition added.");
+                    ? Result<FeedbackMessage>.FromError(addCondition)
+                    : new FeedbackMessage("Condition added.", _feedback.Theme.Secondary);
             }
 
             /// <summary>
@@ -80,7 +80,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             [Description("Modifies an instance of the condition on the role.")]
             [RequireContext(ChannelContext.Guild)]
             [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-            public async Task<Result<UserMessage>> ModifySinceJoinConditionAsync
+            public async Task<Result<FeedbackMessage>> ModifySinceJoinConditionAsync
             (
                 [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole,
                 long conditionID,
@@ -95,7 +95,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
 
                 if (!getCondition.IsSuccess)
                 {
-                    return Result<UserMessage>.FromError(getCondition);
+                    return Result<FeedbackMessage>.FromError(getCondition);
                 }
 
                 var condition = getCondition.Entity;
@@ -106,8 +106,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 );
 
                 return !modifyResult.IsSuccess
-                    ? Result<UserMessage>.FromError(modifyResult)
-                    : new ConfirmationMessage("Condition updated.");
+                    ? Result<FeedbackMessage>.FromError(modifyResult)
+                    : new FeedbackMessage("Condition updated.", _feedback.Theme.Secondary);
             }
         }
     }

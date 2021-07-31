@@ -24,7 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using DIGOS.Ambassador.Discord.Feedback.Errors;
+using DIGOS.Ambassador.Core.Errors;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Utility;
 using Remora.Results;

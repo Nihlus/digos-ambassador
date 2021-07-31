@@ -26,8 +26,6 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Plugins.Moderation.Permissions;
@@ -42,6 +40,8 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Feedback.Messages;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Core;
 using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
     {
         private readonly ModerationService _moderation;
         private readonly WarningService _warnings;
-        private readonly UserFeedbackService _feedback;
+        private readonly FeedbackService _feedback;
         private readonly InteractivityService _interactivity;
         private readonly ChannelLoggingService _logging;
         private readonly IDiscordRestUserAPI _userAPI;
@@ -79,7 +79,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         (
             ModerationService moderation,
             WarningService warnings,
-            UserFeedbackService feedback,
+            FeedbackService feedback,
             InteractivityService interactivity,
             ChannelLoggingService logging,
             IDiscordRestUserAPI userAPI,
@@ -184,12 +184,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [Description("Deletes the given warning.")]
         [RequirePermission(typeof(ManageWarnings), PermissionTarget.All)]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> DeleteWarningAsync(long warningID)
+        public async Task<Result<FeedbackMessage>> DeleteWarningAsync(long warningID)
         {
             var getWarning = await _warnings.GetWarningAsync(_context.GuildID.Value, warningID);
             if (!getWarning.IsSuccess)
             {
-                return Result<UserMessage>.FromError(getWarning);
+                return Result<FeedbackMessage>.FromError(getWarning);
             }
 
             var warning = getWarning.Entity;
@@ -199,16 +199,16 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             var notifyResult = await _logging.NotifyUserWarningRemovedAsync(warning, _context.User.ID);
             if (!notifyResult.IsSuccess)
             {
-                return Result<UserMessage>.FromError(notifyResult);
+                return Result<FeedbackMessage>.FromError(notifyResult);
             }
 
             var deleteWarning = await _warnings.DeleteWarningAsync(warning);
             if (!deleteWarning.IsSuccess)
             {
-                return Result<UserMessage>.FromError(deleteWarning);
+                return Result<FeedbackMessage>.FromError(deleteWarning);
             }
 
-            return new ConfirmationMessage("Warning deleted.");
+            return new FeedbackMessage("Warning deleted.", _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -221,7 +221,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [Description("Adds a warning to the given user.")]
         [RequirePermission(typeof(ManageWarnings), PermissionTarget.All)]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> AddWarningAsync
+        public async Task<Result<FeedbackMessage>> AddWarningAsync
         (
             IUser user,
             string reason,
@@ -245,14 +245,14 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
 
             if (!addWarning.IsSuccess)
             {
-                return Result<UserMessage>.FromError(addWarning);
+                return Result<FeedbackMessage>.FromError(addWarning);
             }
 
             var warning = addWarning.Entity;
             var getSettings = await _moderation.GetOrCreateServerSettingsAsync(_context.GuildID.Value);
             if (!getSettings.IsSuccess)
             {
-                return Result<UserMessage>.FromError(getSettings);
+                return Result<FeedbackMessage>.FromError(getSettings);
             }
 
             var settings = getSettings.Entity;
@@ -260,24 +260,30 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             var notifyResult = await _logging.NotifyUserWarningAddedAsync(warning);
             if (!notifyResult.IsSuccess)
             {
-                return Result<UserMessage>.FromError(notifyResult);
+                return Result<FeedbackMessage>.FromError(notifyResult);
             }
 
             var warnings = await _warnings.GetWarningsAsync(user.ID);
             if (warnings.Count < settings.WarningThreshold)
             {
-                return new ConfirmationMessage($"Warning added (ID {warning.ID}): {warning.Reason}.");
+                return new FeedbackMessage
+                (
+                    $"Warning added (ID {warning.ID}): {warning.Reason}.", _feedback.Theme.Secondary
+                );
             }
 
             var sendAlert = await _feedback.SendContextualWarningAsync
             (
-                _context.User.ID,
-                $"The warned user now has {warnings.Count} warnings. Consider further action."
+                $"The warned user now has {warnings.Count} warnings. Consider further action.",
+                _context.User.ID
             );
 
             return !sendAlert.IsSuccess
-                ? Result<UserMessage>.FromError(sendAlert)
-                : new ConfirmationMessage($"Warning added (ID {warning.ID}): {warning.Reason}.");
+                ? Result<FeedbackMessage>.FromError(sendAlert)
+                : new FeedbackMessage
+                (
+                    $"Warning added (ID {warning.ID}): {warning.Reason}.", _feedback.Theme.Secondary
+                );
         }
     }
 }

@@ -24,12 +24,8 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Transactions;
 using DIGOS.Ambassador.Core.Database;
-using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Discord.Feedback.Errors;
-using DIGOS.Ambassador.Discord.Feedback.Results;
-using DIGOS.Ambassador.Discord.Feedback.Services;
+using DIGOS.Ambassador.Core.Errors;
 using DIGOS.Ambassador.Plugins.Core.Attributes;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using JetBrains.Annotations;
@@ -43,6 +39,8 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Extensions;
+using Remora.Discord.Commands.Feedback.Messages;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Commands.Results;
 using Remora.Discord.Commands.Services;
 using Remora.Discord.Gateway.Responders;
@@ -60,9 +58,8 @@ namespace DIGOS.Ambassador.Responders
         private readonly IDiscordRestInteractionAPI _interactionAPI;
         private readonly ExecutionEventCollectorService _eventCollector;
         private readonly IServiceProvider _services;
-        private readonly UserFeedbackService _userFeedback;
+        private readonly FeedbackService _userFeedback;
         private readonly IDiscordRestWebhookAPI _webhookAPI;
-        private readonly IdentityInformationService _identityInformation;
         private readonly ContextInjectionService _contextInjection;
         private readonly PrivacyService _privacy;
 
@@ -75,7 +72,6 @@ namespace DIGOS.Ambassador.Responders
         /// <param name="services">The available services.</param>
         /// <param name="userFeedback">The user feedback service.</param>
         /// <param name="webhookAPI">The webhook API.</param>
-        /// <param name="identityInformation">The identity information.</param>
         /// <param name="contextInjection">The context injection service.</param>
         /// <param name="privacy">The privacy service.</param>
         public AmbassadorInteractionResponder
@@ -84,9 +80,8 @@ namespace DIGOS.Ambassador.Responders
             IDiscordRestInteractionAPI interactionAPI,
             ExecutionEventCollectorService eventCollector,
             IServiceProvider services,
-            UserFeedbackService userFeedback,
+            FeedbackService userFeedback,
             IDiscordRestWebhookAPI webhookAPI,
-            IdentityInformationService identityInformation,
             ContextInjectionService contextInjection,
             PrivacyService privacy
         )
@@ -97,7 +92,6 @@ namespace DIGOS.Ambassador.Responders
             _services = services;
             _userFeedback = userFeedback;
             _webhookAPI = webhookAPI;
-            _identityInformation = identityInformation;
             _contextInjection = contextInjection;
             _privacy = privacy;
         }
@@ -267,18 +261,12 @@ namespace DIGOS.Ambassador.Responders
         {
             if (commandResult.IsSuccess)
             {
-                if (commandResult is not Result<UserMessage> messageResult)
+                if (commandResult is not Result<FeedbackMessage> messageResult)
                 {
-                    if (_userFeedback.HasEditedOriginalInteraction)
-                    {
-                        // Some custom embed, probably
-                        return Result.FromSuccess();
-                    }
-
                     // Erase the original interaction
                     return await _webhookAPI.DeleteOriginalInteractionResponseAsync
                     (
-                        _identityInformation.ApplicationID,
+                        context.ApplicationID,
                         context.Token,
                         ct
                     );
@@ -287,8 +275,8 @@ namespace DIGOS.Ambassador.Responders
                 // Relay the message to the user
                 var sendMessage = await _userFeedback.SendContextualMessageAsync
                 (
-                    context.User.ID,
                     messageResult.Entity!,
+                    context.User.ID,
                     ct
                 );
 
@@ -307,7 +295,7 @@ namespace DIGOS.Ambassador.Responders
                 case { } when error.GetType().IsGenericType &&
                               error.GetType().GetGenericTypeDefinition() == typeof(ParsingError<>):
                 {
-                    var sendError = await _userFeedback.SendContextualErrorAsync(context.User.ID, error.Message, ct);
+                    var sendError = await _userFeedback.SendContextualErrorAsync(error.Message, context.User.ID, ct);
                     return sendError.IsSuccess
                         ? Result.FromSuccess()
                         : Result.FromError(sendError);

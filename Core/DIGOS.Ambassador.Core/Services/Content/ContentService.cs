@@ -101,20 +101,20 @@ namespace DIGOS.Ambassador.Core.Services
 
             if (!this.FileSystem.FileExists(tokenPath))
             {
-                return new GenericError("The token file could not be found.");
+                return new InvalidOperationError("The token file could not be found.");
             }
 
             var getTokenStream = OpenLocalStream(tokenPath);
             if (!getTokenStream.IsSuccess)
             {
-                return new GenericError("The token file could not be opened.");
+                return new InvalidOperationError("The token file could not be opened.");
             }
 
             await using var tokenStream = getTokenStream.Entity;
             var token = await AsyncIO.ReadAllTextAsync(tokenStream);
 
             return string.IsNullOrEmpty(token)
-                ? new GenericError("The token file did not contain a valid token.")
+                ? new InvalidOperationError("The token file did not contain a valid token.")
                 : Result<string>.FromSuccess(token);
         }
 
@@ -138,7 +138,7 @@ namespace DIGOS.Ambassador.Core.Services
         {
             if (!path.IsAbsolute)
             {
-                return new GenericError("Content paths must be absolute.");
+                return new InvalidOperationError("Content paths must be absolute.");
             }
 
             try

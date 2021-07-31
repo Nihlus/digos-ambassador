@@ -22,7 +22,6 @@
 
 using System.ComponentModel;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Moderation.Permissions;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
 using DIGOS.Ambassador.Plugins.Permissions.Conditions;
@@ -32,6 +31,8 @@ using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Feedback.Messages;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -48,20 +49,24 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         {
             private readonly ModerationService _moderation;
             private readonly ICommandContext _context;
+            private readonly FeedbackService _feedback;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="ModerationServerSetCommands"/> class.
             /// </summary>
             /// <param name="moderation">The moderation service.</param>
             /// <param name="context">The command context.</param>
+            /// <param name="feedback">The feedback service.</param>
             public ModerationServerSetCommands
             (
                 ModerationService moderation,
-                ICommandContext context
+                ICommandContext context,
+                FeedbackService feedback
             )
             {
                 _moderation = moderation;
                 _context = context;
+                _feedback = feedback;
             }
 
             /// <summary>
@@ -72,15 +77,15 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             [Description("Sets the moderation log channel.")]
             [RequirePermission(typeof(EditModerationServerSettings), PermissionTarget.Self)]
             [RequireContext(ChannelContext.Guild)]
-            public async Task<Result<UserMessage>> SetModerationLogChannelAsync(IChannel channel)
+            public async Task<Result<FeedbackMessage>> SetModerationLogChannelAsync(IChannel channel)
             {
                 var setChannel = await _moderation.SetModerationLogChannelAsync(_context.GuildID.Value, channel.ID);
                 if (!setChannel.IsSuccess)
                 {
-                    return Result<UserMessage>.FromError(setChannel);
+                    return Result<FeedbackMessage>.FromError(setChannel);
                 }
 
-                return new ConfirmationMessage("Channel set.");
+                return new FeedbackMessage("Channel set.", _feedback.Theme.Secondary);
             }
 
             /// <summary>
@@ -91,15 +96,15 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             [Description("Sets the event monitoring channel.")]
             [RequirePermission(typeof(EditModerationServerSettings), PermissionTarget.Self)]
             [RequireContext(ChannelContext.Guild)]
-            public async Task<Result<UserMessage>> SetMonitoringChannelAsync(IChannel channel)
+            public async Task<Result<FeedbackMessage>> SetMonitoringChannelAsync(IChannel channel)
             {
                 var setChannel = await _moderation.SetMonitoringChannelAsync(_context.GuildID.Value, channel.ID);
                 if (!setChannel.IsSuccess)
                 {
-                    return Result<UserMessage>.FromError(setChannel);
+                    return Result<FeedbackMessage>.FromError(setChannel);
                 }
 
-                return new ConfirmationMessage("Channel set.");
+                return new FeedbackMessage("Channel set.", _feedback.Theme.Secondary);
             }
 
             /// <summary>
@@ -110,15 +115,15 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             [Description("Sets the warning threshold.")]
             [RequirePermission(typeof(EditModerationServerSettings), PermissionTarget.Self)]
             [RequireContext(ChannelContext.Guild)]
-            public async Task<Result<UserMessage>> SetWarningThresholdAsync(int threshold)
+            public async Task<Result<FeedbackMessage>> SetWarningThresholdAsync(int threshold)
             {
                 var setChannel = await _moderation.SetWarningThresholdAsync(_context.GuildID.Value, threshold);
                 if (!setChannel.IsSuccess)
                 {
-                    return Result<UserMessage>.FromError(setChannel);
+                    return Result<FeedbackMessage>.FromError(setChannel);
                 }
 
-                return new ConfirmationMessage("Threshold set.");
+                return new FeedbackMessage("Threshold set.", _feedback.Theme.Secondary);
             }
         }
     }

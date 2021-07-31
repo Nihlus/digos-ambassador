@@ -22,7 +22,6 @@
 
 using System.ComponentModel;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Characters.Services;
 using DIGOS.Ambassador.Plugins.Transformations.Services;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
@@ -32,6 +31,8 @@ using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Feedback.Messages;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -50,6 +51,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             private readonly CharacterDiscordService _characters;
             private readonly TransformationService _transformation;
             private readonly ICommandContext _context;
+            private readonly FeedbackService _feedback;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="TransformationSetCommands"/> class.
@@ -57,16 +59,19 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             /// <param name="characters">The character service.</param>
             /// <param name="transformation">The transformation service.</param>
             /// <param name="context">The command context.</param>
+            /// <param name="feedback">The feedback service.</param>
             public TransformationSetCommands
             (
                 CharacterDiscordService characters,
                 TransformationService transformation,
-                ICommandContext context
+                ICommandContext context,
+                FeedbackService feedback
             )
             {
                 _characters = characters;
                 _transformation = transformation;
                 _context = context;
+                _feedback = feedback;
             }
 
             /// <summary>
@@ -76,7 +81,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             [Command("default")]
             [Description("Saves your current appearance as your current character's default one.")]
             [RequireContext(ChannelContext.Guild)]
-            public async Task<Result<UserMessage>> SetCurrentAppearanceAsDefaultAsync()
+            public async Task<Result<FeedbackMessage>> SetCurrentAppearanceAsDefaultAsync()
             {
                 var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync
                 (
@@ -86,7 +91,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
 
                 if (!getCurrentCharacterResult.IsSuccess)
                 {
-                    return Result<UserMessage>.FromError(getCurrentCharacterResult);
+                    return Result<FeedbackMessage>.FromError(getCurrentCharacterResult);
                 }
 
                 var character = getCurrentCharacterResult.Entity;
@@ -95,12 +100,13 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
                     await _transformation.SetCurrentAppearanceAsDefaultForCharacterAsync(character);
                 if (!setDefaultAppearanceResult.IsSuccess)
                 {
-                    return Result<UserMessage>.FromError(setDefaultAppearanceResult);
+                    return Result<FeedbackMessage>.FromError(setDefaultAppearanceResult);
                 }
 
-                return new ConfirmationMessage
+                return new FeedbackMessage
                 (
-                    "Current appearance saved as the default one of this character."
+                    "Current appearance saved as the default one of this character.",
+                    _feedback.Theme.Secondary
                 );
             }
 
@@ -112,17 +118,18 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             [Command("default-opt-in")]
             [Description("Sets your default setting for opting in or out of transformations on servers you join.")]
             [RequireContext(ChannelContext.Guild)]
-            public async Task<Result<UserMessage>> SetDefaultOptInOrOutOfTransformationsAsync(bool shouldOptIn = true)
+            public async Task<Result<FeedbackMessage>> SetDefaultOptInOrOutOfTransformationsAsync(bool shouldOptIn = true)
             {
                 var setDefaultOptInResult = await _transformation.SetDefaultOptInAsync(_context.User.ID, shouldOptIn);
                 if (!setDefaultOptInResult.IsSuccess)
                 {
-                    return Result<UserMessage>.FromError(setDefaultOptInResult);
+                    return Result<FeedbackMessage>.FromError(setDefaultOptInResult);
                 }
 
-                return new ConfirmationMessage
+                return new FeedbackMessage
                 (
-                    $"You're now opted {(shouldOptIn ? "in" : "out")} by default on new servers."
+                    $"You're now opted {(shouldOptIn ? "in" : "out")} by default on new servers.",
+                    _feedback.Theme.Secondary
                 );
             }
 
@@ -133,7 +140,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             [UsedImplicitly]
             [Command("default-protection")]
             [Description("Sets your default protection type for transformations on servers you join.")]
-            public async Task<Result<UserMessage>> SetDefaultProtectionTypeAsync(ProtectionType protectionType)
+            public async Task<Result<FeedbackMessage>> SetDefaultProtectionTypeAsync(ProtectionType protectionType)
             {
                 var setProtectionTypeResult = await _transformation.SetDefaultProtectionTypeAsync
                 (
@@ -143,12 +150,13 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
 
                 if (!setProtectionTypeResult.IsSuccess)
                 {
-                    return Result<UserMessage>.FromError(setProtectionTypeResult);
+                    return Result<FeedbackMessage>.FromError(setProtectionTypeResult);
                 }
 
-                return new ConfirmationMessage
+                return new FeedbackMessage
                 (
-                    $"Default protection type set to \"{protectionType.Humanize()}\""
+                    $"Default protection type set to \"{protectionType.Humanize()}\"",
+                    _feedback.Theme.Secondary
                 );
             }
 
@@ -160,7 +168,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             [Command("protection")]
             [Description("Sets your protection type for transformations.")]
             [RequireContext(ChannelContext.Guild)]
-            public async Task<Result<UserMessage>> SetProtectionTypeAsync(ProtectionType protectionType)
+            public async Task<Result<FeedbackMessage>> SetProtectionTypeAsync(ProtectionType protectionType)
             {
                 var setProtectionTypeResult = await _transformation.SetServerProtectionTypeAsync
                 (
@@ -171,12 +179,13 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
 
                 if (!setProtectionTypeResult.IsSuccess)
                 {
-                    return Result<UserMessage>.FromError(setProtectionTypeResult);
+                    return Result<FeedbackMessage>.FromError(setProtectionTypeResult);
                 }
 
-                return new ConfirmationMessage
+                return new FeedbackMessage
                 (
-                    $"Protection type set to \"{protectionType.Humanize()}\""
+                    $"Protection type set to \"{protectionType.Humanize()}\"",
+                    _feedback.Theme.Secondary
                 );
             }
         }

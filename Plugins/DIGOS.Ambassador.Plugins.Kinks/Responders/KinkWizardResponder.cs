@@ -28,10 +28,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
-using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Interactivity.Responders;
-using DIGOS.Ambassador.Discord.Pagination.Extensions;
 using DIGOS.Ambassador.Plugins.Kinks.Model;
 using DIGOS.Ambassador.Plugins.Kinks.Services;
 using DIGOS.Ambassador.Plugins.Kinks.Wizards;
@@ -41,6 +39,7 @@ using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Core;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
@@ -55,7 +54,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
         IResponder<IInteractionCreate>
     {
         private readonly KinkService _kinks;
-        private readonly UserFeedbackService _feedback;
+        private readonly FeedbackService _feedback;
         private readonly IDiscordRestChannelAPI _channelAPI;
         private readonly IDiscordRestInteractionAPI _interactionAPI;
 
@@ -72,7 +71,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
             InteractivityService interactivity,
             KinkService kinks,
             IDiscordRestChannelAPI channelAPI,
-            UserFeedbackService feedback,
+            FeedbackService feedback,
             IDiscordRestInteractionAPI interactionAPI
         )
             : base(interactivity)
@@ -242,11 +241,11 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
                 wizard.CurrentFListKinkID = null;
                 wizard.State = KinkWizardState.CategorySelection;
 
-                var send = await _feedback.SendConfirmationAsync
+                var send = await _feedback.SendNeutralAsync
                 (
                     wizard.ChannelID,
-                    wizard.SourceUserID,
                     "All done in that category!",
+                    wizard.SourceUserID,
                     ct
                 );
 
@@ -294,8 +293,8 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
                     var sendWarning = await _feedback.SendWarningAsync
                     (
                         wizard.ChannelID,
-                        wizard.SourceUserID,
                         "There aren't any categories in the database.",
+                        wizard.SourceUserID,
                         ct
                     );
 
@@ -304,11 +303,11 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
                         : Result.FromError(sendWarning);
                 }
 
-                var sendConfirmation = await _feedback.SendConfirmationAsync
+                var sendConfirmation = await _feedback.SendNeutralAsync
                 (
                     wizard.ChannelID,
-                    wizard.SourceUserID,
                     "Please enter a category name.",
+                    wizard.SourceUserID,
                     ct
                 );
 
@@ -345,8 +344,8 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
                 var send = await _feedback.SendWarningAsync
                 (
                     wizard.ChannelID,
-                    wizard.SourceUserID,
                     tryStartCategoryResult.Error.Message,
+                    wizard.SourceUserID,
                     ct
                 );
 
@@ -556,8 +555,8 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
                         var sendError = await _feedback.SendErrorAsync
                         (
                             wizard.ChannelID,
-                            wizard.SourceUserID,
                             "Failed to get the user kink.",
+                            wizard.SourceUserID,
                             ct
                         );
 

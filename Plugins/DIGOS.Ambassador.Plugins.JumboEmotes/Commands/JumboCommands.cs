@@ -25,7 +25,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Net.Http;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback.Errors;
+using DIGOS.Ambassador.Core.Errors;
 using DIGOS.Ambassador.Plugins.JumboEmotes.EmojiTools;
 using JetBrains.Annotations;
 using Remora.Commands.Attributes;
@@ -76,7 +76,7 @@ namespace DIGOS.Ambassador.Plugins.JumboEmotes.Commands
         [UsedImplicitly]
         [Command("jumbo")]
         [Description("Sends a jumbo version of the given emote to the chat, if available.")]
-        public async Task<IResult> JumboAsync(IEmoji emoji)
+        public async Task<Result> JumboAsync(IEmoji emoji)
         {
             string emoteUrl;
             if (emoji.ID is not null)
@@ -84,7 +84,7 @@ namespace DIGOS.Ambassador.Plugins.JumboEmotes.Commands
                 var getEmoteUrl = CDN.GetEmojiUrl(emoji);
                 if (!getEmoteUrl.IsSuccess)
                 {
-                    return getEmoteUrl;
+                    return Result.FromError(getEmoteUrl);
                 }
 
                 emoteUrl = getEmoteUrl.Entity.ToString();
@@ -93,7 +93,7 @@ namespace DIGOS.Ambassador.Plugins.JumboEmotes.Commands
             {
                 if (emoji.Name is null)
                 {
-                    return Result.FromError(new UserError("Looks like a bad emoji. Oops!"));
+                    return new UserError("Looks like a bad emoji. Oops!");
                 }
 
                 var emojiName = emoji.Name;
@@ -137,7 +137,7 @@ namespace DIGOS.Ambassador.Plugins.JumboEmotes.Commands
             var response = await _httpClient.GetAsync(emoteUrl, HttpCompletionOption.ResponseHeadersRead);
             if (!response.IsSuccessStatusCode)
             {
-                return Result.FromError(new UserError("Sorry, I couldn't find that emote."));
+                return new UserError("Sorry, I couldn't find that emote.");
             }
 
             var embed = new Embed

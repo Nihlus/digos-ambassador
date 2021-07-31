@@ -26,7 +26,6 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
-using DIGOS.Ambassador.Discord.Feedback.Services;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
@@ -70,7 +69,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
         protected override async Task<Result> OnTickAsync(CancellationToken ct, IServiceProvider tickServices)
         {
             var loggingService = tickServices.GetRequiredService<ChannelLoggingService>();
-            var identityService = tickServices.GetRequiredService<IdentityInformationService>();
             var guildAPI = tickServices.GetRequiredService<IDiscordRestGuildAPI>();
             var userAPI = tickServices.GetRequiredService<IDiscordRestUserAPI>();
 
@@ -82,6 +80,14 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                     joinedGuilds.Add(get.Entity);
                 }
             }
+
+            var getSelf = await userAPI.GetCurrentUserAsync(ct);
+            if (!getSelf.IsSuccess)
+            {
+                return Result.FromError(getSelf);
+            }
+
+            var self = getSelf.Entity;
 
             var warningService = tickServices.GetRequiredService<WarningService>();
             var expiredWarnings = await warningService.GetExpiredWarningsAsync(ct);
@@ -109,7 +115,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                 var notifyResult = await loggingService.NotifyUserWarningRemovedAsync
                 (
                     expiredWarning,
-                    identityService.ID
+                    self.ID
                 );
 
                 if (!notifyResult.IsSuccess)
@@ -187,7 +193,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                     }
                 }
 
-                var notifyResult = await loggingService.NotifyUserUnbannedAsync(expiredBan, identityService.ID);
+                var notifyResult = await loggingService.NotifyUserUnbannedAsync(expiredBan, self.ID);
                 if (!notifyResult.IsSuccess)
                 {
                     this.Log.LogWarning("Failed to rescind ban: {Reason}", notifyResult.Error.Message);

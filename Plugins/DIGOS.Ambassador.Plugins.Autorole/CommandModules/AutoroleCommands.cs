@@ -24,8 +24,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
@@ -41,6 +39,8 @@ using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Feedback.Messages;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
@@ -57,7 +57,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
     public partial class AutoroleCommands : CommandGroup
     {
         private readonly AutoroleService _autoroles;
-        private readonly UserFeedbackService _feedback;
+        private readonly FeedbackService _feedback;
         private readonly InteractivityService _interactivity;
         private readonly ICommandContext _context;
         private readonly IDiscordRestGuildAPI _guildAPI;
@@ -73,7 +73,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         public AutoroleCommands
         (
             AutoroleService autoroles,
-            UserFeedbackService feedback,
+            FeedbackService feedback,
             InteractivityService interactivity,
             ICommandContext context,
             IDiscordRestGuildAPI guildAPI
@@ -95,7 +95,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Description("Creates a new autorole configuration for the given Discord role.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(CreateAutorole), PermissionTarget.Self)]
-        public async Task<Result<UserMessage>> CreateAutoroleAsync(IRole discordRole)
+        public async Task<Result<FeedbackMessage>> CreateAutoroleAsync(IRole discordRole)
         {
             var create = await _autoroles.CreateAutoroleAsync
             (
@@ -105,8 +105,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             );
 
             return !create.IsSuccess
-                ? Result<UserMessage>.FromError(create)
-                : new ConfirmationMessage("Autorole configuration created.");
+                ? Result<FeedbackMessage>.FromError(create)
+                : new FeedbackMessage("Autorole configuration created.", _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -118,15 +118,15 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Description("Deletes an existing autorole configuration for the given Discord role.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(DeleteAutorole), PermissionTarget.Self)]
-        public async Task<Result<UserMessage>> DeleteAutoroleAsync
+        public async Task<Result<FeedbackMessage>> DeleteAutoroleAsync
         (
             [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole
         )
         {
             var deleteAutorole = await _autoroles.DeleteAutoroleAsync(autorole);
             return !deleteAutorole.IsSuccess
-                ? Result<UserMessage>.FromError(deleteAutorole)
-                : new ConfirmationMessage("Autorole configuration deleted.");
+                ? Result<FeedbackMessage>.FromError(deleteAutorole)
+                : new FeedbackMessage("Autorole configuration deleted.", _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -138,7 +138,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Description("Enables the given autorole, allowing it to be added to users.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-        public async Task<Result<UserMessage>> EnableAutoroleAsync
+        public async Task<Result<FeedbackMessage>> EnableAutoroleAsync
         (
             [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole
         )
@@ -146,8 +146,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             var enableAutorole = await _autoroles.EnableAutoroleAsync(autorole);
 
             return !enableAutorole.IsSuccess
-                ? Result<UserMessage>.FromError(enableAutorole)
-                : new ConfirmationMessage("Autorole enabled.");
+                ? Result<FeedbackMessage>.FromError(enableAutorole)
+                : new FeedbackMessage("Autorole enabled.", _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -159,7 +159,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Description("Disables the given autorole, preventing it from being added to users.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-        public async Task<Result<UserMessage>> DisableAutoroleAsync
+        public async Task<Result<FeedbackMessage>> DisableAutoroleAsync
         (
             [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole
         )
@@ -167,8 +167,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             var disableAutorole = await _autoroles.DisableAutoroleAsync(autorole);
 
             return !disableAutorole.IsSuccess
-                ? Result<UserMessage>.FromError(disableAutorole)
-                : new ConfirmationMessage("Autorole disabled.");
+                ? Result<FeedbackMessage>.FromError(disableAutorole)
+                : new FeedbackMessage("Autorole disabled.", _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -186,8 +186,9 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         )
         {
             var embedFields = new List<IEmbedField>();
-            var embed = _feedback.CreateEmbedBase() with
+            var embed = new Embed
             {
+                Colour = _feedback.Theme.Secondary,
                 Title = "Autorole Configuration",
                 Description = $"<@&{autorole.DiscordRoleID}>",
                 Fields = embedFields
@@ -273,7 +274,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Description("Affirms a user's qualification for an autorole.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(AffirmDenyAutorole), PermissionTarget.All)]
-        public async Task<Result<UserMessage>> AffirmAutoroleForUserAsync
+        public async Task<Result<FeedbackMessage>> AffirmAutoroleForUserAsync
         (
             [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole,
             IUser user
@@ -282,8 +283,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             var confirmResult = await _autoroles.ConfirmAutoroleAsync(autorole, user.ID);
 
             return !confirmResult.IsSuccess
-                ? Result<UserMessage>.FromError(confirmResult)
-                : new ConfirmationMessage("Qualification affirmed.");
+                ? Result<FeedbackMessage>.FromError(confirmResult)
+                : new FeedbackMessage("Qualification affirmed.", _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -295,7 +296,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Description("Confirms all currently qualifying users for the given autorole.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(AffirmDenyAutorole), PermissionTarget.All)]
-        public async Task<Result<UserMessage>> AffirmAutoroleForAllAsync
+        public async Task<Result<FeedbackMessage>> AffirmAutoroleForAllAsync
         (
             [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole
         )
@@ -303,8 +304,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             var affirmResult = await _autoroles.AffirmAutoroleForAllAsync(autorole);
 
             return !affirmResult.IsSuccess
-                ? Result<UserMessage>.FromError(affirmResult)
-                : new ConfirmationMessage("Qualifications confirmed.");
+                ? Result<FeedbackMessage>.FromError(affirmResult)
+                : new FeedbackMessage("Qualifications confirmed.", _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -317,7 +318,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Description("Denies a user's qualification for an autorole.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(AffirmDenyAutorole), PermissionTarget.Self)]
-        public async Task<Result<UserMessage>> DenyAutoroleForUserAsync
+        public async Task<Result<FeedbackMessage>> DenyAutoroleForUserAsync
         (
             [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole,
             IUser user
@@ -326,8 +327,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             var denyResult = await _autoroles.DenyAutoroleAsync(autorole, user.ID);
 
             return !denyResult.IsSuccess
-                ? Result<UserMessage>.FromError(denyResult)
-                : new ConfirmationMessage("Qualification denied.");
+                ? Result<FeedbackMessage>.FromError(denyResult)
+                : new FeedbackMessage("Qualification denied.", _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -340,7 +341,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Description("Sets whether the given autorole require confirmation for the assignment after a user has qualified.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-        public async Task<Result<UserMessage>> SetAffirmationRequirementAsync
+        public async Task<Result<FeedbackMessage>> SetAffirmationRequirementAsync
         (
             [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole,
             bool requireAffirmation = true
@@ -349,14 +350,15 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             var setRequirementResult = await _autoroles.SetAffirmationRequiredAsync(autorole, requireAffirmation);
             if (!setRequirementResult.IsSuccess)
             {
-                return Result<UserMessage>.FromError(setRequirementResult);
+                return Result<FeedbackMessage>.FromError(setRequirementResult);
             }
 
-            return new ConfirmationMessage
+            return new FeedbackMessage
             (
                 requireAffirmation
                     ? "Affirmation is now required."
-                    : "Affirmation is no longer required."
+                    : "Affirmation is no longer required.",
+                _feedback.Theme.Secondary
             );
         }
 

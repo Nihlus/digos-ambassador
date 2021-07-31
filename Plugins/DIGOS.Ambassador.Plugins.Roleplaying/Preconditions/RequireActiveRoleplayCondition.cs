@@ -22,7 +22,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback.Errors;
+using DIGOS.Ambassador.Core.Errors;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
 using Remora.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;

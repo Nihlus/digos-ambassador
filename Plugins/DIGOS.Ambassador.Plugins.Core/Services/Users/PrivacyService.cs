@@ -25,15 +25,15 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
+using DIGOS.Ambassador.Core.Errors;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Core;
 using Remora.Results;
 using Zio;
@@ -46,7 +46,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
     public sealed class PrivacyService
     {
         private readonly CoreDatabaseContext _database;
-        private readonly UserFeedbackService _feedback;
+        private readonly FeedbackService _feedback;
         private readonly ContentService _content;
 
         private readonly IDiscordRestChannelAPI _channelAPI;
@@ -63,7 +63,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         public PrivacyService
         (
             CoreDatabaseContext database,
-            UserFeedbackService feedback,
+            FeedbackService feedback,
             ContentService content,
             IDiscordRestChannelAPI channelAPI,
             IDiscordRestUserAPI userAPI
@@ -84,9 +84,9 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// <returns>An execution result.</returns>
         public async Task<Result> RequestConsentAsync(Snowflake discordUser, CancellationToken ct = default)
         {
-            var embed = _feedback.CreateEmbedBase(Color.Orange);
-            embed = embed with
+            var embed = new Embed
             {
+                Colour = _feedback.Theme.Warning,
                 Description =
                 "Hello there! This appears to be the first time you're using the bot (or you've not granted your " +
                 "consent for it to store potentially sensitive or identifiable data about you).\n" +
@@ -120,7 +120,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
                                  "privacy policy (which can be requested by running the `!privacy policy` command) " +
                                  "and agree to it by sending `!privacy grant-consent` to the bot over DM.";
 
-            var sendWarning = await _feedback.SendContextualWarningAsync(discordUser, warningMessage, ct);
+            var sendWarning = await _feedback.SendContextualWarningAsync(warningMessage, discordUser, ct);
             return !sendWarning.IsSuccess
                 ? Result.FromError(sendWarning)
                 : Result.FromSuccess();
@@ -137,8 +137,9 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
             var result = _content.OpenLocalStream(UPath.Combine(UPath.Root, "Privacy", "PrivacyPolicy.pdf"));
             if (!result.IsSuccess)
             {
-                var embed = _feedback.CreateEmbedBase(Color.Red) with
+                var embed = new Embed
                 {
+                    Colour = _feedback.Theme.FaultOrDanger,
                     Description = "Oops. Something went wrong, and I couldn't grab the privacy policy. Please report " +
                                   "this to the developer, don't agree to anything, and read it online instead.",
                     Fields = new[] { new EmbedField("Privacy Policy", _content.PrivacyPolicyUri.ToString()) }

@@ -23,10 +23,7 @@
 using System.ComponentModel;
 using System.Drawing;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Discord.Feedback.Errors;
-using DIGOS.Ambassador.Discord.Feedback.Results;
-using DIGOS.Ambassador.Discord.Feedback.Services;
+using DIGOS.Ambassador.Core.Errors;
 using DIGOS.Ambassador.Plugins.Amby.Services;
 using JetBrains.Annotations;
 using Remora.Commands.Attributes;
@@ -36,6 +33,8 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Feedback.Messages;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -51,10 +50,10 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
     {
         private readonly PortraitService _portraits;
         private readonly SassService _sass;
-        private readonly UserFeedbackService _feedback;
+        private readonly FeedbackService _feedback;
         private readonly ICommandContext _context;
-        private readonly IdentityInformationService _identityInformation;
         private readonly IDiscordRestChannelAPI _channelAPI;
+        private readonly IDiscordRestUserAPI _userAPI;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AmbyCommands"/> class.
@@ -63,24 +62,24 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
         /// <param name="sass">The sass service.</param>
         /// <param name="portraits">The portrait service.</param>
         /// <param name="context">The command context.</param>
-        /// <param name="identityInformation">The identity information service.</param>
         /// <param name="channelAPI">The channel API.</param>
+        /// <param name="userAPI">The user API.</param>
         public AmbyCommands
         (
-            UserFeedbackService feedback,
+            FeedbackService feedback,
             SassService sass,
             PortraitService portraits,
             ICommandContext context,
-            IdentityInformationService identityInformation,
-            IDiscordRestChannelAPI channelAPI
+            IDiscordRestChannelAPI channelAPI,
+            IDiscordRestUserAPI userAPI
         )
         {
             _feedback = feedback;
             _sass = sass;
             _portraits = portraits;
             _context = context;
-            _identityInformation = identityInformation;
             _channelAPI = channelAPI;
+            _userAPI = userAPI;
         }
 
         /// <summary>
@@ -90,7 +89,7 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
         [Command("contact")]
         [Description("Instructs Amby to contact you over DM.")]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> ContactSelfAsync() => await ContactUserAsync(_context.User);
+        public async Task<Result<FeedbackMessage>> ContactSelfAsync() => await ContactUserAsync(_context.User);
 
         /// <summary>
         /// Instructs Amby to contact a user over DM.
@@ -101,9 +100,17 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
         [Description("Instructs Amby to contact a user over DM.")]
         [RequireContext(ChannelContext.Guild)]
         [RequireUserGuildPermission(DiscordPermission.MentionEveryone)]
-        public async Task<Result<UserMessage>> ContactUserAsync(IUser discordUser)
+        public async Task<Result<FeedbackMessage>> ContactUserAsync(IUser discordUser)
         {
-            if (discordUser.ID == _identityInformation.ID)
+            var getSelf = await _userAPI.GetCurrentUserAsync();
+            if (!getSelf.IsSuccess)
+            {
+                return Result<FeedbackMessage>.FromError(getSelf);
+            }
+
+            var self = getSelf.Entity;
+
+            if (discordUser.ID == self.ID)
             {
                 return new UserError
                 (
@@ -120,18 +127,16 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
                                  "negotiations... with you. \nA good place to start would be the \"!help <topic>\" " +
                                  "command.";
 
-            var eb = _feedback.CreateFeedbackEmbed
+            var sendPrivate = await _feedback.SendPrivateNeutralAsync
             (
                 discordUser.ID,
-                Color.MediumPurple,
-                contactMessage
+                contactMessage,
+                this.CancellationToken
             );
 
-            var sendPrivate = await _feedback.SendPrivateEmbedAsync(discordUser.ID, eb);
-
             return !sendPrivate.IsSuccess
-                ? Result<UserMessage>.FromError(sendPrivate)
-                : new ConfirmationMessage("User contacted.");
+                ? Result<FeedbackMessage>.FromError(sendPrivate)
+                : new FeedbackMessage("User contacted.", _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -140,12 +145,12 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
         [UsedImplicitly]
         [Command("sass")]
         [Description("Sasses the user in a DIGOS fashion.")]
-        public async Task<Result<UserMessage>> SassAsync()
+        public async Task<Result<FeedbackMessage>> SassAsync()
         {
             var getChannel = await _channelAPI.GetChannelAsync(_context.ChannelID, this.CancellationToken);
             if (!getChannel.IsSuccess)
             {
-                return Result<UserMessage>.FromError(getChannel);
+                return Result<FeedbackMessage>.FromError(getChannel);
             }
 
             var channel = getChannel.Entity;
@@ -154,11 +159,11 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
             var getSassResult = await _sass.GetSassAsync(isNsfwChannel);
             if (!getSassResult.IsSuccess)
             {
-                return Result<UserMessage>.FromError(getSassResult);
+                return Result<FeedbackMessage>.FromError(getSassResult);
             }
 
             var sass = getSassResult.Entity;
-            return new ConfirmationMessage(sass);
+            return new FeedbackMessage(sass, _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -169,8 +174,9 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
         [Description("Mow!")]
         public async Task<IResult> MowAsync()
         {
-            var eb = _feedback.CreateEmbedBase() with
+            var eb = new Embed
             {
+                Colour = _feedback.Theme.Secondary,
                 Image = new EmbedImage(_portraits.MowUri.ToString())
             };
 
@@ -185,8 +191,9 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
         [Description("Bweh!")]
         public async Task<IResult> BwehAsync()
         {
-            var eb = _feedback.CreateEmbedBase() with
+            var eb = new Embed
             {
+                Colour = _feedback.Theme.Secondary,
                 Image = new EmbedImage(_portraits.BwehUri.ToString())
             };
 
@@ -199,9 +206,9 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
         [UsedImplicitly]
         [Command("boop")]
         [Description("Boops you.")]
-        public Task<Result<UserMessage>> BoopAsync()
+        public Task<Result<FeedbackMessage>> BoopAsync()
         {
-            return Task.FromResult<Result<UserMessage>>(new ConfirmationMessage("*boop*"));
+            return Task.FromResult<Result<FeedbackMessage>>(new FeedbackMessage("*boop*", _feedback.Theme.Secondary));
         }
 
         /// <summary>
@@ -210,9 +217,9 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
         [UsedImplicitly]
         [Command("bap")]
         [Description("Baps you.")]
-        public Task<Result<UserMessage>> BapAsync()
+        public Task<Result<FeedbackMessage>> BapAsync()
         {
-            return Task.FromResult<Result<UserMessage>>(new ConfirmationMessage("**baps**"));
+            return Task.FromResult<Result<FeedbackMessage>>(new FeedbackMessage("**baps**", _feedback.Theme.Secondary));
         }
 
         /// <summary>
@@ -222,23 +229,31 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
         [UsedImplicitly]
         [Command("boop-user")]
         [Description("Boops the user.")]
-        public async Task<Result<UserMessage>> BoopAsync(IUser target)
+        public async Task<Result<FeedbackMessage>> BoopAsync(IUser target)
         {
-            if (target.ID != _identityInformation.ID)
+            var getSelf = await _userAPI.GetCurrentUserAsync();
+            if (!getSelf.IsSuccess)
             {
-                return new ConfirmationMessage($"*boops <@{target.ID}>*");
+                return Result<FeedbackMessage>.FromError(getSelf);
             }
 
-            var sendAnnoyed = await _feedback.SendContextualConfirmationAsync
+            var self = getSelf.Entity;
+
+            if (target.ID != self.ID)
+            {
+                return new FeedbackMessage($"*boops <@{target.ID}>*", _feedback.Theme.Secondary);
+            }
+
+            var sendAnnoyed = await _feedback.SendContextualNeutralAsync
             (
-                _context.User.ID,
                 "...seriously?",
+                _context.User.ID,
                 this.CancellationToken
             );
 
             return sendAnnoyed.IsSuccess
-                ? new ConfirmationMessage($"*boops <@{_context.User.ID}>*")
-                : Result<UserMessage>.FromError(sendAnnoyed);
+                ? new FeedbackMessage($"*boops <@{_context.User.ID}>*", _feedback.Theme.Secondary)
+                : Result<FeedbackMessage>.FromError(sendAnnoyed);
         }
 
         /// <summary>
@@ -248,23 +263,31 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
         [UsedImplicitly]
         [Command("bap-user")]
         [Description("Baps the user.")]
-        public async Task<Result<UserMessage>> BapAsync(IUser target)
+        public async Task<Result<FeedbackMessage>> BapAsync(IUser target)
         {
-            if (target.ID != _identityInformation.ID)
+            var getSelf = await _userAPI.GetCurrentUserAsync();
+            if (!getSelf.IsSuccess)
             {
-                return new ConfirmationMessage($"**baps <@{target.ID}>**");
+                return Result<FeedbackMessage>.FromError(getSelf);
             }
 
-            var sendAnnoyed = await _feedback.SendContextualConfirmationAsync
+            var self = getSelf.Entity;
+
+            if (target.ID != self.ID)
+            {
+                return new FeedbackMessage($"**baps <@{target.ID}>**", _feedback.Theme.Secondary);
+            }
+
+            var sendAnnoyed = await _feedback.SendContextualNeutralAsync
             (
-                _context.User.ID,
                 "...seriously?",
+                _context.User.ID,
                 this.CancellationToken
             );
 
             return sendAnnoyed.IsSuccess
-                ? new ConfirmationMessage($"**baps <@{_context.User.ID}>**")
-                : Result<UserMessage>.FromError(sendAnnoyed);
+                ? new FeedbackMessage($"**baps <@{_context.User.ID}>**", _feedback.Theme.Secondary)
+                : Result<FeedbackMessage>.FromError(sendAnnoyed);
         }
 
         /// <summary>
@@ -275,8 +298,9 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
         [Description("Shows some information about Amby's metaworkings.")]
         public async Task<IResult> InfoAsync()
         {
-            var eb = _feedback.CreateEmbedBase() with
+            var eb = new Embed
             {
+                Colour = _feedback.Theme.Secondary,
                 Author = new EmbedAuthor
                 {
                     Name = "DIGOS Ambassador",
@@ -288,22 +312,22 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
                     Url = _portraits.AmbyPortraitUri.ToString()
                 },
                 Description =
-                "Amby is a Discord bot written in C# using the Discord.Net and EF Core frameworks. As an ambassador " +
-                "for the DIGOS community, she provides a number of useful services for communities with similar " +
-                "interests - namely, roleplaying, transformation, weird and wonderful sexual kinks, and much more.\n" +
-                "\n" +
-                "Amby is free and open source software, licensed under the AGPLv3. All of her source code can be " +
-                "freely viewed and improved on Github at https://github.com/Nihlus/DIGOS.Ambassador. You are free to " +
-                "run your own instance of Amby, redistribute her code, and modify it to your heart's content. If " +
-                "you're not familiar with the AGPL, an excellent summary is available here: " +
-                "https://choosealicense.com/licenses/agpl-3.0/.\n" +
-                "\n" +
-                "Any bugs you encounter should be reported on Github, following the issue template provided there. " +
-                "The same holds for feature requests, for which a separate template is provided. Contributions in " +
-                "the form of code, artwork, bug triaging, or quality control testing is always greatly appreciated!\n" +
-                "\n" +
-                "Stay sharky~\n" +
-                "- Amby"
+                    "Amby is a Discord bot written in C# using the Discord.Net and EF Core frameworks. As an ambassador " +
+                    "for the DIGOS community, she provides a number of useful services for communities with similar " +
+                    "interests - namely, roleplaying, transformation, weird and wonderful sexual kinks, and much more.\n" +
+                    "\n" +
+                    "Amby is free and open source software, licensed under the AGPLv3. All of her source code can be " +
+                    "freely viewed and improved on Github at https://github.com/Nihlus/DIGOS.Ambassador. You are free to " +
+                    "run your own instance of Amby, redistribute her code, and modify it to your heart's content. If " +
+                    "you're not familiar with the AGPL, an excellent summary is available here: " +
+                    "https://choosealicense.com/licenses/agpl-3.0/.\n" +
+                    "\n" +
+                    "Any bugs you encounter should be reported on Github, following the issue template provided there. " +
+                    "The same holds for feature requests, for which a separate template is provided. Contributions in " +
+                    "the form of code, artwork, bug triaging, or quality control testing is always greatly appreciated!\n" +
+                    "\n" +
+                    "Stay sharky~\n" +
+                    "- Amby"
             };
 
             return await _feedback.SendPrivateEmbedAsync(_context.User.ID, eb);

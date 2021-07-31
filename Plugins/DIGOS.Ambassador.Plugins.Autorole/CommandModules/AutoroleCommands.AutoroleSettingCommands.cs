@@ -22,9 +22,7 @@
 
 using System.ComponentModel;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Discord.Feedback.Errors;
-using DIGOS.Ambassador.Discord.Feedback.Results;
+using DIGOS.Ambassador.Core.Errors;
 using DIGOS.Ambassador.Plugins.Autorole.Permissions;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
 using DIGOS.Ambassador.Plugins.Permissions.Conditions;
@@ -35,6 +33,8 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Feedback.Messages;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
@@ -53,7 +53,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         public class AutoroleSettingCommands : CommandGroup
         {
             private readonly AutoroleService _autoroles;
-            private readonly UserFeedbackService _feedback;
+            private readonly FeedbackService _feedback;
             private readonly ICommandContext _context;
 
             /// <summary>
@@ -65,7 +65,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             public AutoroleSettingCommands
             (
                 AutoroleService autoroles,
-                UserFeedbackService feedback,
+                FeedbackService feedback,
                 ICommandContext context
             )
             {
@@ -96,8 +96,9 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                     ? $"<#{settings.AffirmationRequiredNotificationChannelID.Value}"
                     : "None";
 
-                var embed = _feedback.CreateEmbedBase() with
+                var embed = new Embed
                 {
+                    Colour = _feedback.Theme.Secondary,
                     Title = "Autorole Settings",
                     Fields = new[] { new EmbedField("Confirmation Notification Channel", notificationChannelValue) }
                 };
@@ -116,7 +117,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             [Description("clears the confirmation notification channel.")]
             [RequireContext(ChannelContext.Guild)]
             [RequirePermission(typeof(EditAutoroleServerSettings), PermissionTarget.Self)]
-            public async Task<Result<UserMessage>> ClearAffirmationNotificationChannel()
+            public async Task<Result<FeedbackMessage>> ClearAffirmationNotificationChannel()
             {
                 var clearResult = await _autoroles.ClearAffirmationNotificationChannelAsync
                 (
@@ -124,8 +125,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 );
 
                 return !clearResult.IsSuccess
-                    ? Result<UserMessage>.FromError(clearResult)
-                    : new ConfirmationMessage("Channel cleared.");
+                    ? Result<FeedbackMessage>.FromError(clearResult)
+                    : new FeedbackMessage("Channel cleared.", _feedback.Theme.Secondary);
             }
 
             /// <summary>
@@ -137,7 +138,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             [Description("Sets the confirmation notification channel.")]
             [RequireContext(ChannelContext.Guild)]
             [RequirePermission(typeof(EditAutoroleServerSettings), PermissionTarget.Self)]
-            public async Task<Result<UserMessage>> SetAffirmationNotificationChannel(IChannel channel)
+            public async Task<Result<FeedbackMessage>> SetAffirmationNotificationChannel(IChannel channel)
             {
                 if (channel.Type is not ChannelType.GuildText)
                 {
@@ -151,8 +152,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 );
 
                 return !setResult.IsSuccess
-                    ? Result<UserMessage>.FromError(setResult)
-                    : new ConfirmationMessage("Channel set.");
+                    ? Result<FeedbackMessage>.FromError(setResult)
+                    : new FeedbackMessage("Channel set.", _feedback.Theme.Secondary);
             }
         }
     }

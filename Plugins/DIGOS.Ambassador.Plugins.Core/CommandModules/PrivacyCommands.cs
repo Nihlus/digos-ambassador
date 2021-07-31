@@ -22,8 +22,6 @@
 
 using System.ComponentModel;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Core.Attributes;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using JetBrains.Annotations;
@@ -33,6 +31,8 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Feedback.Messages;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -49,7 +49,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
     public class PrivacyCommands : CommandGroup
     {
         private readonly PrivacyService _privacy;
-        private readonly UserFeedbackService _feedback;
+        private readonly FeedbackService _feedback;
         private readonly ICommandContext _context;
         private readonly IDiscordRestChannelAPI _channelAPI;
 
@@ -62,7 +62,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         /// <param name="channelAPI">The channel API.</param>
         public PrivacyCommands
         (
-            UserFeedbackService feedback,
+            FeedbackService feedback,
             PrivacyService privacy,
             ICommandContext context,
             IDiscordRestChannelAPI channelAPI
@@ -96,15 +96,15 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         [Description("Grants consent to store user data.")]
         [RequireContext(ChannelContext.DM)]
         [PrivacyExempt]
-        public async Task<Result<UserMessage>> GrantConsentAsync()
+        public async Task<Result<FeedbackMessage>> GrantConsentAsync()
         {
             var grantResult = await _privacy.GrantUserConsentAsync(_context.User.ID);
             if (!grantResult.IsSuccess)
             {
-                return Result<UserMessage>.FromError(grantResult);
+                return Result<FeedbackMessage>.FromError(grantResult);
             }
 
-            return new ConfirmationMessage("Thank you! Enjoy using the bot :smiley:");
+            return new FeedbackMessage("Thank you! Enjoy using the bot :smiley:", _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -115,19 +115,20 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         [Description("Revokes consent to store user data.")]
         [RequireContext(ChannelContext.DM)]
         [PrivacyExempt]
-        public async Task<Result<UserMessage>> RevokeConsentAsync()
+        public async Task<Result<FeedbackMessage>> RevokeConsentAsync()
         {
             var revokeResult = await _privacy.RevokeUserConsentAsync(_context.User.ID);
             if (!revokeResult.IsSuccess)
             {
-                return Result<UserMessage>.FromError(revokeResult);
+                return Result<FeedbackMessage>.FromError(revokeResult);
             }
 
-            return new ConfirmationMessage
+            return new FeedbackMessage
             (
                 "Consent revoked - no more information will be stored about you from now on. If you would like to " +
                 "delete your existing data, or get a copy of it, please contact the privacy contact individual (use " +
-                "!privacy contact to get their contact information)."
+                "!privacy contact to get their contact information).",
+                _feedback.Theme.Secondary
             );
         }
 
@@ -142,8 +143,9 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         public async Task<IResult> DisplayContactAsync()
         {
             const string avatarURL = "https://i.imgur.com/2E334jS.jpg";
-            var embed = _feedback.CreateEmbedBase() with
+            var embed = new Embed
             {
+                Colour = _feedback.Theme.Secondary,
                 Title = "Privacy Contact",
                 Author = new EmbedAuthor("Jarl Gullberg", IconUrl: avatarURL, Url: "https://github.com/Nihlus/"),
                 Thumbnail = new EmbedThumbnail(avatarURL),

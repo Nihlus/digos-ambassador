@@ -28,7 +28,6 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Core.Permissions;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Permissions.Conditions;
@@ -43,6 +42,8 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Feedback.Messages;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Core;
 using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
@@ -226,14 +227,17 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         public class SetCommands : CommandGroup
         {
             private readonly UserService _users;
+            private readonly FeedbackService _feedback;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="SetCommands"/> class.
             /// </summary>
             /// <param name="users">The user service.</param>
-            public SetCommands(UserService users)
+            /// <param name="feedback">The feedback service.</param>
+            public SetCommands(UserService users, FeedbackService feedback)
             {
                 _users = users;
+                _feedback = feedback;
             }
 
             /// <summary>
@@ -245,13 +249,13 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             [Description("Sets the target user's bio.")]
             [RequireContext(ChannelContext.Guild)]
             [RequirePermission(typeof(EditUserInfo), PermissionTarget.Other)]
-            public async Task<Result<UserMessage>> SetUserBioAsync(IUser discordUser, string bio)
+            public async Task<Result<FeedbackMessage>> SetUserBioAsync(IUser discordUser, string bio)
             {
                 // Add the user to the user database if they're not already in it
                 var getUserResult = await _users.GetOrRegisterUserAsync(discordUser.ID);
                 if (!getUserResult.IsSuccess)
                 {
-                    return Result<UserMessage>.FromError(getUserResult);
+                    return Result<FeedbackMessage>.FromError(getUserResult);
                 }
 
                 var user = getUserResult.Entity;
@@ -259,10 +263,10 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                 var setBioResult = await _users.SetUserBioAsync(user, bio);
                 if (!setBioResult.IsSuccess)
                 {
-                    return Result<UserMessage>.FromError(setBioResult);
+                    return Result<FeedbackMessage>.FromError(setBioResult);
                 }
 
-                return new ConfirmationMessage("Bio updated.");
+                return new FeedbackMessage("Bio updated.", _feedback.Theme.Secondary);
             }
 
             /// <summary>
@@ -274,13 +278,13 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             [Description("Sets the target user's UTC timezone hour offset.")]
             [RequireContext(ChannelContext.Guild)]
             [RequirePermission(typeof(EditUserInfo), PermissionTarget.Other)]
-            public async Task<Result<UserMessage>> SetUserTimezoneAsync(IUser discordUser, int timezone)
+            public async Task<Result<FeedbackMessage>> SetUserTimezoneAsync(IUser discordUser, int timezone)
             {
                 // Add the user to the user database if they're not already in it
                 var getUserResult = await _users.GetOrRegisterUserAsync(discordUser.ID);
                 if (!getUserResult.IsSuccess)
                 {
-                    return Result<UserMessage>.FromError(getUserResult);
+                    return Result<FeedbackMessage>.FromError(getUserResult);
                 }
 
                 var user = getUserResult.Entity;
@@ -288,10 +292,10 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                 var setTimezoneResult = await _users.SetUserTimezoneAsync(user, timezone);
                 if (!setTimezoneResult.IsSuccess)
                 {
-                    return Result<UserMessage>.FromError(setTimezoneResult);
+                    return Result<FeedbackMessage>.FromError(setTimezoneResult);
                 }
 
-                return new ConfirmationMessage("Timezone updated.");
+                return new FeedbackMessage("Timezone updated.", _feedback.Theme.Secondary);
             }
         }
     }

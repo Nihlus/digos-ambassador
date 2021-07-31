@@ -29,7 +29,6 @@ using DIGOS.Ambassador.Plugins.Autorole.Services;
 using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
-using static System.Transactions.IsolationLevel;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Responders
 {

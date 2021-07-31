@@ -25,8 +25,6 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Characters.Extensions;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services;
@@ -41,6 +39,8 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Feedback.Messages;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -54,7 +54,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
     [Description("Transformation-related commands, such as transforming body parts or saving appearances.")]
     public partial class TransformationCommands : CommandGroup
     {
-        private readonly UserFeedbackService _feedback;
+        private readonly FeedbackService _feedback;
         private readonly ContentService _content;
         private readonly CharacterDiscordService _characters;
         private readonly TransformationService _transformation;
@@ -70,7 +70,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         /// <param name="context">The command context.</param>
         public TransformationCommands
         (
-            UserFeedbackService feedback,
+            FeedbackService feedback,
             CharacterDiscordService characters,
             TransformationService transformation,
             ContentService content,
@@ -95,7 +95,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command("species")]
         [Description("Transforms the given bodypart of the target user into the given species.")]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> ShiftAsync
+        public async Task<Result<FeedbackMessage>> ShiftAsync
         (
             Bodypart bodyPart,
             string species,
@@ -113,7 +113,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
 
             if (!getCurrentCharacterResult.IsSuccess)
             {
-                return Result<UserMessage>.FromError(getCurrentCharacterResult);
+                return Result<FeedbackMessage>.FromError(getCurrentCharacterResult);
             }
 
             var character = getCurrentCharacterResult.Entity;
@@ -137,12 +137,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
 
             if (!shift.IsSuccess)
             {
-                return Result<UserMessage>.FromError(shift);
+                return Result<FeedbackMessage>.FromError(shift);
             }
 
             var result = shift.Entity;
 
-            return new ConfirmationMessage(result.ShiftMessage);
+            return new FeedbackMessage(result.ShiftMessage, _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -156,7 +156,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Description("Transforms the base colour of the given bodypart on the target user into the given colour.")]
         [Command("colour")]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> ShiftColourAsync
+        public async Task<Result<FeedbackMessage>> ShiftColourAsync
         (
             Bodypart bodyPart,
             Colour colour,
@@ -174,7 +174,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
 
             if (!getCurrentCharacterResult.IsSuccess)
             {
-                return Result<UserMessage>.FromError(getCurrentCharacterResult);
+                return Result<FeedbackMessage>.FromError(getCurrentCharacterResult);
             }
 
             var character = getCurrentCharacterResult.Entity;
@@ -189,8 +189,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             );
 
             return !shiftPartResult.IsSuccess
-                ? Result<UserMessage>.FromError(shiftPartResult)
-                : new ConfirmationMessage(shiftPartResult.Entity.ShiftMessage);
+                ? Result<FeedbackMessage>.FromError(shiftPartResult)
+                : new FeedbackMessage(shiftPartResult.Entity.ShiftMessage, _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -205,7 +205,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command("pattern")]
         [Description("Transforms the pattern on the given bodypart on the target user into the given pattern and colour.")]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> ShiftPatternAsync
+        public async Task<Result<FeedbackMessage>> ShiftPatternAsync
         (
             Bodypart bodyPart,
             Pattern pattern,
@@ -224,7 +224,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
 
             if (!getCurrentCharacterResult.IsSuccess)
             {
-                return Result<UserMessage>.FromError(getCurrentCharacterResult);
+                return Result<FeedbackMessage>.FromError(getCurrentCharacterResult);
             }
 
             var character = getCurrentCharacterResult.Entity;
@@ -240,8 +240,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             );
 
             return !shiftPartResult.IsSuccess
-                ? Result<UserMessage>.FromError(shiftPartResult)
-                : new ConfirmationMessage(shiftPartResult.Entity.ShiftMessage);
+                ? Result<FeedbackMessage>.FromError(shiftPartResult)
+                : new FeedbackMessage(shiftPartResult.Entity.ShiftMessage, _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -255,7 +255,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command("pattern-colour")]
         [Description("Transforms the colour of the pattern on the given bodypart on the target user to the given colour.")]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> ShiftPatternColourAsync
+        public async Task<Result<FeedbackMessage>> ShiftPatternColourAsync
         (
             Bodypart bodyPart,
             Colour colour,
@@ -273,7 +273,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
 
             if (!getCurrentCharacterResult.IsSuccess)
             {
-                return Result<UserMessage>.FromError(getCurrentCharacterResult);
+                return Result<FeedbackMessage>.FromError(getCurrentCharacterResult);
             }
 
             var character = getCurrentCharacterResult.Entity;
@@ -288,8 +288,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             );
 
             return !shiftPartResult.IsSuccess
-                ? Result<UserMessage>.FromError(shiftPartResult)
-                : new ConfirmationMessage(shiftPartResult.Entity.ShiftMessage);
+                ? Result<FeedbackMessage>.FromError(shiftPartResult)
+                : new FeedbackMessage(shiftPartResult.Entity.ShiftMessage, _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -323,13 +323,15 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
                 return Result.FromError(generateDescriptionAsync);
             }
 
-            var descriptionEmbed = _feedback.CreateEmbedBase() with
+            var descriptionEmbed = new Embed
             {
+                Colour = _feedback.Theme.Secondary,
                 Description = generateDescriptionAsync.Entity
             };
 
-            var characterEmbed = _feedback.CreateEmbedBase() with
+            var characterEmbed = new Embed
             {
+                Colour = _feedback.Theme.Secondary,
                 Title = $"{character.Name} \"{character.Nickname}\"".Trim(),
                 Thumbnail = new EmbedThumbnail
                 (
@@ -364,7 +366,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command("reset")]
         [Description("Resets your form to your default one.")]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> ResetFormAsync()
+        public async Task<Result<FeedbackMessage>> ResetFormAsync()
         {
             var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync
             (
@@ -374,15 +376,15 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
 
             if (!getCurrentCharacterResult.IsSuccess)
             {
-                return Result<UserMessage>.FromError(getCurrentCharacterResult);
+                return Result<FeedbackMessage>.FromError(getCurrentCharacterResult);
             }
 
             var character = getCurrentCharacterResult.Entity;
             var resetFormResult = await _transformation.ResetCharacterFormAsync(character);
 
             return !resetFormResult.IsSuccess
-                ? Result<UserMessage>.FromError(resetFormResult)
-                : new ConfirmationMessage("Character form reset.");
+                ? Result<FeedbackMessage>.FromError(resetFormResult)
+                : new FeedbackMessage("Character form reset.", _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -392,13 +394,13 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command("opt-in")]
         [Description("Opts into the transformation module on this server.")]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> OptInToTransformationsAsync()
+        public async Task<Result<FeedbackMessage>> OptInToTransformationsAsync()
         {
             var optInResult = await _transformation.OptInUserAsync(_context.User.ID, _context.GuildID.Value);
 
             return !optInResult.IsSuccess
-                ? Result<UserMessage>.FromError(optInResult)
-                : new ConfirmationMessage("Opted into transformations. Have fun!");
+                ? Result<FeedbackMessage>.FromError(optInResult)
+                : new FeedbackMessage("Opted into transformations. Have fun!", _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -408,13 +410,13 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command("opt-out")]
         [Description("Opts out of the transformation module on this server.")]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> OptOutOfTransformationsAsync()
+        public async Task<Result<FeedbackMessage>> OptOutOfTransformationsAsync()
         {
             var optOutResult = await _transformation.OptOutUserAsync(_context.User.ID, _context.GuildID.Value);
 
             return !optOutResult.IsSuccess
-                ? Result<UserMessage>.FromError(optOutResult)
-                : new ConfirmationMessage("Opted out of transformations.");
+                ? Result<FeedbackMessage>.FromError(optOutResult)
+                : new FeedbackMessage("Opted out of transformations.", _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -424,12 +426,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [UsedImplicitly]
         [Command("whitelist")]
         [Description("Whitelists a user, allowing them to transform you.")]
-        public async Task<Result<UserMessage>> WhitelistUserAsync(IUser user)
+        public async Task<Result<FeedbackMessage>> WhitelistUserAsync(IUser user)
         {
             var whitelistUserResult = await _transformation.WhitelistUserAsync(_context.User.ID, user.ID);
             return !whitelistUserResult.IsSuccess
-                ? Result<UserMessage>.FromError(whitelistUserResult)
-                : new ConfirmationMessage("User whitelisted.");
+                ? Result<FeedbackMessage>.FromError(whitelistUserResult)
+                : new FeedbackMessage("User whitelisted.", _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -439,13 +441,13 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [UsedImplicitly]
         [Command("blacklist")]
         [Description("Blacklists a user, preventing them from transforming you.")]
-        public async Task<Result<UserMessage>> BlacklistUserAsync(IUser user)
+        public async Task<Result<FeedbackMessage>> BlacklistUserAsync(IUser user)
         {
             var blacklistUserResult = await _transformation.BlacklistUserAsync(_context.User.ID, user.ID);
 
             return !blacklistUserResult.IsSuccess
-                ? Result<UserMessage>.FromError(blacklistUserResult)
-                : new ConfirmationMessage("User whitelisted.");
+                ? Result<FeedbackMessage>.FromError(blacklistUserResult)
+                : new FeedbackMessage("User whitelisted.", _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -455,12 +457,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command("update-db")]
         [Description("Updates the transformation database with the bundled definitions.")]
         [RequireOwner]
-        public async Task<Result<UserMessage>> UpdateTransformationDatabaseAsync()
+        public async Task<Result<FeedbackMessage>> UpdateTransformationDatabaseAsync()
         {
             var updateTransformations = await _transformation.UpdateTransformationDatabaseAsync();
             if (!updateTransformations.IsSuccess)
             {
-                return Result<UserMessage>.FromError(updateTransformations);
+                return Result<FeedbackMessage>.FromError(updateTransformations);
             }
 
             var result = updateTransformations.Entity;
@@ -471,7 +473,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
                 $"{result.SpeciesUpdated} species updated, " +
                 $"and {result.TransformationsUpdated} transformations updated.";
 
-            return new ConfirmationMessage(confirmationText);
+            return new FeedbackMessage(confirmationText, _feedback.Theme.Secondary);
         }
     }
 }

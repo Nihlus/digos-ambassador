@@ -23,7 +23,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
@@ -33,6 +32,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Core;
 using Remora.Results;
 
@@ -50,7 +50,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         public class ModerationServerCommands : CommandGroup
         {
             private readonly ModerationService _moderation;
-            private readonly UserFeedbackService _feedback;
+            private readonly FeedbackService _feedback;
             private readonly ICommandContext _context;
             private readonly IDiscordRestGuildAPI _guildAPI;
 
@@ -64,7 +64,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             public ModerationServerCommands
             (
                 ModerationService moderation,
-                UserFeedbackService feedback,
+                FeedbackService feedback,
                 ICommandContext context,
                 IDiscordRestGuildAPI guildAPI
             )
@@ -102,8 +102,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 var getGuildIcon = CDN.GetGuildIconUrl(guild);
 
                 var embedFields = new List<EmbedField>();
-                var eb = _feedback.CreateEmbedBase() with
+                var eb = new Embed
                 {
+                    Colour = _feedback.Theme.Secondary,
                     Title = guild.Name,
                     Thumbnail = getGuildIcon.IsSuccess
                         ? new EmbedThumbnail(getGuildIcon.Entity.ToString())

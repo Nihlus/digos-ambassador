@@ -24,8 +24,6 @@ using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Drone.Extensions;
 using DIGOS.Ambassador.Plugins.Drone.Services;
 using JetBrains.Annotations;
@@ -34,6 +32,8 @@ using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Feedback.Messages;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Drone.CommandModules
@@ -46,7 +46,7 @@ namespace DIGOS.Ambassador.Plugins.Drone.CommandModules
     {
         private readonly ContentService _content;
         private readonly DroneService _drone;
-        private readonly UserFeedbackService _feedback;
+        private readonly FeedbackService _feedback;
         private readonly ICommandContext _context;
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Plugins.Drone.CommandModules
         public DroneCommands
         (
             DroneService drone,
-            UserFeedbackService feedback,
+            FeedbackService feedback,
             ContentService content,
             ICommandContext context
         )
@@ -80,7 +80,7 @@ namespace DIGOS.Ambassador.Plugins.Drone.CommandModules
         [Command("drone")]
         [RequireContext(ChannelContext.Guild)]
         [Description("Drones the target user.")]
-        public async Task<Result<UserMessage>> DroneAsync(IGuildMember member)
+        public async Task<Result<FeedbackMessage>> DroneAsync(IGuildMember member)
         {
             if (!member.User.HasValue)
             {
@@ -91,16 +91,16 @@ namespace DIGOS.Ambassador.Plugins.Drone.CommandModules
                 ? _content.GetRandomSelfDroneMessage()
                 : _content.GetRandomTurnTheTablesMessage();
 
-            var sendMessage = await _feedback.SendContextualConfirmationAsync
+            var sendMessage = await _feedback.SendContextualNeutralAsync
             (
-                _context.User.ID,
                 droneMessage,
+                _context.User.ID,
                 this.CancellationToken
             );
 
             if (!sendMessage.IsSuccess)
             {
-                return Result<UserMessage>.FromError(sendMessage);
+                return Result<FeedbackMessage>.FromError(sendMessage);
             }
 
             var droneResult = await _drone.DroneUserAsync
@@ -111,8 +111,8 @@ namespace DIGOS.Ambassador.Plugins.Drone.CommandModules
             );
 
             return !droneResult.IsSuccess
-                ? Result<UserMessage>.FromError(droneResult)
-                : new ConfirmationMessage(_content.GetRandomConfirmationMessage());
+                ? Result<FeedbackMessage>.FromError(droneResult)
+                : new FeedbackMessage(_content.GetRandomConfirmationMessage(), _feedback.Theme.Secondary);
         }
     }
 }

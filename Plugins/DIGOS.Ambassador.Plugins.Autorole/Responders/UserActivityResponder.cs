@@ -20,7 +20,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,7 +27,6 @@ using DIGOS.Ambassador.Core.Database;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
 using Microsoft.Extensions.Logging;
-using Npgsql;
 using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.Core;
 using Remora.Discord.Gateway.Responders;

@@ -27,8 +27,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Database.Interfaces;
-using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Discord.Feedback.Errors;
+using DIGOS.Ambassador.Core.Errors;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Kinks.Extensions;
 using DIGOS.Ambassador.Plugins.Kinks.Model;
@@ -37,6 +36,7 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq.Extensions;
 using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Core;
 using Remora.Results;
 
@@ -50,7 +50,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
     {
         private readonly KinksDatabaseContext _database;
         private readonly UserService _users;
-        private readonly UserFeedbackService _feedback;
+        private readonly FeedbackService _feedback;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KinkService"/> class.
@@ -60,7 +60,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// <param name="database">The database.</param>
         public KinkService
         (
-            UserFeedbackService feedback,
+            FeedbackService feedback,
             UserService users,
             KinksDatabaseContext database
         )
@@ -96,8 +96,9 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         [Pure]
         public Embed BuildKinkInfoEmbed(Kink kink)
         {
-            return _feedback.CreateEmbedBase() with
+            return new Embed
             {
+                Colour = _feedback.Theme.Secondary,
                 Title = kink.Name.Transform(To.TitleCase),
                 Description = kink.Description
             };
@@ -136,8 +137,9 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         [Pure]
         public Embed BuildUserKinkInfoEmbedBase(UserKink userKink)
         {
-            return _feedback.CreateEmbedBase() with
+            return new Embed
             {
+                Colour = _feedback.Theme.Secondary,
                 Fields = new[]
                 {
                     new EmbedField(userKink.Kink.Name.Transform(To.TitleCase), userKink.Kink.Description),

@@ -22,7 +22,6 @@
 
 using System.ComponentModel;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Core.Preconditions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
@@ -30,8 +29,10 @@ using JetBrains.Annotations;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
-using UserMessage = DIGOS.Ambassador.Discord.Feedback.Results.UserMessage;
+
+using FeedbackMessage = Remora.Discord.Commands.Feedback.Messages.FeedbackMessage;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
@@ -47,17 +48,19 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         public class SetCommands : CommandGroup
         {
             private readonly RoleplayDiscordService _discordRoleplays;
+            private readonly FeedbackService _feedback;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="SetCommands"/> class.
             /// </summary>
             /// <param name="discordRoleplays">The roleplay service.</param>
+            /// <param name="feedback">The feedback service.</param>
             public SetCommands
             (
-                RoleplayDiscordService discordRoleplays
-            )
+                RoleplayDiscordService discordRoleplays, FeedbackService feedback)
             {
                 _discordRoleplays = discordRoleplays;
+                _feedback = feedback;
             }
 
             /// <summary>
@@ -69,7 +72,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             [Command("name")]
             [Description("Sets the new name of the named roleplay.")]
             [RequireContext(ChannelContext.Guild)]
-            public async Task<Result<UserMessage>> SetRoleplayNameAsync
+            public async Task<Result<FeedbackMessage>> SetRoleplayNameAsync
             (
                 string newRoleplayName,
                 [RequireEntityOwner]
@@ -83,8 +86,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 );
 
                 return !result.IsSuccess
-                    ? Result<UserMessage>.FromError(result)
-                    : new ConfirmationMessage("Roleplay name set.");
+                    ? Result<FeedbackMessage>.FromError(result)
+                    : new FeedbackMessage("Roleplay name set.", _feedback.Theme.Secondary);
             }
 
             /// <summary>
@@ -96,7 +99,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             [Command("summary")]
             [Description("Sets the summary of the named roleplay.")]
             [RequireContext(ChannelContext.Guild)]
-            public async Task<Result<UserMessage>> SetRoleplaySummaryAsync
+            public async Task<Result<FeedbackMessage>> SetRoleplaySummaryAsync
             (
                 string newRoleplaySummary,
                 [RequireEntityOwner]
@@ -106,8 +109,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 var result = await _discordRoleplays.SetRoleplaySummaryAsync(roleplay, newRoleplaySummary);
 
                 return !result.IsSuccess
-                    ? Result<UserMessage>.FromError(result)
-                    : new ConfirmationMessage("Roleplay summary set.");
+                    ? Result<FeedbackMessage>.FromError(result)
+                    : new FeedbackMessage("Roleplay summary set.", _feedback.Theme.Secondary);
             }
 
             /// <summary>
@@ -120,7 +123,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             [Command("nsfw")]
             [Description("Sets a value indicating whether or not the named roleplay is NSFW.")]
             [RequireContext(ChannelContext.Guild)]
-            public async Task<Result<UserMessage>> SetRoleplayIsNSFW
+            public async Task<Result<FeedbackMessage>> SetRoleplayIsNSFW
             (
                 bool isNSFW,
                 [RequireEntityOwner]
@@ -130,8 +133,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 var result = await _discordRoleplays.SetRoleplayIsNSFWAsync(roleplay, isNSFW);
 
                 return !result.IsSuccess
-                    ? Result<UserMessage>.FromError(result)
-                    : new ConfirmationMessage($"Roleplay set to {(isNSFW ? "NSFW" : "SFW")}");
+                    ? Result<FeedbackMessage>.FromError(result)
+                    : new FeedbackMessage($"Roleplay set to {(isNSFW ? "NSFW" : "SFW")}", _feedback.Theme.Secondary);
             }
 
             /// <summary>
@@ -143,7 +146,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             [Command("private")]
             [Description("Sets a value indicating whether or not the named roleplay is private.")]
             [RequireContext(ChannelContext.Guild)]
-            public Task<Result<UserMessage>> SetRoleplayIsPrivate
+            public Task<Result<FeedbackMessage>> SetRoleplayIsPrivate
             (
                 bool isPrivate,
                 [RequireEntityOwner]
@@ -161,7 +164,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             [Command("public")]
             [Description("Sets a value indicating whether or not the named roleplay is public.")]
             [RequireContext(ChannelContext.Guild)]
-            public async Task<Result<UserMessage>> SetRoleplayIsPublic
+            public async Task<Result<FeedbackMessage>> SetRoleplayIsPublic
             (
                 bool isPublic,
                 [RequireEntityOwner]
@@ -171,12 +174,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 var result = await _discordRoleplays.SetRoleplayIsPublicAsync(roleplay, isPublic);
                 if (!result.IsSuccess)
                 {
-                    return Result<UserMessage>.FromError(result);
+                    return Result<FeedbackMessage>.FromError(result);
                 }
 
-                return new ConfirmationMessage
+                return new FeedbackMessage
                 (
-                    $"Roleplay set to {(isPublic ? "public" : "private")}"
+                    $"Roleplay set to {(isPublic ? "public" : "private")}",
+                    _feedback.Theme.Secondary
                 );
             }
         }

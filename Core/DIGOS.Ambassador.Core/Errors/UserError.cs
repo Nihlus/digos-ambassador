@@ -1,5 +1,5 @@
 //
-//  WarningMessage.cs
+//  UserError.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,12 +20,12 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.Drawing;
+using Remora.Results;
 
-namespace DIGOS.Ambassador.Discord.Feedback.Results
+namespace DIGOS.Ambassador.Core.Errors
 {
     /// <summary>
-    /// Represents a warning message.
+    /// Represents an error on the user's part, which should be relayed to them.
     /// </summary>
-    public record WarningMessage(string Message) : UserMessage(Message, Color.Orange);
+    public record UserError(string Message) : ResultError(Message);
 }

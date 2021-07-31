@@ -23,11 +23,12 @@
 using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Abstractions.Results;
+using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Gateway.Responders;
 using Remora.Discord.Rest.Results;
 using Remora.Results;
@@ -40,7 +41,7 @@ namespace DIGOS.Ambassador.Plugins.JoinMessages.Responders
     public class JoinMessageResponder : IResponder<IGuildMemberAdd>
     {
         private readonly ServerService _servers;
-        private readonly UserFeedbackService _feedback;
+        private readonly FeedbackService _feedback;
         private readonly IDiscordRestUserAPI _userAPI;
         private readonly IDiscordRestChannelAPI _channelAPI;
         private readonly IDiscordRestGuildAPI _guildAPI;
@@ -55,7 +56,7 @@ namespace DIGOS.Ambassador.Plugins.JoinMessages.Responders
         /// <param name="guildAPI">The guild API.</param>
         public JoinMessageResponder
         (
-            UserFeedbackService feedback,
+            FeedbackService feedback,
             ServerService servers,
             IDiscordRestUserAPI userAPI,
             IDiscordRestChannelAPI channelAPI,
@@ -105,8 +106,9 @@ namespace DIGOS.Ambassador.Plugins.JoinMessages.Responders
 
             var userChannel = openDM.Entity;
 
-            var embed = _feedback.CreateEmbedBase() with
+            var embed = new Embed
             {
+                Colour = _feedback.Theme.Secondary,
                 Description = $"Welcome, <@{gatewayEvent.User.Value.ID}>!\n" +
                               "\n" +
                               $"{getJoinMessageResult.Entity}"
@@ -128,16 +130,6 @@ namespace DIGOS.Ambassador.Plugins.JoinMessages.Responders
                 return Result.FromError(sendEmbed);
             }
 
-            var content = $"Welcome, <@{gatewayEvent.User.Value.ID}>! You have DMs disabled, so I couldn't send you " +
-                          "the first-join message. To see it, type \"!server join-message\".";
-
-            var welcomeMessage = _feedback.CreateFeedbackEmbed
-            (
-                gatewayEvent.User.Value.ID,
-                Color.Orange,
-                content
-            );
-
             var getGuild = await _guildAPI.GetGuildAsync(gatewayEvent.GuildID, ct: ct);
             if (!getGuild.IsSuccess)
             {
@@ -151,11 +143,15 @@ namespace DIGOS.Ambassador.Plugins.JoinMessages.Responders
                 return Result.FromSuccess();
             }
 
-            var sendNotification = await _channelAPI.CreateMessageAsync
+            var content = $"Welcome, <@{gatewayEvent.User.Value.ID}>! You have DMs disabled, so I couldn't send you " +
+                          "the first-join message. To see it, type \"!server join-message\".";
+
+            var sendNotification = await _feedback.SendWarningAsync
             (
                 guild.SystemChannelID.Value,
-                embeds: new[] { welcomeMessage },
-                ct: ct
+                content,
+                gatewayEvent.User.Value.ID,
+                ct
             );
 
             return sendNotification.IsSuccess

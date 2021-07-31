@@ -25,14 +25,13 @@ using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Discord.Feedback.Errors;
-using DIGOS.Ambassador.Discord.Feedback.Services;
+using DIGOS.Ambassador.Core.Errors;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
 using DIGOS.Ambassador.Plugins.Quotes.Services;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Core;
 using Remora.Results;
 
@@ -45,9 +44,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
     {
         private readonly ModerationService _moderation;
         private readonly QuoteService _quotes;
-        private readonly UserFeedbackService _feedback;
+        private readonly FeedbackService _feedback;
 
-        private readonly IdentityInformationService _identityInformation;
         private readonly IDiscordRestGuildAPI _guildAPI;
         private readonly IDiscordRestAuditLogAPI _auditLogAPI;
         private readonly IDiscordRestUserAPI _userAPI;
@@ -58,16 +56,14 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="moderation">The moderation service.</param>
         /// <param name="feedback">The feedback service.</param>
         /// <param name="quotes">The quote service.</param>
-        /// <param name="identityInformation">The identity information service.</param>
         /// <param name="guildAPI">The guild API.</param>
         /// <param name="auditLogAPI">The audit log API.</param>
         /// <param name="userAPI">The user API.</param>
         public ChannelLoggingService
         (
             ModerationService moderation,
-            UserFeedbackService feedback,
+            FeedbackService feedback,
             QuoteService quotes,
-            IdentityInformationService identityInformation,
             IDiscordRestGuildAPI guildAPI,
             IDiscordRestAuditLogAPI auditLogAPI,
             IDiscordRestUserAPI userAPI
@@ -76,7 +72,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             _moderation = moderation;
             _feedback = feedback;
             _quotes = quotes;
-            _identityInformation = identityInformation;
             _guildAPI = guildAPI;
             _auditLogAPI = auditLogAPI;
             _userAPI = userAPI;
@@ -97,10 +92,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             var channel = getChannel.Entity;
 
-            var eb = _feedback.CreateEmbedBase() with
+            var eb = new Embed
             {
+                Colour = _feedback.Theme.FaultOrDanger,
                 Title = $"User Banned (#{ban.ID})",
-                Colour = Color.Red,
                 Description = $"<@{ban.User.DiscordID}> (ID {ban.User.DiscordID}) was banned by " +
                               $"<@{ban.Author.DiscordID}>.\n" +
                               $"Reason: {ban.Reason}"
@@ -126,16 +121,23 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                 return Result.FromError(getChannel);
             }
 
+            var getSelf = await _userAPI.GetCurrentUserAsync();
+            if (!getSelf.IsSuccess)
+            {
+                return Result.FromError(getSelf);
+            }
+
+            var self = getSelf.Entity;
             var channel = getChannel.Entity;
 
-            var whoDidIt = rescinderID == _identityInformation.ID
+            var whoDidIt = rescinderID == self.ID
                 ? "(expired)"
                 : $"by <@{rescinderID}>";
 
-            var eb = _feedback.CreateEmbedBase() with
+            var eb = new Embed
             {
+                Colour = _feedback.Theme.Success,
                 Title = $"User Unbanned (#{ban.ID})",
-                Colour = Color.Green,
                 Description = $"<@{ban.User.DiscordID}> (ID {ban.User.DiscordID}) was unbanned {whoDidIt}."
             };
 
@@ -160,10 +162,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             var channel = getChannel.Entity;
 
-            var eb = _feedback.CreateEmbedBase() with
+            var eb = new Embed
             {
+                Colour = _feedback.Theme.Warning,
                 Title = $"User Warned (#{warning.ID})",
-                Colour = Color.Orange,
                 Description = $"<@{warning.User.DiscordID}> (ID {warning.User.DiscordID}) was warned by " +
                               $"<@{warning.Author.DiscordID}>.\n" +
                               $"Reason: {warning.Reason}"
@@ -189,16 +191,23 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                 return Result.FromError(getChannel);
             }
 
+            var getSelf = await _userAPI.GetCurrentUserAsync();
+            if (!getSelf.IsSuccess)
+            {
+                return Result.FromError(getSelf);
+            }
+
+            var self = getSelf.Entity;
             var channel = getChannel.Entity;
 
-            var whoDidIt = rescinderID == _identityInformation.ID
+            var whoDidIt = rescinderID == self.ID
                 ? "(expired)"
                 : $"by <@{rescinderID}>";
 
-            var eb = _feedback.CreateEmbedBase() with
+            var eb = new Embed
             {
+                Colour = _feedback.Theme.Success,
                 Title = $"Warning Removed (#{warning.ID})",
-                Colour = Color.Green,
                 Description = $"A warning was removed from <@{warning.User.DiscordID}> (ID {warning.User.DiscordID}) " +
                               $"{whoDidIt}."
             };
@@ -224,7 +233,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             var channel = getChannel.Entity;
 
-            var eb = _feedback.CreateEmbedBase() with
+            var eb = new Embed
             {
                 Title = $"Note Added (#{note.ID})",
                 Colour = Color.Gold,
@@ -256,10 +265,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             var channel = getChannel.Entity;
 
-            var eb = _feedback.CreateEmbedBase() with
+            var eb = new Embed
             {
+                Colour = _feedback.Theme.Success,
                 Title = $"Note Removed (#{note.ID})",
-                Colour = Color.Green,
                 Description = $"A note was removed from <@{note.User.DiscordID}> (ID {note.User.DiscordID}) by " +
                               $"<@{removerID}>."
             };
@@ -286,9 +295,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             var channel = getChannel.Entity;
 
-            var eb = _feedback.CreateEmbedBase() with
+            var eb = new Embed
             {
-                Colour = Color.Cyan,
+                Colour = _feedback.Theme.Secondary,
                 Description = $"<@{userID}> left the server."
             };
 
@@ -322,9 +331,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             var channel = getChannel.Entity;
 
-            var eb = _feedback.CreateEmbedBase() with
+            var eb = new Embed
             {
-                Colour = Color.Cyan,
+                Colour = _feedback.Theme.Secondary,
                 Description = $"<@{userID}> changed their nickname from {oldNickname} to {newNickname}."
             };
 
@@ -360,9 +369,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             var channel = getChannel.Entity;
 
-            var eb = _feedback.CreateEmbedBase() with
+            var eb = new Embed
             {
-                Colour = Color.Cyan,
+                Colour = _feedback.Theme.Secondary,
                 Description = $"<@{userID}> changed their discriminator from {oldDiscriminator:D4} to " +
                               $"{newDiscriminator:D4}."
             };
@@ -381,10 +390,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         public async Task<Result> NotifyMessageDeletedAsync(IMessage message)
         {
             // We don't care about bot messages
-            var isNonUserMessage = (message.Author.IsBot.HasValue && message.Author.IsBot.Value) ||
+            var isNonFeedbackMessage = (message.Author.IsBot.HasValue && message.Author.IsBot.Value) ||
                                    (message.Author.IsSystem.HasValue && message.Author.IsSystem.Value);
 
-            if (isNonUserMessage)
+            if (isNonFeedbackMessage)
             {
                 return Result.FromSuccess();
             }
@@ -401,12 +410,19 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                 return Result.FromError(getChannel);
             }
 
+            var getSelf = await _userAPI.GetCurrentUserAsync();
+            if (!getSelf.IsSuccess)
+            {
+                return Result.FromError(getSelf);
+            }
+
+            var self = getSelf.Entity;
             var channel = getChannel.Entity;
 
-            var eb = _feedback.CreateEmbedBase() with
+            var eb = new Embed
             {
-                Title = "Message Deleted",
-                Colour = Color.Orange
+                Colour = _feedback.Theme.Warning,
+                Title = "Message Deleted"
             };
 
             var getGuildRoles = await _guildAPI.GetGuildRolesAsync(message.GuildID.Value);
@@ -418,7 +434,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             var guildRoles = getGuildRoles.Entity;
             var everyoneRole = guildRoles.First(r => r.ID == message.GuildID.Value);
 
-            var getGuildMember = await _guildAPI.GetGuildMemberAsync(message.GuildID.Value, _identityInformation.ID);
+            var getGuildMember = await _guildAPI.GetGuildMemberAsync(message.GuildID.Value, self.ID);
             if (!getGuildMember.IsSuccess)
             {
                 return Result.FromError(getGuildMember);
@@ -429,7 +445,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             var botPermissions = DiscordPermissionSet.ComputePermissions
             (
-                _identityInformation.ID,
+                self.ID,
                 everyoneRole,
                 botRoles
             );
@@ -467,7 +483,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                 Description = $"A message was deleted from <#{message.ChannelID}>{extra}."
             };
 
-            var quote = _quotes.CreateMessageQuote(message, _identityInformation.ID);
+            var quote = _quotes.CreateMessageQuote(message, self.ID);
 
             var sendResult = await _feedback.SendEmbedAsync(channel, eb);
             if (!sendResult.IsSuccess)

@@ -32,7 +32,6 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Core;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
-using static System.Transactions.IsolationLevel;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Responders
 {

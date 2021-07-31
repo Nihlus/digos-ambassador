@@ -25,7 +25,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Plugins.Permissions.Conditions;
@@ -37,6 +36,8 @@ using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Feedback.Messages;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
@@ -52,7 +53,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
         private readonly InteractivityService _interactivity;
         private readonly PermissionService _permissions;
         private readonly PermissionRegistryService _permissionRegistry;
-
+        private readonly FeedbackService _feedback;
         private readonly ICommandContext _context;
 
         /// <summary>
@@ -62,18 +63,21 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
         /// <param name="interactivity">The interactivity service.</param>
         /// <param name="permissionRegistry">The permission registry service.</param>
         /// <param name="context">The command context.</param>
+        /// <param name="feedback">The feedback service.</param>
         public PermissionCommands
         (
             PermissionService permissions,
             InteractivityService interactivity,
             PermissionRegistryService permissionRegistry,
-            ICommandContext context
+            ICommandContext context,
+            FeedbackService feedback
         )
         {
             _permissions = permissions;
             _interactivity = interactivity;
             _permissionRegistry = permissionRegistry;
             _context = context;
+            _feedback = feedback;
         }
 
         /// <summary>
@@ -198,7 +202,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
         [Description("Grant the targeted user the given permission.")]
         [RequirePermission(typeof(GrantPermission), PermissionTarget.Other)]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> GrantAsync
+        public async Task<Result<FeedbackMessage>> GrantAsync
         (
             IUser discordUser,
             string permissionName,
@@ -208,7 +212,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
             var getPermissionResult = _permissionRegistry.GetPermission(permissionName);
             if (!getPermissionResult.IsSuccess)
             {
-                return Result<UserMessage>.FromError(getPermissionResult);
+                return Result<FeedbackMessage>.FromError(getPermissionResult);
             }
 
             var permission = getPermissionResult.Entity;
@@ -223,12 +227,13 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
 
             if (!grantPermissionResult.IsSuccess)
             {
-                return Result<UserMessage>.FromError(grantPermissionResult);
+                return Result<FeedbackMessage>.FromError(grantPermissionResult);
             }
 
-            return new ConfirmationMessage
+            return new FeedbackMessage
             (
-                $"{permission.FriendlyName} granted to <@{discordUser.ID}>."
+                $"{permission.FriendlyName} granted to <@{discordUser.ID}>.",
+                _feedback.Theme.Secondary
             );
         }
 
@@ -242,7 +247,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
         [Command("grant-to-role")]
         [Description("Grant the targeted role the given permission.")]
         [RequirePermission(typeof(GrantPermission), PermissionTarget.Other)]
-        public async Task<Result<UserMessage>> GrantAsync
+        public async Task<Result<FeedbackMessage>> GrantAsync
         (
             IRole discordRole,
             string permissionName,
@@ -252,7 +257,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
             var getPermissionResult = _permissionRegistry.GetPermission(permissionName);
             if (!getPermissionResult.IsSuccess)
             {
-                return Result<UserMessage>.FromError(getPermissionResult);
+                return Result<FeedbackMessage>.FromError(getPermissionResult);
             }
 
             var permission = getPermissionResult.Entity;
@@ -265,12 +270,13 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
 
             if (!grantPermissionResult.IsSuccess)
             {
-                return Result<UserMessage>.FromError(grantPermissionResult);
+                return Result<FeedbackMessage>.FromError(grantPermissionResult);
             }
 
-            return new ConfirmationMessage
+            return new FeedbackMessage
             (
-                $"{permission.FriendlyName} granted to <&@{discordRole.ID}>."
+                $"{permission.FriendlyName} granted to <&@{discordRole.ID}>.",
+                _feedback.Theme.Secondary
             );
         }
 
@@ -285,7 +291,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
         [Description("Revoke the given permission from the targeted user.")]
         [RequirePermission(typeof(RevokePermission), PermissionTarget.Other)]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> RevokeAsync
+        public async Task<Result<FeedbackMessage>> RevokeAsync
         (
             IUser discordUser,
             string permissionName,
@@ -295,7 +301,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
             var getPermissionResult = _permissionRegistry.GetPermission(permissionName);
             if (!getPermissionResult.IsSuccess)
             {
-                return Result<UserMessage>.FromError(getPermissionResult);
+                return Result<FeedbackMessage>.FromError(getPermissionResult);
             }
 
             var permission = getPermissionResult.Entity;
@@ -309,12 +315,13 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
 
             if (!revokePermissionResult.IsSuccess)
             {
-                return Result<UserMessage>.FromError(revokePermissionResult);
+                return Result<FeedbackMessage>.FromError(revokePermissionResult);
             }
 
-            return new ConfirmationMessage
+            return new FeedbackMessage
             (
-                $"{permission.FriendlyName} revoked from <@{discordUser.ID}>."
+                $"{permission.FriendlyName} revoked from <@{discordUser.ID}>.",
+                _feedback.Theme.Secondary
             );
         }
 
@@ -328,7 +335,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
         [Command("revoke-from-role")]
         [Description("Revoke the given permission from the targeted role.")]
         [RequirePermission(typeof(RevokePermission), PermissionTarget.Other)]
-        public async Task<Result<UserMessage>> RevokeAsync
+        public async Task<Result<FeedbackMessage>> RevokeAsync
         (
             IRole discordRole,
             string permissionName,
@@ -338,7 +345,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
             var getPermissionResult = _permissionRegistry.GetPermission(permissionName);
             if (!getPermissionResult.IsSuccess)
             {
-                return Result<UserMessage>.FromError(getPermissionResult);
+                return Result<FeedbackMessage>.FromError(getPermissionResult);
             }
 
             var permission = getPermissionResult.Entity;
@@ -351,12 +358,13 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
 
             if (!revokePermissionResult.IsSuccess)
             {
-                return Result<UserMessage>.FromError(revokePermissionResult);
+                return Result<FeedbackMessage>.FromError(revokePermissionResult);
             }
 
-            return new ConfirmationMessage
+            return new FeedbackMessage
             (
-                $"{permission.FriendlyName} revoked from <&@{discordRole.ID}>."
+                $"{permission.FriendlyName} revoked from <&@{discordRole.ID}>.",
+                _feedback.Theme.Secondary
             );
         }
     }

@@ -26,10 +26,8 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Errors;
 using DIGOS.Ambassador.Core.Extensions;
-using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Discord.Feedback.Errors;
-using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Discord.Pagination.Extensions;
@@ -50,10 +48,11 @@ using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Core;
 using Remora.Results;
+using FeedbackMessage = Remora.Discord.Commands.Feedback.Messages.FeedbackMessage;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
-using UserMessage = DIGOS.Ambassador.Discord.Feedback.Results.UserMessage;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
@@ -73,7 +72,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         private readonly RoleplayDiscordService _discordRoleplays;
         private readonly DedicatedChannelService _dedicatedChannels;
 
-        private readonly UserFeedbackService _feedback;
+        private readonly FeedbackService _feedback;
         private readonly InteractivityService _interactivity;
 
         private readonly ICommandContext _context;
@@ -91,7 +90,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         public RoleplayCommands
         (
             RoleplayDiscordService discordRoleplays,
-            UserFeedbackService feedback,
+            FeedbackService feedback,
             InteractivityService interactivity,
             DedicatedChannelService dedicatedChannels,
             ICommandContext context,
@@ -136,8 +135,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         private Embed CreateRoleplayInfoEmbed(Roleplay roleplay)
         {
             var fields = new List<IEmbedField>();
-            var eb = _feedback.CreateEmbedBase() with
+            var eb = new Embed
             {
+                Colour = _feedback.Theme.Secondary,
                 Title = roleplay.Name,
                 Description = roleplay.Summary,
                 Fields = fields
@@ -243,7 +243,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Description("Creates a new roleplay with the specified name.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(CreateRoleplay), PermissionTarget.Self)]
-        public async Task<Result<UserMessage>> CreateRoleplayAsync
+        public async Task<Result<FeedbackMessage>> CreateRoleplayAsync
         (
             string roleplayName,
             string roleplaySummary = "No summary set.",
@@ -262,8 +262,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             );
 
             return !result.IsSuccess
-                ? Result<UserMessage>.FromError(result)
-                : new ConfirmationMessage($"Roleplay \"{result.Entity.Name}\" created.");
+                ? Result<FeedbackMessage>.FromError(result)
+                : new FeedbackMessage($"Roleplay \"{result.Entity.Name}\" created.", _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -289,11 +289,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             var canReplyInChannelAfterDeletion = _context.ChannelID != roleplay.DedicatedChannelID;
             if (canReplyInChannelAfterDeletion)
             {
-                return Result<UserMessage>.FromSuccess(new ConfirmationMessage($"Roleplay \"{roleplay.Name}\" deleted."));
+                return Result<FeedbackMessage>.FromSuccess(new FeedbackMessage($"Roleplay \"{roleplay.Name}\" deleted.", _feedback.Theme.Secondary));
             }
 
-            var eb = _feedback.CreateEmbedBase() with
+            var eb = new Embed
             {
+                Colour = _feedback.Theme.Secondary,
                 Description = $"Roleplay \"{roleplay.Name}\" deleted."
             };
 
@@ -309,17 +310,18 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Description("Joins the roleplay owned by the given person with the given name.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(JoinRoleplay), PermissionTarget.Self)]
-        public async Task<Result<UserMessage>> JoinRoleplayAsync(Roleplay roleplay)
+        public async Task<Result<FeedbackMessage>> JoinRoleplayAsync(Roleplay roleplay)
         {
             var addUserResult = await _discordRoleplays.AddUserToRoleplayAsync(roleplay, _context.User.ID);
             if (!addUserResult.IsSuccess)
             {
-                return Result<UserMessage>.FromError(addUserResult);
+                return Result<FeedbackMessage>.FromError(addUserResult);
             }
 
-            return new ConfirmationMessage
+            return new FeedbackMessage
             (
-                $"Joined <@{roleplay.Owner.ID}>'s roleplay \"{roleplay.Name}\""
+                $"Joined <@{roleplay.Owner.ID}>'s roleplay \"{roleplay.Name}\"",
+                _feedback.Theme.Secondary
             );
         }
 
@@ -333,7 +335,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Description("Invites the specified user to the given roleplay.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(EditRoleplay), PermissionTarget.Self)]
-        public async Task<Result<UserMessage>> InvitePlayerAsync
+        public async Task<Result<FeedbackMessage>> InvitePlayerAsync
         (
             IUser playerToInvite,
             [RequireEntityOwner] Roleplay roleplay
@@ -342,24 +344,26 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             var invitePlayerResult = await _discordRoleplays.InviteUserToRoleplayAsync(roleplay, playerToInvite.ID);
             if (!invitePlayerResult.IsSuccess)
             {
-                return Result<UserMessage>.FromError(invitePlayerResult);
+                return Result<FeedbackMessage>.FromError(invitePlayerResult);
             }
 
             var roleplayName = roleplay.Name.Contains(" ") ? roleplay.Name.Quote() : roleplay.Name;
-            var message = _feedback.CreateEmbedBase() with
+            var message = new Embed
             {
+                Colour = _feedback.Theme.Secondary,
                 Description = $"You've been invited to join {roleplay.Name}. Use `!rp join {roleplayName}` to join."
             };
 
             var send = await _feedback.SendPrivateEmbedAsync(playerToInvite.ID, message);
             if (!send.IsSuccess)
             {
-                return Result<UserMessage>.FromError(send);
+                return Result<FeedbackMessage>.FromError(send);
             }
 
-            return new ConfirmationMessage
+            return new FeedbackMessage
             (
-                $"Invited <@{playerToInvite.ID}> to {roleplay.Name}."
+                $"Invited <@{playerToInvite.ID}> to {roleplay.Name}.",
+                _feedback.Theme.Secondary
             );
         }
 
@@ -371,17 +375,18 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Command("leave")]
         [Description("Leaves the roleplay owned by the given person with the given name.")]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> LeaveRoleplayAsync(Roleplay roleplay)
+        public async Task<Result<FeedbackMessage>> LeaveRoleplayAsync(Roleplay roleplay)
         {
             var removeUserResult = await _discordRoleplays.RemoveUserFromRoleplayAsync(roleplay, _context.User.ID);
             if (!removeUserResult.IsSuccess)
             {
-                return Result<UserMessage>.FromError(removeUserResult);
+                return Result<FeedbackMessage>.FromError(removeUserResult);
             }
 
-            return new ConfirmationMessage
+            return new FeedbackMessage
             (
-                $"Left <@{roleplay.Owner.DiscordID}>'s roleplay \"{roleplay.Name}\""
+                $"Left <@{roleplay.Owner.DiscordID}>'s roleplay \"{roleplay.Name}\"",
+                _feedback.Theme.Secondary
             );
         }
 
@@ -395,7 +400,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Description("Kicks the given user from the named roleplay.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(KickRoleplayMember), PermissionTarget.Self)]
-        public async Task<Result<UserMessage>> KickRoleplayParticipantAsync
+        public async Task<Result<FeedbackMessage>> KickRoleplayParticipantAsync
         (
             IUser discordUser,
             [RequireEntityOwner] Roleplay roleplay
@@ -404,11 +409,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             var kickUserResult = await _discordRoleplays.KickUserFromRoleplayAsync(roleplay, discordUser.ID);
             if (!kickUserResult.IsSuccess)
             {
-                return Result<UserMessage>.FromError(kickUserResult);
+                return Result<FeedbackMessage>.FromError(kickUserResult);
             }
 
-            var message = _feedback.CreateEmbedBase() with
+            var message = new Embed
             {
+                Colour = _feedback.Theme.Secondary,
                 Description = $"You've been removed from the roleplay \"{roleplay.Name}\" by " +
                               $"<@{_context.User.ID}>."
             };
@@ -416,9 +422,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             // It's fine if this one fails
             _ = await _feedback.SendPrivateEmbedAsync(discordUser.ID, message);
 
-            return new ConfirmationMessage
+            return new FeedbackMessage
             (
-                $"<@{discordUser.ID}> has been kicked from {roleplay.Name}."
+                $"<@{discordUser.ID}> has been kicked from {roleplay.Name}.",
+                _feedback.Theme.Secondary
             );
         }
 
@@ -431,7 +438,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Description("Makes the roleplay with the given name current in the current channel.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(StartStopRoleplay), PermissionTarget.Self)]
-        public async Task<Result<UserMessage>> ShowOrCreateDedicatedRoleplayChannel
+        public async Task<Result<FeedbackMessage>> ShowOrCreateDedicatedRoleplayChannel
         (
             [RequireEntityOwner] Roleplay roleplay
         )
@@ -443,34 +450,36 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 var message = $"\"{roleplay.Name}\" has a dedicated channel at " +
                               $"<#{existingDedicatedChannel}>";
 
-                return new ConfirmationMessage(message);
+                return new FeedbackMessage(message, _feedback.Theme.Secondary);
             }
 
-            var workingMessage = _feedback.CreateEmbedBase() with
+            var workingMessage = new Embed
             {
+                Colour = _feedback.Theme.Secondary,
                 Description = "Setting up dedicated channel..."
             };
 
             var send = await _feedback.SendContextualEmbedAsync(workingMessage);
             if (!send.IsSuccess)
             {
-                return Result<UserMessage>.FromError(send);
+                return Result<FeedbackMessage>.FromError(send);
             }
 
             // The roleplay either doesn't have a channel, or the one it has has been deleted or is otherwise invalid.
             var result = await _dedicatedChannels.CreateDedicatedChannelAsync(roleplay);
             if (!result.IsSuccess)
             {
-                return Result<UserMessage>.FromError(result);
+                return Result<FeedbackMessage>.FromError(result);
             }
 
             var dedicatedChannel = result.Entity;
 
             if (!roleplay.IsActive || roleplay.ActiveChannelID == dedicatedChannel.ID)
             {
-                return new ConfirmationMessage
+                return new FeedbackMessage
                 (
-                    $"All done! Your roleplay now has a dedicated channel at <#{dedicatedChannel}>."
+                    $"All done! Your roleplay now has a dedicated channel at <#{dedicatedChannel}>.",
+                    _feedback.Theme.Secondary
                 );
             }
 
@@ -486,9 +495,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 return startResult;
             }
 
-            return new ConfirmationMessage
+            return new FeedbackMessage
             (
-                $"All done! Your roleplay now has a dedicated channel at <#{dedicatedChannel}>."
+                $"All done! Your roleplay now has a dedicated channel at <#{dedicatedChannel}>.",
+                _feedback.Theme.Secondary
             );
         }
 
@@ -501,7 +511,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Description("Starts the roleplay with the given name.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(StartStopRoleplay), PermissionTarget.Self)]
-        public async Task<Result<UserMessage>> StartRoleplayAsync
+        public async Task<Result<FeedbackMessage>> StartRoleplayAsync
         (
             [RequireEntityOwner] Roleplay roleplay
         )
@@ -514,13 +524,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
             if (!startRoleplayResult.IsSuccess)
             {
-                return Result<UserMessage>.FromError(startRoleplayResult);
+                return Result<FeedbackMessage>.FromError(startRoleplayResult);
             }
 
             var activationMessage = $"The roleplay \"{roleplay.Name}\" is now active in " +
                                     $"<#{roleplay.ActiveChannelID!.Value}>.";
 
-            return new ConfirmationMessage(activationMessage);
+            return new FeedbackMessage(activationMessage, _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -532,7 +542,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Description("Stops the given roleplay.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(StartStopRoleplay), PermissionTarget.Self)]
-        public async Task<Result<UserMessage>> StopRoleplayAsync
+        public async Task<Result<FeedbackMessage>> StopRoleplayAsync
         (
             [RequireEntityOwner] Roleplay roleplay
         )
@@ -540,8 +550,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             var stopRoleplayAsync = await _discordRoleplays.StopRoleplayAsync(roleplay);
 
             return !stopRoleplayAsync.IsSuccess
-                ? Result<UserMessage>.FromError(stopRoleplayAsync)
-                : new ConfirmationMessage($"The roleplay \"{roleplay.Name}\" has been stopped.");
+                ? Result<FeedbackMessage>.FromError(stopRoleplayAsync)
+                : new FeedbackMessage($"The roleplay \"{roleplay.Name}\" has been stopped.", _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -554,7 +564,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Description("Transfers ownership of the named roleplay to the specified user.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(TransferRoleplay), PermissionTarget.Self)]
-        public async Task<Result<UserMessage>> TransferRoleplayOwnershipAsync
+        public async Task<Result<FeedbackMessage>> TransferRoleplayOwnershipAsync
         (
             IUser newOwner,
             [RequireEntityOwner] Roleplay roleplay
@@ -563,8 +573,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             var transferResult = await _discordRoleplays.TransferRoleplayOwnershipAsync(newOwner.ID, roleplay);
 
             return !transferResult.IsSuccess
-                ? Result<UserMessage>.FromError(transferResult)
-                : new ConfirmationMessage("Roleplay ownership transferred.");
+                ? Result<FeedbackMessage>.FromError(transferResult)
+                : new FeedbackMessage("Roleplay ownership transferred.", _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -605,17 +615,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 }
             }
 
-            var message = _feedback.CreateFeedbackEmbed
-            (
-                _context.User.ID,
-                Color.MediumPurple,
-                "Compiling the roleplay..."
-            );
-
-            var send = await _feedback.SendContextualEmbedAsync(message);
+            var send = await _feedback.SendContextualNeutralAsync("Compiling the roleplay...");
             if (!send.IsSuccess)
             {
-                return Result<UserMessage>.FromError(send);
+                return Result<FeedbackMessage>.FromError(send);
             }
 
             using var output = await exporter.ExportAsync(_services, roleplay);
@@ -636,7 +639,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Command("view")]
         [Description("Views the given roleplay, allowing you to read the channel.")]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> ViewRoleplayAsync(Roleplay roleplay)
+        public async Task<Result<FeedbackMessage>> ViewRoleplayAsync(Roleplay roleplay)
         {
             var getDedicatedChannelResult = _dedicatedChannels.GetDedicatedChannel(roleplay);
             if (!getDedicatedChannelResult.IsSuccess)
@@ -665,12 +668,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
             if (!setVisibility.IsSuccess)
             {
-                return Result<UserMessage>.FromError(setVisibility);
+                return Result<FeedbackMessage>.FromError(setVisibility);
             }
 
-            return new ConfirmationMessage
+            return new FeedbackMessage
             (
-                $"The roleplay \"{roleplay.Name}\" is now visible in <#{dedicatedChannel}>."
+                $"The roleplay \"{roleplay.Name}\" is now visible in <#{dedicatedChannel}>.",
+                _feedback.Theme.Secondary
             );
         }
 
@@ -682,7 +686,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Command("hide")]
         [Description("Hides the given roleplay.")]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> HideRoleplayAsync(Roleplay roleplay)
+        public async Task<Result<FeedbackMessage>> HideRoleplayAsync(Roleplay roleplay)
         {
             var getDedicatedChannelResult = _dedicatedChannels.GetDedicatedChannel
             (
@@ -691,7 +695,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
             if (!getDedicatedChannelResult.IsSuccess)
             {
-                return Result<UserMessage>.FromError(getDedicatedChannelResult);
+                return Result<FeedbackMessage>.FromError(getDedicatedChannelResult);
             }
 
             var dedicatedChannel = getDedicatedChannelResult.Entity;
@@ -703,8 +707,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             );
 
             return !setVisibility.IsSuccess
-                ? Result<UserMessage>.FromError(setVisibility)
-                : new ConfirmationMessage("Roleplay hidden.");
+                ? Result<FeedbackMessage>.FromError(setVisibility)
+                : new FeedbackMessage("Roleplay hidden.", _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -714,7 +718,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Command("hide-all")]
         [Description("Hides all roleplays in the server for the user.")]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> HideAllRoleplaysAsync()
+        public async Task<Result<FeedbackMessage>> HideAllRoleplaysAsync()
         {
             var roleplays = await _discordRoleplays.QueryRoleplaysAsync
             (
@@ -734,11 +738,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
                 if (!setVisibility.IsSuccess)
                 {
-                    return Result<UserMessage>.FromError(setVisibility);
+                    return Result<FeedbackMessage>.FromError(setVisibility);
                 }
             }
 
-            return new ConfirmationMessage("Roleplays hidden.");
+            return new FeedbackMessage("Roleplays hidden.", _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -749,7 +753,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Command("refresh")]
         [Description("Manually refreshes the given roleplay, resetting its last-updated time to now.")]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> RefreshRoleplayAsync(Roleplay roleplay)
+        public async Task<Result<FeedbackMessage>> RefreshRoleplayAsync(Roleplay roleplay)
         {
             var isOwner = roleplay.IsOwner(_context.User.ID);
             var isParticipant = roleplay.HasJoined(_context.User);
@@ -762,8 +766,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             var refreshResult = await _discordRoleplays.RefreshRoleplayAsync(roleplay);
 
             return !refreshResult.IsSuccess
-                ? Result<UserMessage>.FromError(refreshResult)
-                : new ConfirmationMessage("Timeout refreshed.");
+                ? Result<FeedbackMessage>.FromError(refreshResult)
+                : new FeedbackMessage("Timeout refreshed.", _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -774,7 +778,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Description("Resets the permission set of all dedicated channels.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.All)]
-        public async Task<Result<UserMessage>> ResetChannelPermissionsAsync()
+        public async Task<Result<FeedbackMessage>> ResetChannelPermissionsAsync()
         {
             var roleplays = await _discordRoleplays.QueryRoleplaysAsync
             (
@@ -788,11 +792,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 var reset = await _dedicatedChannels.ResetChannelPermissionsAsync(roleplay);
                 if (!reset.IsSuccess)
                 {
-                    await _feedback.SendContextualErrorAsync(_context.User.ID, reset.Error.Message);
+                    await _feedback.SendContextualErrorAsync(reset.Error.Message, _context.User.ID);
                 }
             }
 
-            return new ConfirmationMessage("Permissions reset.");
+            return new FeedbackMessage("Permissions reset.", _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -845,8 +849,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
                 var sendWarning = await _feedback.SendContextualWarningAsync
                 (
-                    _context.User.ID,
-                    message
+                    message,
+                    _context.User.ID
                 );
 
                 if (!sendWarning.IsSuccess)

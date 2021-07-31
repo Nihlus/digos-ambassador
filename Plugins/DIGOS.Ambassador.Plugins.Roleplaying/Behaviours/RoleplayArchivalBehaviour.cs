@@ -25,8 +25,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
-using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Discord.Feedback.Errors;
+using DIGOS.Ambassador.Core.Errors;
 using DIGOS.Ambassador.Plugins.Roleplaying.Extensions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
@@ -37,6 +36,7 @@ using Microsoft.Extensions.Logging;
 using Remora.Behaviours.Bases;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Core;
 using Remora.Results;
 
@@ -71,7 +71,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// <inheritdoc />
         protected override async Task<Result> OnTickAsync(CancellationToken ct, IServiceProvider tickServices)
         {
-            var feedback = tickServices.GetRequiredService<UserFeedbackService>();
+            var feedback = tickServices.GetRequiredService<FeedbackService>();
             var roleplayService = tickServices.GetRequiredService<RoleplayDiscordService>();
             var serverSettings = tickServices.GetRequiredService<RoleplayServerSettingsService>();
             var dedicatedChannels = tickServices.GetRequiredService<DedicatedChannelService>();
@@ -126,7 +126,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         private async Task<Result> ArchiveRoleplayAsync
         (
             IServiceProvider services,
-            UserFeedbackService feedback,
+            FeedbackService feedback,
             RoleplayDiscordService roleplayService,
             DedicatedChannelService dedicatedChannels,
             RoleplayServerSettingsService serverSettings,
@@ -159,7 +159,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         private async Task<Result> PostArchivedRoleplayAsync
         (
             IServiceProvider services,
-            UserFeedbackService feedback,
+            FeedbackService feedback,
             RoleplayServerSettingsService serverSettings,
             Roleplay roleplay
         )
@@ -182,8 +182,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             var exporter = new PDFRoleplayExporter();
             using var exportedRoleplay = await exporter.ExportAsync(services, roleplay);
 
-            var embed = feedback.CreateEmbedBase() with
+            var embed = new Embed
             {
+                Colour = feedback.Theme.Secondary,
                 Title = $"{exportedRoleplay.Title} - Archived",
                 Description = roleplay.Summary,
                 Footer = new EmbedFooter($"Archived on {DateTime.Now:d}.")
@@ -207,10 +208,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 : Result.FromError(send);
         }
 
-        private async Task<Result> NotifyOwnerAsync(UserFeedbackService feedback, Roleplay roleplay)
+        private async Task<Result> NotifyOwnerAsync(FeedbackService feedback, Roleplay roleplay)
         {
-            var notification = feedback.CreateEmbedBase() with
+            var notification = new Embed
             {
+                Colour = feedback.Theme.Secondary,
                 Description =
                 $"Your roleplay \"{roleplay.Name}\" has been inactive for more than 28 days, and has been " +
                 "archived.\n" +

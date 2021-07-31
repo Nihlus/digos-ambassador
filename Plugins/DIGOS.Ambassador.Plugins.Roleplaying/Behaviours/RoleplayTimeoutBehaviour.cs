@@ -25,7 +25,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
-using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
 using JetBrains.Annotations;
@@ -33,6 +32,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Remora.Behaviours.Bases;
 using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
@@ -66,7 +66,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// <inheritdoc/>
         protected override async Task<Result> OnTickAsync(CancellationToken ct, IServiceProvider tickServices)
         {
-            var feedback = tickServices.GetRequiredService<UserFeedbackService>();
+            var feedback = tickServices.GetRequiredService<FeedbackService>();
             var roleplayService = tickServices.GetRequiredService<RoleplayDiscordService>();
 
             var timedOutRoleplays = await roleplayService.QueryRoleplaysAsync
@@ -113,10 +113,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// <param name="feedback">The feedback service.</param>
         /// <param name="roleplay">The roleplay.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        private async Task<Result> NotifyOwnerAsync(UserFeedbackService feedback, Roleplay roleplay)
+        private async Task<Result> NotifyOwnerAsync(FeedbackService feedback, Roleplay roleplay)
         {
-            var notification = feedback.CreateEmbedBase() with
+            var notification = new Embed
             {
+                Colour = feedback.Theme.Secondary,
                 Description = $"Due to inactivity, your roleplay \"{roleplay.Name}\" has been stopped.",
                 Footer = new EmbedFooter($"You can restart it by running !rp start \"{roleplay.Name}\".")
             };

@@ -23,7 +23,6 @@
 using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Moderation.Permissions;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
 using DIGOS.Ambassador.Plugins.Permissions.Conditions;
@@ -33,6 +32,8 @@ using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Feedback.Messages;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -49,20 +50,24 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         {
             private readonly BanService _bans;
             private readonly ICommandContext _context;
+            private readonly FeedbackService _feedback;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="BanSetCommands"/> class.
             /// </summary>
             /// <param name="bans">The moderation service.</param>
             /// <param name="context">The command context.</param>
+            /// <param name="feedback">The feedback service.</param>
             public BanSetCommands
             (
                 BanService bans,
-                ICommandContext context
+                ICommandContext context,
+                FeedbackService feedback
             )
             {
                 _bans = bans;
                 _context = context;
+                _feedback = feedback;
             }
 
             /// <summary>
@@ -74,12 +79,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             [Description("Sets the reason for the ban.")]
             [RequirePermission(typeof(ManageBans), PermissionTarget.All)]
             [RequireContext(ChannelContext.Guild)]
-            public async Task<Result<UserMessage>> SetBanReasonAsync(long banID, string newReason)
+            public async Task<Result<FeedbackMessage>> SetBanReasonAsync(long banID, string newReason)
             {
                 var getBan = await _bans.GetBanAsync(_context.GuildID.Value, banID);
                 if (!getBan.IsSuccess)
                 {
-                    return Result<UserMessage>.FromError(getBan);
+                    return Result<FeedbackMessage>.FromError(getBan);
                 }
 
                 var ban = getBan.Entity;
@@ -87,10 +92,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 var setContents = await _bans.SetBanReasonAsync(ban, newReason);
                 if (!setContents.IsSuccess)
                 {
-                    return Result<UserMessage>.FromError(setContents);
+                    return Result<FeedbackMessage>.FromError(setContents);
                 }
 
-                return new ConfirmationMessage("Ban reason updated.");
+                return new FeedbackMessage("Ban reason updated.", _feedback.Theme.Secondary);
             }
 
             /// <summary>
@@ -102,12 +107,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             [Description("Sets the contextually relevant message for the ban.")]
             [RequirePermission(typeof(ManageBans), PermissionTarget.All)]
             [RequireContext(ChannelContext.Guild)]
-            public async Task<Result<UserMessage>> SetBanContextMessageAsync(long banID, IMessage newMessage)
+            public async Task<Result<FeedbackMessage>> SetBanContextMessageAsync(long banID, IMessage newMessage)
             {
                 var getBan = await _bans.GetBanAsync(_context.GuildID.Value, banID);
                 if (!getBan.IsSuccess)
                 {
-                    return Result<UserMessage>.FromError(getBan);
+                    return Result<FeedbackMessage>.FromError(getBan);
                 }
 
                 var ban = getBan.Entity;
@@ -115,10 +120,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 var setMessage = await _bans.SetBanContextMessageAsync(ban, newMessage.ID);
                 if (!setMessage.IsSuccess)
                 {
-                    return Result<UserMessage>.FromError(setMessage);
+                    return Result<FeedbackMessage>.FromError(setMessage);
                 }
 
-                return new ConfirmationMessage("Ban context message updated.");
+                return new FeedbackMessage("Ban context message updated.", _feedback.Theme.Secondary);
             }
 
             /// <summary>
@@ -130,12 +135,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             [Description("Sets the duration of the ban.")]
             [RequirePermission(typeof(ManageBans), PermissionTarget.All)]
             [RequireContext(ChannelContext.Guild)]
-            public async Task<Result<UserMessage>> SetBanDurationAsync(long banID, TimeSpan newDuration)
+            public async Task<Result<FeedbackMessage>> SetBanDurationAsync(long banID, TimeSpan newDuration)
             {
                 var getBan = await _bans.GetBanAsync(_context.GuildID.Value, banID);
                 if (!getBan.IsSuccess)
                 {
-                    return Result<UserMessage>.FromError(getBan);
+                    return Result<FeedbackMessage>.FromError(getBan);
                 }
 
                 var ban = getBan.Entity;
@@ -145,10 +150,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 var setExpiration = await _bans.SetBanExpiryDateAsync(ban, newExpiration);
                 if (!setExpiration.IsSuccess)
                 {
-                    return Result<UserMessage>.FromError(setExpiration);
+                    return Result<FeedbackMessage>.FromError(setExpiration);
                 }
 
-                return new ConfirmationMessage("Ban duration updated.");
+                return new FeedbackMessage("Ban duration updated.", _feedback.Theme.Secondary);
             }
         }
     }

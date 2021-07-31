@@ -25,7 +25,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
-using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity.Extensions;
 using DIGOS.Ambassador.Discord.Pagination.Responders;
 using DIGOS.Ambassador.Discord.TypeReaders;
@@ -61,7 +60,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions
         public override void ConfigureServices(IServiceCollection serviceCollection)
         {
             // Dependencies
-            serviceCollection.TryAddScoped<UserFeedbackService>();
             serviceCollection.AddInteractivity();
             serviceCollection.TryAddInteractivityResponder<PaginatedMessageResponder>();
 

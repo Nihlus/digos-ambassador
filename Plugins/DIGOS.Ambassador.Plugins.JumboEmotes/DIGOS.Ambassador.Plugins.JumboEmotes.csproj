@@ -6,12 +6,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Remora.Discord.Commands" Version="4.1.1" />
+        <PackageReference Include="Remora.Discord.Commands" Version="5.1.0" />
         <PackageReference Include="Remora.Plugins.Abstractions" Version="3.1.0" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Feedback\DIGOS.Ambassador.Discord.Feedback.csproj" />
+        <ProjectReference Include="..\..\Core\DIGOS.Ambassador.Core\DIGOS.Ambassador.Core.csproj" />
         <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.TypeReaders\DIGOS.Ambassador.Discord.TypeReaders.csproj" />
     </ItemGroup>
 

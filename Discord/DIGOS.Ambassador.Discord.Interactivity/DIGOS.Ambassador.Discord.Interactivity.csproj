@@ -6,11 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\DIGOS.Ambassador.Discord.Feedback\DIGOS.Ambassador.Discord.Feedback.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="Remora.Discord.Gateway" Version="3.5.3" />
+      <PackageReference Include="Remora.Discord.Gateway" Version="3.5.5" />
     </ItemGroup>
 
 </Project>

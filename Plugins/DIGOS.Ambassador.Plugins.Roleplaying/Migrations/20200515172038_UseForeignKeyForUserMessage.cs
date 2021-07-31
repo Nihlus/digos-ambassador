@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Migrations
 {
     [ExcludeFromCodeCoverage]
-    public partial class UseForeignKeyForUserMessage : Migration
+    public partial class UseForeignKeyForFeedbackMessage : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

@@ -27,11 +27,9 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Errors;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Discord.Feedback.Errors;
-using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Discord.Pagination.Extensions;
@@ -52,6 +50,8 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Feedback.Messages;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
@@ -69,7 +69,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
     {
         private readonly PronounService _pronouns;
         private readonly ContentService _content;
-        private readonly UserFeedbackService _feedback;
+        private readonly FeedbackService _feedback;
         private readonly CharacterDiscordService _characters;
         private readonly InteractivityService _interactivity;
         private readonly ICommandContext _context;
@@ -88,7 +88,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         public CharacterCommands
         (
             ContentService contentService,
-            UserFeedbackService feedbackService,
+            FeedbackService feedbackService,
             CharacterDiscordService characterService,
             InteractivityService interactivity,
             PronounService pronouns,
@@ -135,8 +135,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                               "each field is the pronoun family that you use when selecting the pronoun, and below it" +
                               "is a short example of how it might be used.";
 
-            var pageBase = _feedback.CreateEmbedBase() with
+            var pageBase = new Embed
             {
+                Colour = _feedback.Theme.Secondary,
                 Title = "Available pronouns"
             };
 
@@ -274,7 +275,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             CancellationToken ct = default
         )
         {
-            var eb = _feedback.CreateEmbedBase();
+            var eb = new Embed { Colour = _feedback.Theme.Secondary };
 
             var getOwner = await _guildAPI.GetGuildMemberAsync(_context.GuildID.Value, character.Owner.DiscordID, ct);
             if (!getOwner.IsSuccess)
@@ -375,7 +376,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Description("Creates a new character.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(CreateCharacter), PermissionTarget.Self)]
-        public async Task<Result<UserMessage>> CreateCharacterAsync
+        public async Task<Result<FeedbackMessage>> CreateCharacterAsync
         (
             string characterName,
             string? characterNickname = null,
@@ -399,8 +400,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             );
 
             return !createCharacterResult.IsSuccess
-                ? Result<UserMessage>.FromError(createCharacterResult)
-                : new ConfirmationMessage($"Character \"{createCharacterResult.Entity.Name}\" created.");
+                ? Result<FeedbackMessage>.FromError(createCharacterResult)
+                : new FeedbackMessage($"Character \"{createCharacterResult.Entity.Name}\" created.", _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -412,7 +413,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Description("Deletes the named character.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(DeleteCharacter), PermissionTarget.Self)]
-        public async Task<Result<UserMessage>> DeleteCharacterAsync
+        public async Task<Result<FeedbackMessage>> DeleteCharacterAsync
         (
             [RequireEntityOwner]
             Character character
@@ -427,8 +428,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             );
 
             return !deleteResult.IsSuccess
-                ? Result<UserMessage>.FromError(deleteResult)
-                : new ConfirmationMessage($"Character \"{character.Name}\" deleted.");
+                ? Result<FeedbackMessage>.FromError(deleteResult)
+                : new FeedbackMessage($"Character \"{character.Name}\" deleted.", _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -485,7 +486,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Command("random")]
         [Description("Switches the user's current character to a different one, picked at random.")]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> AssumeRandomCharacterFormAsync()
+        public async Task<Result<FeedbackMessage>> AssumeRandomCharacterFormAsync()
         {
             var getRandom = await _characters.GetRandomUserCharacterAsync
             (
@@ -496,7 +497,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
 
             if (!getRandom.IsSuccess)
             {
-                return Result<UserMessage>.FromError(getRandom);
+                return Result<FeedbackMessage>.FromError(getRandom);
             }
 
             var randomCharacter = getRandom.Entity;
@@ -512,7 +513,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Description("Sets the named character as the user's current character.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(AssumeCharacter), PermissionTarget.Self)]
-        public async Task<Result<UserMessage>> AssumeCharacterFormAsync
+        public async Task<Result<FeedbackMessage>> AssumeCharacterFormAsync
         (
             [RequireEntityOwner]
             Character character
@@ -528,12 +529,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
 
             if (!makeCurrent.IsSuccess)
             {
-                return Result<UserMessage>.FromError(makeCurrent);
+                return Result<FeedbackMessage>.FromError(makeCurrent);
             }
 
-            return new ConfirmationMessage
+            return new FeedbackMessage
             (
-                $"{_context.User.Username} shimmers and morphs into {character.Name}."
+                $"{_context.User.Username} shimmers and morphs into {character.Name}.",
+                _feedback.Theme.Secondary
             );
         }
 
@@ -544,7 +546,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Command("clear-default")]
         [Description("Clears your default form.")]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> ClearDefaultCharacterAsync()
+        public async Task<Result<FeedbackMessage>> ClearDefaultCharacterAsync()
         {
             var result = await _characters.ClearDefaultCharacterAsync
             (
@@ -554,8 +556,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             );
 
             return !result.IsSuccess
-                ? Result<UserMessage>.FromError(result)
-                : new ConfirmationMessage("Default character cleared.");
+                ? Result<FeedbackMessage>.FromError(result)
+                : new FeedbackMessage("Default character cleared.", _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -565,7 +567,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Command("default")]
         [Description("Clears any active characters from you, restoring your default form.")]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> ClearCharacterFormAsync()
+        public async Task<Result<FeedbackMessage>> ClearCharacterFormAsync()
         {
             // First, let's try dropping to a default form instead.
             var getDefaultCharacter = await _characters.GetDefaultCharacterAsync
@@ -589,8 +591,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             );
 
             return !result.IsSuccess
-                ? Result<UserMessage>.FromError(result)
-                : new ConfirmationMessage("Character cleared.");
+                ? Result<FeedbackMessage>.FromError(result)
+                : new FeedbackMessage("Character cleared.", _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -670,7 +672,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Description("Adds an attached image to a character's gallery.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
-        public async Task<Result<UserMessage>> AddImageAsync
+        public async Task<Result<FeedbackMessage>> AddImageAsync
         (
             [RequireEntityOwner]
             Character character,
@@ -718,7 +720,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Description("Adds a linked image to a character's gallery.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
-        public async Task<Result<UserMessage>> AddImageAsync
+        public async Task<Result<FeedbackMessage>> AddImageAsync
         (
             [RequireEntityOwner]
             Character character,
@@ -738,8 +740,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             );
 
             return !addImageResult.IsSuccess
-                ? Result<UserMessage>.FromError(addImageResult)
-                : new ConfirmationMessage($"Added \"{imageName}\" to {character.Name}'s gallery.");
+                ? Result<FeedbackMessage>.FromError(addImageResult)
+                : new FeedbackMessage($"Added \"{imageName}\" to {character.Name}'s gallery.", _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -752,7 +754,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Description("Removes an image from a character's gallery.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
-        public async Task<Result<UserMessage>> RemoveImageAsync
+        public async Task<Result<FeedbackMessage>> RemoveImageAsync
         (
             [RequireEntityOwner]
             Character character,
@@ -768,8 +770,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             var removeImageResult = await _characters.RemoveImageFromCharacterAsync(character, image);
 
             return !removeImageResult.IsSuccess
-                ? Result<UserMessage>.FromError(removeImageResult)
-                : new ConfirmationMessage("Image removed.");
+                ? Result<FeedbackMessage>.FromError(removeImageResult)
+                : new FeedbackMessage("Image removed.", _feedback.Theme.Secondary);
         }
 
         /// <summary>
@@ -782,7 +784,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Description("Transfers ownership of the named character to another user.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(TransferCharacter), PermissionTarget.Self)]
-        public async Task<Result<UserMessage>> TransferCharacterOwnershipAsync
+        public async Task<Result<FeedbackMessage>> TransferCharacterOwnershipAsync
         (
             IUser newOwner,
             [RequireEntityOwner]
@@ -798,8 +800,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             );
 
             return !transferResult.IsSuccess
-                ? Result<UserMessage>.FromError(transferResult)
-                : new ConfirmationMessage("Character ownership transferred.");
+                ? Result<FeedbackMessage>.FromError(transferResult)
+                : new FeedbackMessage("Character ownership transferred.", _feedback.Theme.Secondary);
         }
     }
 }
