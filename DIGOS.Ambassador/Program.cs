@@ -31,6 +31,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord.TypeReaders;
+using DIGOS.Ambassador.ExecutionEventServices;
 using DIGOS.Ambassador.Responders;
 using log4net;
 using log4net.Config;
@@ -46,10 +47,12 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Caching.Extensions;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Commands.Feedback.Themes;
 using Remora.Discord.Commands.Parsers;
+using Remora.Discord.Commands.Responders;
 using Remora.Discord.Commands.Results;
 using Remora.Discord.Commands.Services;
 using Remora.Discord.Core;
@@ -120,6 +123,8 @@ namespace DIGOS.Ambassador
                         s.ValidateOnBuild = true;
                     });
 
+                    services.Configure<CommandResponderOptions>(o => o.Prefix = "!");
+
                     services.AddSingleton<BehaviourService>();
 
                     services
@@ -129,72 +134,10 @@ namespace DIGOS.Ambassador
                         .AddSingleton<Random>();
 
                     services
-                        .AddCommands()
+                        .AddDiscordCommands(true)
                         .AddDiscordCaching();
 
-                    services.Configure<AmbassadorCommandResponderOptions>(o => o.Prefix = "!");
-
-                    // Custom responders & command services
-                    // Add the helpers used for context injection.
-                    services
-                        .TryAddScoped<ContextInjectionService>();
-
-                    services
-                        .TryAddTransient<ICommandContext>
-                        (
-                            s =>
-                            {
-                                var injectionService = s.GetRequiredService<ContextInjectionService>();
-                                return injectionService.Context ?? throw new InvalidOperationException
-                                (
-                                    "No context has been set for this scope."
-                                );
-                            }
-                        );
-
-                    services
-                        .TryAddTransient
-                        (
-                            s =>
-                            {
-                                var injectionService = s.GetRequiredService<ContextInjectionService>();
-                                return injectionService.Context as MessageContext ?? throw new InvalidOperationException
-                                (
-                                    "No message context has been set for this scope."
-                                );
-                            }
-                        );
-
-                    services
-                        .TryAddTransient
-                        (
-                            s =>
-                            {
-                                var injectionService = s.GetRequiredService<ContextInjectionService>();
-                                return injectionService.Context as InteractionContext ?? throw new InvalidOperationException
-                                (
-                                    "No interaction context has been set for this scope."
-                                );
-                            }
-                        );
-
-                    services.AddCondition<RequireContextCondition>();
-                    services.AddCondition<RequireOwnerCondition>();
-                    services.AddCondition<RequireUserGuildPermissionCondition>();
-
-                    services
-                        .AddParser<IChannel, ChannelParser>()
-                        .AddParser<IGuildMember, GuildMemberParser>()
-                        .AddParser<IRole, RoleParser>()
-                        .AddParser<IUser, UserParser>()
-                        .AddParser<Snowflake, SnowflakeParser>()
-                        .AddParser<IMessage, MessageReader>()
-                        .AddParser<TimeSpan, HumanTimeSpanReader>();
-
-                    services.TryAddScoped<ExecutionEventCollectorService>();
-
-                    services.TryAddScoped<FeedbackService>();
-
+                    // Set up the feedback theme
                     var theme = (FeedbackTheme)FeedbackTheme.DiscordDark with
                     {
                         Secondary = Color.MediumPurple
@@ -202,10 +145,13 @@ namespace DIGOS.Ambassador
 
                     services.AddSingleton<IFeedbackTheme>(theme);
 
-                    services.TryAddSingleton<SlashService>();
+                    // Add execution events
+                    services
+                        .AddExecutionEvent<TransactionWrappingExecutionEvent>()
+                        .AddPreExecutionEvent<ConsentCheckingExecutionEvent>()
+                        .AddPostExecutionEvent<MessageRelayingExecutionEvent>;
 
-                    services.AddResponder<AmbassadorCommandResponder>();
-                    services.AddResponder<AmbassadorInteractionResponder>();
+                    // Ensure we're automatically joining created threads
                     services.AddResponder<ThreadJoinResponder>();
 
                     foreach (var plugin in plugins)
