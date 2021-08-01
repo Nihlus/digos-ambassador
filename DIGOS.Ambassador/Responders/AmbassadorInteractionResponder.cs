@@ -263,6 +263,12 @@ namespace DIGOS.Ambassador.Responders
             {
                 if (commandResult is not Result<FeedbackMessage> messageResult)
                 {
+                    if (commandResult is Result)
+                    {
+                        // Most likely some kind of custom embed
+                        return Result.FromSuccess();
+                    }
+
                     // Erase the original interaction
                     return await _webhookAPI.DeleteOriginalInteractionResponseAsync
                     (
