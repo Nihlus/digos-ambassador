@@ -32,6 +32,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Commands.Feedback.Services;
+using Remora.Discord.Commands.Feedback.Themes;
 using Remora.Discord.Commands.Services;
 using Xunit;
 
@@ -70,6 +71,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
                 .AddScoped<FeedbackService>()
                 .AddScoped<PrivacyService>()
                 .AddScoped<ContextInjectionService>()
+                .AddSingleton(FeedbackTheme.DiscordDark)
                 .AddSingleton(channelAPIMock.Object)
                 .AddSingleton(userAPIMock.Object)
                 .AddSingleton(webhookAPIMock.Object)
