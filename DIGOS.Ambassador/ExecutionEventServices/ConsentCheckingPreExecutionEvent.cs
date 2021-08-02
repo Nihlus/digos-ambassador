@@ -1,5 +1,5 @@
 //
-//  ConsentCheckingExecutionEvent.cs
+//  ConsentCheckingPreExecutionEvent.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -27,13 +27,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Core.Attributes;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
-using DIGOS.Ambassador.Responders;
+using DIGOS.Ambassador.Results;
 using Microsoft.Extensions.Options;
 using Remora.Commands.Extensions;
 using Remora.Commands.Services;
 using Remora.Commands.Signatures;
 using Remora.Commands.Trees;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Responders;
 using Remora.Discord.Commands.Services;
 using Remora.Results;
@@ -43,29 +44,25 @@ namespace DIGOS.Ambassador.ExecutionEventServices
     /// <summary>
     /// Ensures the user has consented to data processing before allowing a command to be executed.
     /// </summary>
-    public class ConsentCheckingExecutionEvent : IPreExecutionEvent
+    public class ConsentCheckingPreExecutionEvent : IPreExecutionEvent
     {
-        private readonly TransactionWrappingExecutionEvent _transactionWrapper;
         private readonly ICommandResponderOptions _options;
         private readonly PrivacyService _privacy;
         private readonly CommandService _commandService;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ConsentCheckingExecutionEvent"/> class.
+        /// Initializes a new instance of the <see cref="ConsentCheckingPreExecutionEvent"/> class.
         /// </summary>
-        /// <param name="transactionWrapper">The transaction wrapper service.</param>
         /// <param name="privacy">The privacy service.</param>
         /// <param name="commandService">The command service.</param>
         /// <param name="options">The responder options.</param>
-        public ConsentCheckingExecutionEvent
+        public ConsentCheckingPreExecutionEvent
         (
-            TransactionWrappingExecutionEvent transactionWrapper,
             PrivacyService privacy,
             CommandService commandService,
             IOptions<CommandResponderOptions> options
         )
         {
-            _transactionWrapper = transactionWrapper;
             _privacy = privacy;
             _commandService = commandService;
             _options = options.Value;
@@ -74,8 +71,6 @@ namespace DIGOS.Ambassador.ExecutionEventServices
         /// <inheritdoc />
         public async Task<Result> BeforeExecutionAsync(ICommandContext context, CancellationToken ct = default)
         {
-            await _transactionWrapper.ScopeCreated;
-
             var hasConsented = await _privacy.HasUserConsentedAsync(context.User.ID, ct);
 
             var searchOptions = new TreeSearchOptions(StringComparison.OrdinalIgnoreCase);
@@ -133,7 +128,7 @@ namespace DIGOS.Ambassador.ExecutionEventServices
                 return requestConsent;
             }
 
-            return Result.FromSuccess();
+            return new NoConsentError();
         }
     }
 }

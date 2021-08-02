@@ -24,6 +24,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
 using Remora.Commands.Conditions;
+using Remora.Commands.Results;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Results;
 using Remora.Results;
@@ -62,7 +63,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Conditions
         {
             if (!_context.GuildID.HasValue)
             {
-                return new ConditionNotSatisfiedError("This condition required a guild.");
+                return new InvalidOperationError("This condition must be executed in a guild.");
             }
 
             var getPermissionResult = _permissionRegistry.GetPermission(attribute.Type);

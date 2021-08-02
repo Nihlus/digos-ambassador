@@ -1,5 +1,5 @@
 //
-//  MessageRelayingExecutionEvent.cs
+//  MessageRelayingPostExecutionEvent.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,16 +20,17 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Errors;
+using DIGOS.Ambassador.Results;
 using Remora.Commands.Results;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
-using Remora.Discord.Commands.Results;
+using Remora.Discord.Commands.Services;
+using Remora.Discord.Rest.Results;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.ExecutionEventServices
@@ -37,17 +38,17 @@ namespace DIGOS.Ambassador.ExecutionEventServices
     /// <summary>
     /// Relays returned messages to the user upon completion of a command.
     /// </summary>
-    public class MessageRelayingExecutionEvent : IPostExecutionEvent
+    public class MessageRelayingPostExecutionEvent : IPostExecutionEvent
     {
         private readonly IDiscordRestWebhookAPI _webhookAPI;
         private readonly FeedbackService _userFeedback;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MessageRelayingExecutionEvent"/> class.
+        /// Initializes a new instance of the <see cref="MessageRelayingPostExecutionEvent"/> class.
         /// </summary>
         /// <param name="webhookAPI">The webhook API.</param>
         /// <param name="userFeedback">The feedback service.</param>
-        public MessageRelayingExecutionEvent(IDiscordRestWebhookAPI webhookAPI, FeedbackService userFeedback)
+        public MessageRelayingPostExecutionEvent(IDiscordRestWebhookAPI webhookAPI, FeedbackService userFeedback)
         {
             _webhookAPI = webhookAPI;
             _userFeedback = userFeedback;
@@ -63,27 +64,39 @@ namespace DIGOS.Ambassador.ExecutionEventServices
         {
             if (commandResult.IsSuccess)
             {
-                if (commandResult is Result)
-                {
-                    // Most likely some kind of custom embed (which is definitely true if we're not in an
-                    // interaction)
-                    return Result.FromSuccess();
-                }
-
                 if (commandResult is not Result<FeedbackMessage> messageResult)
                 {
-                    if (context is InteractionContext interactionContext)
+                    if (context is not InteractionContext interactionContext)
                     {
-                        // Erase the original interaction
-                        return await _webhookAPI.DeleteOriginalInteractionResponseAsync
-                        (
-                            interactionContext.ApplicationID,
-                            interactionContext.Token,
-                            ct
-                        );
+                        return Result.FromSuccess();
                     }
 
-                    return Result.FromSuccess();
+                    // Check if the original interaction has been edited
+                    var getOriginal = await _webhookAPI.GetOriginalInteractionResponseAsync
+                    (
+                        interactionContext.ApplicationID,
+                        interactionContext.Token,
+                        ct
+                    );
+
+                    if (!getOriginal.IsSuccess)
+                    {
+                        return Result.FromError(getOriginal);
+                    }
+
+                    var original = getOriginal.Entity;
+                    if (original.EditedTimestamp.HasValue)
+                    {
+                        return Result.FromSuccess();
+                    }
+
+                    // Erase the original interaction
+                    return await _webhookAPI.DeleteOriginalInteractionResponseAsync
+                    (
+                        interactionContext.ApplicationID,
+                        interactionContext.Token,
+                        ct
+                    );
                 }
 
                 // Relay the message to the user
@@ -120,15 +133,32 @@ namespace DIGOS.Ambassador.ExecutionEventServices
                         ct
                     );
 
-                    return sendError.IsSuccess
-                        ? Result.FromSuccess()
-                        : Result.FromError(sendError);
+                    if (!sendError.IsSuccess)
+                    {
+                        return Result.FromError(sendError);
+                    }
+
+                    break;
                 }
-                default:
+                case CommandNotFoundError:
                 {
-                    return Result.FromError(commandResult.Error!);
+                    var sendError = await _userFeedback.SendContextualErrorAsync
+                    (
+                        "No matching command found.",
+                        context.User.ID,
+                        ct
+                    );
+
+                    if (!sendError.IsSuccess)
+                    {
+                        return Result.FromError(sendError);
+                    }
+
+                    break;
                 }
             }
+
+            return Result.FromError(result.Error!);
         }
     }
 }

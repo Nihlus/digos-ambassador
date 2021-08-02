@@ -43,6 +43,7 @@ using Microsoft.Extensions.Logging;
 using Remora.Behaviours.Services;
 using Remora.Commands.Extensions;
 using Remora.Commands.Trees.Nodes;
+using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Caching.Extensions;
 using Remora.Discord.Commands.Conditions;
@@ -147,12 +148,15 @@ namespace DIGOS.Ambassador
 
                     // Add execution events
                     services
-                        .AddExecutionEvent<TransactionWrappingExecutionEvent>()
-                        .AddPreExecutionEvent<ConsentCheckingExecutionEvent>()
-                        .AddPostExecutionEvent<MessageRelayingExecutionEvent>;
+                        .AddPreExecutionEvent<ConsentCheckingPreExecutionEvent>()
+                        .AddPostExecutionEvent<MessageRelayingPostExecutionEvent>();
 
                     // Ensure we're automatically joining created threads
                     services.AddResponder<ThreadJoinResponder>();
+
+                    // Override the default responders
+                    services.Replace(ServiceDescriptor.Scoped<CommandResponder, AmbassadorCommandResponder>());
+                    services.Replace(ServiceDescriptor.Scoped<InteractionResponder, AmbassadorInteractionResponder>());
 
                     foreach (var plugin in plugins)
                     {
