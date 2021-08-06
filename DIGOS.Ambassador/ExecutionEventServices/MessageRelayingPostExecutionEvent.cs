@@ -85,7 +85,11 @@ namespace DIGOS.Ambassador.ExecutionEventServices
                     }
 
                     var original = getOriginal.Entity;
-                    if (original.EditedTimestamp.HasValue)
+                    var originalIsEdited = original.EditedTimestamp.HasValue
+                                           || original.Embeds.Count > 0
+                                           || original.Content != string.Empty;
+
+                    if (originalIsEdited)
                     {
                         return Result.FromSuccess();
                     }
