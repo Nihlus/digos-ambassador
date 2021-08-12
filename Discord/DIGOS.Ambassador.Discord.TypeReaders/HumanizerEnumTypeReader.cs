@@ -40,6 +40,8 @@ namespace DIGOS.Ambassador.Discord.TypeReaders
         /// <inheritdoc />
         public override ValueTask<Result<T>> TryParse(string value, CancellationToken ct)
         {
+            value = value.Trim();
+
             var defaultLocator = Configurator.EnumDescriptionPropertyLocator;
             Configurator.EnumDescriptionPropertyLocator = _ => false;
 

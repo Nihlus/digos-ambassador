@@ -51,6 +51,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Parsers
         /// <inheritdoc />
         public override async ValueTask<Result<AutoroleConfiguration>> TryParse(string value, CancellationToken ct)
         {
+            value = value.Trim();
+
             if (!Snowflake.TryParse(value.Unmention(), out var roleID))
             {
                 return new ParsingError<AutoroleConfiguration>(value);

@@ -56,6 +56,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Parsers
         /// <inheritdoc />
         public override async ValueTask<Result<Character>> TryParse(string value, CancellationToken ct)
         {
+            value = value.Trim();
+
             if (!_context.GuildID.HasValue)
             {
                 return new UserError("Characters can only be parsed in the context of a guild.");

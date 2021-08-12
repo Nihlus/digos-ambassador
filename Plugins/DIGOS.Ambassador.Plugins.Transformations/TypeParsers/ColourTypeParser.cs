@@ -37,6 +37,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.TypeParsers
         /// <inheritdoc />
         public override ValueTask<Result<Colour>> TryParse(string value, CancellationToken ct)
         {
+            value = value.Trim();
+
             return Colour.TryParse(value, out var colour)
                 ? new ValueTask<Result<Colour>>(colour)
                 : new ValueTask<Result<Colour>>(new ParsingError<Colour>(value));

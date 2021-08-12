@@ -73,6 +73,8 @@ namespace DIGOS.Ambassador.Discord.TypeReaders
         /// <inheritdoc />
         public override async ValueTask<Result<IEmoji>> TryParse(string value, CancellationToken ct)
         {
+            value = value.Trim();
+
             var regexMatches = EmojiRegex.Matches(value);
             if (regexMatches.Count != 0)
             {

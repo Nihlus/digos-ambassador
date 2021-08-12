@@ -45,6 +45,8 @@ namespace DIGOS.Ambassador.Discord.TypeReaders
         /// <inheritdoc />
         public override ValueTask<Result<TimeSpan>> TryParse(string value, CancellationToken ct)
         {
+            value = value.Trim();
+
             if (TimeSpan.TryParse(value, out var parsedTimespan))
             {
                 return new ValueTask<Result<TimeSpan>>(parsedTimespan);

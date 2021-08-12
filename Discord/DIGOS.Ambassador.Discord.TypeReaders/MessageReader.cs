@@ -61,6 +61,8 @@ namespace DIGOS.Ambassador.Discord.TypeReaders
         /// <inheritdoc />
         public override async ValueTask<Result<IMessage>> TryParse(string value, CancellationToken ct)
         {
+            value = value.Trim();
+
             var match = Pattern.Match(value);
             if (!match.Success)
             {
