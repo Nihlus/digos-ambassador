@@ -21,8 +21,6 @@
 //
 
 using System;
-using System.Collections.Concurrent;
-using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Linq;
 using System.Threading;
@@ -44,11 +42,6 @@ namespace DIGOS.Ambassador.Discord.Interactivity
     public class InteractivityService
     {
         /// <summary>
-        /// Holds a mapping of message IDs to tracked messages.
-        /// </summary>
-        private readonly ConcurrentDictionary<string, IInteractiveMessage> _trackedMessages = new();
-
-        /// <summary>
         /// Holds the Discord channel API.
         /// </summary>
         private readonly IDiscordRestChannelAPI _channelAPI;
@@ -64,14 +57,21 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         private readonly IServiceProvider _services;
 
         /// <summary>
+        /// Gets the message tracker.
+        /// </summary>
+        public InteractiveMessageTracker Tracker { get; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="InteractivityService"/> class.
         /// </summary>
         /// <param name="services">The available services.</param>
+        /// <param name="tracker">The message tracker.</param>
         /// <param name="channelAPI">The channel API.</param>
         /// <param name="userAPI">The user API.</param>
         public InteractivityService
         (
             IServiceProvider services,
+            InteractiveMessageTracker tracker,
             IDiscordRestChannelAPI channelAPI,
             IDiscordRestUserAPI userAPI
         )
@@ -79,6 +79,8 @@ namespace DIGOS.Ambassador.Discord.Interactivity
             _channelAPI = channelAPI;
             _userAPI = userAPI;
             _services = services;
+
+            this.Tracker = tracker;
         }
 
         /// <summary>
@@ -134,7 +136,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity
 
             var message = sendMessage.Entity;
             var interactiveMessage = messageFactory(channelID, message.ID);
-            var trackMessage = TrackMessage(interactiveMessage);
+            var trackMessage = this.Tracker.TrackMessage(interactiveMessage);
             if (!trackMessage.IsSuccess)
             {
                 return trackMessage;
@@ -151,64 +153,6 @@ namespace DIGOS.Ambassador.Discord.Interactivity
             }
 
             return Result.FromSuccess();
-        }
-
-        /// <summary>
-        /// Begins tracking the given message.
-        /// </summary>
-        /// <param name="message">The interactive message.</param>
-        /// <returns>A result which may or may not have succeeded.</returns>
-        public Result TrackMessage(IInteractiveMessage message)
-        {
-            return _trackedMessages.TryAdd(message.Nonce, message)
-                ? Result.FromSuccess()
-                : new GenericError("A message with that ID is already tracked.");
-        }
-
-        /// <summary>
-        /// Ceases tracking the message with the given ID.
-        /// </summary>
-        /// <param name="id">The ID of the message.</param>
-        /// <param name="ct">The cancellation token for this operation.</param>
-        /// <returns>A result which may or may not have succeeded.</returns>
-        public async Task<Result> UntrackMessageAsync(Snowflake id, CancellationToken ct = default)
-        {
-            if (!_trackedMessages.TryRemove(id.ToString(), out var trackedMessage))
-            {
-                // The message is already removed
-                return Result.FromSuccess();
-            }
-
-            await trackedMessage.Semaphore.WaitAsync(ct);
-            trackedMessage.Dispose();
-
-            return Result.FromSuccess();
-        }
-
-        /// <summary>
-        /// Gets a registered interactive entity that matches the given nonce.
-        /// </summary>
-        /// <param name="nonce">The entity's unique identifier.</param>
-        /// <param name="entity">The entity, or null if none exists.</param>
-        /// <typeparam name="TEntity">The concrete entity type.</typeparam>
-        /// <returns>true if a matching entity was successfully found; otherwise, false.</returns>
-        public bool TryGetInteractiveEntity<TEntity>(string nonce, [NotNullWhen(true)] out TEntity? entity)
-            where TEntity : IInteractiveEntity
-        {
-            entity = default;
-
-            if (!_trackedMessages.TryGetValue(nonce, out var untypedEntity))
-            {
-                return false;
-            }
-
-            if (untypedEntity is not TEntity typedEntity)
-            {
-                return false;
-            }
-
-            entity = typedEntity;
-            return true;
         }
 
         /// <summary>
@@ -256,14 +200,5 @@ namespace DIGOS.Ambassador.Discord.Interactivity
 
             return Result<IMessage?>.FromSuccess(null);
         }
-
-        /// <summary>
-        /// Ceases tracking the message with the given ID.
-        /// </summary>
-        /// <param name="id">The ID of the message.</param>
-        /// <param name="ct">The cancellation token for this operation.</param>
-        /// <returns>A result which may or may not have succeeded.</returns>
-        public Task<Result> OnMessageDeletedAsync(Snowflake id, CancellationToken ct = default)
-            => UntrackMessageAsync(id, ct);
     }
 }

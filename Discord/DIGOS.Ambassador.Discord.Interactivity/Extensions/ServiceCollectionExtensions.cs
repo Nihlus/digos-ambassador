@@ -49,7 +49,8 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Extensions
                 o.Intents |= GatewayIntents.GuildMessageReactions;
             });
 
-            serviceCollection.TryAddSingleton<InteractivityService>();
+            serviceCollection.TryAddSingleton<InteractiveMessageTracker>();
+            serviceCollection.TryAddScoped<InteractivityService>();
             serviceCollection.AddResponder<MessageDeletionResponder>();
 
             return serviceCollection;

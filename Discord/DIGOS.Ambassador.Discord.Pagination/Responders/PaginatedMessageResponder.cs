@@ -85,7 +85,7 @@ namespace DIGOS.Ambassador.Discord.Pagination.Responders
             var interactedMessage = gatewayEvent.Message.Value ?? throw new InvalidOperationException();
             var messageID = interactedMessage.ID.ToString();
 
-            if (!this.Interactivity.TryGetInteractiveEntity<PaginatedMessage>(messageID, out var message))
+            if (!this.Interactivity.Tracker.TryGetInteractiveEntity<PaginatedMessage>(messageID, out var message))
             {
                 return Result.FromSuccess();
             }
@@ -198,7 +198,7 @@ namespace DIGOS.Ambassador.Discord.Pagination.Responders
         /// <inheritdoc />
         public override async Task<Result> OnCreateAsync(string nonce, CancellationToken ct = default)
         {
-            if (!this.Interactivity.TryGetInteractiveEntity<PaginatedMessage>(nonce, out var message))
+            if (!this.Interactivity.Tracker.TryGetInteractiveEntity<PaginatedMessage>(nonce, out var message))
             {
                 return Result.FromSuccess();
             }

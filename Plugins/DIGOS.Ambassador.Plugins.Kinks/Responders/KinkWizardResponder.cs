@@ -101,7 +101,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
             var interactedMessage = gatewayEvent.Message.Value ?? throw new InvalidOperationException();
             var messageID = interactedMessage.ID.ToString();
 
-            if (!this.Interactivity.TryGetInteractiveEntity<KinkWizard>(messageID, out var wizard))
+            if (!this.Interactivity.Tracker.TryGetInteractiveEntity<KinkWizard>(messageID, out var wizard))
             {
                 return Result.FromSuccess();
             }
@@ -181,7 +181,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
         /// <inheritdoc />
         public override async Task<Result> OnCreateAsync(string nonce, CancellationToken ct = default)
         {
-            if (!this.Interactivity.TryGetInteractiveEntity<KinkWizard>(nonce, out var message))
+            if (!this.Interactivity.Tracker.TryGetInteractiveEntity<KinkWizard>(nonce, out var message))
             {
                 return Result.FromSuccess();
             }
@@ -567,7 +567,8 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
 
                         wizard.State = KinkWizardState.CategorySelection;
 
-                        // Recursively calling at this point is safe, since we will get the emojis from the category page.
+                        // Recursively calling at this point is safe, since we will get the emojis from the category
+                        // page.
                         return await GetCurrentPageAsync(wizard, ct);
                     }
 

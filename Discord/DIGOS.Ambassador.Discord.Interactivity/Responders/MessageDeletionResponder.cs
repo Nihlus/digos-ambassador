@@ -36,25 +36,25 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Responders
         IResponder<IMessageDelete>,
         IResponder<IMessageDeleteBulk>
     {
-        private readonly InteractivityService _interactivity;
+        private readonly InteractiveMessageTracker _messageTracker;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MessageDeletionResponder"/> class.
         /// </summary>
-        /// <param name="interactivity">The interactivity service.</param>
-        public MessageDeletionResponder(InteractivityService interactivity)
+        /// <param name="messageTracker">The message tracker service.</param>
+        public MessageDeletionResponder(InteractiveMessageTracker messageTracker)
         {
-            _interactivity = interactivity;
+            _messageTracker = messageTracker;
         }
 
         /// <inheritdoc />
         public Task<Result> RespondAsync(IMessageDelete gatewayEvent, CancellationToken ct = default)
-            => _interactivity.OnMessageDeletedAsync(gatewayEvent.ID, ct);
+            => _messageTracker.OnMessageDeletedAsync(gatewayEvent.ID, ct);
 
         /// <inheritdoc />
         public async Task<Result> RespondAsync(IMessageDeleteBulk gatewayEvent, CancellationToken ct = default)
         {
-            var deletions = gatewayEvent.IDs.Select(id => _interactivity.OnMessageDeletedAsync(id, ct));
+            var deletions = gatewayEvent.IDs.Select(id => _messageTracker.OnMessageDeletedAsync(id, ct));
             var results = await Task.WhenAll(deletions);
 
             var firstFail = results.FirstOrDefault(r => !r.IsSuccess);
