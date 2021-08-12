@@ -63,7 +63,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
 
             var channelAPIMock = new Mock<IDiscordRestChannelAPI>();
             var userAPIMock = new Mock<IDiscordRestUserAPI>();
-            var webhookAPIMock = new Mock<IDiscordRestWebhookAPI>();
+            var interactionAPIMock = new Mock<IDiscordRestInteractionAPI>();
 
             serviceCollection
                 .AddSingleton(FileSystemFactory.CreateContentFileSystem())
@@ -74,7 +74,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
                 .AddSingleton(FeedbackTheme.DiscordDark)
                 .AddSingleton(channelAPIMock.Object)
                 .AddSingleton(userAPIMock.Object)
-                .AddSingleton(webhookAPIMock.Object)
+                .AddSingleton(interactionAPIMock.Object)
                 .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
         }
 
