@@ -39,17 +39,17 @@ namespace DIGOS.Ambassador.ExecutionEventServices
     public class MessageRelayingPostExecutionEvent : IPostExecutionEvent
     {
         private readonly IDiscordRestInteractionAPI _interactionAPI;
-        private readonly FeedbackService _userFeedback;
+        private readonly FeedbackService _feedback;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MessageRelayingPostExecutionEvent"/> class.
         /// </summary>
         /// <param name="interactionAPI">The webhook API.</param>
-        /// <param name="userFeedback">The feedback service.</param>
-        public MessageRelayingPostExecutionEvent(IDiscordRestInteractionAPI interactionAPI, FeedbackService userFeedback)
+        /// <param name="feedback">The feedback service.</param>
+        public MessageRelayingPostExecutionEvent(IDiscordRestInteractionAPI interactionAPI, FeedbackService feedback)
         {
             _interactionAPI = interactionAPI;
-            _userFeedback = userFeedback;
+            _feedback = feedback;
         }
 
         /// <inheritdoc />
@@ -64,30 +64,7 @@ namespace DIGOS.Ambassador.ExecutionEventServices
             {
                 if (commandResult is not Result<FeedbackMessage> messageResult)
                 {
-                    if (context is not InteractionContext interactionContext)
-                    {
-                        return Result.FromSuccess();
-                    }
-
-                    // Check if the original interaction has been edited
-                    var getOriginal = await _interactionAPI.GetOriginalInteractionResponseAsync
-                    (
-                        interactionContext.ApplicationID,
-                        interactionContext.Token,
-                        ct
-                    );
-
-                    if (!getOriginal.IsSuccess)
-                    {
-                        return Result.FromError(getOriginal);
-                    }
-
-                    var original = getOriginal.Entity;
-                    var originalIsEdited = original.EditedTimestamp.HasValue
-                                           || original.Embeds.Count > 0
-                                           || original.Content != string.Empty;
-
-                    if (originalIsEdited)
+                    if (context is not InteractionContext interactionContext || _feedback.HasEditedOriginalMessage)
                     {
                         return Result.FromSuccess();
                     }
@@ -102,7 +79,7 @@ namespace DIGOS.Ambassador.ExecutionEventServices
                 }
 
                 // Relay the message to the user
-                var sendMessage = await _userFeedback.SendContextualMessageAsync
+                var sendMessage = await _feedback.SendContextualMessageAsync
                 (
                     messageResult.Entity!,
                     context.User.ID,
@@ -128,7 +105,7 @@ namespace DIGOS.Ambassador.ExecutionEventServices
                 case { } e when
                     e.GetType().IsGenericType && e.GetType().GetGenericTypeDefinition() == typeof(ParsingError<>):
                 {
-                    var sendError = await _userFeedback.SendContextualErrorAsync
+                    var sendError = await _feedback.SendContextualErrorAsync
                     (
                         error.Message,
                         context.User.ID,
@@ -144,7 +121,7 @@ namespace DIGOS.Ambassador.ExecutionEventServices
                 }
                 case CommandNotFoundError:
                 {
-                    var sendError = await _userFeedback.SendContextualErrorAsync
+                    var sendError = await _feedback.SendContextualErrorAsync
                     (
                         "No matching command found.",
                         context.User.ID,

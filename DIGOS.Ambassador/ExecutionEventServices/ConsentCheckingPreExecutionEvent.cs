@@ -37,6 +37,7 @@ using Remora.Commands.Trees;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Extensions;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Commands.Responders;
 using Remora.Discord.Commands.Services;
 using Remora.Results;
@@ -52,9 +53,9 @@ namespace DIGOS.Ambassador.ExecutionEventServices
         private readonly PrivacyService _privacy;
         private readonly CommandService _commandService;
         private readonly IDiscordRestInteractionAPI _interactionAPI;
-
         private readonly TokenizerOptions _tokenizerOptions;
         private readonly TreeSearchOptions _treeSearchOptions;
+        private readonly FeedbackService _feedback;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsentCheckingPreExecutionEvent"/> class.
@@ -65,6 +66,7 @@ namespace DIGOS.Ambassador.ExecutionEventServices
         /// <param name="interactionAPI">The interaction API.</param>
         /// <param name="tokenizerOptions">The tokenizer options.</param>
         /// <param name="treeSearchOptions">The tree search options.</param>
+        /// <param name="feedback">The feedback service.</param>
         public ConsentCheckingPreExecutionEvent
         (
             PrivacyService privacy,
@@ -72,12 +74,14 @@ namespace DIGOS.Ambassador.ExecutionEventServices
             IOptions<CommandResponderOptions> options,
             IDiscordRestInteractionAPI interactionAPI,
             IOptions<TokenizerOptions> tokenizerOptions,
-            IOptions<TreeSearchOptions> treeSearchOptions
+            IOptions<TreeSearchOptions> treeSearchOptions,
+            FeedbackService feedback
         )
         {
             _privacy = privacy;
             _commandService = commandService;
             _interactionAPI = interactionAPI;
+            _feedback = feedback;
             _options = options.Value;
             _tokenizerOptions = tokenizerOptions.Value;
             _treeSearchOptions = treeSearchOptions.Value;
@@ -148,29 +152,7 @@ namespace DIGOS.Ambassador.ExecutionEventServices
             }
 
             // Delete the original message
-            if (context is not InteractionContext deletionContext)
-            {
-                return new NoConsentError();
-            }
-
-            var getOriginal = await _interactionAPI.GetOriginalInteractionResponseAsync
-            (
-                deletionContext.ApplicationID,
-                deletionContext.Token,
-                ct
-            );
-
-            if (!getOriginal.IsSuccess)
-            {
-                return Result.FromError(getOriginal);
-            }
-
-            var original = getOriginal.Entity;
-            var originalIsEdited = original.EditedTimestamp.HasValue
-                                   || original.Embeds.Count > 0
-                                   || original.Content != string.Empty;
-
-            if (originalIsEdited)
+            if (context is not InteractionContext deletionContext || !_feedback.HasEditedOriginalMessage)
             {
                 return new NoConsentError();
             }
