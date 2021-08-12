@@ -79,9 +79,9 @@ namespace DIGOS.Ambassador.Plugins.Autorole
             serviceCollection.AddResponder<ReactionConditionResponder>();
             serviceCollection.AddResponder<UserActivityResponder>();
             serviceCollection.AddResponder<RoleConditionResponder>();
-            */
 
-            //serviceCollection.Configure<DiscordGatewayClientOptions>(o => o.Intents |= GatewayIntents.GuildPresences);
+            serviceCollection.Configure<DiscordGatewayClientOptions>(o => o.Intents |= GatewayIntents.GuildPresences);
+            */
         }
 
         /// <inheritdoc />

@@ -21,7 +21,6 @@
 //
 
 using System.ComponentModel;
-using System.Drawing;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Errors;
 using DIGOS.Ambassador.Plugins.Amby.Services;

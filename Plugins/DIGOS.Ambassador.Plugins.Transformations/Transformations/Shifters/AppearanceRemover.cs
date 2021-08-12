@@ -109,7 +109,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
             var messageBuilder = new StringBuilder();
             void InsertRemovalMessage(string message)
             {
-                messageBuilder!.Append(message);
+                messageBuilder.Append(message);
 
                 if (!message.EndsWith(" "))
                 {
@@ -137,7 +137,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
                         continue;
                     }
 
-                    InsertRemovalMessage(shiftResult.Entity.ShiftMessage!);
+                    InsertRemovalMessage(shiftResult.Entity.ShiftMessage);
                     continue;
                 }
 

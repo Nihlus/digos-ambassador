@@ -33,7 +33,6 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Feedback.Messages;
-using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 

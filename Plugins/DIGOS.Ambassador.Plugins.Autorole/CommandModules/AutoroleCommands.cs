@@ -387,8 +387,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             (
                 discordUsers,
                 u => !u.Nickname.HasValue
-                    ? $"{u.User.Value!.Username}#{u.User.Value!.Discriminator} | {u.User.Value!.ID}"
-                    : $"{u.Nickname} ({u.User.Value!.Username}#{u.User.Value!.Discriminator} | {u.User.Value!.ID})",
+                    ? $"{u.User.Value.Username}#{u.User.Value.Discriminator} | {u.User.Value.ID}"
+                    : $"{u.Nickname} ({u.User.Value.Username}#{u.User.Value.Discriminator} | {u.User.Value.ID})",
                 _ => "Not confirmed",
                 "There are no users that haven't been confirmed for that role."
             );

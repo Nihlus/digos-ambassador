@@ -54,7 +54,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Services
                 var fields = new List<IEmbedField>();
                 if (firstEmbed.Fields.HasValue)
                 {
-                    fields.AddRange(firstEmbed.Fields.Value!);
+                    fields.AddRange(firstEmbed.Fields.Value);
                 }
 
                 fields.Add(CreateQuoteMarkerField(message, quotingUser));
@@ -108,7 +108,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Services
             var fields = new List<IEmbedField>();
             if (embed.Fields.HasValue)
             {
-                fields.AddRange(embed.Fields.Value!);
+                fields.AddRange(embed.Fields.Value);
             }
 
             fields.Add
@@ -136,14 +136,14 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Services
             var fields = new List<IEmbedField>();
             if (embed.Fields.HasValue)
             {
-                fields.AddRange(embed.Fields.Value!);
+                fields.AddRange(embed.Fields.Value);
             }
 
-            fields.Add(new EmbedField("Invite type", activity!.Type.ToString()));
+            fields.Add(new EmbedField("Invite type", activity.Type.ToString()));
 
             if (activity.PartyID.HasValue)
             {
-                fields.Add(new EmbedField("Party ID", activity!.PartyID.Value!));
+                fields.Add(new EmbedField("Party ID", activity.PartyID.Value));
             }
 
             return embed with { Fields = fields };
@@ -170,7 +170,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Services
             var fields = new List<IEmbedField>();
             if (embed.Fields.HasValue)
             {
-                fields.AddRange(embed.Fields.Value!);
+                fields.AddRange(embed.Fields.Value);
             }
 
             fields.Add(new EmbedField("Embed Type", message.Embeds.First().Type.Value.ToString()));

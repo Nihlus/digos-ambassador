@@ -115,7 +115,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Responders
             (
                 gatewayEvent.ChannelID.Value,
                 gatewayEvent.Content.Value,
-                gatewayEvent.Author.Value!.ID,
+                gatewayEvent.Author.Value.ID,
                 ct
             );
         }
@@ -198,7 +198,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Responders
                 }
 
                 var fields = embed.Fields.Value;
-                if (fields!.Any(f => f.Name.Contains("Quoted by")))
+                if (fields.Any(f => f.Name.Contains("Quoted by")))
                 {
                     return true;
                 }
@@ -219,7 +219,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Responders
                 return false;
             }
 
-            foreach (var embed in message.Embeds.Value!)
+            foreach (var embed in message.Embeds.Value)
             {
                 if (!embed.Fields.HasValue)
                 {
@@ -227,7 +227,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Responders
                 }
 
                 var fields = embed.Fields.Value;
-                if (fields!.Any(f => f.Name.Contains("Quoted by")))
+                if (fields.Any(f => f.Name.Contains("Quoted by")))
                 {
                     return true;
                 }

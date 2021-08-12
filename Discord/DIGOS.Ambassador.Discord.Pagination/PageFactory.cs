@@ -62,7 +62,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
             // Build the pages
             var pages = new List<Embed>();
             var currentPageFields = new List<IEmbedField>();
-            if (pageBase.Fields.HasValue && pageBase.Fields.Value is not null)
+            if (pageBase.Fields.HasValue)
             {
                 currentPageFields.AddRange(pageBase.Fields.Value);
             }

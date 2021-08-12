@@ -218,7 +218,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <param name="bodypart">The bodypart to get.</param>
         /// <param name="chirality">The chirality of the bodypart.</param>
         /// <returns>The appearance component of the bodypart.</returns>
-        [Pure, JetBrains.Annotations.NotNull]
+        [Pure]
         public AppearanceComponent GetAppearanceComponent(Bodypart bodypart, Chirality chirality)
         {
             if (bodypart.IsChiral() && chirality == Chirality.Center)

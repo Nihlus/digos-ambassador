@@ -284,11 +284,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             var owner = getOwner.Entity;
             var ownerName = owner.Nickname.HasValue && owner.Nickname.Value is not null
                 ? owner.Nickname.Value
-                : owner.User.Value!.Username;
+                : owner.User.Value.Username;
 
             var author = new EmbedAuthor(ownerName);
 
-            var getOwnerAvatar = CDN.GetUserAvatarUrl(owner.User.Value!);
+            var getOwnerAvatar = CDN.GetUserAvatarUrl(owner.User.Value);
             if (getOwnerAvatar.IsSuccess)
             {
                 author = author with { IconUrl = getOwnerAvatar.Entity.ToString() };

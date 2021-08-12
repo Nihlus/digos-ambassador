@@ -20,7 +20,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;

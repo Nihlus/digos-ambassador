@@ -202,8 +202,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
                 users.AddRange
                 (
                     listMembers.Entity
-                        .Where(m => !m.User.Value!.IsBot.HasValue || !m.User.Value!.IsBot.Value)
-                        .Select(m => m.User.Value!.ID)
+                        .Where(m => !m.User.Value.IsBot.HasValue || !m.User.Value.IsBot.Value)
+                        .Select(m => m.User.Value.ID)
                 );
 
                 after = users.Last();
@@ -272,7 +272,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
                     break;
                 }
 
-                users.AddRange(listMembers.Entity.Select(m => m.User.Value!.ID));
+                users.AddRange(listMembers.Entity.Select(m => m.User.Value.ID));
                 after = users.Last();
             }
 

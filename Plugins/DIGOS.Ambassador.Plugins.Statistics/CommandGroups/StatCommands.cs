@@ -26,7 +26,6 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Interactivity;
-using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Discord.Pagination.Extensions;
 using JetBrains.Annotations;
 using Remora.Commands.Attributes;

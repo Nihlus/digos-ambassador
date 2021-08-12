@@ -384,7 +384,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="bodypart">The bodypart to build the message from.</param>
         /// <returns>The removal message.</returns>
         [Pure]
-        public string BuildRemoveMessage([NotNull]Appearance appearanceConfiguration, Bodypart bodypart)
+        public string BuildRemoveMessage(Appearance appearanceConfiguration, Bodypart bodypart)
         {
             string removalText;
             switch (bodypart)
@@ -470,7 +470,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="bodypart">The bodypart to build the message from.</param>
         /// <returns>The removal message.</returns>
         [Pure]
-        public string BuildUniformRemoveMessage([NotNull]Appearance appearanceConfiguration, Bodypart bodypart)
+        public string BuildUniformRemoveMessage(Appearance appearanceConfiguration, Bodypart bodypart)
         {
             string removalText;
             switch (bodypart)
@@ -637,7 +637,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         [Pure]
         public string BuildUniformPatternRemoveMessage
         (
-            [NotNull]Appearance appearanceConfiguration,
+            Appearance appearanceConfiguration,
             AppearanceComponent currentComponent
         )
         {

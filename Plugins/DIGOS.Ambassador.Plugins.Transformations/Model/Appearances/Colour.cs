@@ -122,7 +122,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// Clones this colour, creating a new unbound colour with the same settings.
         /// </summary>
         /// <returns>The cloned colour.</returns>
-        [Pure, JetBrains.Annotations.NotNull]
+        [Pure]
         public Colour Clone()
         {
             return new Colour(this.Shade, this.Modifier);
@@ -133,7 +133,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// </summary>
         /// <param name="other">The other colour.</param>
         /// <returns>The copied colour.</returns>
-        [Pure, JetBrains.Annotations.NotNull]
+        [Pure]
         public static Colour CopyFrom(Colour other)
         {
             return other.Clone();

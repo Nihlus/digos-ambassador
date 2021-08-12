@@ -81,7 +81,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         {
             if (!@this.FileSystem.FileExists(TransformationMessagesPath))
             {
-                return new GenericError("Transformation messages not found.");
+                return new InvalidOperationError("Transformation messages not found.");
             }
 
             using var reader = new StreamReader
