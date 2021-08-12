@@ -37,7 +37,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
         ButtonComponent Close,
         ButtonComponent Help,
         string FooterFormat = "Page {0}/{1}",
-        string HelpText = "This is a paginated message. React with the respective icons to change page."
+        string HelpText = "This is a paginated message. Use the buttons to change page."
     )
     {
         /// <summary>
