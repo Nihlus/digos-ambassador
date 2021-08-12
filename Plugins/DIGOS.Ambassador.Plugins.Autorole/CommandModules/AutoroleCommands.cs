@@ -26,6 +26,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
+using DIGOS.Ambassador.Discord.Pagination.Extensions;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Permissions;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
@@ -218,16 +219,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
 
             var pages = PageFactory.FromFields(conditionFields, pageBase: embed);
 
-            return await _interactivity.SendInteractiveMessageAsync
+            return await _interactivity.SendContextualInteractiveMessageAsync
             (
-                _context.ChannelID,
-                (channelID, messageID) => new PaginatedMessage
-                (
-                    channelID,
-                    messageID,
-                    _context.User.ID,
-                    pages
-                )
+                _context.User.ID,
+                pages
             );
         }
 
@@ -251,16 +246,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 "There are no autoroles configured."
             );
 
-            return await _interactivity.SendInteractiveMessageAsync
+            return await _interactivity.SendContextualInteractiveMessageAsync
             (
-                _context.ChannelID,
-                (channelID, messageID) => new PaginatedMessage
-                (
-                    channelID,
-                    messageID,
-                    _context.User.ID,
-                    pages
-                )
+                _context.User.ID,
+                pages
             );
         }
 
@@ -404,16 +393,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 "There are no users that haven't been confirmed for that role."
             );
 
-            return await _interactivity.SendInteractiveMessageAsync
+            return await _interactivity.SendContextualInteractiveMessageAsync
             (
-                _context.ChannelID,
-                (channelID, messageID) => new PaginatedMessage
-                (
-                    channelID,
-                    messageID,
-                    _context.User.ID,
-                    pages
-                )
+                _context.User.ID,
+                pages
             );
         }
     }

@@ -31,6 +31,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Core;
 using Remora.Results;
 
@@ -47,14 +48,14 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         private readonly IDiscordRestChannelAPI _channelAPI;
 
         /// <summary>
-        /// Holds the Discord user API.
-        /// </summary>
-        private readonly IDiscordRestUserAPI _userAPI;
-
-        /// <summary>
         /// Holds the available services.
         /// </summary>
         private readonly IServiceProvider _services;
+
+        /// <summary>
+        /// Holds the feedback service.
+        /// </summary>
+        private readonly FeedbackService _feedback;
 
         /// <summary>
         /// Gets the message tracker.
@@ -67,57 +68,30 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         /// <param name="services">The available services.</param>
         /// <param name="tracker">The message tracker.</param>
         /// <param name="channelAPI">The channel API.</param>
-        /// <param name="userAPI">The user API.</param>
+        /// <param name="feedback">The feedback service.</param>
         public InteractivityService
         (
             IServiceProvider services,
             InteractiveMessageTracker tracker,
             IDiscordRestChannelAPI channelAPI,
-            IDiscordRestUserAPI userAPI
+            FeedbackService feedback
         )
         {
             _channelAPI = channelAPI;
-            _userAPI = userAPI;
+            _feedback = feedback;
             _services = services;
 
             this.Tracker = tracker;
         }
 
         /// <summary>
-        /// Sends an interactive message.
+        /// Sends an interactive message to the current context.
         /// </summary>
-        /// <param name="userID">The user to send the message to.</param>
         /// <param name="messageFactory">A factory function that wraps a sent message.</param>
         /// <param name="ct">The cancellation token for this operation.</param>
         /// <returns>A result which may or may not have succeeded.</returns>
-        public async Task<Result> SendPrivateInteractiveMessageAsync
+        public async Task<Result> SendContextualInteractiveMessageAsync
         (
-            Snowflake userID,
-            Func<Snowflake, Snowflake, IInteractiveMessage> messageFactory,
-            CancellationToken ct = default
-        )
-        {
-            var createDM = await _userAPI.CreateDMAsync(userID, ct);
-            if (!createDM.IsSuccess)
-            {
-                return Result.FromError(createDM);
-            }
-
-            var dm = createDM.Entity;
-
-            return await SendInteractiveMessageAsync(dm.ID, messageFactory, ct);
-        }
-
-        /// <summary>
-        /// Sends an interactive message.
-        /// </summary>
-        /// <param name="channelID">The channel to send the message in.</param>
-        /// <param name="messageFactory">A factory function that wraps a sent message.</param>
-        /// <param name="ct">The cancellation token for this operation.</param>
-        /// <returns>A result which may or may not have succeeded.</returns>
-        public async Task<Result> SendInteractiveMessageAsync
-        (
-            Snowflake channelID,
             Func<Snowflake, Snowflake, IInteractiveMessage> messageFactory,
             CancellationToken ct = default
         )
@@ -128,14 +102,14 @@ namespace DIGOS.Ambassador.Discord.Interactivity
                 Description = "Loading..."
             };
 
-            var sendMessage = await _channelAPI.CreateMessageAsync(channelID, embeds: new[] { initialEmbed }, ct: ct);
+            var sendMessage = await _feedback.SendContextualEmbedAsync(initialEmbed, ct);
             if (!sendMessage.IsSuccess)
             {
                 return Result.FromError(sendMessage);
             }
 
             var message = sendMessage.Entity;
-            var interactiveMessage = messageFactory(channelID, message.ID);
+            var interactiveMessage = messageFactory(message.ChannelID, message.ID);
             var trackMessage = this.Tracker.TrackMessage(interactiveMessage);
             if (!trackMessage.IsSuccess)
             {

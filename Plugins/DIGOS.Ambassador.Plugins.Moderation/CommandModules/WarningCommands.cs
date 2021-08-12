@@ -28,6 +28,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
+using DIGOS.Ambassador.Discord.Pagination.Extensions;
 using DIGOS.Ambassador.Plugins.Moderation.Permissions;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
 using DIGOS.Ambassador.Plugins.Permissions.Conditions;
@@ -161,16 +162,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
 
             var pages = createPages.Select(p => p.Entity!).ToList();
 
-            await _interactivity.SendInteractiveMessageAsync
+            await _interactivity.SendContextualInteractiveMessageAsync
             (
-                _context.ChannelID,
-                (channelID, messageID) => new PaginatedMessage
-                (
-                    channelID,
-                    messageID,
-                    _context.User.ID,
-                    pages
-                )
+                _context.User.ID,
+                pages
             );
 
             return Result.FromSuccess();

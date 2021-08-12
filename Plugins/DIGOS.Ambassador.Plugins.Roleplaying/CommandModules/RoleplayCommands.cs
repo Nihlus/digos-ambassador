@@ -188,9 +188,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 "There are no roleplays in the server that you can view."
             );
 
-            return await _interactivity.SendInteractiveMessageAsync
+            return await _interactivity.SendContextualInteractiveMessageAsync
             (
-                _context.ChannelID,
                 _context.User.ID,
                 pages
             );
@@ -223,9 +222,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 "You don't have any roleplays."
             );
 
-            return await _interactivity.SendInteractiveMessageAsync
+            return await _interactivity.SendContextualInteractiveMessageAsync
             (
-                _context.ChannelID,
                 _context.User.ID,
                 pages
             );

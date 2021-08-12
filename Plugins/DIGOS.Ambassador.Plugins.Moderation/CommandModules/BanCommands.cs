@@ -214,9 +214,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
 
             var pages = createPages.Select(p => p.Entity!).ToList();
 
-            await _interactivity.SendInteractiveMessageAsync
+            await _interactivity.SendContextualInteractiveMessageAsync
             (
-                _context.ChannelID,
                 (channelID, messageID) => new PaginatedMessage
                 (
                     channelID,

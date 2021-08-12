@@ -122,9 +122,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                         Footer = new EmbedFooter("There aren't any character roles available in this server.")
                     };
 
-                    return await _interactivity.SendInteractiveMessageAsync
+                    return await _interactivity.SendContextualInteractiveMessageAsync
                     (
-                        _context.ChannelID,
                         _context.User.ID,
                         new[] { baseEmbed },
                         ct: this.CancellationToken
@@ -161,9 +160,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
 
                 var pages = PageFactory.FromFields(fields, pageBase: baseEmbed);
 
-                return await _interactivity.SendInteractiveMessageAsync
+                return await _interactivity.SendContextualInteractiveMessageAsync
                 (
-                    _context.ChannelID,
                     _context.User.ID,
                     pages,
                     ct: this.CancellationToken

@@ -27,6 +27,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
+using DIGOS.Ambassador.Discord.Pagination.Extensions;
 using DIGOS.Ambassador.Plugins.Permissions.Conditions;
 using DIGOS.Ambassador.Plugins.Permissions.Extensions;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
@@ -107,17 +108,11 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
                 "No permissions available. This is most likely an error."
             );
 
-            return await _interactivity.SendInteractiveMessageAsync
+            return await _interactivity.SendContextualInteractiveMessageAsync
             (
-                _context.ChannelID,
-                (channelID, messageID) => new PaginatedMessage
-                (
-                    channelID,
-                    messageID,
-                    _context.User.ID,
-                    pages,
-                    appearance
-                ),
+                _context.User.ID,
+                pages,
+                appearance,
                 this.CancellationToken
             );
         }
@@ -176,17 +171,11 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
                 "No permissions set."
             );
 
-            return await _interactivity.SendInteractiveMessageAsync
+            return await _interactivity.SendContextualInteractiveMessageAsync
             (
-                _context.ChannelID,
-                (channelID, messageID) => new PaginatedMessage
-                (
-                    channelID,
-                    messageID,
-                    _context.User.ID,
-                    pages,
-                    appearance
-                ),
+                _context.User.ID,
+                pages,
+                appearance,
                 this.CancellationToken
             );
         }

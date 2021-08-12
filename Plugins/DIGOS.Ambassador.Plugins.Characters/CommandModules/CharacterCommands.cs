@@ -148,9 +148,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 pageBase: pageBase
             );
 
-            await _interactivity.SendInteractiveMessageAsync
+            await _interactivity.SendContextualInteractiveMessageAsync
             (
-                _context.ChannelID,
                 _context.User.ID,
                 pages,
                 ct: this.CancellationToken
@@ -258,9 +257,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 "You don't have any characters"
             );
 
-            await _interactivity.SendInteractiveMessageAsync
+            await _interactivity.SendContextualInteractiveMessageAsync
             (
-                _context.ChannelID,
                 _context.User.ID,
                 pages.Where(p => p.IsSuccess).Select(p => p.Entity!).ToList(),
                 ct: this.CancellationToken
@@ -468,9 +466,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
 
             pages = pages.Select(p => p with { Title = "Your characters" }).ToList();
 
-            await _interactivity.SendInteractiveMessageAsync
+            await _interactivity.SendContextualInteractiveMessageAsync
             (
-                _context.ChannelID,
                 _context.User.ID,
                 pages,
                 ct: this.CancellationToken
@@ -621,9 +618,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 i => new Embed(i.Name, Description: i.Caption, Image: new EmbedImage(i.Url))
             );
 
-            return await _interactivity.SendInteractiveMessageAsync
+            return await _interactivity.SendContextualInteractiveMessageAsync
             (
-                _context.ChannelID,
                 _context.User.ID,
                 pages.ToList(),
                 appearance,
@@ -651,9 +647,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
 
             pages = pages.Select(p => p with { Title = "Images in character gallery" }).ToList();
 
-            return _interactivity.SendInteractiveMessageAsync
+            return _interactivity.SendContextualInteractiveMessageAsync
             (
-                _context.ChannelID,
                 _context.User.ID,
                 pages,
                 ct: this.CancellationToken

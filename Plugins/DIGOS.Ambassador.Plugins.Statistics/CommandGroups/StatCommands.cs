@@ -27,6 +27,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
+using DIGOS.Ambassador.Discord.Pagination.Extensions;
 using JetBrains.Annotations;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
@@ -123,17 +124,11 @@ namespace DIGOS.Ambassador.Plugins.Statistics.CommandGroups
                 pages.Add(CreateGuildInfoEmbed(getGuild.Entity));
             }
 
-            return await _interactivity.SendInteractiveMessageAsync
+            return await _interactivity.SendContextualInteractiveMessageAsync
             (
-                _context.ChannelID,
-                (channelID, messageID) => new PaginatedMessage
-                (
-                    channelID,
-                    messageID,
-                    _context.User.ID,
-                    pages
-                ),
-                this.CancellationToken
+                _context.User.ID,
+                pages,
+                ct: this.CancellationToken
             );
         }
 

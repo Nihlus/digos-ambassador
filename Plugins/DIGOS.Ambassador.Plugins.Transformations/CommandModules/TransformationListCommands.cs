@@ -116,9 +116,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
                         .ToList();
                 }
 
-                return await _interactivity.SendInteractiveMessageAsync
+                return await _interactivity.SendContextualInteractiveMessageAsync
                 (
-                    _context.ChannelID,
                     _context.User.ID,
                     pages
                 );
@@ -170,7 +169,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
                     )
                     .ToList();
 
-                return await _interactivity.SendInteractiveMessageAsync(_context.ChannelID, _context.User.ID, pages);
+                return await _interactivity.SendContextualInteractiveMessageAsync(_context.User.ID, pages);
             }
 
             /// <summary>
@@ -204,7 +203,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
                     )
                     .ToList();
 
-                return await _interactivity.SendInteractiveMessageAsync(_context.ChannelID, _context.User.ID, pages);
+                return await _interactivity.SendContextualInteractiveMessageAsync(_context.User.ID, pages);
             }
 
             /// <summary>
@@ -238,7 +237,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
                     )
                     .ToList();
 
-                return await _interactivity.SendInteractiveMessageAsync(_context.ChannelID, _context.User.ID, pages);
+                return await _interactivity.SendContextualInteractiveMessageAsync(_context.User.ID, pages);
             }
 
             /// <summary>
@@ -272,7 +271,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
                     )
                     .ToList();
 
-                return await _interactivity.SendInteractiveMessageAsync(_context.ChannelID, _context.User.ID, pages);
+                return await _interactivity.SendContextualInteractiveMessageAsync(_context.User.ID, pages);
             }
 
             /// <summary>
@@ -305,7 +304,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
                     )
                     .ToList();
 
-                return await _interactivity.SendInteractiveMessageAsync(_context.ChannelID, _context.User.ID, pages);
+                return await _interactivity.SendContextualInteractiveMessageAsync(_context.User.ID, pages);
             }
         }
     }

@@ -160,7 +160,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
             }
 
             var pages = _kinks.BuildKinkOverlapEmbeds(_context.User.ID, otherUser.ID, overlappingKinks);
-            return await _interactivity.SendPrivateInteractiveMessageAsync(_context.User.ID, pages);
+            return await _interactivity.SendContextualInteractiveMessageAsync(_context.User.ID, pages);
         }
 
         /// <summary>
@@ -199,7 +199,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
             }
 
             var pages = _kinks.BuildPaginatedUserKinkEmbeds(kinksWithPreference);
-            return await _interactivity.SendPrivateInteractiveMessageAsync
+            return await _interactivity.SendContextualInteractiveMessageAsync
             (
                 _context.User.ID,
                 pages
@@ -242,9 +242,8 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         [Description("Runs an interactive wizard for setting kink preferences.")]
         public async Task<Result> RunKinkWizardAsync()
         {
-            return await _interactivity.SendInteractiveMessageAsync
+            return await _interactivity.SendContextualInteractiveMessageAsync
             (
-                _context.ChannelID,
                 (c, m) => new KinkWizard(c, m, _context.User.ID)
             );
         }
