@@ -147,6 +147,46 @@ namespace DIGOS.Ambassador.ExecutionEventServices
                 return requestConsent;
             }
 
+            // Delete the original message
+            if (context is not InteractionContext deletionContext)
+            {
+                return new NoConsentError();
+            }
+
+            var getOriginal = await _interactionAPI.GetOriginalInteractionResponseAsync
+            (
+                deletionContext.ApplicationID,
+                deletionContext.Token,
+                ct
+            );
+
+            if (!getOriginal.IsSuccess)
+            {
+                return Result.FromError(getOriginal);
+            }
+
+            var original = getOriginal.Entity;
+            var originalIsEdited = original.EditedTimestamp.HasValue
+                                   || original.Embeds.Count > 0
+                                   || original.Content != string.Empty;
+
+            if (originalIsEdited)
+            {
+                return new NoConsentError();
+            }
+
+            var deleteOriginal = await _interactionAPI.DeleteOriginalInteractionResponseAsync
+            (
+                deletionContext.ApplicationID,
+                deletionContext.Token,
+                ct
+            );
+
+            if (!deleteOriginal.IsSuccess)
+            {
+                return deleteOriginal;
+            }
+
             return new NoConsentError();
         }
     }
