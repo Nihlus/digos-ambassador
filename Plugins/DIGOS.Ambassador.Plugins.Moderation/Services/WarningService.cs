@@ -248,6 +248,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             CancellationToken ct = default
         )
         {
+            reason = reason.Trim();
+
             if (reason.IsNullOrWhitespace())
             {
                 return new UserError("You must provide some reason for the warning.");

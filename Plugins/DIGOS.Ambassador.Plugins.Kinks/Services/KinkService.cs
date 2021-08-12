@@ -79,6 +79,8 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         [Pure]
         public async Task<Result<Kink>> GetKinkByNameAsync(string name, CancellationToken ct = default)
         {
+            name = name.Trim();
+
             return await _database.Kinks.SelectFromBestLevenshteinMatchAsync
             (
                 x => x,
@@ -119,6 +121,8 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
             CancellationToken ct = default
         )
         {
+            name = name.Trim();
+
             var userKinks = await QueryDatabaseAsync
             (
                 q => q

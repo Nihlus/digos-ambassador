@@ -70,7 +70,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="userID">The ID of the user.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>The notes.</returns>
-        public Task<IReadOnlyList<UserNote>> GetNotesAsync(Snowflake guildID, Snowflake userID, CancellationToken ct = default)
+        public Task<IReadOnlyList<UserNote>> GetNotesAsync
+        (
+            Snowflake guildID,
+            Snowflake userID,
+            CancellationToken ct = default
+        )
         {
             return _database.UserNotes.ServersideQueryAsync
             (
@@ -184,6 +189,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             CancellationToken ct = default
         )
         {
+            content = content.Trim();
+
             if (content.IsNullOrWhitespace())
             {
                 return new UserError("You must provide some content for the note.");

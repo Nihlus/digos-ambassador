@@ -1226,6 +1226,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             string speciesName
         )
         {
+            speciesName = speciesName.Trim();
+
             var species = _database.Species.SingleOrDefault
             (
                 s => string.Equals(s.Name.ToLower(), speciesName.ToLower())
@@ -1251,6 +1253,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             CancellationToken ct = default
         )
         {
+            speciesName = speciesName.Trim();
+
             var species = await _database.Species.ServersideQueryAsync
             (
                 q => q
@@ -1281,6 +1285,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             CancellationToken ct = default
         )
         {
+            speciesName = speciesName.Trim();
+
             var matchingSpecies = await _database.Species.ServersideQueryAsync
             (
                 q => q.Where(s => string.Equals(s.Name.ToLower(), speciesName.ToLower())),

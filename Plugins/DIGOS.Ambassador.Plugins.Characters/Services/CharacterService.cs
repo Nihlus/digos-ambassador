@@ -190,6 +190,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
+            name = name?.Trim();
+
             server = _database.NormalizeReference(server);
             if (user is not null)
             {
@@ -264,6 +266,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
+            name = name.Trim();
+
             server = _database.NormalizeReference(server);
 
             var characters = await _database.Characters.ServersideQueryAsync
@@ -302,6 +306,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
+            name = name.Trim();
+
             user = _database.NormalizeReference(user);
             server = _database.NormalizeReference(server);
 
@@ -489,6 +495,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
+            name = name.Trim();
+
             if (string.IsNullOrWhiteSpace(name))
             {
                 return new UserError("You need to provide a name.");
@@ -528,6 +536,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
+            avatarUrl = avatarUrl.Trim();
             avatarUrl = avatarUrl.Unquote(new[] { '<', '>' });
 
             if (string.IsNullOrWhiteSpace(avatarUrl))
@@ -559,6 +568,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
+            nickname = nickname.Trim();
+
             if (string.IsNullOrWhiteSpace(nickname))
             {
                 return new UserError("You need to provide a new nickname.");
@@ -588,6 +599,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
+            summary = summary.Trim();
+
             if (string.IsNullOrWhiteSpace(summary))
             {
                 return new UserError("You need to provide a new summary.");
@@ -617,6 +630,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
+            description = description.Trim();
+
             if (string.IsNullOrWhiteSpace(description))
             {
                 return new UserError("You need to provide a new description.");
@@ -645,6 +660,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
+            pronounFamily = pronounFamily.Trim();
+
             if (pronounFamily.IsNullOrWhitespace())
             {
                 return new UserError("You need to provide a pronoun family.");
@@ -728,6 +745,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
+            characterName = characterName.Trim();
+
             user = _database.NormalizeReference(user);
             server = _database.NormalizeReference(server);
 
@@ -753,6 +772,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
+            imageCaption ??= "No caption set.";
+
+            imageName = imageName.Trim();
+            imageUrl = imageUrl.Trim();
+            imageCaption = imageCaption.Trim();
+
             var isImageNameUnique = !character.Images.Any(i => string.Equals(i.Name.ToLower(), imageName.ToLower()));
             if (!isImageNameUnique)
             {
@@ -762,11 +787,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             if (imageName.IsNullOrWhitespace())
             {
                 return new UserError("You need to specify a name.");
-            }
-
-            if (imageCaption.IsNullOrWhitespace())
-            {
-                imageCaption = "No caption set.";
             }
 
             if (!Uri.IsWellFormedUriString(imageUrl, UriKind.RelativeOrAbsolute))

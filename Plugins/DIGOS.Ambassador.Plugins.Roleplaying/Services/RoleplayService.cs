@@ -227,6 +227,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             CancellationToken ct = default
         )
         {
+            roleplayName = roleplayName.Trim();
+
             var roleplays = await _database.Roleplays.ServersideQueryAsync
             (
                 q => q
@@ -273,6 +275,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             CancellationToken ct = default
         )
         {
+            roleplayName = roleplayName.Trim();
+
             var userRoleplays = await QueryDatabaseAsync
             (
                 q => q
@@ -333,6 +337,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             CancellationToken ct = default
         )
         {
+            roleplayName = roleplayName.Trim();
+
             var roleplay = await _database.Roleplays.ServersideQueryAsync
             (
                 q => q
@@ -574,6 +580,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             CancellationToken ct = default
         )
         {
+            newRoleplayName = newRoleplayName.Trim();
+
             if (string.IsNullOrWhiteSpace(newRoleplayName))
             {
                 return new UserError("You need to provide a name.");
@@ -609,6 +617,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             CancellationToken ct = default
         )
         {
+            newRoleplaySummary = newRoleplaySummary.Trim();
+
             if (string.IsNullOrWhiteSpace(newRoleplaySummary))
             {
                 return new UserError("You need to provide a new summary.");

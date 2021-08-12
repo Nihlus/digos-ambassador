@@ -181,6 +181,8 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
             CancellationToken ct = default
         )
         {
+            description = description.Trim();
+
             if (description.IsNullOrWhitespace())
             {
                 return new UserError
@@ -217,10 +219,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         /// <param name="server">The server.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         [Pure]
-        public Result<string> GetJoinMessage
-        (
-            Server server
-        )
+        public Result<string> GetJoinMessage(Server server)
         {
             return server.JoinMessage.IsNullOrWhitespace()
                 ? new UserError("No join message set.")
@@ -241,6 +240,8 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
             CancellationToken ct = default
         )
         {
+            joinMessage = joinMessage.Trim();
+
             if (joinMessage.IsNullOrWhitespace())
             {
                 return new UserError

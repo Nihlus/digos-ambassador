@@ -312,7 +312,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 );
             }
 
-            if (condition is not TCondition)
+            if (condition is not TCondition autoroleCondition)
             {
                 return new UserError
                 (
@@ -320,7 +320,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 );
             }
 
-            return (TCondition)condition;
+            return autoroleCondition;
         }
 
         /// <summary>

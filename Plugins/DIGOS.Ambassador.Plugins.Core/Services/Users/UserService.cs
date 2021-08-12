@@ -196,6 +196,8 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
             CancellationToken ct = default
         )
         {
+            bio = bio.Trim();
+
             if (bio.IsNullOrWhitespace())
             {
                 return new UserError("You must provide a bio.");
