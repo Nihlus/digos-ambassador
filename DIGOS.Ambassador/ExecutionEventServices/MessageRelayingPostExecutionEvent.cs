@@ -23,14 +23,12 @@
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Errors;
-using DIGOS.Ambassador.Results;
 using Remora.Commands.Results;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Commands.Services;
-using Remora.Discord.Rest.Results;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.ExecutionEventServices
@@ -40,17 +38,17 @@ namespace DIGOS.Ambassador.ExecutionEventServices
     /// </summary>
     public class MessageRelayingPostExecutionEvent : IPostExecutionEvent
     {
-        private readonly IDiscordRestWebhookAPI _webhookAPI;
+        private readonly IDiscordRestInteractionAPI _interactionAPI;
         private readonly FeedbackService _userFeedback;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MessageRelayingPostExecutionEvent"/> class.
         /// </summary>
-        /// <param name="webhookAPI">The webhook API.</param>
+        /// <param name="interactionAPI">The webhook API.</param>
         /// <param name="userFeedback">The feedback service.</param>
-        public MessageRelayingPostExecutionEvent(IDiscordRestWebhookAPI webhookAPI, FeedbackService userFeedback)
+        public MessageRelayingPostExecutionEvent(IDiscordRestInteractionAPI interactionAPI, FeedbackService userFeedback)
         {
-            _webhookAPI = webhookAPI;
+            _interactionAPI = interactionAPI;
             _userFeedback = userFeedback;
         }
 
@@ -72,7 +70,7 @@ namespace DIGOS.Ambassador.ExecutionEventServices
                     }
 
                     // Check if the original interaction has been edited
-                    var getOriginal = await _webhookAPI.GetOriginalInteractionResponseAsync
+                    var getOriginal = await _interactionAPI.GetOriginalInteractionResponseAsync
                     (
                         interactionContext.ApplicationID,
                         interactionContext.Token,
@@ -95,7 +93,7 @@ namespace DIGOS.Ambassador.ExecutionEventServices
                     }
 
                     // Erase the original interaction
-                    return await _webhookAPI.DeleteOriginalInteractionResponseAsync
+                    return await _interactionAPI.DeleteOriginalInteractionResponseAsync
                     (
                         interactionContext.ApplicationID,
                         interactionContext.Token,

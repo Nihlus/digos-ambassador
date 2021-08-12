@@ -7,7 +7,7 @@
 
     <ItemGroup>
         <PackageReference Include="Humanizer.Core" Version="2.11.10" />
-        <PackageReference Include="Remora.Discord.Gateway" Version="3.5.7" />
+        <PackageReference Include="Remora.Discord.Gateway" Version="4.0.0" />
         <PackageReference Include="Remora.Plugins.Abstractions" Version="3.1.0" />
     </ItemGroup>
 

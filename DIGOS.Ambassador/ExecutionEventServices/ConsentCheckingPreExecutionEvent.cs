@@ -32,7 +32,9 @@ using Microsoft.Extensions.Options;
 using Remora.Commands.Extensions;
 using Remora.Commands.Services;
 using Remora.Commands.Signatures;
+using Remora.Commands.Tokenization;
 using Remora.Commands.Trees;
+using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Responders;
@@ -49,6 +51,10 @@ namespace DIGOS.Ambassador.ExecutionEventServices
         private readonly ICommandResponderOptions _options;
         private readonly PrivacyService _privacy;
         private readonly CommandService _commandService;
+        private readonly IDiscordRestInteractionAPI _interactionAPI;
+
+        private readonly TokenizerOptions _tokenizerOptions;
+        private readonly TreeSearchOptions _treeSearchOptions;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsentCheckingPreExecutionEvent"/> class.
@@ -56,24 +62,31 @@ namespace DIGOS.Ambassador.ExecutionEventServices
         /// <param name="privacy">The privacy service.</param>
         /// <param name="commandService">The command service.</param>
         /// <param name="options">The responder options.</param>
+        /// <param name="interactionAPI">The interaction API.</param>
+        /// <param name="tokenizerOptions">The tokenizer options.</param>
+        /// <param name="treeSearchOptions">The tree search options.</param>
         public ConsentCheckingPreExecutionEvent
         (
             PrivacyService privacy,
             CommandService commandService,
-            IOptions<CommandResponderOptions> options
+            IOptions<CommandResponderOptions> options,
+            IDiscordRestInteractionAPI interactionAPI,
+            IOptions<TokenizerOptions> tokenizerOptions,
+            IOptions<TreeSearchOptions> treeSearchOptions
         )
         {
             _privacy = privacy;
             _commandService = commandService;
+            _interactionAPI = interactionAPI;
             _options = options.Value;
+            _tokenizerOptions = tokenizerOptions.Value;
+            _treeSearchOptions = treeSearchOptions.Value;
         }
 
         /// <inheritdoc />
         public async Task<Result> BeforeExecutionAsync(ICommandContext context, CancellationToken ct = default)
         {
             var hasConsented = await _privacy.HasUserConsentedAsync(context.User.ID, ct);
-
-            var searchOptions = new TreeSearchOptions(StringComparison.OrdinalIgnoreCase);
 
             IReadOnlyList<BoundCommandNode> potentialCommands;
             switch (context)
@@ -97,13 +110,19 @@ namespace DIGOS.Ambassador.ExecutionEventServices
                         ];
                     }
 
-                    potentialCommands = _commandService.Tree.Search(content, searchOptions).ToList();
+                    potentialCommands = _commandService.Tree
+                        .Search(content, _tokenizerOptions, _treeSearchOptions)
+                        .ToList();
+
                     break;
                 }
                 case InteractionContext interactionContext:
                 {
                     interactionContext.Data.UnpackInteraction(out var command, out var parameters);
-                    potentialCommands = _commandService.Tree.Search(command, parameters, searchOptions).ToList();
+                    potentialCommands = _commandService.Tree
+                        .Search(command, parameters, _tokenizerOptions, _treeSearchOptions)
+                        .ToList();
+
                     break;
                 }
                 default:

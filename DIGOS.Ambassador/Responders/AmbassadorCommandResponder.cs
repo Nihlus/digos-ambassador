@@ -26,6 +26,8 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database;
 using Microsoft.Extensions.Options;
 using Remora.Commands.Services;
+using Remora.Commands.Tokenization;
+using Remora.Commands.Trees;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Responders;
 using Remora.Discord.Commands.Services;
@@ -45,7 +47,9 @@ namespace DIGOS.Ambassador.Responders
             IOptions<CommandResponderOptions> options,
             ExecutionEventCollectorService eventCollector,
             IServiceProvider services,
-            ContextInjectionService contextInjection
+            ContextInjectionService contextInjection,
+            IOptions<TokenizerOptions> tokenizerOptions,
+            IOptions<TreeSearchOptions> treeSearchOptions
         )
             : base
             (
@@ -53,7 +57,9 @@ namespace DIGOS.Ambassador.Responders
                 options,
                 eventCollector,
                 services,
-                contextInjection
+                contextInjection,
+                tokenizerOptions,
+                treeSearchOptions
             )
         {
         }

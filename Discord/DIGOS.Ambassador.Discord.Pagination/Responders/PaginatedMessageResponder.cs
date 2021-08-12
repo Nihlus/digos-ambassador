@@ -69,7 +69,7 @@ namespace DIGOS.Ambassador.Discord.Pagination.Responders
         /// <inheritdoc />
         public async Task<Result> RespondAsync(IInteractionCreate gatewayEvent, CancellationToken ct = default)
         {
-            if (gatewayEvent.Type != InteractionType.MessageComponent)
+            if (gatewayEvent.Type != InteractionRequestType.MessageComponent)
             {
                 return Result.FromSuccess();
             }
