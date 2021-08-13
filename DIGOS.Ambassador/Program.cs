@@ -41,7 +41,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Remora.Behaviours.Services;
 using Remora.Commands.Trees.Nodes;
+using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Caching.Extensions;
+using Remora.Discord.Caching.Services;
 using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Themes;
 using Remora.Discord.Commands.Responders;
@@ -128,6 +130,13 @@ namespace DIGOS.Ambassador
                     services
                         .AddDiscordCommands(true)
                         .AddDiscordCaching();
+
+                    // Configure cache times
+                    services.Configure<CacheSettings>(settings =>
+                    {
+                        settings.SetAbsoluteExpiration<IGuildMember>(TimeSpan.FromDays(1));
+                        settings.SetAbsoluteExpiration<IMessage>(TimeSpan.FromDays(1));
+                    });
 
                     // Set up the feedback theme
                     var theme = (FeedbackTheme)FeedbackTheme.DiscordDark with
