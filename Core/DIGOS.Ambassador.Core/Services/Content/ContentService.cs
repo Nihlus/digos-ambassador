@@ -69,7 +69,7 @@ namespace DIGOS.Ambassador.Core.Services
         {
             this.FileSystem = fileSystem;
 
-            this.BaseCDNUri = new Uri("https://cdn.gullberg.tk/amby/");
+            this.BaseCDNUri = new Uri("https://cdn.algiz.nu/amby/");
 
             this.AutomaticBugReportCreationUri = new Uri
             (
