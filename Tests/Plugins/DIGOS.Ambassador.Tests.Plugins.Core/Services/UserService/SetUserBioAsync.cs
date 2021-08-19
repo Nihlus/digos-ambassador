@@ -45,7 +45,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
                 [UsedImplicitly]
                 get
                 {
-                    yield return new object?[] { null };
                     yield return new object?[] { string.Empty };
                     yield return new object?[] { "    " };
                     yield return new object?[] { new string('a', 1025) };
