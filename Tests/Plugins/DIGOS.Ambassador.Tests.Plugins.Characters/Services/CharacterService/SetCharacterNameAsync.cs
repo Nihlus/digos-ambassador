@@ -48,15 +48,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             }
 
             [Fact]
-            public async Task ReturnsUnsuccessfulResultIfNameIsNull()
-            {
-                // ReSharper disable once AssignNullToNotNullAttribute
-                var result = await this.CharacterEditor.SetCharacterNameAsync(_character, null);
-
-                Assert.False(result.IsSuccess);
-            }
-
-            [Fact]
             public async Task ReturnsUnsuccessfulResultIfNameIsEmpty()
             {
                 var result = await this.CharacterEditor.SetCharacterNameAsync(_character, string.Empty);

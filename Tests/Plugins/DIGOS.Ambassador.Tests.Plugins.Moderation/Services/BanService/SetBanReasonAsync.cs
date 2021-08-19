@@ -50,15 +50,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
             }
 
             [Fact]
-            public async Task ReturnsUnsuccessfulIfNewReasonsAreNull()
-            {
-                // ReSharper disable once AssignNullToNotNullAttribute
-                var result = await this.Bans.SetBanReasonAsync(_ban, null);
-
-                Assert.False(result.IsSuccess);
-            }
-
-            [Fact]
             public async Task ReturnsUnsuccessfulIfNewReasonIsTooLong()
             {
                 var result = await this.Bans.SetBanReasonAsync(_ban, new string('a', 1025));

@@ -59,7 +59,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
             [Fact]
             public async Task ReturnsUnsuccessfulIfNewExpiryDateIsInThePast()
             {
-                // ReSharper disable once AssignNullToNotNullAttribute
                 var result = await this.Bans.SetBanExpiryDateAsync(_ban, DateTime.Today.AddDays(-1));
 
                 Assert.False(result.IsSuccess);

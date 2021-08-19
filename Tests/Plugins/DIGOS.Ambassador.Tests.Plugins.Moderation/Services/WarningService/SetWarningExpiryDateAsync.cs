@@ -59,7 +59,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
             [Fact]
             public async Task ReturnsUnsuccessfulIfNewExpiryDateIsInThePast()
             {
-                // ReSharper disable once AssignNullToNotNullAttribute
                 var result = await this.Warnings.SetWarningExpiryDateAsync(_warning, DateTime.Today.AddDays(-1));
 
                 Assert.False(result.IsSuccess);

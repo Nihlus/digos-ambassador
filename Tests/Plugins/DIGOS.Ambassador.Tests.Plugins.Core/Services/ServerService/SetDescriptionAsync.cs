@@ -46,15 +46,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             }
 
             [Fact]
-            public async Task ReturnsErrorIfNewDescriptionIsNull()
-            {
-                // ReSharper disable once AssignNullToNotNullAttribute
-                var result = await this.Servers.SetDescriptionAsync(_server, null);
-
-                Assert.False(result.IsSuccess);
-            }
-
-            [Fact]
             public async Task ReturnsErrorIfNewDescriptionIsEmpty()
             {
                 var result = await this.Servers.SetDescriptionAsync(_server, string.Empty);

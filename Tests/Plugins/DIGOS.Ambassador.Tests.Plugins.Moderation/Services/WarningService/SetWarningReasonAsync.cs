@@ -50,15 +50,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
             }
 
             [Fact]
-            public async Task ReturnsUnsuccessfulIfNewReasonIsNull()
-            {
-                // ReSharper disable once AssignNullToNotNullAttribute
-                var result = await this.Warnings.SetWarningReasonAsync(_warning, null);
-
-                Assert.False(result.IsSuccess);
-            }
-
-            [Fact]
             public async Task ReturnsUnsuccessfulIfNewReasonIsTooLong()
             {
                 var result = await this.Warnings.SetWarningReasonAsync(_warning, new string('a', 1025));

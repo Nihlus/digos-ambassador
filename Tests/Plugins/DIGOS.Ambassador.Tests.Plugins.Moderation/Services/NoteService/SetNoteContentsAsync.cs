@@ -50,15 +50,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.NoteService
             }
 
             [Fact]
-            public async Task ReturnsUnsuccessfulIfNewContentsAreNull()
-            {
-                // ReSharper disable once AssignNullToNotNullAttribute
-                var result = await this.Notes.SetNoteContentsAsync(_note, null);
-
-                Assert.False(result.IsSuccess);
-            }
-
-            [Fact]
             public async Task ReturnsUnsuccessfulIfNewContentIsTooLong()
             {
                 var result = await this.Notes.SetNoteContentsAsync(_note, new string('a', 1025));
