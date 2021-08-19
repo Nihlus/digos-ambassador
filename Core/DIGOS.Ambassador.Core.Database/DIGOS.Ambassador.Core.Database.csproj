@@ -5,6 +5,7 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>compile; runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="Remora.Results" Version="6.0.0" />
     </ItemGroup>
 
     <ItemGroup>

@@ -8,5 +8,9 @@
         <ProjectReference Include="..\..\..\Plugins\DIGOS.Ambassador.Plugins.Amby\DIGOS.Ambassador.Plugins.Amby.csproj" />
         <ProjectReference Include="..\..\DIGOS.Ambassador.Tests\DIGOS.Ambassador.Tests.csproj" />
     </ItemGroup>
+    
+    <ItemGroup>
+      <PackageReference Include="Remora.Results" Version="6.0.0" />
+    </ItemGroup>
 
 </Project>

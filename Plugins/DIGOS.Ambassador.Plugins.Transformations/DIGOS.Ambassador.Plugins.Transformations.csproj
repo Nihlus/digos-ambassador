@@ -6,6 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Remora.Results" Version="6.0.0" />
         <PackageReference Include="YamlDotNet" Version="11.2.1" />
         <PackageReference Include="NLua" Version="1.5.9" />
     </ItemGroup>

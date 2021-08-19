@@ -11,6 +11,7 @@
         <PackageReference Include="Humanizer.Core" Version="2.11.10" />
         <PackageReference Include="iTextSharp.LGPLv2.Core" Version="1.7.3" />
         <PackageReference Include="Remora.Behaviours" Version="6.1.0" />
+        <PackageReference Include="Remora.Results" Version="6.0.0" />
     </ItemGroup>
 
     <!-- Workaround for a problem with EF Core -->

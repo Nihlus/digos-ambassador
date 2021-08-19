@@ -8,4 +8,8 @@
         <ProjectReference Include="..\..\DIGOS.Ambassador.Tests\DIGOS.Ambassador.Tests.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Remora.Results" Version="6.0.0" />
+    </ItemGroup>
+
 </Project>
