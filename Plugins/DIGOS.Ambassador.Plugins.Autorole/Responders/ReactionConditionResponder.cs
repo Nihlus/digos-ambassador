@@ -69,15 +69,14 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
         /// <inheritdoc />
         public async Task<Result> RespondAsync(IMessageReactionAdd gatewayEvent, CancellationToken ct = default)
         {
-            if (!gatewayEvent.GuildID.HasValue)
+            if (!gatewayEvent.GuildID.IsDefined(out var guildID))
             {
                 return Result.FromSuccess();
             }
 
-            var guild = gatewayEvent.GuildID.Value;
             var autoroles = await _autoroles.GetAutorolesAsync
             (
-                guild,
+                guildID,
                 q => q
                     .Where(a => a.IsEnabled)
                     .Where
@@ -99,7 +98,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
             {
                 using var transaction = TransactionFactory.Create();
 
-                var updateAutorole = await _autoroleUpdates.UpdateAutoroleForUserAsync(autorole, guild, user, ct);
+                var updateAutorole = await _autoroleUpdates.UpdateAutoroleForUserAsync(autorole, guildID, user, ct);
                 if (!updateAutorole.IsSuccess)
                 {
                     return Result.FromError(updateAutorole);
@@ -114,15 +113,14 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
         /// <inheritdoc />
         public async Task<Result> RespondAsync(IMessageReactionRemove gatewayEvent, CancellationToken ct = default)
         {
-            if (!gatewayEvent.GuildID.HasValue)
+            if (!gatewayEvent.GuildID.IsDefined(out var guildID))
             {
                 return Result.FromSuccess();
             }
 
-            var guild = gatewayEvent.GuildID.Value;
             var autoroles = await _autoroles.GetAutorolesAsync
             (
-                guild,
+                guildID,
                 q => q
                     .Where(a => a.IsEnabled)
                     .Where
@@ -144,7 +142,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
             {
                 using var transaction = TransactionFactory.Create();
 
-                var updateAutorole = await _autoroleUpdates.UpdateAutoroleForUserAsync(autorole, guild, user, ct);
+                var updateAutorole = await _autoroleUpdates.UpdateAutoroleForUserAsync(autorole, guildID, user, ct);
                 if (!updateAutorole.IsSuccess)
                 {
                     return Result.FromError(updateAutorole);
@@ -159,15 +157,14 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
         /// <inheritdoc />
         public async Task<Result> RespondAsync(IMessageReactionRemoveAll gatewayEvent, CancellationToken ct = default)
         {
-            if (!gatewayEvent.GuildID.HasValue)
+            if (!gatewayEvent.GuildID.IsDefined(out var guildID))
             {
                 return Result.FromSuccess();
             }
 
-            var guild = gatewayEvent.GuildID.Value;
             var autoroles = await _autoroles.GetAutorolesAsync
             (
-                guild,
+                guildID,
                 q => q
                     .Where(a => a.IsEnabled)
                     .Where
@@ -187,7 +184,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
             Optional<Snowflake> after = default;
             while (true)
             {
-                var listMembers = await _guildAPI.ListGuildMembersAsync(guild, after: after, ct: ct);
+                var listMembers = await _guildAPI.ListGuildMembersAsync(guildID, after: after, ct: ct);
                 if (!listMembers.IsSuccess)
                 {
                     return Result.FromError(listMembers);
@@ -215,7 +212,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
                 {
                     using var transaction = TransactionFactory.Create();
 
-                    var updateAutorole = await _autoroleUpdates.UpdateAutoroleForUserAsync(autorole, guild, user, ct);
+                    var updateAutorole = await _autoroleUpdates.UpdateAutoroleForUserAsync(autorole, guildID, user, ct);
                     if (!updateAutorole.IsSuccess)
                     {
                         return Result.FromError(updateAutorole);
@@ -231,15 +228,14 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
         /// <inheritdoc />
         public async Task<Result> RespondAsync(IMessageReactionRemoveEmoji gatewayEvent, CancellationToken ct = default)
         {
-            if (!gatewayEvent.GuildID.HasValue)
+            if (!gatewayEvent.GuildID.IsDefined(out var guildID))
             {
                 return Result.FromSuccess();
             }
 
-            var guild = gatewayEvent.GuildID.Value;
             var autoroles = await _autoroles.GetAutorolesAsync
             (
-                guild,
+                guildID,
                 q => q
                     .Where(a => a.IsEnabled)
                     .Where
@@ -260,7 +256,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
             Optional<Snowflake> after = default;
             while (true)
             {
-                var listMembers = await _guildAPI.ListGuildMembersAsync(guild, after: after, ct: ct);
+                var listMembers = await _guildAPI.ListGuildMembersAsync(guildID, after: after, ct: ct);
                 if (!listMembers.IsSuccess)
                 {
                     return Result.FromError(listMembers);
@@ -282,7 +278,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
                 {
                     using var transaction = TransactionFactory.Create();
 
-                    var updateAutorole = await _autoroleUpdates.UpdateAutoroleForUserAsync(autorole, guild, user, ct);
+                    var updateAutorole = await _autoroleUpdates.UpdateAutoroleForUserAsync(autorole, guildID, user, ct);
                     if (!updateAutorole.IsSuccess)
                     {
                         return Result.FromError(updateAutorole);

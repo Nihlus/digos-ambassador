@@ -58,7 +58,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Parsers
         {
             value = value.Trim();
 
-            if (!_context.GuildID.HasValue)
+            if (!_context.GuildID.IsDefined(out var guildID))
             {
                 return new UserError("Characters can only be parsed in the context of a guild.");
             }
@@ -66,14 +66,14 @@ namespace DIGOS.Ambassador.Plugins.Characters.Parsers
             // Special case
             if (string.Equals(value, "current", StringComparison.OrdinalIgnoreCase))
             {
-                return await _characterService.GetCurrentCharacterAsync(_context.GuildID.Value, _context.User.ID, ct);
+                return await _characterService.GetCurrentCharacterAsync(guildID, _context.User.ID, ct);
             }
 
             if (!value.Contains(':'))
             {
                 return await _characterService.GetBestMatchingCharacterAsync
                 (
-                    _context.GuildID.Value,
+                    guildID,
                     _context.User.ID,
                     value,
                     ct

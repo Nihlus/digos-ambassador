@@ -66,7 +66,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Responders
         public async Task<Result> RespondAsync(IMessageCreate gatewayEvent, CancellationToken ct = default)
         {
             var author = gatewayEvent.Author;
-            if ((author.IsBot.HasValue && author.IsBot.Value) || (author.IsSystem.HasValue && author.IsSystem.Value))
+            if ((author.IsBot.IsDefined(out var isBot) && isBot) || (author.IsSystem.IsDefined(out var isSystem) && isSystem))
             {
                 return Result.FromSuccess();
             }
@@ -96,26 +96,26 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Responders
                 return Result.FromSuccess();
             }
 
-            if (!gatewayEvent.Content.HasValue)
+            if (!gatewayEvent.Content.IsDefined(out var content))
             {
                 return Result.FromSuccess();
             }
 
-            if (!gatewayEvent.Author.HasValue)
+            if (!gatewayEvent.Author.IsDefined(out var author))
             {
                 return Result.FromSuccess();
             }
 
-            if (!gatewayEvent.ChannelID.HasValue)
+            if (!gatewayEvent.ChannelID.IsDefined(out var channelID))
             {
                 return Result.FromSuccess();
             }
 
             return await CreateQuotesAsync
             (
-                gatewayEvent.ChannelID.Value,
-                gatewayEvent.Content.Value,
-                gatewayEvent.Author.Value.ID,
+                channelID,
+                content,
+                author.ID,
                 ct
             );
         }
@@ -192,12 +192,11 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Responders
         {
             foreach (var embed in message.Embeds)
             {
-                if (!embed.Fields.HasValue)
+                if (!embed.Fields.IsDefined(out var fields))
                 {
                     continue;
                 }
 
-                var fields = embed.Fields.Value;
                 if (fields.Any(f => f.Name.Contains("Quoted by")))
                 {
                     return true;
@@ -214,19 +213,18 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Responders
         /// <returns>true if the message is a quoted message; otherwise, false.</returns>
         private bool IsQuote(IPartialMessage message)
         {
-            if (!message.Embeds.HasValue)
+            if (!message.Embeds.IsDefined(out var embeds))
             {
                 return false;
             }
 
-            foreach (var embed in message.Embeds.Value)
+            foreach (var embed in embeds)
             {
-                if (!embed.Fields.HasValue)
+                if (!embed.Fields.IsDefined(out var fields))
                 {
                     continue;
                 }
 
-                var fields = embed.Fields.Value;
                 if (fields.Any(f => f.Name.Contains("Quoted by")))
                 {
                     return true;

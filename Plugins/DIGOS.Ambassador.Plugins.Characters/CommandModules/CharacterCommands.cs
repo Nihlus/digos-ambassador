@@ -282,8 +282,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             }
 
             var owner = getOwner.Entity;
-            var ownerName = owner.Nickname.HasValue && owner.Nickname.Value is not null
-                ? owner.Nickname.Value
+            var ownerName = owner.Nickname.IsDefined(out var nickname)
+                ? nickname
                 : owner.User.Value.Username;
 
             var author = new EmbedAuthor(ownerName);

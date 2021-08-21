@@ -182,7 +182,7 @@ namespace DIGOS.Ambassador.Plugins.Drone.Services
             }
 
             var member = getMember.Entity;
-            if (!member.User.HasValue)
+            if (!member.User.IsDefined(out var user))
             {
                 throw new InvalidOperationException();
             }
@@ -192,7 +192,7 @@ namespace DIGOS.Ambassador.Plugins.Drone.Services
             while (true)
             {
                 var serialNumber = _random.Next(0, 9999);
-                var firstLetter = member.User.Value.Username.First();
+                var firstLetter = user.Username.First();
 
                 var generatedName = $"sharkdrone-{char.ToLowerInvariant(firstLetter)}{serialNumber}";
                 if (characterNames.Contains(generatedName))

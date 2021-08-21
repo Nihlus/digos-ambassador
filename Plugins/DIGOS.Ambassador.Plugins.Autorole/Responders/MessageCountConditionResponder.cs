@@ -62,7 +62,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
         /// <inheritdoc />
         public async Task<Result> RespondAsync(IMessageCreate gatewayEvent, CancellationToken ct = default)
         {
-            if (!gatewayEvent.GuildID.HasValue)
+            if (!gatewayEvent.GuildID.IsDefined(out var guildID))
             {
                 return Result.FromSuccess();
             }
@@ -70,9 +70,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
             using var transaction = TransactionFactory.Create();
 
             var user = gatewayEvent.Author.ID;
-            var guild = gatewayEvent.GuildID.Value;
 
-            var getUserStatistics = await _statistics.GetOrCreateUserServerStatisticsAsync(guild, user, ct);
+            var getUserStatistics = await _statistics.GetOrCreateUserServerStatisticsAsync(guildID, user, ct);
             if (!getUserStatistics.IsSuccess)
             {
                 return Result.FromError(getUserStatistics);
@@ -94,7 +93,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
             var channel = gatewayEvent.ChannelID;
             var getChannelStatistics = await _statistics.GetOrCreateUserChannelStatisticsAsync
             (
-                guild,
+                guildID,
                 user,
                 channel,
                 ct
@@ -121,7 +120,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
             // Finally, update the relevant autoroles
             var autoroles = await _autoroles.GetAutorolesAsync
             (
-                guild,
+                guildID,
                 q => q
                 .Where(a => a.IsEnabled)
                 .Where
@@ -138,7 +137,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
 
             foreach (var autorole in autoroles)
             {
-                var updateAutorole = await _autoroleUpdates.UpdateAutoroleForUserAsync(autorole, guild, user, ct);
+                var updateAutorole = await _autoroleUpdates.UpdateAutoroleForUserAsync(autorole, guildID, user, ct);
                 if (!updateAutorole.IsSuccess)
                 {
                     return Result.FromError(updateAutorole);

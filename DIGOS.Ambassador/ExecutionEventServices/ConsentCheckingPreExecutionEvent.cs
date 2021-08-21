@@ -97,13 +97,11 @@ namespace DIGOS.Ambassador.ExecutionEventServices
             {
                 case MessageContext messageContext:
                 {
-                    if (!messageContext.Message.Content.HasValue)
+                    if (!messageContext.Message.Content.IsDefined(out var content))
                     {
                         potentialCommands = Array.Empty<BoundCommandNode>();
                         break;
                     }
-
-                    var content = messageContext.Message.Content.Value;
 
                     // Strip off the prefix
                     if (_options.Prefix is not null)

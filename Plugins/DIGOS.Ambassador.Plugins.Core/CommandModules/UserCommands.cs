@@ -129,11 +129,11 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                 Fields = embedFields
             };
 
-            if (_context.GuildID.HasValue)
+            if (_context.GuildID.IsDefined(out var guildID))
             {
                 var getMember = await _guildAPI.GetGuildMemberAsync
                 (
-                    _context.GuildID.Value,
+                    guildID,
                     discordUser.ID,
                     this.CancellationToken
                 );
@@ -146,7 +146,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                 var member = getMember.Entity;
                 if (member.Roles.Count > 0)
                 {
-                    var getRoles = await _guildAPI.GetGuildRolesAsync(_context.GuildID.Value, this.CancellationToken);
+                    var getRoles = await _guildAPI.GetGuildRolesAsync(guildID, this.CancellationToken);
                     if (!getRoles.IsSuccess)
                     {
                         return Result.FromError(getRoles);

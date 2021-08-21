@@ -70,85 +70,79 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
         /// <inheritdoc />
         public async Task<Result> RespondAsync(IMessageCreate gatewayEvent, CancellationToken ct = default)
         {
-            if (!gatewayEvent.GuildID.HasValue)
+            if (!gatewayEvent.GuildID.IsDefined(out var guildID))
             {
                 return Result.FromSuccess();
             }
 
-            var guild = gatewayEvent.GuildID.Value;
             var user = gatewayEvent.Author.ID;
 
-            return await UpdateTimestampAndRelevantAutorolesAsync(ct, guild, user);
+            return await UpdateTimestampAndRelevantAutorolesAsync(ct, guildID, user);
         }
 
         /// <inheritdoc />
         public async Task<Result> RespondAsync(IMessageReactionAdd gatewayEvent, CancellationToken ct = default)
         {
-            if (!gatewayEvent.GuildID.HasValue)
+            if (!gatewayEvent.GuildID.IsDefined(out var guildID))
             {
                 return Result.FromSuccess();
             }
 
-            var guild = gatewayEvent.GuildID.Value;
             var user = gatewayEvent.UserID;
 
-            return await UpdateTimestampAndRelevantAutorolesAsync(ct, guild, user);
+            return await UpdateTimestampAndRelevantAutorolesAsync(ct, guildID, user);
         }
 
         /// <inheritdoc />
         public async Task<Result> RespondAsync(IMessageReactionRemove gatewayEvent, CancellationToken ct = default)
         {
-            if (!gatewayEvent.GuildID.HasValue)
+            if (!gatewayEvent.GuildID.IsDefined(out var guildID))
             {
                 return Result.FromSuccess();
             }
 
-            var guild = gatewayEvent.GuildID.Value;
             var user = gatewayEvent.UserID;
 
-            return await UpdateTimestampAndRelevantAutorolesAsync(ct, guild, user);
+            return await UpdateTimestampAndRelevantAutorolesAsync(ct, guildID, user);
         }
 
         /// <inheritdoc />
         public async Task<Result> RespondAsync(ITypingStart gatewayEvent, CancellationToken ct = default)
         {
-            if (!gatewayEvent.GuildID.HasValue)
+            if (!gatewayEvent.GuildID.IsDefined(out var guildID))
             {
                 return Result.FromSuccess();
             }
 
-            var guild = gatewayEvent.GuildID.Value;
             var user = gatewayEvent.UserID;
 
-            return await UpdateTimestampAndRelevantAutorolesAsync(ct, guild, user);
+            return await UpdateTimestampAndRelevantAutorolesAsync(ct, guildID, user);
         }
 
         /// <inheritdoc />
         public async Task<Result> RespondAsync(IVoiceStateUpdate gatewayEvent, CancellationToken ct = default)
         {
-            if (!gatewayEvent.GuildID.HasValue)
+            if (!gatewayEvent.GuildID.IsDefined(out var guildID))
             {
                 return Result.FromSuccess();
             }
 
-            var guild = gatewayEvent.GuildID.Value;
             var user = gatewayEvent.UserID;
 
-            return await UpdateTimestampAndRelevantAutorolesAsync(ct, guild, user);
+            return await UpdateTimestampAndRelevantAutorolesAsync(ct, guildID, user);
         }
 
         /// <inheritdoc />
         public async Task<Result> RespondAsync(IPresenceUpdate gatewayEvent, CancellationToken ct = default)
         {
-            if (!gatewayEvent.User.ID.HasValue)
+            if (!gatewayEvent.User.ID.IsDefined(out var guildID))
             {
                 return Result.FromSuccess();
             }
 
-            var guild = gatewayEvent.GuildID;
             var user = gatewayEvent.User.ID.Value;
 
-            return await UpdateTimestampAndRelevantAutorolesAsync(ct, guild, user);
+            return await UpdateTimestampAndRelevantAutorolesAsync(ct, guildID, user);
         }
 
         private async Task<Result> UpdateTimestampAndRelevantAutorolesAsync(CancellationToken ct, Snowflake guild, Snowflake user)

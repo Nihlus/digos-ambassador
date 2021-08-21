@@ -89,18 +89,18 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Responders
                 }
             }
 
-            if (!oldMember.User.HasValue)
+            if (!oldMember.User.IsDefined(out var oldUser))
             {
                 return Result.FromSuccess();
             }
 
-            if (oldMember.User.Value.Discriminator != newMember.User.Discriminator)
+            if (oldUser.Discriminator != newMember.User.Discriminator)
             {
                 return await _channelLogging.NotifyUserDiscriminatorChangedAsync
                 (
                     gatewayEvent.GuildID,
                     gatewayEvent.User.ID,
-                    oldMember.User.Value.Discriminator,
+                    oldUser.Discriminator,
                     newMember.User.Discriminator,
                     ct
                 );

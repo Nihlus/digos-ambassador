@@ -116,12 +116,12 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
 
             var member = getMember.Entity;
 
-            if (!member.User.HasValue)
+            if (!member.User.IsDefined(out var user))
             {
                 return Unqualified;
             }
 
-            if (member.User.Value.IsBot.HasValue && member.User.Value.IsBot.Value)
+            if (user.IsBot.IsDefined(out var isBot) && isBot)
             {
                 return Unqualified;
             }

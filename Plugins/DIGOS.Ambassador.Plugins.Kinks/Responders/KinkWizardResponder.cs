@@ -147,7 +147,9 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
                     return Result.FromSuccess();
                 }
 
-                var button = wizard.Buttons.FirstOrDefault(b => b.CustomID.HasValue && b.CustomID.Value == buttonNonce);
+                var button = wizard.Buttons
+                    .FirstOrDefault(b => b.CustomID.IsDefined(out var customID) && customID == buttonNonce);
+
                 if (button is null)
                 {
                     // This isn't a button we react to

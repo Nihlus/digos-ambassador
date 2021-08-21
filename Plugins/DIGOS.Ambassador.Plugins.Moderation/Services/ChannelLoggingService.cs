@@ -390,8 +390,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         public async Task<Result> NotifyMessageDeletedAsync(IMessage message)
         {
             // We don't care about bot messages
-            var isNonFeedbackMessage = (message.Author.IsBot.HasValue && message.Author.IsBot.Value) ||
-                                   (message.Author.IsSystem.HasValue && message.Author.IsSystem.Value);
+            var isNonFeedbackMessage = (message.Author.IsBot.IsDefined(out var isBot) && isBot) ||
+                                   (message.Author.IsSystem.IsDefined(out var isSystem) && isSystem);
 
             if (isNonFeedbackMessage)
             {
@@ -399,12 +399,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             // We don't care about non-guild messages
-            if (!message.GuildID.HasValue)
+            if (!message.GuildID.IsDefined(out var guildID))
             {
                 return Result.FromSuccess();
             }
 
-            var getChannel = await GetMonitoringChannelAsync(message.GuildID.Value);
+            var getChannel = await GetMonitoringChannelAsync(guildID);
             if (!getChannel.IsSuccess)
             {
                 return Result.FromError(getChannel);
@@ -425,16 +425,16 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                 Title = "Message Deleted"
             };
 
-            var getGuildRoles = await _guildAPI.GetGuildRolesAsync(message.GuildID.Value);
+            var getGuildRoles = await _guildAPI.GetGuildRolesAsync(guildID);
             if (!getGuildRoles.IsSuccess)
             {
                 return Result.FromError(getGuildRoles);
             }
 
             var guildRoles = getGuildRoles.Entity;
-            var everyoneRole = guildRoles.First(r => r.ID == message.GuildID.Value);
+            var everyoneRole = guildRoles.First(r => r.ID == guildID);
 
-            var getGuildMember = await _guildAPI.GetGuildMemberAsync(message.GuildID.Value, self.ID);
+            var getGuildMember = await _guildAPI.GetGuildMemberAsync(guildID, self.ID);
             if (!getGuildMember.IsSuccess)
             {
                 return Result.FromError(getGuildMember);
@@ -468,8 +468,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
                 var mostProbableDeleter = getUser.Entity;
 
-                var isNonUserDeleter = (mostProbableDeleter.IsBot.HasValue && mostProbableDeleter.IsBot.Value) ||
-                                       (mostProbableDeleter.IsSystem.HasValue && mostProbableDeleter.IsSystem.Value);
+                var isNonUserDeleter = (mostProbableDeleter.IsBot.IsDefined(out var isDeleterBot) && isDeleterBot) ||
+                                       (mostProbableDeleter.IsSystem.IsDefined(out var isDeleterSystem) && isDeleterSystem);
 
                 // We don't care about bot deletions
                 if (!isNonUserDeleter)
@@ -546,7 +546,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         // ReSharper disable once UnusedParameter.Local
         private async Task<Result<Snowflake>> FindMostProbableDeleterAsync(IMessage message)
         {
-            if (!message.GuildID.HasValue)
+            if (!message.GuildID.IsDefined(out var guildID))
             {
                 return message.Author.ID;
             }
@@ -559,7 +559,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             {
                 var getAuditLogEntries = await _auditLogAPI.GetAuditLogAsync
                 (
-                    message.GuildID.Value,
+                    guildID,
                     actionType: AuditLogEvent.MessageDelete,
                     before: before
                 );
@@ -579,19 +579,17 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                 (
                     e =>
                     {
-                        if (!e.Options.HasValue)
+                        if (!e.Options.IsDefined(out var options))
                         {
                             return false;
                         }
 
-                        var options = e.Options.Value;
-                        if (!options.ChannelID.HasValue)
+                        if (!options.ChannelID.IsDefined(out var channelID))
                         {
                             return false;
                         }
 
-                        var channel = options.ChannelID.Value;
-                        if (channel != message.ChannelID)
+                        if (channelID != message.ChannelID)
                         {
                             return false;
                         }

@@ -38,36 +38,36 @@ namespace DIGOS.Ambassador.Discord.Pagination.Extensions
         {
             var length = 0;
 
-            if (embed.Title.HasValue)
+            if (embed.Title.IsDefined(out var title))
             {
-                length += embed.Title.Value.Length;
+                length += title.Length;
             }
 
-            if (embed.Description.HasValue)
+            if (embed.Description.IsDefined(out var description))
             {
-                length += embed.Description.Value.Length;
+                length += description.Length;
             }
 
-            if (embed.Fields.HasValue)
+            if (embed.Fields.IsDefined(out var fields))
             {
-                foreach (var field in embed.Fields.Value)
+                foreach (var field in fields)
                 {
                     length += field.Name.Length;
                     length += field.Value.Length;
                 }
             }
 
-            if (embed.Author.HasValue)
+            if (embed.Author.IsDefined(out var author))
             {
-                if (embed.Author.Value.Name.HasValue)
+                if (author.Name.IsDefined(out var name))
                 {
-                    length += embed.Author.Value.Name.Value.Length;
+                    length += name.Length;
                 }
             }
 
-            if (embed.Footer.HasValue)
+            if (embed.Footer.IsDefined(out var footer))
             {
-                length += embed.Footer.Value.Text.Length;
+                length += footer.Text.Length;
             }
 
             return length;

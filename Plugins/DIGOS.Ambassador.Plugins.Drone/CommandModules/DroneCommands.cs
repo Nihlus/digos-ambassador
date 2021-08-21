@@ -82,12 +82,12 @@ namespace DIGOS.Ambassador.Plugins.Drone.CommandModules
         [Description("Drones the target user.")]
         public async Task<Result<FeedbackMessage>> DroneAsync(IGuildMember member)
         {
-            if (!member.User.HasValue)
+            if (!member.User.IsDefined(out var user))
             {
                 throw new InvalidOperationException();
             }
 
-            var droneMessage = member.User.Value.ID == _context.User.ID
+            var droneMessage = user.ID == _context.User.ID
                 ? _content.GetRandomSelfDroneMessage()
                 : _content.GetRandomTurnTheTablesMessage();
 

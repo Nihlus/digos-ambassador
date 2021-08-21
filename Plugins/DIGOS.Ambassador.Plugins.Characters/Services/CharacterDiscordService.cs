@@ -733,7 +733,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             var member = getMember.Entity;
-            if (!member.User.HasValue)
+            if (!member.User.IsDefined(out var discordUser))
             {
                 throw new InvalidOperationException();
             }
@@ -744,7 +744,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             {
                 var newCharacter = getNewCharacter.Entity;
                 newNick = newCharacter.Nickname.IsNullOrWhitespace()
-                    ? member.User.Value.Username
+                    ? discordUser.Username
                     : newCharacter.Nickname;
             }
             else

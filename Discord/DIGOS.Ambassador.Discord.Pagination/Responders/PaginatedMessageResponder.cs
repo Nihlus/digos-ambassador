@@ -133,7 +133,7 @@ namespace DIGOS.Ambassador.Discord.Pagination.Responders
 
                 var button = message.Buttons.FirstOrDefault
                 (
-                    b => b.CustomID.HasValue && b.CustomID.Value == buttonNonce
+                    b => b.CustomID.IsDefined(out var customID) && customID == buttonNonce
                 );
 
                 if (button is null)

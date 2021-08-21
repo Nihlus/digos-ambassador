@@ -117,7 +117,7 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
                 );
             }
 
-            if (discordUser.IsBot.HasValue && discordUser.IsBot.Value)
+            if (discordUser.IsBot.IsDefined(out var isBot) && isBot)
             {
                 return new UserError("I could do that, but I doubt I'd get a reply.");
             }
@@ -154,7 +154,7 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
 
             var channel = getChannel.Entity;
 
-            var isNsfwChannel = channel.IsNsfw.HasValue && channel.IsNsfw.Value;
+            var isNsfwChannel = channel.IsNsfw.IsDefined(out var isNsfw) && isNsfw;
             var getSassResult = await _sass.GetSassAsync(isNsfwChannel);
             if (!getSassResult.IsSuccess)
             {

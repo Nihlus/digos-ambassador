@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Conditions
         /// <inheritdoc />
         public async ValueTask<Result> CheckAsync(RequirePermissionAttribute attribute, CancellationToken ct = default)
         {
-            if (!_context.GuildID.HasValue)
+            if (!_context.GuildID.IsDefined(out var guildID))
             {
                 return new InvalidOperationError("This condition must be executed in a guild.");
             }
@@ -74,7 +74,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Conditions
 
             return await _permissions.HasPermissionAsync
             (
-                _context.GuildID.Value,
+                guildID,
                 _context.User.ID,
                 permission,
                 attribute.Target,

@@ -72,7 +72,7 @@ namespace DIGOS.Ambassador.Plugins.JoinMessages.Responders
         /// <inheritdoc />
         public async Task<Result> RespondAsync(IGuildMemberAdd gatewayEvent, CancellationToken ct = default)
         {
-            if (!gatewayEvent.User.HasValue)
+            if (!gatewayEvent.User.IsDefined(out var user))
             {
                 // We can't do anything about this
                 return Result.FromSuccess();
@@ -97,7 +97,7 @@ namespace DIGOS.Ambassador.Plugins.JoinMessages.Responders
                 return Result.FromError(getJoinMessageResult);
             }
 
-            var openDM = await _userAPI.CreateDMAsync(gatewayEvent.User.Value.ID, ct);
+            var openDM = await _userAPI.CreateDMAsync(user.ID, ct);
             if (!openDM.IsSuccess)
             {
                 return Result.FromError(openDM);
@@ -108,7 +108,7 @@ namespace DIGOS.Ambassador.Plugins.JoinMessages.Responders
             var embed = new Embed
             {
                 Colour = _feedback.Theme.Secondary,
-                Description = $"Welcome, <@{gatewayEvent.User.Value.ID}>!\n" +
+                Description = $"Welcome, <@{user.ID}>!\n" +
                               "\n" +
                               $"{getJoinMessageResult.Entity}"
             };
@@ -142,14 +142,14 @@ namespace DIGOS.Ambassador.Plugins.JoinMessages.Responders
                 return Result.FromSuccess();
             }
 
-            var content = $"Welcome, <@{gatewayEvent.User.Value.ID}>! You have DMs disabled, so I couldn't send you " +
+            var content = $"Welcome, <@{user.ID}>! You have DMs disabled, so I couldn't send you " +
                           "the first-join message. To see it, type \"!server join-message\".";
 
             var sendNotification = await _feedback.SendWarningAsync
             (
                 guild.SystemChannelID.Value,
                 content,
-                gatewayEvent.User.Value.ID,
+                user.ID,
                 ct
             );
 

@@ -241,12 +241,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
 
                 foreach (var retrievedGuild in retrievedGuilds)
                 {
-                    if (!retrievedGuild.ID.HasValue)
+                    if (!retrievedGuild.ID.IsDefined(out var guildID))
                     {
                         continue;
                     }
 
-                    yield return retrievedGuild.ID.Value;
+                    yield return guildID;
                 }
 
                 after = getGuilds.Entity[^1].ID;
