@@ -38,10 +38,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
     {
         public class DeleteBanAsync : BanServiceTestBase
         {
-            private readonly Snowflake _user = new Snowflake(0);
-            private readonly Snowflake _guild = new Snowflake(1);
+            private readonly Snowflake _user = new(0);
+            private readonly Snowflake _guild = new(1);
 
-            private readonly Snowflake _author = new Snowflake(1);
+            private readonly Snowflake _author = new(1);
 
             [Fact]
             private async Task ReturnsUnsuccessfulIfBanDoesNotExist()
@@ -56,7 +56,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
             [Fact]
             private async Task ReturnsSuccessfulIfBanExists()
             {
-                var ban = (await this.Bans.CreateBanAsync(_author, _user, _guild, "Dummy thicc")).Entity!;
+                var ban = (await this.Bans.CreateBanAsync(_author, _user, _guild, "Dummy thicc")).Entity;
 
                 var result = await this.Bans.DeleteBanAsync(ban);
                 Assert.True(result.IsSuccess);
@@ -65,7 +65,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
             [Fact]
             private async Task ActuallyDeletesBan()
             {
-                var ban = (await this.Bans.CreateBanAsync(_author, _user, _guild, "Dummy thicc")).Entity!;
+                var ban = (await this.Bans.CreateBanAsync(_author, _user, _guild, "Dummy thicc")).Entity;
 
                 await this.Bans.DeleteBanAsync(ban);
 

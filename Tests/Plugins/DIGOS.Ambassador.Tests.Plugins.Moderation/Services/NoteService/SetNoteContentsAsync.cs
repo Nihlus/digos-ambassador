@@ -39,7 +39,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.NoteService
     {
         public class SetNoteContentsAsync : NoteServiceTestBase
         {
-            private readonly UserNote _note = new UserNote(new Server(new Snowflake(0)), new User(new Snowflake(0)), new User(new Snowflake(1)), string.Empty);
+            private readonly UserNote _note = new(new Server(new Snowflake(0)), new User(new Snowflake(0)), new User(new Snowflake(1)), string.Empty);
 
             [Fact]
             public async Task ReturnsUnsuccessfulIfNewContentsAreEmpty()

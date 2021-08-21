@@ -39,7 +39,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
     {
         public class SetBanReasonAsync : BanServiceTestBase
         {
-            private readonly UserBan _ban = new UserBan(new Server(new Snowflake(0)), new User(new Snowflake(0)), new User(new Snowflake(1)), string.Empty);
+            private readonly UserBan _ban = new(new Server(new Snowflake(0)), new User(new Snowflake(0)), new User(new Snowflake(1)), string.Empty);
 
             [Fact]
             public async Task ReturnsUnsuccessfulIfNewReasonsAreEmpty()

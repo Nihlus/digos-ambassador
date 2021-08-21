@@ -86,7 +86,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
             if (files.Count <= 0)
             {
-                return new GenericError("No files to verify in input directory.");
+                return new NotFoundError("No files to verify in input directory.");
             }
 
             foreach (var file in files)

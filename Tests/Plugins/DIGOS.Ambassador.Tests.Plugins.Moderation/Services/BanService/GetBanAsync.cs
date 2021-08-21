@@ -35,16 +35,16 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
     {
         public class GetBanAsync : BanServiceTestBase
         {
-            private readonly Snowflake _guild = new Snowflake(1);
-            private readonly Snowflake _otherGuild = new Snowflake(2);
-            private readonly Snowflake _user = new Snowflake(3);
+            private readonly Snowflake _guild = new(1);
+            private readonly Snowflake _otherGuild = new(2);
+            private readonly Snowflake _user = new(3);
 
-            private readonly Snowflake _author = new Snowflake(4);
+            private readonly Snowflake _author = new(4);
 
             [Fact]
             public async Task ReturnsSuccessfulIfBanExists()
             {
-                var ban = (await this.Bans.CreateBanAsync(_author, _user, _guild, "Dummy thicc")).Entity!;
+                var ban = (await this.Bans.CreateBanAsync(_author, _user, _guild, "Dummy thicc")).Entity;
 
                 var result = await this.Bans.GetBanAsync(_guild, ban.ID);
 
@@ -62,7 +62,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
             [Fact]
             public async Task ReturnsUnsuccessfulIfBanExistsButServerIsWrong()
             {
-                var ban = (await this.Bans.CreateBanAsync(_author, _user, _guild, "Dummy thicc")).Entity!;
+                var ban = (await this.Bans.CreateBanAsync(_author, _user, _guild, "Dummy thicc")).Entity;
 
                 var result = await this.Bans.GetBanAsync(_otherGuild, ban.ID);
 
@@ -72,7 +72,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
             [Fact]
             public async Task ActuallyReturnsBan()
             {
-                var ban = (await this.Bans.CreateBanAsync(_author, _user, _guild, "Dummy thicc")).Entity!;
+                var ban = (await this.Bans.CreateBanAsync(_author, _user, _guild, "Dummy thicc")).Entity;
 
                 var result = await this.Bans.GetBanAsync(_guild, ban.ID);
 

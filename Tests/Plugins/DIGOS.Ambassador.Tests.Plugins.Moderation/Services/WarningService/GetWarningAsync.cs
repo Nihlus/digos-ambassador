@@ -35,16 +35,16 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
     {
         public class GetWarningAsync : WarningServiceTestBase
         {
-            private readonly Snowflake _guild = new Snowflake(0);
-            private readonly Snowflake _otherGuild = new Snowflake(1);
-            private readonly Snowflake _user = new Snowflake(2);
+            private readonly Snowflake _guild = new(0);
+            private readonly Snowflake _otherGuild = new(1);
+            private readonly Snowflake _user = new(2);
 
-            private readonly Snowflake _author = new Snowflake(3);
+            private readonly Snowflake _author = new(3);
 
             [Fact]
             public async Task ReturnsSuccessfulIfWarningExists()
             {
-                var warning = (await this.Warnings.CreateWarningAsync(_author, _user, _guild, "Dummy thicc")).Entity!;
+                var warning = (await this.Warnings.CreateWarningAsync(_author, _user, _guild, "Dummy thicc")).Entity;
 
                 var result = await this.Warnings.GetWarningAsync(_guild, warning.ID);
 
@@ -62,7 +62,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
             [Fact]
             public async Task ReturnsUnsuccessfulIfWarningExistsButServerIsWrong()
             {
-                var warning = (await this.Warnings.CreateWarningAsync(_author, _user, _guild, "Dummy thicc")).Entity!;
+                var warning = (await this.Warnings.CreateWarningAsync(_author, _user, _guild, "Dummy thicc")).Entity;
 
                 var result = await this.Warnings.GetWarningAsync(_otherGuild, warning.ID);
 
@@ -72,7 +72,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
             [Fact]
             public async Task ActuallyReturnsWarning()
             {
-                var warning = (await this.Warnings.CreateWarningAsync(_author, _user, _guild, "Dummy thicc")).Entity!;
+                var warning = (await this.Warnings.CreateWarningAsync(_author, _user, _guild, "Dummy thicc")).Entity;
 
                 var result = await this.Warnings.GetWarningAsync(_guild, warning.ID);
 

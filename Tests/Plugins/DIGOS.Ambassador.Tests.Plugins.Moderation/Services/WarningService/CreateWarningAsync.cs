@@ -36,10 +36,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
     {
         public class CreateWarningAsync : WarningServiceTestBase
         {
-            private readonly Snowflake _user = new Snowflake(0);
-            private readonly Snowflake _guild = new Snowflake(1);
+            private readonly Snowflake _user = new(0);
+            private readonly Snowflake _guild = new(1);
 
-            private readonly Snowflake _author = new Snowflake(1);
+            private readonly Snowflake _author = new(1);
 
             [Fact]
             private async Task ReturnsSuccessful()
@@ -72,7 +72,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
                 );
 
                 Assert.True(result.IsSuccess);
-                Assert.Equal(expiryDate, result.Entity!.ExpiresOn);
+                Assert.Equal(expiryDate, result.Entity.ExpiresOn);
             }
 
             [Fact]
@@ -90,7 +90,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
                 );
 
                 Assert.True(result.IsSuccess);
-                Assert.Equal(messageID, result.Entity!.MessageID);
+                Assert.Equal(messageID, result.Entity.MessageID);
             }
         }
     }

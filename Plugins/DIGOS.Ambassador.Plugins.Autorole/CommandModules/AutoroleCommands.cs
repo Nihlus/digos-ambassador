@@ -379,7 +379,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
 
             var discordUsers = getDiscordUsers
                 .Where(r => r.IsSuccess)
-                .Select(r => r.Entity!)
+                .Select(r => r.Entity)
                 .Where(u => u.User.HasValue)
                 .ToList();
 

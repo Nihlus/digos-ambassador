@@ -35,7 +35,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.ModerationService
     {
         public class CreateServerSettingsAsync : ModerationServiceTestBase
         {
-            private readonly Snowflake _guild = new Snowflake(0);
+            private readonly Snowflake _guild = new(0);
 
             [Fact]
             public async Task ReturnsSuccessfulIfNoSettingsExist()

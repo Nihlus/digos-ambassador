@@ -38,8 +38,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
     {
         public class SetWarningContextMessageAsync : WarningServiceTestBase
         {
-            private readonly UserWarning _warning = new UserWarning
-            (
+            private readonly UserWarning _warning = new(
                 new Server(new Snowflake(0)),
                 new User(new Snowflake(0)),
                 new User(new Snowflake(1)),

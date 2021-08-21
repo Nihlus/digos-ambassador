@@ -35,10 +35,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.NoteService
     {
         public class CreateNoteAsync : NoteServiceTestBase
         {
-            private readonly Snowflake _user = new Snowflake(0);
-            private readonly Snowflake _guild = new Snowflake(1);
+            private readonly Snowflake _user = new(0);
+            private readonly Snowflake _guild = new(1);
 
-            private readonly Snowflake _author = new Snowflake(1);
+            private readonly Snowflake _author = new(1);
 
             [Fact]
             private async Task ReturnsSuccessful()

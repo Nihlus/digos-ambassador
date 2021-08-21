@@ -86,7 +86,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 );
 
                 // Create a test character
-                var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity!;
+                var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
                 var character = new Character
                 (
                     owner,
@@ -110,7 +110,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _character
                 );
 
-                var appearance = getAppearanceConfigurationResult.Entity!;
+                var appearance = getAppearanceConfigurationResult.Entity;
                 _originalColour = appearance.GetAppearanceComponent(Bodypart.Face, Chirality.Center).BaseColour;
             }
 
@@ -170,7 +170,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _originalColour
                 );
 
-                Assert.Equal(ShiftBodypartAction.Nothing, result.Entity!.Action);
+                Assert.Equal(ShiftBodypartAction.Nothing, result.Entity.Action);
             }
 
             [Fact]
@@ -198,7 +198,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _newColour
                 );
 
-                var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity!;
+                var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity;
 
                 var face = appearance.Components.First(c => c.Bodypart == Bodypart.Face);
                 Assert.True(_newColour.IsSameColourAs(face.BaseColour));
@@ -215,8 +215,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _newColour
                 );
 
-                Assert.NotNull(result.Entity!.ShiftMessage);
-                Assert.NotEmpty(result.Entity!.ShiftMessage);
+                Assert.NotNull(result.Entity.ShiftMessage);
+                Assert.NotEmpty(result.Entity.ShiftMessage);
             }
         }
     }

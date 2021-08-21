@@ -53,7 +53,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             {
                 var result = await this.Transformations.GetOrCreateGlobalUserProtectionAsync(_user);
 
-                Assert.Equal(_user, result.Entity!.User.DiscordID);
+                Assert.Equal(_user, result.Entity.User.DiscordID);
             }
 
             [Fact]

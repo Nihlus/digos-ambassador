@@ -64,7 +64,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _guild
                 );
 
-                Assert.Equal(_guild, result.Entity!.Server.DiscordID);
+                Assert.Equal(_guild, result.Entity.Server.DiscordID);
             }
 
             [Fact]
@@ -76,7 +76,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _guild
                 );
 
-                Assert.Equal(_user, result.Entity!.User.DiscordID);
+                Assert.Equal(_user, result.Entity.User.DiscordID);
             }
 
             [Fact]
@@ -102,7 +102,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             [Fact]
             public async Task CreatedObjectRespectsGlobalDefaults()
             {
-                var user = (await this.Users.GetOrRegisterUserAsync(_user)).Entity!;
+                var user = (await this.Users.GetOrRegisterUserAsync(_user)).Entity;
 
                 var globalSetting = new GlobalUserProtection(user)
                 {
@@ -119,9 +119,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _guild
                 );
 
-                Assert.Equal(globalSetting.DefaultOptIn, localSetting.Entity!.HasOptedIn);
-                Assert.Equal(globalSetting.DefaultType, localSetting.Entity!.Type);
-                Assert.Same(globalSetting.User, localSetting.Entity!.User);
+                Assert.Equal(globalSetting.DefaultOptIn, localSetting.Entity.HasOptedIn);
+                Assert.Equal(globalSetting.DefaultType, localSetting.Entity.Type);
+                Assert.Same(globalSetting.User, localSetting.Entity.User);
             }
         }
     }

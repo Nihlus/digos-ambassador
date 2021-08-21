@@ -35,9 +35,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.ModerationService
     {
         public class SetMonitoringChannelAsync : ModerationServiceTestBase
         {
-            private readonly Snowflake _guild = new Snowflake(0);
-            private readonly Snowflake _channel = new Snowflake(0);
-            private readonly Snowflake _anotherChannel = new Snowflake(1);
+            private readonly Snowflake _guild = new(0);
+            private readonly Snowflake _channel = new(0);
+            private readonly Snowflake _anotherChannel = new(1);
 
             [Fact]
             public async Task ReturnsSuccessfulIfNoChannelIsSet()
@@ -72,7 +72,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.ModerationService
             {
                 await this.Moderation.SetMonitoringChannelAsync(_guild, _channel);
 
-                var settings = (await this.Moderation.GetServerSettingsAsync(_guild)).Entity!;
+                var settings = (await this.Moderation.GetServerSettingsAsync(_guild)).Entity;
 
                 Assert.Equal(_channel, settings.MonitoringChannel);
             }

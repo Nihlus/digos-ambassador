@@ -39,8 +39,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
     {
         public class TransferEntityOwnershipAsync : OwnedEntityServiceTestBase
         {
-            private readonly Snowflake _originalUser = new Snowflake(0);
-            private readonly Snowflake _newUser = new Snowflake(1);
+            private readonly Snowflake _originalUser = new(0);
+            private readonly Snowflake _newUser = new(1);
 
             private User _originalDBUser = null!;
             private User _newDBUser = null!;
@@ -50,8 +50,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
                 await base.InitializeAsync();
 
                 // Set up mocked database users
-                _originalDBUser = (await this.Users.AddUserAsync(_originalUser)).Entity!;
-                _newDBUser = (await this.Users.AddUserAsync(_newUser)).Entity!;
+                _originalDBUser = (await this.Users.AddUserAsync(_originalUser)).Entity;
+                _newDBUser = (await this.Users.AddUserAsync(_newUser)).Entity;
             }
 
             [Fact]

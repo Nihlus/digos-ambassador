@@ -35,16 +35,16 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.NoteService
     {
         public class GetNoteAsync : NoteServiceTestBase
         {
-            private readonly Snowflake _guild = new Snowflake(0);
-            private readonly Snowflake _otherGuild = new Snowflake(1);
-            private readonly Snowflake _user = new Snowflake(2);
+            private readonly Snowflake _guild = new(0);
+            private readonly Snowflake _otherGuild = new(1);
+            private readonly Snowflake _user = new(2);
 
-            private readonly Snowflake _author = new Snowflake(3);
+            private readonly Snowflake _author = new(3);
 
             [Fact]
             public async Task ReturnsSuccessfulIfNoteExists()
             {
-                var note = (await this.Notes.CreateNoteAsync(_author, _user, _guild, "Dummy thicc")).Entity!;
+                var note = (await this.Notes.CreateNoteAsync(_author, _user, _guild, "Dummy thicc")).Entity;
 
                 var result = await this.Notes.GetNoteAsync(_guild, note.ID);
 
@@ -62,7 +62,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.NoteService
             [Fact]
             public async Task ReturnsUnsuccessfulIfNoteExistsButServerIsWrong()
             {
-                var note = (await this.Notes.CreateNoteAsync(_author, _user, _guild, "Dummy thicc")).Entity!;
+                var note = (await this.Notes.CreateNoteAsync(_author, _user, _guild, "Dummy thicc")).Entity;
 
                 var result = await this.Notes.GetNoteAsync(_otherGuild, note.ID);
 
@@ -72,7 +72,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.NoteService
             [Fact]
             public async Task ActuallyReturnsNote()
             {
-                var note = (await this.Notes.CreateNoteAsync(_author, _user, _guild, "Dummy thicc")).Entity!;
+                var note = (await this.Notes.CreateNoteAsync(_author, _user, _guild, "Dummy thicc")).Entity;
 
                 var result = await this.Notes.GetNoteAsync(_guild, note.ID);
 

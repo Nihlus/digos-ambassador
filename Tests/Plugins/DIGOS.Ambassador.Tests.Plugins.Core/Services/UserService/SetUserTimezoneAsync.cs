@@ -58,7 +58,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
 
                 var discordUser = new Snowflake(0);
                 var user = await this.Users.AddUserAsync(discordUser);
-                _user = user.Entity!;
+                _user = user.Entity;
             }
 
             [Theory]

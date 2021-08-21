@@ -70,7 +70,7 @@ namespace DIGOS.Ambassador.Core.Extensions
             var passing = candidates.Where(c => c.percentile <= tolerance).ToList();
             if (!passing.Any())
             {
-                return new GenericError("No sufficiently close match found.");
+                return new NotFoundError("No sufficiently close match found.");
             }
 
             var best = passing.MinBy(c => c.distance).First();

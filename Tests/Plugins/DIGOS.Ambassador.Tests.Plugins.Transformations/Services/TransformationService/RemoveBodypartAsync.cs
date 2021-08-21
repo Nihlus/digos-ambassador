@@ -84,7 +84,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _character
                 );
 
-                _appearance = getAppearanceConfigurationResult.Entity!;
+                _appearance = getAppearanceConfigurationResult.Entity;
             }
 
             [Fact]
@@ -128,7 +128,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     Chirality.Left
                 );
 
-                Assert.Equal(ShiftBodypartAction.Nothing, result.Entity!.Action);
+                Assert.Equal(ShiftBodypartAction.Nothing, result.Entity.Action);
             }
 
             [Fact]
@@ -169,7 +169,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     Bodypart.Face
                 );
 
-                Assert.NotNull(result.Entity!.ShiftMessage);
+                Assert.NotNull(result.Entity.ShiftMessage);
             }
         }
     }

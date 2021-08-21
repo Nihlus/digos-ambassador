@@ -213,7 +213,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _newPatternColour
                 );
 
-                Assert.Equal(ShiftBodypartAction.Nothing, result.Entity!.Action);
+                Assert.Equal(ShiftBodypartAction.Nothing, result.Entity.Action);
             }
 
             [Fact]
@@ -241,7 +241,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _newPatternColour
                 );
 
-                var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity!;
+                var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity;
 
                 var face = appearance.GetAppearanceComponent(Bodypart.Face, Chirality.Center);
                 Assert.True(_newPatternColour.IsSameColourAs(face.PatternColour));
@@ -258,8 +258,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _newPatternColour
                 );
 
-                Assert.NotNull(result.Entity!.ShiftMessage);
-                Assert.NotEmpty(result.Entity!.ShiftMessage);
+                Assert.NotNull(result.Entity.ShiftMessage);
+                Assert.NotEmpty(result.Entity.ShiftMessage);
             }
         }
     }

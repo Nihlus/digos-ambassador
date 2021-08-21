@@ -65,7 +65,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
                 await this.Servers.AddServerAsync(_discordGuild);
 
                 var result = await this.Servers.GetServerAsync(_discordGuild);
-                var server = result.Entity!;
+                var server = result.Entity;
 
                 Assert.Equal(_discordGuild, server.DiscordID);
             }

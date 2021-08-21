@@ -81,7 +81,7 @@ namespace DIGOS.Ambassador.ExecutionEventServices
                 // Relay the message to the user
                 var sendMessage = await _feedback.SendContextualMessageAsync
                 (
-                    messageResult.Entity!,
+                    messageResult.Entity,
                     context.User.ID,
                     ct
                 );

@@ -65,7 +65,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
                 await this.Users.AddUserAsync(_discordUser);
 
                 var result = await this.Users.GetUserAsync(_discordUser);
-                var user = result.Entity!;
+                var user = result.Entity;
 
                 Assert.Equal(_discordUser, user.DiscordID);
             }

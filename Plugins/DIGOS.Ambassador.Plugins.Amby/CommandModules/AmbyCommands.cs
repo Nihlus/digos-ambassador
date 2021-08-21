@@ -98,7 +98,7 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
         [Command("contact-user")]
         [Description("Instructs Amby to contact a user over DM.")]
         [RequireContext(ChannelContext.Guild)]
-        [RequireUserGuildPermission(DiscordPermission.MentionEveryone)]
+        [RequireDiscordPermission(DiscordPermission.MentionEveryone)]
         public async Task<Result<FeedbackMessage>> ContactUserAsync(IUser discordUser)
         {
             var getSelf = await _userAPI.GetCurrentUserAsync();

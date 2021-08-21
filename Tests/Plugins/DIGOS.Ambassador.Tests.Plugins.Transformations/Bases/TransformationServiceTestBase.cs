@@ -88,7 +88,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 .AddSingleton(s =>
                 {
                     var content = s.GetRequiredService<ContentService>();
-                    return content.GetTransformationMessages().Entity!;
+                    return content.GetTransformationMessages().Entity;
                 })
                 .AddSingleton(FileSystemFactory.CreateContentFileSystem())
                 .AddSingleton<PronounService>()

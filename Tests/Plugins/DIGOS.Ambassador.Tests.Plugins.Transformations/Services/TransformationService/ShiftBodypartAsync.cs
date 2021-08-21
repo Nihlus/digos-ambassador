@@ -79,7 +79,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 );
 
                 // Create a test character
-                var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity!;
+                var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
 
                 var character = new Character
                 (
@@ -175,13 +175,13 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     "template"
                 );
 
-                Assert.Equal(ShiftBodypartAction.Nothing, result.Entity!.Action);
+                Assert.Equal(ShiftBodypartAction.Nothing, result.Entity.Action);
             }
 
             [Fact]
             public async Task AddsBodypartIfItDoesNotAlreadyExist()
             {
-                var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity!;
+                var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity;
 
                 Assert.False(appearance.HasComponent(Bodypart.Tail, Chirality.Center));
 
@@ -208,7 +208,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     "shark"
                 );
 
-                var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity!;
+                var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity;
 
                 Assert.True(result.IsSuccess);
                 Assert.Equal("shark", appearance.GetAppearanceComponent(Bodypart.Face, Chirality.Center).Transformation.Species.Name);
@@ -225,8 +225,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     "shark"
                 );
 
-                Assert.NotNull(result.Entity!.ShiftMessage);
-                Assert.NotEmpty(result.Entity!.ShiftMessage);
+                Assert.NotNull(result.Entity.ShiftMessage);
+                Assert.NotEmpty(result.Entity.ShiftMessage);
             }
 
             [Fact]
@@ -240,7 +240,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     "shark"
                 );
 
-                var appearance = (await this.Transformations.GetOrCreateDefaultAppearanceAsync(_character)).Entity!;
+                var appearance = (await this.Transformations.GetOrCreateDefaultAppearanceAsync(_character)).Entity;
 
                 Assert.NotEqual
                 (
@@ -265,7 +265,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _character
                 );
 
-                var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity!;
+                var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity;
 
                 Assert.NotEqual
                 (
@@ -290,7 +290,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _character
                 );
 
-                var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity!;
+                var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity;
 
                 Assert.Equal
                 (
@@ -328,7 +328,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _character
                 );
 
-                var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity!;
+                var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity;
 
                 Assert.Equal
                 (

@@ -62,7 +62,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             public async Task ReturnsCorrectServerIfServerHasNotBeenRegistered()
             {
                 var result = await this.Servers.GetOrRegisterServerAsync(_discordGuild);
-                var server = result.Entity!;
+                var server = result.Entity;
 
                 Assert.Equal(_discordGuild, server.DiscordID);
             }
@@ -72,7 +72,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             {
                 await this.Servers.AddServerAsync(_discordGuild);
                 var result = await this.Servers.GetOrRegisterServerAsync(_discordGuild);
-                var server = result.Entity!;
+                var server = result.Entity;
 
                 Assert.Equal(_discordGuild, server.DiscordID);
             }

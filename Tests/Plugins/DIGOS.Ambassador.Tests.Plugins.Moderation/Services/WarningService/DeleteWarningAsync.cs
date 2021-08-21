@@ -38,10 +38,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
     {
         public class DeleteWarningAsync : WarningServiceTestBase
         {
-            private readonly Snowflake _user = new Snowflake(0);
-            private readonly Snowflake _guild = new Snowflake(1);
+            private readonly Snowflake _user = new(0);
+            private readonly Snowflake _guild = new(1);
 
-            private readonly Snowflake _author = new Snowflake(1);
+            private readonly Snowflake _author = new(1);
 
             [Fact]
             private async Task ReturnsUnsuccessfulIfWarningDoesNotExist()
@@ -56,7 +56,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
             [Fact]
             private async Task ReturnsSuccessfulIfWarningExists()
             {
-                var warning = (await this.Warnings.CreateWarningAsync(_author, _user, _guild, "Dummy thicc")).Entity!;
+                var warning = (await this.Warnings.CreateWarningAsync(_author, _user, _guild, "Dummy thicc")).Entity;
 
                 var result = await this.Warnings.DeleteWarningAsync(warning);
                 Assert.True(result.IsSuccess);
@@ -65,7 +65,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
             [Fact]
             private async Task ActuallyDeletesWarning()
             {
-                var warning = (await this.Warnings.CreateWarningAsync(_author, _user, _guild, "Dummy thicc")).Entity!;
+                var warning = (await this.Warnings.CreateWarningAsync(_author, _user, _guild, "Dummy thicc")).Entity;
 
                 await this.Warnings.DeleteWarningAsync(warning);
 

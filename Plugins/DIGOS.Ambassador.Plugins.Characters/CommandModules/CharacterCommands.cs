@@ -260,7 +260,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             await _interactivity.SendContextualInteractiveMessageAsync
             (
                 _context.User.ID,
-                pages.Where(p => p.IsSuccess).Select(p => p.Entity!).ToList(),
+                pages.Where(p => p.IsSuccess).Select(p => p.Entity).ToList(),
                 ct: this.CancellationToken
             );
 

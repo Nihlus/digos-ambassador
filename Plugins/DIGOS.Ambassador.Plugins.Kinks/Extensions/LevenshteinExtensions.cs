@@ -81,7 +81,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Extensions
             var selectedObject = await @this.FirstOrDefaultAsync(i => selectorFunc(i) == selectedString, ct);
             if (selectedObject is null)
             {
-                return new GenericError("No matching object for the selector found.");
+                return new NotFoundError("No matching object for the selector found.");
             }
 
             var result = selector(selectedObject);
@@ -125,7 +125,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Extensions
             var selectedObject = enumerable.FirstOrDefault(i => stringSelector(i) == selectedString);
             if (selectedObject is null)
             {
-                return new GenericError("No matching object for the selector found.");
+                return new NotFoundError("No matching object for the selector found.");
             }
 
             var result = selector(selectedObject);

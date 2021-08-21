@@ -177,7 +177,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [Command("create")]
             [Description("Creates a new character role linked to a Discord role.")]
             [RequireContext(ChannelContext.Guild)]
-            [RequireUserGuildPermission(DiscordPermission.ManageRoles)]
+            [RequireDiscordPermission(DiscordPermission.ManageRoles)]
             public async Task<Result<FeedbackMessage>> CreateCharacterRoleAsync
             (
                 IRole discordRole,
@@ -205,7 +205,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [Command("delete")]
             [Description("Deletes the character role for a given discord role.")]
             [RequireContext(ChannelContext.Guild)]
-            [RequireUserGuildPermission(DiscordPermission.ManageRoles)]
+            [RequireDiscordPermission(DiscordPermission.ManageRoles)]
             public async Task<Result<FeedbackMessage>> DeleteCharacterRoleAsync(IRole discordRole)
             {
                 var getExistingRoleResult = await _characterRoles.GetCharacterRoleAsync
@@ -240,7 +240,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [Command("set-access")]
             [Description("Sets the access conditions for the given role.")]
             [RequireContext(ChannelContext.Guild)]
-            [RequireUserGuildPermission(DiscordPermission.ManageRoles)]
+            [RequireDiscordPermission(DiscordPermission.ManageRoles)]
             public async Task<Result<FeedbackMessage>> SetCharacterRoleAccessAsync(IRole discordRole, RoleAccess access)
             {
                 var getExistingRoleResult = await _characterRoles.GetCharacterRoleAsync

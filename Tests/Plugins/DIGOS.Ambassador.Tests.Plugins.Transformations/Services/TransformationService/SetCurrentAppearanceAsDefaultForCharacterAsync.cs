@@ -39,7 +39,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
     {
         public class SetCurrentAppearanceAsDefaultForCharacterAsync : TransformationServiceTestBase
         {
-            private readonly Snowflake _user = new Snowflake(0);
+            private readonly Snowflake _user = new(0);
             private User _owner = null!;
             private Character _character = null!;
 
@@ -47,7 +47,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
             protected override async Task InitializeTestAsync()
             {
-                _owner = (await this.Users.GetOrRegisterUserAsync(_user)).Entity!;
+                _owner = (await this.Users.GetOrRegisterUserAsync(_user)).Entity;
 
                 _character = new Character
                 (
@@ -69,7 +69,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _character
                 );
 
-                _appearance = getAppearanceConfigurationResult.Entity!;
+                _appearance = getAppearanceConfigurationResult.Entity;
             }
 
             [Fact]

@@ -42,7 +42,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             public override async Task InitializeAsync()
             {
                 var serverMock = new Snowflake(0);
-                _server = (await this.Servers.GetOrRegisterServerAsync(serverMock)).Entity!;
+                _server = (await this.Servers.GetOrRegisterServerAsync(serverMock)).Entity;
             }
 
             [Fact]

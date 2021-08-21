@@ -149,7 +149,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 return createPages.First(p => !p.IsSuccess);
             }
 
-            var pages = createPages.Select(p => p.Entity!).ToList();
+            var pages = createPages.Select(p => p.Entity).ToList();
 
             await _interactivity.SendContextualInteractiveMessageAsync
             (

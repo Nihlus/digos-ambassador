@@ -78,7 +78,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Amby.Services.SassService
             {
                 var result = await this.SassService.GetSassAsync();
 
-                Assert.NotEmpty(result.Entity!);
+                Assert.NotEmpty(result.Entity);
             }
         }
 

@@ -39,7 +39,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
     {
         public class SetWarningReasonAsync : WarningServiceTestBase
         {
-            private readonly UserWarning _warning = new UserWarning(new Server(new Snowflake(0)), new User(new Snowflake(0)), new User(new Snowflake(1)), string.Empty);
+            private readonly UserWarning _warning = new(new Server(new Snowflake(0)), new User(new Snowflake(0)), new User(new Snowflake(1)), string.Empty);
 
             [Fact]
             public async Task ReturnsUnsuccessfulIfNewReasonIsEmpty()
