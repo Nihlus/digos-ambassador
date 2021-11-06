@@ -21,6 +21,7 @@
 //
 
 using System.Diagnostics.CodeAnalysis;
+using DIGOS.Ambassador.Core.Database.Context;
 using DIGOS.Ambassador.Plugins.Permissions.Extensions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
@@ -32,7 +33,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Model
     /// <summary>
     /// Represents the database model of the dossier plugin.
     /// </summary>
-    public class PermissionsDatabaseContext : SchemaAwareDbContext
+    public class PermissionsDatabaseContext : AmbassadorDbContext
     {
         private const string SchemaName = "PermissionModule";
 

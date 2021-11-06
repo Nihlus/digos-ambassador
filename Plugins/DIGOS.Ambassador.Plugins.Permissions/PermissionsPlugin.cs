@@ -71,7 +71,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions
 
             serviceCollection.AddCondition<RequirePermissionCondition>();
             serviceCollection.AddCommandGroup<PermissionCommands>();
-            serviceCollection.AddParser<PermissionTarget, HumanizerEnumTypeReader<PermissionTarget>>();
+            serviceCollection.AddParser<HumanizerEnumTypeReader<PermissionTarget>>();
         }
 
         /// <inheritdoc />

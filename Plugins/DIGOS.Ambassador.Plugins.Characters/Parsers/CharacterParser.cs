@@ -54,7 +54,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Parsers
         }
 
         /// <inheritdoc />
-        public override async ValueTask<Result<Character>> TryParse(string value, CancellationToken ct)
+        public override async ValueTask<Result<Character>> TryParseAsync(string value, CancellationToken ct)
         {
             value = value.Trim();
 

@@ -49,7 +49,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Parsers
         }
 
         /// <inheritdoc />
-        public override async ValueTask<Result<AutoroleConfiguration>> TryParse(string value, CancellationToken ct)
+        public override async ValueTask<Result<AutoroleConfiguration>> TryParseAsync(string value, CancellationToken ct = default)
         {
             value = value.Trim();
 

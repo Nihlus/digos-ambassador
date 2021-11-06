@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,6 +31,8 @@ using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using OneOf;
+using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Feedback.Services;
@@ -119,7 +122,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
                                  "privacy policy (which can be requested by running the `!privacy policy` command) " +
                                  "and agree to it by sending `!privacy grant-consent` to the bot over DM.";
 
-            var sendWarning = await _feedback.SendContextualWarningAsync(warningMessage, discordUser, ct);
+            var sendWarning = await _feedback.SendContextualWarningAsync(warningMessage, discordUser, ct: ct);
             return !sendWarning.IsSuccess
                 ? Result.FromError(sendWarning)
                 : Result.FromSuccess();
@@ -154,7 +157,10 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
             var sendPolicy = await _channelAPI.CreateMessageAsync
             (
                 channel,
-                file: new FileData("PrivacyPolicy.pdf", privacyPolicy),
+                attachments: new List<OneOf<FileData, IPartialAttachment>>
+                {
+                    new FileData("PrivacyPolicy.pdf", privacyPolicy)
+                },
                 ct: ct
             );
 

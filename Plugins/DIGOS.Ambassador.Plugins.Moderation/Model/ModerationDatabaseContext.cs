@@ -21,6 +21,7 @@
 //
 
 using System.Diagnostics.CodeAnalysis;
+using DIGOS.Ambassador.Core.Database.Context;
 using DIGOS.Ambassador.Plugins.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Moderation.Extensions;
 using DIGOS.Ambassador.Plugins.Permissions.Extensions;
@@ -33,7 +34,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
     /// <summary>
     /// Represents the database model of the dossier plugin.
     /// </summary>
-    public class ModerationDatabaseContext : SchemaAwareDbContext
+    public class ModerationDatabaseContext : AmbassadorDbContext
     {
         private const string SchemaName = "ModerationModule";
 

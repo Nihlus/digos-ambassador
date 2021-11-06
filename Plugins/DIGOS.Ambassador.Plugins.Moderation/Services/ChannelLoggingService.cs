@@ -376,7 +376,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                               $"{newDiscriminator:D4}."
             };
 
-            var sendResult = await _feedback.SendEmbedAsync(channel, eb, ct);
+            var sendResult = await _feedback.SendEmbedAsync(channel, eb, ct: ct);
             return sendResult.IsSuccess
                 ? Result.FromSuccess()
                 : Result.FromError(sendResult);

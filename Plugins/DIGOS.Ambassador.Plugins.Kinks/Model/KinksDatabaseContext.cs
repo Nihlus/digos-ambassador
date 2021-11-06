@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using DIGOS.Ambassador.Core.Database.Context;
 using DIGOS.Ambassador.Plugins.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Permissions.Extensions;
 using JetBrains.Annotations;
@@ -33,7 +34,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Model
     /// Represents the database model of the dossier plugin.
     /// </summary>
     [PublicAPI]
-    public class KinksDatabaseContext : SchemaAwareDbContext
+    public class KinksDatabaseContext : AmbassadorDbContext
     {
         private const string SchemaName = "KinkModule";
 

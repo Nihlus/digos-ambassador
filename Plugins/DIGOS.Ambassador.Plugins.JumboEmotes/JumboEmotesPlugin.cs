@@ -48,7 +48,7 @@ namespace DIGOS.Ambassador.Plugins.JumboEmotes
         public override void ConfigureServices(IServiceCollection serviceCollection)
         {
             serviceCollection
-                .AddParser<IEmoji, EmojiTypeReader>()
+                .AddParser<EmojiTypeReader>()
                 .AddCommandGroup<JumboCommands>();
         }
     }

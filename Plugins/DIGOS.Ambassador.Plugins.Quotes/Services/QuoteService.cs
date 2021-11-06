@@ -215,9 +215,8 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Services
         {
             var getUserAvatar = CDN.GetUserAvatarUrl(message.Author);
 
-            var author = new EmbedAuthor
+            var author = new EmbedAuthor($"{message.Author.Username}#{message.Author.Discriminator}")
             {
-                Name = $"{message.Author.Username}#{message.Author.Discriminator}",
                 IconUrl = getUserAvatar.IsSuccess
                     ? getUserAvatar.Entity.ToString()
                     : default(Optional<string>)

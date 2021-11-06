@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using DIGOS.Ambassador.Core.Database.Context;
 using DIGOS.Ambassador.Plugins.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
@@ -34,7 +35,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model
     /// <summary>
     /// Represents the database model of the core plugin.
     /// </summary>
-    public class CoreDatabaseContext : SchemaAwareDbContext
+    public class CoreDatabaseContext : AmbassadorDbContext
     {
         private const string SchemaName = "Core";
 

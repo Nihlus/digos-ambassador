@@ -175,9 +175,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                     {
                         Title = $"Ban #{ban.ID} for {bannedUser.Username}:{bannedUser.Discriminator}",
                         Colour = Color.Orange,
-                        Author = new EmbedAuthor
+                        Author = new EmbedAuthor(banAuthor.Username)
                         {
-                            Name = banAuthor.Username,
                             Url = getBanAuthorAvatar.IsSuccess
                                 ? getBanAuthorAvatar.Entity.ToString()
                                 : default(Optional<string>)

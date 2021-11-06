@@ -95,7 +95,7 @@ namespace DIGOS.Ambassador.Plugins.Drone.CommandModules
             (
                 droneMessage,
                 _context.User.ID,
-                this.CancellationToken
+                ct: this.CancellationToken
             );
 
             if (!sendMessage.IsSuccess)

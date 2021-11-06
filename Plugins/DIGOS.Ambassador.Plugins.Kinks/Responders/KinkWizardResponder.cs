@@ -112,7 +112,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
                 gatewayEvent.ID,
                 gatewayEvent.Token,
                 new InteractionResponse(InteractionCallbackType.DeferredUpdateMessage),
-                ct
+                ct: ct
             );
 
             if (!respondDeferred.IsSuccess)
@@ -248,7 +248,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
                     wizard.ChannelID,
                     "All done in that category!",
                     wizard.SourceUserID,
-                    ct
+                    ct: ct
                 );
 
                 if (!send.IsSuccess)
@@ -297,7 +297,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
                         wizard.ChannelID,
                         "There aren't any categories in the database.",
                         wizard.SourceUserID,
-                        ct
+                        ct: ct
                     );
 
                     return sendWarning.IsSuccess
@@ -310,7 +310,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
                     wizard.ChannelID,
                     "Please enter a category name.",
                     wizard.SourceUserID,
-                    ct
+                    ct: ct
                 );
 
                 if (!sendConfirmation.IsSuccess)
@@ -348,7 +348,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
                     wizard.ChannelID,
                     tryStartCategoryResult.Error.Message,
                     wizard.SourceUserID,
-                    ct
+                    ct: ct
                 );
 
                 return !send.IsSuccess
@@ -464,7 +464,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
                 }
             }
 
-            var send = await _feedback.SendEmbedAsync(wizard.ChannelID, eb, ct);
+            var send = await _feedback.SendEmbedAsync(wizard.ChannelID, eb, ct: ct);
             return send.IsSuccess
                 ? Result.FromSuccess()
                 : Result.FromError(send);
@@ -559,7 +559,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
                             wizard.ChannelID,
                             "Failed to get the user kink.",
                             wizard.SourceUserID,
-                            ct
+                            ct: ct
                         );
 
                         if (!sendError.IsSuccess)

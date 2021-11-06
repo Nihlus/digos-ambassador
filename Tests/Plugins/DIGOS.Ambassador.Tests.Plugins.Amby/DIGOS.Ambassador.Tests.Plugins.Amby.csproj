@@ -10,7 +10,7 @@
     </ItemGroup>
     
     <ItemGroup>
-      <PackageReference Include="Remora.Results" Version="6.0.0" />
+      <PackageReference Include="Remora.Results" Version="7.0.2" />
     </ItemGroup>
 
 </Project>

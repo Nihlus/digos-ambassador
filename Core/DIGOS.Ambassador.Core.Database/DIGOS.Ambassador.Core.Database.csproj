@@ -1,17 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.4">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.10">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>compile; runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Remora.Results" Version="6.0.0" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.FuzzyStringMatch" Version="5.0.10" />
+        <PackageReference Include="Remora.Results" Version="7.0.2" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Remora.EntityFrameworkCore.Modular" Version="3.0.0" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="5.0.4" />
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.7" />
+        <PackageReference Include="Remora.EntityFrameworkCore.Modular" Version="3.0.1" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="5.0.10" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.10" />
     </ItemGroup>
 
     <ItemGroup>

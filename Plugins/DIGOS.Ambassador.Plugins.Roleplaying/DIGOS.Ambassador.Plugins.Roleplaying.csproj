@@ -9,14 +9,14 @@
 
     <ItemGroup>
         <PackageReference Include="Humanizer.Core" Version="2.11.10" />
-        <PackageReference Include="iTextSharp.LGPLv2.Core" Version="1.7.3" />
-        <PackageReference Include="Remora.Behaviours" Version="6.1.0" />
-        <PackageReference Include="Remora.Results" Version="6.0.0" />
+        <PackageReference Include="iTextSharp.LGPLv2.Core" Version="1.7.5" />
+        <PackageReference Include="Remora.Behaviours" Version="6.1.1" />
+        <PackageReference Include="Remora.Results" Version="7.0.2" />
     </ItemGroup>
 
     <!-- Workaround for a problem with EF Core -->
     <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.4">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.10">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

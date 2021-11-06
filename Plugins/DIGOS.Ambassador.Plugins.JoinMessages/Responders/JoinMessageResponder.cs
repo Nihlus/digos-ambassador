@@ -150,7 +150,7 @@ namespace DIGOS.Ambassador.Plugins.JoinMessages.Responders
                 guild.SystemChannelID.Value,
                 content,
                 user.ID,
-                ct
+                ct: ct
             );
 
             return sendNotification.IsSuccess

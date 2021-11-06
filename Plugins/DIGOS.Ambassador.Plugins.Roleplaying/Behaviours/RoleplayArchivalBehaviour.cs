@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,7 +34,9 @@ using DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using OneOf;
 using Remora.Behaviours.Bases;
+using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Feedback.Services;
@@ -200,7 +203,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             (
                 settings.ArchiveChannel.Value,
                 embeds: new[] { embed },
-                file: fileData
+                attachments: new List<OneOf<FileData, IPartialAttachment>> { fileData }
             );
 
             return send.IsSuccess

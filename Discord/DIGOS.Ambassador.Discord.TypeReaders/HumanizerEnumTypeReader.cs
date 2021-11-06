@@ -38,7 +38,7 @@ namespace DIGOS.Ambassador.Discord.TypeReaders
     public class HumanizerEnumTypeReader<T> : AbstractTypeParser<T> where T : struct, Enum
     {
         /// <inheritdoc />
-        public override ValueTask<Result<T>> TryParse(string value, CancellationToken ct)
+        public override ValueTask<Result<T>> TryParseAsync(string value, CancellationToken ct)
         {
             value = value.Trim();
 

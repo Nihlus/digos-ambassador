@@ -55,7 +55,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.TypeReaders
         }
 
         /// <inheritdoc />
-        public override async ValueTask<Result<Roleplay>> TryParse(string value, CancellationToken ct)
+        public override async ValueTask<Result<Roleplay>> TryParseAsync(string value, CancellationToken ct)
         {
             value = value.Trim();
 

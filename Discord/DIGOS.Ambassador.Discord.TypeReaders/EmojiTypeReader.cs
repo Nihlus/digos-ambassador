@@ -71,7 +71,7 @@ namespace DIGOS.Ambassador.Discord.TypeReaders
         }
 
         /// <inheritdoc />
-        public override async ValueTask<Result<IEmoji>> TryParse(string value, CancellationToken ct)
+        public override async ValueTask<Result<IEmoji>> TryParseAsync(string value, CancellationToken ct)
         {
             value = value.Trim();
 

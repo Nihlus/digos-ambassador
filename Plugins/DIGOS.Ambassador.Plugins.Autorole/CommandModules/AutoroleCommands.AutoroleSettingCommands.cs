@@ -103,7 +103,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                     Fields = new[] { new EmbedField("Confirmation Notification Channel", notificationChannelValue) }
                 };
 
-                var send = await _feedback.SendContextualEmbedAsync(embed, this.CancellationToken);
+                var send = await _feedback.SendContextualEmbedAsync(embed, ct: this.CancellationToken);
                 return send.IsSuccess
                     ? Result.FromSuccess()
                     : Result.FromError(send);

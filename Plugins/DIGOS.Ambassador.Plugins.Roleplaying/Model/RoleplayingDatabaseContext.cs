@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using DIGOS.Ambassador.Core.Database.Context;
 using DIGOS.Ambassador.Plugins.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Permissions.Extensions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Extensions;
@@ -33,7 +34,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
     /// <summary>
     /// Represents the database model of the dossier plugin.
     /// </summary>
-    public class RoleplayingDatabaseContext : SchemaAwareDbContext
+    public class RoleplayingDatabaseContext : AmbassadorDbContext
     {
         private const string SchemaName = "RoleplayModule";
 

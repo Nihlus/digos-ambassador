@@ -1,5 +1,5 @@
 //
-//  ServiceCollectionExtensions.cs
+//  AmbassadorDbContext.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,24 +20,32 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using Microsoft.Extensions.DependencyInjection;
-using Remora.Commands.Extensions;
+using Microsoft.EntityFrameworkCore;
+using Remora.EntityFrameworkCore.Modular;
 
-namespace DIGOS.Ambassador.Discord.TypeReaders.Extensions
+namespace DIGOS.Ambassador.Core.Database.Context
 {
     /// <summary>
-    /// Extensions to the <see cref="IServiceCollection"/> class.
+    /// The base context for all ambassador contexts.
     /// </summary>
-    public static class ServiceCollectionExtensions
+    public abstract class AmbassadorDbContext : SchemaAwareDbContext
     {
         /// <summary>
-        /// Adds a type reader to the command service based on a <see cref="HumanizerEnumTypeReader{T}"/>.
+        /// Initializes a new instance of the <see cref="AmbassadorDbContext"/> class.
         /// </summary>
-        /// <param name="this">The command service.</param>
-        /// <typeparam name="TEnum">The enum type to add.</typeparam>
-        public static void AddEnumReader<TEnum>(this IServiceCollection @this) where TEnum : struct, System.Enum
+        /// <param name="schema">The schema managed by the context.</param>
+        /// <param name="contextOptions">The context options.</param>
+        public AmbassadorDbContext(string schema, DbContextOptions contextOptions)
+            : base(schema, contextOptions)
         {
-            @this.AddParser<HumanizerEnumTypeReader<TEnum>>();
+        }
+
+        /// <inheritdoc />
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.HasPostgresExtension("fuzzystrmatch");
         }
     }
 }

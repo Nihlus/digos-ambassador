@@ -39,6 +39,7 @@ using DIGOS.Ambassador.Plugins.Roleplaying.Services;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters;
 using Humanizer;
 using JetBrains.Annotations;
+using OneOf;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
@@ -625,7 +626,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 output.Data
             );
 
-            return await _channelAPI.CreateMessageAsync(_context.ChannelID, file: fileData);
+            return await _channelAPI.CreateMessageAsync
+            (
+                _context.ChannelID,
+                attachments: new List<OneOf<FileData, IPartialAttachment>> { fileData }
+            );
         }
 
         /// <summary>

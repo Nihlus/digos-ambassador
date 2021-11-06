@@ -106,7 +106,9 @@ namespace DIGOS.Ambassador.Core.Database.Services
                 .UseNpgsql
                 (
                     credentials.GetConnectionString(),
-                    b => b.MigrationsHistoryTable(HistoryRepository.DefaultTableName + schema)
+                    b => b
+                        .MigrationsHistoryTable(HistoryRepository.DefaultTableName + schema)
+                        .UseFuzzyStringMatch()
                 );
 
             _schemaAwareDbContextService.ConfigureSchemaAwareContext(optionsBuilder);

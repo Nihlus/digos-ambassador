@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using DIGOS.Ambassador.Core.Database.Context;
 using DIGOS.Ambassador.Plugins.Characters.Extensions;
 using DIGOS.Ambassador.Plugins.Characters.Model.Data;
 using DIGOS.Ambassador.Plugins.Core.Extensions;
@@ -34,7 +35,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
     /// <summary>
     /// Represents the database model of the dossier plugin.
     /// </summary>
-    public class CharactersDatabaseContext : SchemaAwareDbContext
+    public class CharactersDatabaseContext : AmbassadorDbContext
     {
         private const string SchemaName = "CharacterModule";
 

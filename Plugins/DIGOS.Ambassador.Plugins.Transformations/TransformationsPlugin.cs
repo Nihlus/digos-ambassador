@@ -81,14 +81,14 @@ namespace DIGOS.Ambassador.Plugins.Transformations
             serviceCollection.TryAddScoped<TransformationService>();
             serviceCollection.AddConfiguredSchemaAwareDbContextPool<TransformationsDatabaseContext>();
 
-            serviceCollection.AddParser<Colour, ColourTypeParser>();
-            serviceCollection.AddParser<Pattern, EnumParser<Pattern>>();
-            serviceCollection.AddParser<Shade, EnumParser<Shade>>();
-            serviceCollection.AddParser<ShadeModifier, EnumParser<ShadeModifier>>();
-            serviceCollection.AddParser<ProtectionType, EnumParser<ProtectionType>>();
-            serviceCollection.AddParser<Chirality, EnumParser<Chirality>>();
+            serviceCollection.AddParser<ColourTypeParser>();
+            serviceCollection.AddParser<EnumParser<Pattern>>();
+            serviceCollection.AddParser<EnumParser<Shade>>();
+            serviceCollection.AddParser<EnumParser<ShadeModifier>>();
+            serviceCollection.AddParser<EnumParser<ProtectionType>>();
+            serviceCollection.AddParser<EnumParser<Chirality>>();
 
-            serviceCollection.AddParser<Colour, ColourTypeParser>();
+            serviceCollection.AddParser<ColourTypeParser>();
             serviceCollection.AddCommandGroup<TransformationCommands>();
         }
 

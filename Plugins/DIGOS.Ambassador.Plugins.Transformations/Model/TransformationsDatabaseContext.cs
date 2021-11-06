@@ -21,6 +21,7 @@
 //
 
 using System.Diagnostics.CodeAnalysis;
+using DIGOS.Ambassador.Core.Database.Context;
 using DIGOS.Ambassador.Plugins.Characters.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Permissions.Extensions;
@@ -36,7 +37,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
     /// Represents the database model of the dossier plugin.
     /// </summary>
     [PublicAPI]
-    public class TransformationsDatabaseContext : SchemaAwareDbContext
+    public class TransformationsDatabaseContext : AmbassadorDbContext
     {
         private const string SchemaName = "TransformationModule";
 

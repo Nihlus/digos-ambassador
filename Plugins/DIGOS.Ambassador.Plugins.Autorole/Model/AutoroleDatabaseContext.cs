@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using DIGOS.Ambassador.Core.Database.Context;
 using DIGOS.Ambassador.Plugins.Autorole.Extensions;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
@@ -36,7 +37,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
     /// <summary>
     /// Represents the database model of the dossier plugin.
     /// </summary>
-    public class AutoroleDatabaseContext : SchemaAwareDbContext
+    public class AutoroleDatabaseContext : AmbassadorDbContext
     {
         private const string SchemaName = "AutoroleModule";
 

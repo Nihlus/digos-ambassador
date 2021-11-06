@@ -102,7 +102,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity
                 Description = "Loading..."
             };
 
-            var sendMessage = await _feedback.SendContextualEmbedAsync(initialEmbed, ct);
+            var sendMessage = await _feedback.SendContextualEmbedAsync(initialEmbed, ct: ct);
             if (!sendMessage.IsSuccess)
             {
                 return Result.FromError(sendMessage);

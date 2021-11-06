@@ -73,8 +73,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying
 
             serviceCollection.AddCommandGroup<RoleplayCommands>();
 
-            serviceCollection.AddParser<Roleplay, RoleplayParser>();
-            serviceCollection.AddParser<ExportFormat, HumanizerEnumTypeReader<ExportFormat>>();
+            serviceCollection.AddParser<RoleplayParser>();
+            serviceCollection.AddParser<HumanizerEnumTypeReader<ExportFormat>>();
 
             serviceCollection.AddCondition<RequireActiveRoleplayCondition>();
             serviceCollection.AddCondition<RequireEntityOwnerCondition<Roleplay>>();

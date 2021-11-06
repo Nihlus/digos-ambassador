@@ -69,7 +69,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks
 
             serviceCollection.AddCommandGroup<KinkCommands>();
 
-            serviceCollection.AddParser<KinkPreference, EnumParser<KinkPreference>>();
+            serviceCollection.AddParser<EnumParser<KinkPreference>>();
 
             serviceCollection.Configure<DiscordGatewayClientOptions>(o =>
             {

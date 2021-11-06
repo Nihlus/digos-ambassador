@@ -122,9 +122,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                     {
                         Title = $"Note #{note.ID} for {user.Username}:{user.Discriminator}",
                         Colour = Color.Gold,
-                        Author = new EmbedAuthor
+                        Author = new EmbedAuthor(author.Username)
                         {
-                            Name = author.Username,
                             IconUrl = getAuthorAvatar.IsSuccess
                                 ? getAuthorAvatar.Entity.ToString()
                                 : default(Optional<string>)

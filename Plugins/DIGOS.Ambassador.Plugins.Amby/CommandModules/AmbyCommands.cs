@@ -130,7 +130,7 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
             (
                 discordUser.ID,
                 contactMessage,
-                this.CancellationToken
+                ct: this.CancellationToken
             );
 
             return !sendPrivate.IsSuccess
@@ -247,7 +247,7 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
             (
                 "...seriously?",
                 _context.User.ID,
-                this.CancellationToken
+                ct: this.CancellationToken
             );
 
             return sendAnnoyed.IsSuccess
@@ -281,7 +281,7 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
             (
                 "...seriously?",
                 _context.User.ID,
-                this.CancellationToken
+                ct: this.CancellationToken
             );
 
             return sendAnnoyed.IsSuccess
@@ -300,16 +300,12 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
             var eb = new Embed
             {
                 Colour = _feedback.Theme.Secondary,
-                Author = new EmbedAuthor
+                Author = new EmbedAuthor("DIGOS Ambassador")
                 {
-                    Name = "DIGOS Ambassador",
                     IconUrl = _portraits.AmbyPortraitUri.ToString()
                 },
                 Title = "The DIGOS Ambassador (\"Amby\")",
-                Image = new EmbedImage
-                {
-                    Url = _portraits.AmbyPortraitUri.ToString()
-                },
+                Image = new EmbedImage(_portraits.AmbyPortraitUri.ToString()),
                 Description =
                     "Amby is a Discord bot written in C# using the Discord.Net and EF Core frameworks. As an ambassador " +
                     "for the DIGOS community, she provides a number of useful services for communities with similar " +

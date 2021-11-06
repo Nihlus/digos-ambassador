@@ -76,7 +76,7 @@ namespace DIGOS.Ambassador.Plugins.Characters
 
             serviceCollection.AddConfiguredSchemaAwareDbContextPool<CharactersDatabaseContext>();
 
-            serviceCollection.AddParser<Character, CharacterParser>();
+            serviceCollection.AddParser<CharacterParser>();
             serviceCollection.AddCommandGroup<CharacterCommands>();
 
             serviceCollection.AddCondition<RequireEntityOwnerCondition<Character>>();

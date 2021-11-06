@@ -68,8 +68,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole
             serviceCollection.TryAddScoped<AutoroleUpdateService>();
             serviceCollection.TryAddScoped<UserStatisticsService>();
 
-            serviceCollection.AddParser<AutoroleConfiguration, AutoroleConfigurationParser>();
-            serviceCollection.AddParser<IEmoji, EmojiTypeReader>();
+            serviceCollection.AddParser<AutoroleConfigurationParser>();
+            serviceCollection.AddParser<EmojiTypeReader>();
             serviceCollection.AddCommandGroup<AutoroleCommands>();
 
             serviceCollection.AddConfiguredSchemaAwareDbContextPool<AutoroleDatabaseContext>();

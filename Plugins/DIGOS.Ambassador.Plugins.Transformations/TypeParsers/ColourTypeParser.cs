@@ -35,7 +35,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.TypeParsers
     public sealed class ColourTypeParser : AbstractTypeParser<Colour>
     {
         /// <inheritdoc />
-        public override ValueTask<Result<Colour>> TryParse(string value, CancellationToken ct)
+        public override ValueTask<Result<Colour>> TryParseAsync(string value, CancellationToken ct = default)
         {
             value = value.Trim();
 

@@ -143,7 +143,7 @@ namespace DIGOS.Ambassador.Plugins.JumboEmotes.Commands
             var embed = new Embed
             {
                 Colour = Color.MediumPurple,
-                Image = new EmbedImage { Url = emoteUrl }
+                Image = new EmbedImage(emoteUrl)
             };
 
             var sendEmoji = await _channelAPI.CreateMessageAsync

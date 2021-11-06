@@ -122,7 +122,7 @@ namespace DIGOS.Ambassador.ExecutionEventServices
                 {
                     interactionContext.Data.UnpackInteraction(out var command, out var parameters);
                     potentialCommands = _commandService.Tree
-                        .Search(command, parameters, _tokenizerOptions, _treeSearchOptions)
+                        .Search(command, parameters, _treeSearchOptions)
                         .ToList();
 
                     break;

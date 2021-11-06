@@ -59,10 +59,7 @@ namespace DIGOS.Ambassador.Discord.Pagination.Extensions
 
             if (embed.Author.IsDefined(out var author))
             {
-                if (author.Name.IsDefined(out var name))
-                {
-                    length += name.Length;
-                }
+                length += author.Name.Length;
             }
 
             if (embed.Footer.IsDefined(out var footer))

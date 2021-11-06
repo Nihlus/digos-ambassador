@@ -98,7 +98,7 @@ namespace DIGOS.Ambassador.Plugins.Statistics.CommandGroups
             var guild = getGuild.Entity;
 
             var eb = CreateGuildInfoEmbed(guild);
-            return await _feedback.SendContextualEmbedAsync(eb, this.CancellationToken);
+            return await _feedback.SendContextualEmbedAsync(eb, ct: this.CancellationToken);
         }
 
         /// <summary>
@@ -200,9 +200,8 @@ namespace DIGOS.Ambassador.Plugins.Statistics.CommandGroups
             }
 
             var getGuildAuthorIcon = CDN.GetGuildIconUrl(guild);
-            var author = new EmbedAuthor
+            var author = new EmbedAuthor(guild.Name)
             {
-                Name = guild.Name,
                 IconUrl = getGuildAuthorIcon.IsSuccess
                     ? getGuildAuthorIcon.Entity.ToString()
                     : default(Optional<string>)

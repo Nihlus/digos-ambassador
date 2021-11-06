@@ -96,7 +96,7 @@ namespace DIGOS.Ambassador.Discord.Pagination.Responders
                 gatewayEvent.ID,
                 gatewayEvent.Token,
                 new InteractionResponse(InteractionCallbackType.DeferredUpdateMessage),
-                ct
+                ct: ct
             );
 
             if (!respondDeferred.IsSuccess)

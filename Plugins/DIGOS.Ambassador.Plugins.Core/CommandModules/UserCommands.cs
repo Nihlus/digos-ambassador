@@ -124,7 +124,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                 (
                     getUserAvatar.IsSuccess
                         ? getUserAvatar.Entity.ToString()
-                        : default(Optional<string>)
+                        : string.Empty
                 ),
                 Fields = embedFields
             };

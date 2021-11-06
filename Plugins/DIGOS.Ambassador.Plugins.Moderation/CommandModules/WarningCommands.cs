@@ -128,9 +128,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                     {
                         Title = $"Warning #{warning.ID} for {user.Username}:{user.Discriminator}",
                         Colour = Color.Orange,
-                        Author = new EmbedAuthor
+                        Author = new EmbedAuthor(author.Username)
                         {
-                            Name = author.Username,
                             IconUrl = getAuthorAvatar.IsSuccess
                                 ? getAuthorAvatar.Entity.ToString()
                                 : default(Optional<string>)

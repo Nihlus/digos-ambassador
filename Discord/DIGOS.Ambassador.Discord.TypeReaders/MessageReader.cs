@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Discord.TypeReaders
         }
 
         /// <inheritdoc />
-        public override async ValueTask<Result<IMessage>> TryParse(string value, CancellationToken ct)
+        public override async ValueTask<Result<IMessage>> TryParseAsync(string value, CancellationToken ct)
         {
             value = value.Trim();
 
