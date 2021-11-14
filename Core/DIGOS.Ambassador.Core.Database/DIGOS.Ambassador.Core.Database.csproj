@@ -1,21 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.10">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.0">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>compile; runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.FuzzyStringMatch" Version="5.0.10" />
-        <PackageReference Include="Remora.Results" Version="7.0.2" />
+        <PackageReference Include="Remora.Discord.Core" Version="4.0.1" />
+        <PackageReference Include="Remora.Results" Version="7.0.3" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Remora.EntityFrameworkCore.Modular" Version="3.0.1" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="5.0.10" />
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.10" />
+        <PackageReference Include="Remora.EntityFrameworkCore.Modular" Version="3.0.2" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="6.0.0" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.0" />
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\..\Remora\EntityFrameworkCore\Remora.EntityFrameworkCore.Modular\Remora.EntityFrameworkCore.Modular.csproj" />
       <ProjectReference Include="..\DIGOS.Ambassador.Core\DIGOS.Ambassador.Core.csproj" />
     </ItemGroup>
 

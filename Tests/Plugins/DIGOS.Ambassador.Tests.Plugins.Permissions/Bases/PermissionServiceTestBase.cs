@@ -28,6 +28,7 @@ using DIGOS.Ambassador.Plugins.Permissions.Model;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
 using DIGOS.Ambassador.Tests.TestBases;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -60,7 +61,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
         /// <inheritdoc />
         protected sealed override void RegisterServices(IServiceCollection serviceCollection)
         {
-            serviceCollection.AddDbContext<PermissionsDatabaseContext>(ConfigureOptions<PermissionsDatabaseContext>);
+            serviceCollection.AddDbContext<PermissionsDatabaseContext>(o => ConfigureOptions(o, "Permissions"));
 
             var guildMock = new Mock<IGuild>();
             guildMock.SetupGet(g => g.OwnerID).Returns(new Snowflake(3));
@@ -103,7 +104,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
         protected sealed override void ConfigureServices(IServiceProvider serviceProvider)
         {
             this.Database = serviceProvider.GetRequiredService<PermissionsDatabaseContext>();
-            this.Database.Database.EnsureCreated();
+            this.Database.Database.Migrate();
 
             this.Permissions = serviceProvider.GetRequiredService<PermissionService>();
         }

@@ -30,6 +30,7 @@ using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
 using DIGOS.Ambassador.Tests.TestBases;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -59,8 +60,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Roleplaying
         protected override void RegisterServices(IServiceCollection serviceCollection)
         {
             serviceCollection
-                .AddDbContext<CoreDatabaseContext>(ConfigureOptions<CoreDatabaseContext>)
-                .AddDbContext<RoleplayingDatabaseContext>(ConfigureOptions<RoleplayingDatabaseContext>);
+                .AddDbContext<CoreDatabaseContext>(o => ConfigureOptions(o, "Core"))
+                .AddDbContext<RoleplayingDatabaseContext>(o => ConfigureOptions(o, "Roleplaying"));
 
             serviceCollection
                 .AddScoped<CommandService>()
@@ -75,10 +76,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Roleplaying
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
             var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            coreDatabase.Database.EnsureCreated();
+            coreDatabase.Database.Migrate();
 
             this.Database = serviceProvider.GetRequiredService<RoleplayingDatabaseContext>();
-            this.Database.Database.EnsureCreated();
+            this.Database.Database.Migrate();
 
             this.Roleplays = serviceProvider.GetRequiredService<RoleplayService>();
         }

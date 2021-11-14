@@ -1,15 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>netstandard2.1</TargetFramework>
-    </PropertyGroup>
-
     <ItemGroup>
         <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Characters\DIGOS.Ambassador.Plugins.Characters.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Remora.Results" Version="7.0.2" />
+      <PackageReference Include="Remora.Results" Version="7.0.3" />
     </ItemGroup>
 
 </Project>

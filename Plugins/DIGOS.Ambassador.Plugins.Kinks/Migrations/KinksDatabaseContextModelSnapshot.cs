@@ -25,9 +25,9 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("KinkModule")
-                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn)
-                .HasAnnotation("ProductVersion", "3.1.0")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63)
+                .HasAnnotation("ProductVersion", "5.0.11")
+                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Core.Model.Users.User", b =>
                 {
@@ -48,7 +48,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Users","Core");
+                    b.ToTable("Users", "Core", t => t.ExcludeFromMigrations());
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Kinks.Model.Kink", b =>
@@ -74,7 +74,10 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Kinks","KinkModule");
+                    b.HasIndex("FListID")
+                        .IsUnique();
+
+                    b.ToTable("Kinks", "KinkModule");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Kinks.Model.UserKink", b =>
@@ -84,13 +87,13 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<long>("KinkID")
+                    b.Property<long?>("KinkID")
                         .HasColumnType("bigint");
 
                     b.Property<int>("Preference")
                         .HasColumnType("integer");
 
-                    b.Property<long>("UserID")
+                    b.Property<long?>("UserID")
                         .HasColumnType("bigint");
 
                     b.HasKey("ID");
@@ -99,22 +102,22 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("UserKinks","KinkModule");
+                    b.ToTable("UserKinks", "KinkModule");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Kinks.Model.UserKink", b =>
                 {
                     b.HasOne("DIGOS.Ambassador.Plugins.Kinks.Model.Kink", "Kink")
                         .WithMany()
-                        .HasForeignKey("KinkID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("KinkID");
 
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Users.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserID");
+
+                    b.Navigation("Kink");
+
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

@@ -47,6 +47,14 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleCondition"/> class.
         /// </summary>
+        [Obsolete("Required by EF Core.")]
+        protected RoleCondition()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RoleCondition"/> class.
+        /// </summary>
         /// <param name="roleID">The ID of the Discord role.</param>
         [UsedImplicitly]
         protected RoleCondition(Snowflake roleID)

@@ -22,11 +22,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Context;
-using DIGOS.Ambassador.Plugins.Core.Extensions;
-using DIGOS.Ambassador.Plugins.Moderation.Extensions;
-using DIGOS.Ambassador.Plugins.Permissions.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Remora.EntityFrameworkCore.Modular;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Moderation.Model
@@ -66,17 +62,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         public ModerationDatabaseContext(DbContextOptions<ModerationDatabaseContext> contextOptions)
             : base(SchemaName, contextOptions)
         {
-        }
-
-        /// <inheritdoc />
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-
-            modelBuilder
-                .ConfigurePermissionConversions()
-                .ConfigureCoreConversions()
-                .ConfigureModerationConversions();
         }
     }
 }

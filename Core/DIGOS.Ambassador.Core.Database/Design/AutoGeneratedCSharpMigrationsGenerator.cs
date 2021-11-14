@@ -54,7 +54,7 @@ namespace DIGOS.Ambassador.Core.Database.Design
         /// <inheritdoc />
         public override string GenerateMigration
         (
-            string migrationNamespace,
+            string? migrationNamespace,
             string migrationName,
             IReadOnlyList<MigrationOperation> upOperations,
             IReadOnlyList<MigrationOperation> downOperations
@@ -100,7 +100,7 @@ namespace DIGOS.Ambassador.Core.Database.Design
         /// <inheritdoc />
         public override string GenerateMetadata
         (
-            string migrationNamespace,
+            string? migrationNamespace,
             Type contextType,
             string migrationName,
             string migrationId,
@@ -134,7 +134,7 @@ namespace DIGOS.Ambassador.Core.Database.Design
         /// <inheritdoc />
         public override string GenerateSnapshot
         (
-            string modelSnapshotNamespace,
+            string? modelSnapshotNamespace,
             Type contextType,
             string modelSnapshotName,
             IModel model

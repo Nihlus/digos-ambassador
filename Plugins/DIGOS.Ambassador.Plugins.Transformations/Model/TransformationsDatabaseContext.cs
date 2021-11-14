@@ -22,13 +22,9 @@
 
 using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Context;
-using DIGOS.Ambassador.Plugins.Characters.Extensions;
-using DIGOS.Ambassador.Plugins.Core.Extensions;
-using DIGOS.Ambassador.Plugins.Permissions.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using Remora.EntityFrameworkCore.Modular;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Transformations.Model
@@ -83,11 +79,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
-            modelBuilder
-                .ConfigurePermissionConversions()
-                .ConfigureCoreConversions()
-                .ConfigureCharacterConversions();
 
             modelBuilder.Entity<Transformation>()
                 .OwnsOne(t => t.DefaultBaseColour, od => od.ToTable("DefaultBaseColours", SchemaName))

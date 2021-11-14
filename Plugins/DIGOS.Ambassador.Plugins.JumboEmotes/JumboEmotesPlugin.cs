@@ -25,7 +25,6 @@ using DIGOS.Ambassador.Plugins.JumboEmotes;
 using DIGOS.Ambassador.Plugins.JumboEmotes.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Commands.Extensions;
-using Remora.Discord.API.Abstractions.Objects;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
 

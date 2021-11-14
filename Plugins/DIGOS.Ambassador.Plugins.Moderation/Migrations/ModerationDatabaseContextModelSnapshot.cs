@@ -25,9 +25,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("ModerationModule")
-                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn)
-                .HasAnnotation("ProductVersion", "3.1.0")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63)
+                .HasAnnotation("ProductVersion", "5.0.11")
+                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Core.Model.Servers.Server", b =>
                 {
@@ -56,7 +56,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Servers","Core");
+                    b.ToTable("Servers", "Core", t => t.ExcludeFromMigrations());
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Core.Model.Users.ServerUser", b =>
@@ -69,7 +69,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
                     b.Property<long>("ServerID")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("UserID")
+                    b.Property<long?>("UserID")
                         .HasColumnType("bigint");
 
                     b.HasKey("ID");
@@ -78,7 +78,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("ServerUser","Core");
+                    b.ToTable("ServerUser", "Core", t => t.ExcludeFromMigrations());
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Core.Model.Users.User", b =>
@@ -100,7 +100,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Users","Core");
+                    b.ToTable("Users", "Core", t => t.ExcludeFromMigrations());
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Moderation.Model.ServerModerationSettings", b =>
@@ -116,7 +116,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
                     b.Property<long?>("MonitoringChannel")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("ServerID")
+                    b.Property<long?>("ServerID")
                         .HasColumnType("bigint");
 
                     b.Property<int>("WarningThreshold")
@@ -126,7 +126,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
 
                     b.HasIndex("ServerID");
 
-                    b.ToTable("ServerModerationSettings","ModerationModule");
+                    b.ToTable("ServerModerationSettings", "ModerationModule");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Moderation.Model.UserBan", b =>
@@ -136,7 +136,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<long>("AuthorID")
+                    b.Property<long?>("AuthorID")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("CreatedAt")
@@ -152,13 +152,13 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<long>("ServerID")
+                    b.Property<long?>("ServerID")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<long>("UserID")
+                    b.Property<long?>("UserID")
                         .HasColumnType("bigint");
 
                     b.HasKey("ID");
@@ -169,7 +169,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("UserBans","ModerationModule");
+                    b.ToTable("UserBans", "ModerationModule");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Moderation.Model.UserNote", b =>
@@ -179,7 +179,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<long>("AuthorID")
+                    b.Property<long?>("AuthorID")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Content")
@@ -189,13 +189,13 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<long>("ServerID")
+                    b.Property<long?>("ServerID")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<long>("UserID")
+                    b.Property<long?>("UserID")
                         .HasColumnType("bigint");
 
                     b.HasKey("ID");
@@ -206,7 +206,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("UserNotes","ModerationModule");
+                    b.ToTable("UserNotes", "ModerationModule");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Moderation.Model.UserWarning", b =>
@@ -216,7 +216,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<long>("AuthorID")
+                    b.Property<long?>("AuthorID")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("CreatedAt")
@@ -232,13 +232,13 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<long>("ServerID")
+                    b.Property<long?>("ServerID")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<long>("UserID")
+                    b.Property<long?>("UserID")
                         .HasColumnType("bigint");
 
                     b.HasKey("ID");
@@ -249,7 +249,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("UserWarnings","ModerationModule");
+                    b.ToTable("UserWarnings", "ModerationModule");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Core.Model.Users.ServerUser", b =>
@@ -262,81 +262,88 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
 
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Users.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserID");
+
+                    b.Navigation("Server");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Moderation.Model.ServerModerationSettings", b =>
                 {
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Servers.Server", "Server")
                         .WithMany()
-                        .HasForeignKey("ServerID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ServerID");
+
+                    b.Navigation("Server");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Moderation.Model.UserBan", b =>
                 {
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Users.User", "Author")
                         .WithMany()
-                        .HasForeignKey("AuthorID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("AuthorID");
 
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Servers.Server", "Server")
                         .WithMany()
-                        .HasForeignKey("ServerID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ServerID");
 
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Users.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserID");
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Server");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Moderation.Model.UserNote", b =>
                 {
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Users.User", "Author")
                         .WithMany()
-                        .HasForeignKey("AuthorID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("AuthorID");
 
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Servers.Server", "Server")
                         .WithMany()
-                        .HasForeignKey("ServerID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ServerID");
 
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Users.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserID");
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Server");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Moderation.Model.UserWarning", b =>
                 {
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Users.User", "Author")
                         .WithMany()
-                        .HasForeignKey("AuthorID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("AuthorID");
 
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Servers.Server", "Server")
                         .WithMany()
-                        .HasForeignKey("ServerID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ServerID");
 
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Users.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserID");
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Server");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DIGOS.Ambassador.Plugins.Core.Model.Servers.Server", b =>
+                {
+                    b.Navigation("KnownUsers");
                 });
 #pragma warning restore 612, 618
         }

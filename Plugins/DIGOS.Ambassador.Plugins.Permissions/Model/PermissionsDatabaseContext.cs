@@ -22,10 +22,8 @@
 
 using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Context;
-using DIGOS.Ambassador.Plugins.Permissions.Extensions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using Remora.EntityFrameworkCore.Modular;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Permissions.Model
@@ -55,14 +53,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Model
         public PermissionsDatabaseContext(DbContextOptions<PermissionsDatabaseContext> contextOptions)
             : base(SchemaName, contextOptions)
         {
-        }
-
-        /// <inheritdoc />
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-
-            modelBuilder.ConfigurePermissionConversions();
         }
     }
 }

@@ -20,7 +20,10 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Linq;
+using DIGOS.Ambassador.Core.Database.Converters;
 using Microsoft.EntityFrameworkCore;
+using Remora.Discord.Core;
 using Remora.EntityFrameworkCore.Modular;
 
 namespace DIGOS.Ambassador.Core.Database.Context
@@ -46,6 +49,14 @@ namespace DIGOS.Ambassador.Core.Database.Context
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.HasPostgresExtension("fuzzystrmatch");
+        }
+
+        /// <inheritdoc />
+        protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+        {
+            base.ConfigureConventions(configurationBuilder);
+
+            configurationBuilder.Properties<Snowflake>().HaveConversion(typeof(SnowflakeConverter));
         }
     }
 }

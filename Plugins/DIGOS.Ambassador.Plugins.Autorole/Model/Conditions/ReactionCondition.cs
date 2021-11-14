@@ -57,6 +57,15 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         /// <summary>
         /// Initializes a new instance of the <see cref="ReactionCondition"/> class.
         /// </summary>
+        [Obsolete("Required by EF Core.")]
+        protected ReactionCondition()
+        {
+            this.EmoteName = null!;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ReactionCondition"/> class.
+        /// </summary>
         /// <param name="channelID">The channel ID.</param>
         /// <param name="messageID">The message ID.</param>
         /// <param name="emoteName">The name of the emote.</param>

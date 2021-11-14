@@ -33,6 +33,7 @@ using DIGOS.Ambassador.Plugins.Transformations.Model;
 using DIGOS.Ambassador.Plugins.Transformations.Services;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using DIGOS.Ambassador.Tests.TestBases;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -80,9 +81,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
         protected override void RegisterServices(IServiceCollection serviceCollection)
         {
             serviceCollection
-                .AddDbContext<CoreDatabaseContext>(ConfigureOptions<CoreDatabaseContext>)
-                .AddDbContext<TransformationsDatabaseContext>(ConfigureOptions<TransformationsDatabaseContext>)
-                .AddDbContext<CharactersDatabaseContext>(ConfigureOptions<CharactersDatabaseContext>);
+                .AddDbContext<CoreDatabaseContext>(o => ConfigureOptions(o, "Core"))
+                .AddDbContext<TransformationsDatabaseContext>(o => ConfigureOptions(o, "Transformations"))
+                .AddDbContext<CharactersDatabaseContext>(o => ConfigureOptions(o, "Characters"));
 
             serviceCollection
                 .AddSingleton(s =>
@@ -108,7 +109,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             this.CharacterDatabase = serviceProvider.GetRequiredService<CharactersDatabaseContext>();
             this.Database = serviceProvider.GetRequiredService<TransformationsDatabaseContext>();
 
-            this.Database.Database.EnsureCreated();
+            this.Database.Database.Migrate();
 
             this.Transformations = serviceProvider.GetRequiredService<TransformationService>();
             this.Users = serviceProvider.GetRequiredService<UserService>();

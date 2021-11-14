@@ -21,15 +21,12 @@
 //
 
 using DIGOS.Ambassador.Core.Database.Context;
-using DIGOS.Ambassador.Plugins.Autorole.Extensions;
+using DIGOS.Ambassador.Core.Database.Converters;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Statistics;
-using DIGOS.Ambassador.Plugins.Core.Extensions;
-using DIGOS.Ambassador.Plugins.Permissions.Extensions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using Remora.EntityFrameworkCore.Modular;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Autorole.Model
@@ -74,11 +71,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
-            modelBuilder
-                .ConfigurePermissionConversions()
-                .ConfigureCoreConversions()
-                .ConfigureAutoroleConversions();
 
             modelBuilder.Entity<AutoroleConfiguration>()
                 .HasMany(ac => ac.Conditions)

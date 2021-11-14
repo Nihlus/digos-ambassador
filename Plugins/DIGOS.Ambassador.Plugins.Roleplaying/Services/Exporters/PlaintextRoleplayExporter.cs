@@ -26,7 +26,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using Microsoft.Extensions.DependencyInjection;
-using MoreLinq.Extensions;
 using Remora.Discord.API.Abstractions.Rest;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters

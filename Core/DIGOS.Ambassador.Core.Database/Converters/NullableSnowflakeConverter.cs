@@ -1,5 +1,5 @@
 //
-//  ModelBuilderExtensions.cs
+//  NullableSnowflakeConverter.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,29 +20,31 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using DIGOS.Ambassador.Plugins.Characters.Model;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Remora.Discord.Core;
 
-namespace DIGOS.Ambassador.Plugins.Characters.Extensions
+namespace DIGOS.Ambassador.Core.Database.Converters
 {
     /// <summary>
-    /// Contains extension methods for the <see cref="ModelBuilder"/> class.
+    /// Converts <see cref="Snowflake"/> instances to and from a database provider representation.
     /// </summary>
-    public static class ModelBuilderExtensions
+    public class NullableSnowflakeConverter : ValueConverter<Snowflake?, long?>
     {
         /// <summary>
-        /// Configures value conversions for entities from the character schema.
+        /// Initializes a new instance of the <see cref="NullableSnowflakeConverter"/> class.
         /// </summary>
-        /// <param name="modelBuilder">The model builder.</param>
-        /// <returns>The configured model builder.</returns>
-        public static ModelBuilder ConfigureCharacterConversions(this ModelBuilder modelBuilder)
+        /// <param name="mappingHints">The mapping hints.</param>
+        public NullableSnowflakeConverter
+        (
+            ConverterMappingHints? mappingHints = null
+        )
+            : base
+            (
+                v => v.HasValue ? (long)v.Value.Value : null,
+                v => v.HasValue ? new Snowflake((ulong)v) : null,
+                mappingHints
+            )
         {
-            modelBuilder.Entity<CharacterRole>()
-                .Property(s => s.DiscordID)
-                .HasConversion(v => (long)v.Value, v => new Snowflake((ulong)v));
-
-            return modelBuilder;
         }
     }
 }

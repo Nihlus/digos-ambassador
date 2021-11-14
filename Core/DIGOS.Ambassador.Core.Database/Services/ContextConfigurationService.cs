@@ -28,7 +28,6 @@ using DIGOS.Ambassador.Core.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Remora.EntityFrameworkCore.Modular;
-using Remora.EntityFrameworkCore.Modular.Services;
 
 namespace DIGOS.Ambassador.Core.Database.Services
 {
@@ -38,22 +37,15 @@ namespace DIGOS.Ambassador.Core.Database.Services
     public class ContextConfigurationService
     {
         private readonly ContentService _content;
-        private readonly SchemaAwareDbContextService _schemaAwareDbContextService;
         private readonly Dictionary<Type, string> _knownSchemas;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ContextConfigurationService"/> class.
         /// </summary>
         /// <param name="content">The content service.</param>
-        /// <param name="schemaAwareDbContextService">The schema-aware database context service.</param>
-        public ContextConfigurationService
-        (
-            ContentService content,
-            SchemaAwareDbContextService schemaAwareDbContextService
-        )
+        public ContextConfigurationService(ContentService content)
         {
             _content = content;
-            _schemaAwareDbContextService = schemaAwareDbContextService;
             _knownSchemas = new Dictionary<Type, string>();
         }
 
@@ -106,12 +98,8 @@ namespace DIGOS.Ambassador.Core.Database.Services
                 .UseNpgsql
                 (
                     credentials.GetConnectionString(),
-                    b => b
-                        .MigrationsHistoryTable(HistoryRepository.DefaultTableName + schema)
-                        .UseFuzzyStringMatch()
+                    b => b.MigrationsHistoryTable(HistoryRepository.DefaultTableName + schema)
                 );
-
-            _schemaAwareDbContextService.ConfigureSchemaAwareContext(optionsBuilder);
         }
     }
 }

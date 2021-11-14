@@ -137,8 +137,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
         protected override void RegisterServices(IServiceCollection serviceCollection)
         {
             serviceCollection
-                .AddDbContext<CoreDatabaseContext>(ConfigureOptions<CoreDatabaseContext>)
-                .AddDbContext<CharactersDatabaseContext>(ConfigureOptions<CharactersDatabaseContext>);
+                .AddDbContext<CoreDatabaseContext>(o => ConfigureOptions(o, "Core"))
+                .AddDbContext<CharactersDatabaseContext>(o => ConfigureOptions(o, "Characters"));
 
             serviceCollection
                 .AddSingleton(FileSystemFactory.CreateContentFileSystem())
@@ -157,7 +157,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
             var charactersDatabase = serviceProvider.GetRequiredService<CharactersDatabaseContext>();
-            charactersDatabase.Database.EnsureCreated();
+            charactersDatabase.Database.Migrate();
 
             this.Database = charactersDatabase;
 

@@ -21,12 +21,8 @@
 //
 
 using DIGOS.Ambassador.Core.Database.Context;
-using DIGOS.Ambassador.Plugins.Core.Extensions;
-using DIGOS.Ambassador.Plugins.Permissions.Extensions;
-using DIGOS.Ambassador.Plugins.Roleplaying.Extensions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using Remora.EntityFrameworkCore.Modular;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
@@ -61,11 +57,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
-            modelBuilder
-                .ConfigurePermissionConversions()
-                .ConfigureCoreConversions()
-                .ConfigureRoleplayConversions();
 
             modelBuilder.Entity<Roleplay>().HasMany(r => r.ParticipatingUsers).WithOne(pu => pu.Roleplay);
             modelBuilder.Entity<RoleplayParticipant>().HasOne(rp => rp.User).WithMany();

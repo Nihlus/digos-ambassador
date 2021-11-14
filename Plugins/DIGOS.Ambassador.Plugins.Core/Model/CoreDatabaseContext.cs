@@ -21,13 +21,10 @@
 //
 
 using DIGOS.Ambassador.Core.Database.Context;
-using DIGOS.Ambassador.Plugins.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
-using DIGOS.Ambassador.Plugins.Permissions.Extensions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using Remora.EntityFrameworkCore.Modular;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Core.Model
@@ -70,10 +67,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Model
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
-            modelBuilder
-                .ConfigurePermissionConversions()
-                .ConfigureCoreConversions();
 
             modelBuilder.Entity<ServerUser>().HasOne(su => su.Server).WithMany(s => s.KnownUsers);
             modelBuilder.Entity<ServerUser>().HasOne(su => su.User).WithMany();

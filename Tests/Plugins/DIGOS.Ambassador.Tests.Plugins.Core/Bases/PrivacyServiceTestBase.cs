@@ -26,6 +26,7 @@ using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Tests.TestBases;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -59,7 +60,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
         /// <inheritdoc />
         protected override void RegisterServices(IServiceCollection serviceCollection)
         {
-            serviceCollection.AddDbContext<CoreDatabaseContext>(ConfigureOptions<CoreDatabaseContext>);
+            serviceCollection.AddDbContext<CoreDatabaseContext>(o => ConfigureOptions(o, "Core"));
 
             var channelAPIMock = new Mock<IDiscordRestChannelAPI>();
             var userAPIMock = new Mock<IDiscordRestUserAPI>();
@@ -82,7 +83,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
             this.Database = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            this.Database.Database.EnsureCreated();
+            this.Database.Database.Migrate();
 
             this.Privacy = serviceProvider.GetRequiredService<PrivacyService>();
         }

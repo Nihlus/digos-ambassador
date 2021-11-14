@@ -21,12 +21,10 @@
 //
 
 using System;
-using System.Data;
+using DoomedDatabases.Postgres;
 using JetBrains.Annotations;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Remora.EntityFrameworkCore.Modular;
-using Remora.EntityFrameworkCore.Modular.Services;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace DIGOS.Ambassador.Tests.TestBases
 {
@@ -36,38 +34,42 @@ namespace DIGOS.Ambassador.Tests.TestBases
     [PublicAPI]
     public abstract class DatabaseProvidingTestBase : ServiceProvidingTestBase, IDisposable
     {
-        private readonly SqliteConnection _connection = new($"DataSource=:memory:?mode={Guid.NewGuid()}&cache=shared");
+        private static readonly string ConnectionString =
+            "User ID=integration_test_user;Password=integration_test_password;Server=localhost;Port=6432;Database=integration_test_db";
+
+        private readonly ITestDatabase _testDatabase = new TestDatabaseBuilder()
+            .WithConnectionString(ConnectionString)
+            .Build();
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatabaseProvidingTestBase"/> class.
+        /// </summary>
+        protected DatabaseProvidingTestBase()
+        {
+            _testDatabase.Create();
+        }
 
         /// <summary>
         /// Configures the given options builder to use the underlying test database.
         /// </summary>
         /// <param name="optionsBuilder">The builder to configure.</param>
-        /// <typeparam name="TContext">The context type to configure.</typeparam>
-        protected void ConfigureOptions<TContext>(DbContextOptionsBuilder optionsBuilder)
-            where TContext : DbContext
+        /// <param name="schema">The schema of the context to configure.</param>
+        protected void ConfigureOptions(DbContextOptionsBuilder optionsBuilder, string schema)
         {
-            if (_connection.State != ConnectionState.Open)
-            {
-                _connection.Open();
-            }
-
             optionsBuilder
                 .UseLazyLoadingProxies()
-                .UseSqlite(_connection);
-
-            var contextService = new SchemaAwareDbContextService();
-
-            if (typeof(TContext).IsSubclassOf(typeof(SchemaAwareDbContext)))
-            {
-                contextService.ConfigureSchemaAwareContext(optionsBuilder);
-            }
+                .UseNpgsql
+                (
+                    ConnectionString,
+                    b => b.MigrationsHistoryTable(HistoryRepository.DefaultTableName + schema)
+                );
         }
 
         /// <inheritdoc />
         public void Dispose()
         {
             GC.SuppressFinalize(this);
-            _connection.Dispose();
+            _testDatabase.Drop();
         }
     }
 }

@@ -6,12 +6,12 @@
 
     <ItemGroup>
         <PackageReference Include="morelinq" Version="3.3.2" />
-        <PackageReference Include="Remora.Results" Version="7.0.2" />
+        <PackageReference Include="Remora.Results" Version="7.0.3" />
     </ItemGroup>
 
     <!-- Workaround for a problem with EF Core -->
     <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.10">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

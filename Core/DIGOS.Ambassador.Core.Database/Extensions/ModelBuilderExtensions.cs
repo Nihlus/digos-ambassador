@@ -20,35 +20,27 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using DIGOS.Ambassador.Plugins.Permissions.Model;
 using Microsoft.EntityFrameworkCore;
-using Remora.Discord.Core;
+using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace DIGOS.Ambassador.Plugins.Permissions.Extensions
+namespace DIGOS.Ambassador.Core.Database.Extensions
 {
     /// <summary>
-    /// Contains extension methods for the <see cref="ModelBuilder"/> class.
+    /// Defines extension methods for the <see cref="ModelBuilder"/> class.
     /// </summary>
     public static class ModelBuilderExtensions
     {
         /// <summary>
-        /// Configures value conversions for entities from the permissions schema.
+        /// Excludes the given entity type from migrations.
         /// </summary>
         /// <param name="modelBuilder">The model builder.</param>
-        /// <returns>The configured model builder.</returns>
-        public static ModelBuilder ConfigurePermissionConversions(this ModelBuilder modelBuilder)
+        /// <typeparam name="TEntity">The entity type.</typeparam>
+        /// <returns>The model builder, with the type excluded.</returns>
+        public static ModelBuilder ExcludeEntityFromMigrations<TEntity>(this ModelBuilder modelBuilder)
+            where TEntity : class
         {
-            modelBuilder.Entity<UserPermission>()
-                .Property(s => s.ServerID)
-                .HasConversion(v => (long)v.Value, v => new Snowflake((ulong)v));
-
-            modelBuilder.Entity<UserPermission>()
-                .Property(s => s.UserID)
-                .HasConversion(v => (long)v.Value, v => new Snowflake((ulong)v));
-
-            modelBuilder.Entity<RolePermission>()
-                .Property(s => s.RoleID)
-                .HasConversion(v => (long)v.Value, v => new Snowflake((ulong)v));
+            modelBuilder.Entity<TEntity>().ToTable("placeholder", t => t.ExcludeFromMigrations());
+            modelBuilder.Entity<TEntity>().Metadata.RemoveAnnotation(RelationalAnnotationNames.TableName);
 
             return modelBuilder;
         }

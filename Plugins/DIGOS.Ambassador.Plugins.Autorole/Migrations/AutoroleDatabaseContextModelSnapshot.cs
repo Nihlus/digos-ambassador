@@ -14,6 +14,8 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
+#nullable disable
+
 namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
 {
     [DbContext(typeof(AutoroleDatabaseContext))]
@@ -25,16 +27,19 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("AutoroleModule")
-                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn)
-                .HasAnnotation("ProductVersion", "3.1.6")
+                .HasAnnotation("ProductVersion", "6.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
+
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "fuzzystrmatch");
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.AutoroleConfiguration", b =>
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
 
                     b.Property<long>("DiscordRoleID")
                         .HasColumnType("bigint");
@@ -52,15 +57,16 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
 
                     b.HasIndex("ServerID");
 
-                    b.ToTable("AutoroleConfigurations","AutoroleModule");
+                    b.ToTable("AutoroleConfigurations", "AutoroleModule");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.AutoroleConfirmation", b =>
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
 
                     b.Property<long>("AutoroleID")
                         .HasColumnType("bigint");
@@ -80,15 +86,16 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("AutoroleConfirmations","AutoroleModule");
+                    b.ToTable("AutoroleConfirmations", "AutoroleModule");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.AutoroleServerSettings", b =>
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
 
                     b.Property<long?>("AffirmationRequiredNotificationChannelID")
                         .HasColumnType("bigint");
@@ -100,15 +107,16 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
 
                     b.HasIndex("ServerID");
 
-                    b.ToTable("AutoroleServerSettings");
+                    b.ToTable("AutoroleServerSettings", "AutoroleModule");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases.AutoroleCondition", b =>
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
 
                     b.Property<long?>("AutoroleConfigurationID")
                         .HasColumnType("bigint");
@@ -121,7 +129,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
 
                     b.HasIndex("AutoroleConfigurationID");
 
-                    b.ToTable("AutoroleConditions","AutoroleModule");
+                    b.ToTable("AutoroleConditions", "AutoroleModule");
 
                     b.HasDiscriminator<string>("Discriminator").HasValue("AutoroleCondition");
                 });
@@ -130,8 +138,9 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
 
                     b.Property<long>("ChannelID")
                         .HasColumnType("bigint");
@@ -149,18 +158,19 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                     b.HasIndex("ChannelID", "UserServerStatisticsID")
                         .IsUnique();
 
-                    b.ToTable("UserChannelStatistics","AutoroleModule");
+                    b.ToTable("UserChannelStatistics", "AutoroleModule");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.Statistics.UserServerStatistics", b =>
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
 
                     b.Property<DateTime?>("LastActivityTime")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<long>("ServerID")
                         .HasColumnType("bigint");
@@ -178,15 +188,16 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                     b.HasIndex("ServerID", "UserStatisticsID")
                         .IsUnique();
 
-                    b.ToTable("UserServerStatistics","AutoroleModule");
+                    b.ToTable("UserServerStatistics", "AutoroleModule");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.Statistics.UserStatistics", b =>
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
 
                     b.Property<long>("UserID")
                         .HasColumnType("bigint");
@@ -196,15 +207,16 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                     b.HasIndex("UserID")
                         .IsUnique();
 
-                    b.ToTable("UserStatistics","AutoroleModule");
+                    b.ToTable("UserStatistics", "AutoroleModule");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Core.Model.Servers.Server", b =>
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
 
                     b.Property<string>("Description")
                         .HasColumnType("text");
@@ -226,15 +238,16 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Servers","Core");
+                    b.ToTable("Servers", "Core", t => t.ExcludeFromMigrations());
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Core.Model.Users.ServerUser", b =>
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
 
                     b.Property<long>("ServerID")
                         .HasColumnType("bigint");
@@ -248,15 +261,16 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("ServerUser","Core");
+                    b.ToTable("ServerUser", "Core", t => t.ExcludeFromMigrations());
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Core.Model.Users.User", b =>
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
 
                     b.Property<string>("Bio")
                         .IsRequired()
@@ -270,7 +284,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Users","Core");
+                    b.ToTable("Users", "Core", t => t.ExcludeFromMigrations());
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases.MessageCountInSourceCondition<DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.MessageCountInChannelCondition>", b =>
@@ -278,14 +292,16 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                     b.HasBaseType("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases.AutoroleCondition");
 
                     b.Property<long>("RequiredCount")
-                        .HasColumnName("RequiredCount")
-                        .HasColumnType("bigint");
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("bigint")
+                        .HasColumnName("RequiredCount");
 
                     b.Property<long>("SourceID")
-                        .HasColumnName("SourceID")
-                        .HasColumnType("bigint");
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("bigint")
+                        .HasColumnName("SourceID");
 
-                    b.ToTable("AutoroleConditions","AutoroleModule");
+                    b.ToTable("AutoroleConditions", "AutoroleModule");
 
                     b.HasDiscriminator().HasValue("MessageCountInSourceCondition<MessageCountInChannelCondition>");
                 });
@@ -295,14 +311,16 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                     b.HasBaseType("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases.AutoroleCondition");
 
                     b.Property<long>("RequiredCount")
-                        .HasColumnName("RequiredCount")
-                        .HasColumnType("bigint");
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("bigint")
+                        .HasColumnName("RequiredCount");
 
                     b.Property<long>("SourceID")
-                        .HasColumnName("SourceID")
-                        .HasColumnType("bigint");
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("bigint")
+                        .HasColumnName("SourceID");
 
-                    b.ToTable("AutoroleConditions","AutoroleModule");
+                    b.ToTable("AutoroleConditions", "AutoroleModule");
 
                     b.HasDiscriminator().HasValue("MessageCountInSourceCondition<MessageCountInGuildCondition>");
                 });
@@ -312,10 +330,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                     b.HasBaseType("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases.AutoroleCondition");
 
                     b.Property<TimeSpan>("RequiredTime")
-                        .HasColumnName("RequiredTime")
-                        .HasColumnType("interval");
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("interval")
+                        .HasColumnName("RequiredTime");
 
-                    b.ToTable("AutoroleConditions","AutoroleModule");
+                    b.ToTable("AutoroleConditions", "AutoroleModule");
 
                     b.HasDiscriminator().HasValue("TimeSinceEventCondition<TimeSinceJoinCondition>");
                 });
@@ -325,10 +344,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                     b.HasBaseType("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases.AutoroleCondition");
 
                     b.Property<TimeSpan>("RequiredTime")
-                        .HasColumnName("RequiredTime")
-                        .HasColumnType("interval");
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("interval")
+                        .HasColumnName("RequiredTime");
 
-                    b.ToTable("AutoroleConditions","AutoroleModule");
+                    b.ToTable("AutoroleConditions", "AutoroleModule");
 
                     b.HasDiscriminator().HasValue("TimeSinceEventCondition<TimeSinceLastActivityCondition>");
                 });
@@ -347,7 +367,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                     b.Property<long>("MessageID")
                         .HasColumnType("bigint");
 
-                    b.ToTable("AutoroleConditions","AutoroleModule");
+                    b.ToTable("AutoroleConditions", "AutoroleModule");
 
                     b.HasDiscriminator().HasValue("ReactionCondition");
                 });
@@ -359,7 +379,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                     b.Property<long>("RoleID")
                         .HasColumnType("bigint");
 
-                    b.ToTable("AutoroleConditions","AutoroleModule");
+                    b.ToTable("AutoroleConditions", "AutoroleModule");
 
                     b.HasDiscriminator().HasValue("RoleCondition");
                 });
@@ -368,7 +388,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                 {
                     b.HasBaseType("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases.MessageCountInSourceCondition<DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.MessageCountInChannelCondition>");
 
-                    b.ToTable("AutoroleConditions","AutoroleModule");
+                    b.ToTable("AutoroleConditions", "AutoroleModule");
 
                     b.HasDiscriminator().HasValue("MessageCountInChannelCondition");
                 });
@@ -377,7 +397,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                 {
                     b.HasBaseType("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases.MessageCountInSourceCondition<DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.MessageCountInGuildCondition>");
 
-                    b.ToTable("AutoroleConditions","AutoroleModule");
+                    b.ToTable("AutoroleConditions", "AutoroleModule");
 
                     b.HasDiscriminator().HasValue("MessageCountInGuildCondition");
                 });
@@ -386,7 +406,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                 {
                     b.HasBaseType("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases.TimeSinceEventCondition<DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.TimeSinceJoinCondition>");
 
-                    b.ToTable("AutoroleConditions","AutoroleModule");
+                    b.ToTable("AutoroleConditions", "AutoroleModule");
 
                     b.HasDiscriminator().HasValue("TimeSinceJoinCondition");
                 });
@@ -395,7 +415,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                 {
                     b.HasBaseType("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases.TimeSinceEventCondition<DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.TimeSinceLastActivityCondition>");
 
-                    b.ToTable("AutoroleConditions","AutoroleModule");
+                    b.ToTable("AutoroleConditions", "AutoroleModule");
 
                     b.HasDiscriminator().HasValue("TimeSinceLastActivityCondition");
                 });
@@ -407,6 +427,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                         .HasForeignKey("ServerID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Server");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.AutoroleConfirmation", b =>
@@ -422,6 +444,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Autorole");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.AutoroleServerSettings", b =>
@@ -431,6 +457,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                         .HasForeignKey("ServerID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Server");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases.AutoroleCondition", b =>
@@ -461,6 +489,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                         .WithMany("ServerStatistics")
                         .HasForeignKey("UserStatisticsID")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Server");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.Statistics.UserStatistics", b =>
@@ -470,6 +500,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Core.Model.Users.ServerUser", b =>
@@ -485,6 +517,30 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Server");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.AutoroleConfiguration", b =>
+                {
+                    b.Navigation("Conditions");
+                });
+
+            modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.Statistics.UserServerStatistics", b =>
+                {
+                    b.Navigation("ChannelStatistics");
+                });
+
+            modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.Statistics.UserStatistics", b =>
+                {
+                    b.Navigation("ServerStatistics");
+                });
+
+            modelBuilder.Entity("DIGOS.Ambassador.Plugins.Core.Model.Servers.Server", b =>
+                {
+                    b.Navigation("KnownUsers");
                 });
 #pragma warning restore 612, 618
         }

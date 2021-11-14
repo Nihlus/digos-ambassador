@@ -28,6 +28,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Discord.Interactivity.Extensions;
 using DIGOS.Ambassador.Plugins.Characters;
+using DIGOS.Ambassador.Plugins.Characters.Autocomplete;
 using DIGOS.Ambassador.Plugins.Characters.CommandModules;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Parsers;
@@ -40,6 +41,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Remora.Commands.Extensions;
+using Remora.Discord.Commands.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
 using Remora.Results;
@@ -80,6 +82,8 @@ namespace DIGOS.Ambassador.Plugins.Characters
             serviceCollection.AddCommandGroup<CharacterCommands>();
 
             serviceCollection.AddCondition<RequireEntityOwnerCondition<Character>>();
+
+            serviceCollection.AddAutocompleteProvider<CharacterAutocompleteProvider>();
         }
 
         /// <inheritdoc />

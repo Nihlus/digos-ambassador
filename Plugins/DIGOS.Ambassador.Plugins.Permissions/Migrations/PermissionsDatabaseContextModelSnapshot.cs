@@ -25,9 +25,9 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("PermissionModule")
-                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn)
-                .HasAnnotation("ProductVersion", "3.1.0")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63)
+                .HasAnnotation("ProductVersion", "5.0.11")
+                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Permissions.Model.RolePermission", b =>
                 {
@@ -50,7 +50,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("RolePermissions","PermissionModule");
+                    b.ToTable("RolePermissions", "PermissionModule");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Permissions.Model.UserPermission", b =>
@@ -77,7 +77,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("UserPermissions","PermissionModule");
+                    b.ToTable("UserPermissions", "PermissionModule");
                 });
 #pragma warning restore 612, 618
         }

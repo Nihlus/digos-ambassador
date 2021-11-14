@@ -25,9 +25,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("TransformationModule")
-                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn)
-                .HasAnnotation("ProductVersion", "3.1.0")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63)
+                .HasAnnotation("ProductVersion", "5.0.11")
+                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Characters.Model.Character", b =>
                 {
@@ -61,7 +61,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<long>("OwnerID")
+                    b.Property<long?>("OwnerID")
                         .HasColumnType("bigint");
 
                     b.Property<string>("PronounProviderFamily")
@@ -71,7 +71,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
                     b.Property<long?>("RoleID")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("ServerID")
+                    b.Property<long?>("ServerID")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Summary")
@@ -84,7 +84,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
 
                     b.HasIndex("RoleID");
 
-                    b.ToTable("Characters","CharacterModule");
+                    b.HasIndex("ServerID");
+
+                    b.ToTable("Characters", "CharacterModule", t => t.ExcludeFromMigrations());
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Characters.Model.CharacterRole", b =>
@@ -100,14 +102,14 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
                     b.Property<long>("DiscordID")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("ServerID")
+                    b.Property<long?>("ServerID")
                         .HasColumnType("bigint");
 
                     b.HasKey("ID");
 
                     b.HasIndex("ServerID");
 
-                    b.ToTable("CharacterRoles","CharacterModule");
+                    b.ToTable("CharacterRoles", "CharacterModule", t => t.ExcludeFromMigrations());
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Characters.Model.Data.Image", b =>
@@ -139,7 +141,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
 
                     b.HasIndex("CharacterID");
 
-                    b.ToTable("Images","CharacterModule");
+                    b.ToTable("Images", "CharacterModule", t => t.ExcludeFromMigrations());
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Core.Model.Servers.Server", b =>
@@ -169,7 +171,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Servers","Core");
+                    b.ToTable("Servers", "Core", t => t.ExcludeFromMigrations());
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Core.Model.Users.ServerUser", b =>
@@ -182,7 +184,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
                     b.Property<long>("ServerID")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("UserID")
+                    b.Property<long?>("UserID")
                         .HasColumnType("bigint");
 
                     b.HasKey("ID");
@@ -191,7 +193,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("ServerUser","Core");
+                    b.ToTable("ServerUser", "Core", t => t.ExcludeFromMigrations());
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Core.Model.Users.User", b =>
@@ -213,7 +215,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Users","Core");
+                    b.ToTable("Users", "Core", t => t.ExcludeFromMigrations());
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Transformations.Model.Appearances.Appearance", b =>
@@ -223,7 +225,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<long>("CharacterID")
+                    b.Property<long?>("CharacterID")
                         .HasColumnType("bigint");
 
                     b.Property<double>("Height")
@@ -245,7 +247,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
 
                     b.HasIndex("CharacterID");
 
-                    b.ToTable("Appearances","TransformationModule");
+                    b.ToTable("Appearances", "TransformationModule");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Transformations.Model.GlobalUserProtection", b =>
@@ -261,14 +263,14 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
                     b.Property<int>("DefaultType")
                         .HasColumnType("integer");
 
-                    b.Property<long>("UserID")
+                    b.Property<long?>("UserID")
                         .HasColumnType("bigint");
 
                     b.HasKey("ID");
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("GlobalUserProtections","TransformationModule");
+                    b.ToTable("GlobalUserProtections", "TransformationModule");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Transformations.Model.ServerUserProtection", b =>
@@ -281,13 +283,13 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
                     b.Property<bool>("HasOptedIn")
                         .HasColumnType("boolean");
 
-                    b.Property<long>("ServerID")
+                    b.Property<long?>("ServerID")
                         .HasColumnType("bigint");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer");
 
-                    b.Property<long>("UserID")
+                    b.Property<long?>("UserID")
                         .HasColumnType("bigint");
 
                     b.HasKey("ID");
@@ -296,7 +298,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("ServerUserProtections","TransformationModule");
+                    b.ToTable("ServerUserProtections", "TransformationModule");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Transformations.Model.Species", b =>
@@ -325,7 +327,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
 
                     b.HasIndex("ParentID");
 
-                    b.ToTable("Species","TransformationModule");
+                    b.ToTable("Species", "TransformationModule");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Transformations.Model.Transformation", b =>
@@ -360,7 +362,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<long>("SpeciesID")
+                    b.Property<long?>("SpeciesID")
                         .HasColumnType("bigint");
 
                     b.Property<string>("UniformDescription")
@@ -376,7 +378,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
 
                     b.HasIndex("SpeciesID");
 
-                    b.ToTable("Transformations","TransformationModule");
+                    b.ToTable("Transformations", "TransformationModule");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Transformations.Model.UserProtectionEntry", b =>
@@ -392,7 +394,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("integer");
 
-                    b.Property<long>("UserID")
+                    b.Property<long?>("UserID")
                         .HasColumnType("bigint");
 
                     b.HasKey("ID");
@@ -401,29 +403,37 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("UserProtectionEntries","TransformationModule");
+                    b.ToTable("UserProtectionEntries", "TransformationModule");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Characters.Model.Character", b =>
                 {
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Users.User", "Owner")
                         .WithMany()
-                        .HasForeignKey("OwnerID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("OwnerID");
 
                     b.HasOne("DIGOS.Ambassador.Plugins.Characters.Model.CharacterRole", "Role")
                         .WithMany()
                         .HasForeignKey("RoleID");
+
+                    b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Servers.Server", "Server")
+                        .WithMany()
+                        .HasForeignKey("ServerID");
+
+                    b.Navigation("Owner");
+
+                    b.Navigation("Role");
+
+                    b.Navigation("Server");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Characters.Model.CharacterRole", b =>
                 {
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Servers.Server", "Server")
                         .WithMany()
-                        .HasForeignKey("ServerID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ServerID");
+
+                    b.Navigation("Server");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Characters.Model.Data.Image", b =>
@@ -443,18 +453,18 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
 
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Users.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserID");
+
+                    b.Navigation("Server");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Transformations.Model.Appearances.Appearance", b =>
                 {
                     b.HasOne("DIGOS.Ambassador.Plugins.Characters.Model.Character", "Character")
                         .WithMany()
-                        .HasForeignKey("CharacterID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CharacterID");
 
                     b.OwnsMany("DIGOS.Ambassador.Plugins.Transformations.Model.Appearances.AppearanceComponent", "Components", b1 =>
                         {
@@ -481,7 +491,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
 
                             b1.HasIndex("TransformationID");
 
-                            b1.ToTable("AppearanceComponents","TransformationModule");
+                            b1.ToTable("AppearanceComponents", "TransformationModule");
 
                             b1.WithOwner()
                                 .HasForeignKey("AppearanceID");
@@ -505,7 +515,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
 
                                     b2.HasKey("AppearanceComponentID");
 
-                                    b2.ToTable("BaseColours","TransformationModule");
+                                    b2.ToTable("BaseColours", "TransformationModule");
 
                                     b2.WithOwner()
                                         .HasForeignKey("AppearanceComponentID");
@@ -524,36 +534,47 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
 
                                     b2.HasKey("AppearanceComponentID");
 
-                                    b2.ToTable("PatternColours","TransformationModule");
+                                    b2.ToTable("PatternColours", "TransformationModule");
 
                                     b2.WithOwner()
                                         .HasForeignKey("AppearanceComponentID");
                                 });
+
+                            b1.Navigation("BaseColour")
+                                .IsRequired();
+
+                            b1.Navigation("PatternColour");
+
+                            b1.Navigation("Transformation");
                         });
+
+                    b.Navigation("Character");
+
+                    b.Navigation("Components");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Transformations.Model.GlobalUserProtection", b =>
                 {
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Users.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserID");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Transformations.Model.ServerUserProtection", b =>
                 {
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Servers.Server", "Server")
                         .WithMany()
-                        .HasForeignKey("ServerID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ServerID");
 
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Users.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserID");
+
+                    b.Navigation("Server");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Transformations.Model.Species", b =>
@@ -561,15 +582,15 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
                     b.HasOne("DIGOS.Ambassador.Plugins.Transformations.Model.Species", "Parent")
                         .WithMany()
                         .HasForeignKey("ParentID");
+
+                    b.Navigation("Parent");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Transformations.Model.Transformation", b =>
                 {
                     b.HasOne("DIGOS.Ambassador.Plugins.Transformations.Model.Species", "Species")
                         .WithMany()
-                        .HasForeignKey("SpeciesID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("SpeciesID");
 
                     b.OwnsOne("DIGOS.Ambassador.Plugins.Transformations.Model.Appearances.Colour", "DefaultBaseColour", b1 =>
                         {
@@ -584,7 +605,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
 
                             b1.HasKey("TransformationID");
 
-                            b1.ToTable("DefaultBaseColours","TransformationModule");
+                            b1.ToTable("DefaultBaseColours", "TransformationModule");
 
                             b1.WithOwner()
                                 .HasForeignKey("TransformationID");
@@ -603,11 +624,18 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
 
                             b1.HasKey("TransformationID");
 
-                            b1.ToTable("DefaultPatternColours","TransformationModule");
+                            b1.ToTable("DefaultPatternColours", "TransformationModule");
 
                             b1.WithOwner()
                                 .HasForeignKey("TransformationID");
                         });
+
+                    b.Navigation("DefaultBaseColour")
+                        .IsRequired();
+
+                    b.Navigation("DefaultPatternColour");
+
+                    b.Navigation("Species");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Transformations.Model.UserProtectionEntry", b =>
@@ -620,9 +648,26 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
 
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Users.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserID");
+
+                    b.Navigation("GlobalProtection");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DIGOS.Ambassador.Plugins.Characters.Model.Character", b =>
+                {
+                    b.Navigation("Images");
+                });
+
+            modelBuilder.Entity("DIGOS.Ambassador.Plugins.Core.Model.Servers.Server", b =>
+                {
+                    b.Navigation("KnownUsers");
+                });
+
+            modelBuilder.Entity("DIGOS.Ambassador.Plugins.Transformations.Model.GlobalUserProtection", b =>
+                {
+                    b.Navigation("UserListing");
                 });
 #pragma warning restore 612, 618
         }

@@ -28,6 +28,7 @@ using DIGOS.Ambassador.Plugins.Moderation.Model;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
 using DIGOS.Ambassador.Tests.TestBases;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -56,8 +57,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Bases
         protected override void RegisterServices(IServiceCollection serviceCollection)
         {
             serviceCollection
-                .AddDbContext<CoreDatabaseContext>(ConfigureOptions<CoreDatabaseContext>)
-                .AddDbContext<ModerationDatabaseContext>(ConfigureOptions<ModerationDatabaseContext>);
+                .AddDbContext<CoreDatabaseContext>(o => ConfigureOptions(o, "Core"))
+                .AddDbContext<ModerationDatabaseContext>(o => ConfigureOptions(o, "Moderation"));
 
             serviceCollection
                 .AddScoped<ServerService>()
@@ -69,7 +70,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Bases
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
             var moderationDatabase = serviceProvider.GetRequiredService<ModerationDatabaseContext>();
-            moderationDatabase.Database.EnsureCreated();
+            moderationDatabase.Database.Migrate();
 
             this.Database = moderationDatabase;
             this.Moderation = serviceProvider.GetRequiredService<ModerationService>();

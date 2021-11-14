@@ -175,7 +175,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             var author = getAuthor.Entity;
 
-            var ban = _database.CreateProxy<UserBan>(server, user, author, string.Empty, null, null);
+            var ban = _database.CreateProxy<UserBan>(server, user, author, string.Empty, null!, null!);
             _database.UserBans.Update(ban);
 
             var setReason = await SetBanReasonAsync(ban, reason, ct);

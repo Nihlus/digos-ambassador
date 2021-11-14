@@ -202,7 +202,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             var author = getAuthor.Entity;
 
-            var warning = _database.CreateProxy<UserWarning>(server, user, author, string.Empty, null, null);
+            var warning = _database.CreateProxy<UserWarning>(server, user, author, string.Empty, null!, null!);
             _database.UserWarnings.Update(warning);
 
             var setReason = await SetWarningReasonAsync(warning, reason, ct);

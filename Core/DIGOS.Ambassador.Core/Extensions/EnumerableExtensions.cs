@@ -25,7 +25,6 @@ using System.Collections.Generic;
 using System.Linq;
 using DIGOS.Ambassador.Core.Utility;
 using JetBrains.Annotations;
-using MoreLinq.Extensions;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Core.Extensions
@@ -73,7 +72,7 @@ namespace DIGOS.Ambassador.Core.Extensions
                 return new NotFoundError("No sufficiently close match found.");
             }
 
-            var best = passing.MinBy(c => c.distance).First();
+            var best = passing.MinBy(c => c.distance);
             return Result<string>.FromSuccess(best.value);
         }
     }

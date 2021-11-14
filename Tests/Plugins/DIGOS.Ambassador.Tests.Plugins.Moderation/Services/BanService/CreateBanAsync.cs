@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
             [Fact]
             private async Task CanCreateWithExpiryDate()
             {
-                var expiryDate = DateTime.Today.AddDays(1);
+                var expiryDate = DateTime.Today.ToUniversalTime().AddDays(1);
 
                 var result = await this.Bans.CreateBanAsync
                 (

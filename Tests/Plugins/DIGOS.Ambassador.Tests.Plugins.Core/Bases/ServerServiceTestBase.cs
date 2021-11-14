@@ -25,6 +25,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Tests.TestBases;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -54,7 +55,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
         protected override void RegisterServices(IServiceCollection serviceCollection)
         {
             serviceCollection
-                .AddDbContext<CoreDatabaseContext>(ConfigureOptions<CoreDatabaseContext>);
+                .AddDbContext<CoreDatabaseContext>(o => ConfigureOptions(o, "Core"));
 
             serviceCollection
                 .AddScoped<ServerService>()
@@ -65,7 +66,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
             this.Database = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            this.Database.Database.EnsureCreated();
+            this.Database.Database.Migrate();
 
             this.Servers = serviceProvider.GetRequiredService<ServerService>();
         }
