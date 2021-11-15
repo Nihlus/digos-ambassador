@@ -35,13 +35,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model.Data
         /// <summary>
         /// Gets the name of the image.
         /// </summary>
-        [Required]
         public string Name { get; internal set; }
 
         /// <summary>
         /// Gets the caption of the image.
         /// </summary>
-        [Required]
         public string Caption { get; internal set; }
 
         /// <summary>
@@ -52,7 +50,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model.Data
         /// <summary>
         /// Gets the online URL of the image.
         /// </summary>
-        [Required]
         public string Url { get; internal set; }
 
         /// <summary>
