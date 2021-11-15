@@ -20,10 +20,10 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using DIGOS.Ambassador.Core.Database.Context;
 using DIGOS.Ambassador.Core.Database.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Remora.EntityFrameworkCore.Modular;
 
 namespace DIGOS.Ambassador.Core.Database.Extensions
 {
@@ -42,7 +42,7 @@ namespace DIGOS.Ambassador.Core.Database.Extensions
         (
             this IServiceCollection services
         )
-            where TContext : SchemaAwareDbContext
+            where TContext : AmbassadorDbContext
         {
             services.TryAddSingleton<ContextConfigurationService>();
 
