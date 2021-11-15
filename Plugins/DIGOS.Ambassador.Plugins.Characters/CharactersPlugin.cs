@@ -83,7 +83,8 @@ namespace DIGOS.Ambassador.Plugins.Characters
 
             serviceCollection.AddCondition<RequireEntityOwnerCondition<Character>>();
 
-            serviceCollection.AddAutocompleteProvider<CharacterAutocompleteProvider>();
+            serviceCollection.AddAutocompleteProvider<AnyCharacterAutocompleteProvider>();
+            serviceCollection.AddAutocompleteProvider<OwnedCharacterAutocompleteProvider>();
         }
 
         /// <inheritdoc />

@@ -115,7 +115,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Command("show")]
         [Description("Shows information about the specified roleplay.")]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<IResult> ShowRoleplayAsync(Roleplay? roleplay = null)
+        public async Task<IResult> ShowRoleplayAsync
+        (
+            [AutocompleteProvider("roleplay::any")]
+            Roleplay? roleplay = null
+        )
         {
             if (roleplay is null)
             {
@@ -275,7 +279,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [RequirePermission(typeof(DeleteRoleplay), PermissionTarget.Self)]
         public async Task<IResult> DeleteRoleplayAsync
         (
-            [RequireEntityOwner] Roleplay roleplay
+            [RequireEntityOwner]
+            [AutocompleteProvider("roleplay::owned")]
+            Roleplay roleplay
         )
         {
             var deletionResult = await _discordRoleplays.DeleteRoleplayAsync(roleplay);
@@ -287,7 +293,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             var canReplyInChannelAfterDeletion = _context.ChannelID != roleplay.DedicatedChannelID;
             if (canReplyInChannelAfterDeletion)
             {
-                return Result<FeedbackMessage>.FromSuccess(new FeedbackMessage($"Roleplay \"{roleplay.Name}\" deleted.", _feedback.Theme.Secondary));
+                return Result<FeedbackMessage>.FromSuccess
+                (
+                    new FeedbackMessage($"Roleplay \"{roleplay.Name}\" deleted.", _feedback.Theme.Secondary)
+                );
             }
 
             var eb = new Embed
@@ -308,7 +317,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Description("Joins the roleplay owned by the given person with the given name.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(JoinRoleplay), PermissionTarget.Self)]
-        public async Task<Result<FeedbackMessage>> JoinRoleplayAsync(Roleplay roleplay)
+        public async Task<Result<FeedbackMessage>> JoinRoleplayAsync
+        (
+            [AutocompleteProvider("roleplay::notjoined")]
+            Roleplay roleplay
+        )
         {
             var addUserResult = await _discordRoleplays.AddUserToRoleplayAsync(roleplay, _context.User.ID);
             if (!addUserResult.IsSuccess)
@@ -336,7 +349,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         public async Task<Result<FeedbackMessage>> InvitePlayerAsync
         (
             IUser playerToInvite,
-            [RequireEntityOwner] Roleplay roleplay
+            [RequireEntityOwner]
+            [AutocompleteProvider("roleplay::owned")]
+            Roleplay roleplay
         )
         {
             var invitePlayerResult = await _discordRoleplays.InviteUserToRoleplayAsync(roleplay, playerToInvite.ID);
@@ -373,7 +388,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Command("leave")]
         [Description("Leaves the roleplay owned by the given person with the given name.")]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<FeedbackMessage>> LeaveRoleplayAsync(Roleplay roleplay)
+        public async Task<Result<FeedbackMessage>> LeaveRoleplayAsync
+        (
+            [AutocompleteProvider("roleplay::joined")]
+            Roleplay roleplay
+        )
         {
             var removeUserResult = await _discordRoleplays.RemoveUserFromRoleplayAsync(roleplay, _context.User.ID);
             if (!removeUserResult.IsSuccess)
@@ -401,7 +420,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         public async Task<Result<FeedbackMessage>> KickRoleplayParticipantAsync
         (
             IUser discordUser,
-            [RequireEntityOwner] Roleplay roleplay
+            [RequireEntityOwner]
+            [AutocompleteProvider("roleplay::owned")]
+            Roleplay roleplay
         )
         {
             var kickUserResult = await _discordRoleplays.KickUserFromRoleplayAsync(roleplay, discordUser.ID);
@@ -438,7 +459,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [RequirePermission(typeof(StartStopRoleplay), PermissionTarget.Self)]
         public async Task<Result<FeedbackMessage>> ShowOrCreateDedicatedRoleplayChannel
         (
-            [RequireEntityOwner] Roleplay roleplay
+            [RequireEntityOwner]
+            [AutocompleteProvider("roleplay::owned")]
+            Roleplay roleplay
         )
         {
             var getDedicatedChannelResult = _dedicatedChannels.GetDedicatedChannel(roleplay);
@@ -511,7 +534,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [RequirePermission(typeof(StartStopRoleplay), PermissionTarget.Self)]
         public async Task<Result<FeedbackMessage>> StartRoleplayAsync
         (
-            [RequireEntityOwner] Roleplay roleplay
+            [RequireEntityOwner]
+            [AutocompleteProvider("roleplay::owned")]
+            Roleplay roleplay
         )
         {
             var startRoleplayResult = await _discordRoleplays.StartRoleplayAsync
@@ -542,7 +567,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [RequirePermission(typeof(StartStopRoleplay), PermissionTarget.Self)]
         public async Task<Result<FeedbackMessage>> StopRoleplayAsync
         (
-            [RequireEntityOwner] Roleplay roleplay
+            [RequireEntityOwner]
+            [AutocompleteProvider("roleplay::owned")]
+            Roleplay roleplay
         )
         {
             var stopRoleplayAsync = await _discordRoleplays.StopRoleplayAsync(roleplay);
@@ -565,7 +592,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         public async Task<Result<FeedbackMessage>> TransferRoleplayOwnershipAsync
         (
             IUser newOwner,
-            [RequireEntityOwner] Roleplay roleplay
+            [RequireEntityOwner]
+            [AutocompleteProvider("roleplay::owned")]
+            Roleplay roleplay
         )
         {
             var transferResult = await _discordRoleplays.TransferRoleplayOwnershipAsync(newOwner.ID, roleplay);
@@ -587,7 +616,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [RequirePermission(typeof(ExportRoleplay), PermissionTarget.Self)]
         public async Task<IResult> ExportRoleplayAsync
         (
-            [RequireEntityOwner] Roleplay roleplay,
+            [RequireEntityOwner]
+            [AutocompleteProvider("roleplay::owned")]
+            Roleplay roleplay,
             ExportFormat format = ExportFormat.PDF
         )
         {
@@ -641,7 +672,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Command("view")]
         [Description("Views the given roleplay, allowing you to read the channel.")]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<FeedbackMessage>> ViewRoleplayAsync(Roleplay roleplay)
+        public async Task<Result<FeedbackMessage>> ViewRoleplayAsync
+        (
+            [AutocompleteProvider("roleplay::any")] Roleplay roleplay
+        )
         {
             var getDedicatedChannelResult = _dedicatedChannels.GetDedicatedChannel(roleplay);
             if (!getDedicatedChannelResult.IsSuccess)
@@ -688,7 +722,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Command("hide")]
         [Description("Hides the given roleplay.")]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<FeedbackMessage>> HideRoleplayAsync(Roleplay roleplay)
+        public async Task<Result<FeedbackMessage>> HideRoleplayAsync
+        (
+            [AutocompleteProvider("roleplay::any")]
+            Roleplay roleplay
+        )
         {
             var getDedicatedChannelResult = _dedicatedChannels.GetDedicatedChannel
             (
@@ -755,7 +793,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Command("refresh")]
         [Description("Manually refreshes the given roleplay, resetting its last-updated time to now.")]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<FeedbackMessage>> RefreshRoleplayAsync(Roleplay roleplay)
+        public async Task<Result<FeedbackMessage>> RefreshRoleplayAsync
+        (
+            [AutocompleteProvider("roleplay::any")]
+            Roleplay roleplay
+        )
         {
             var isOwner = roleplay.IsOwner(_context.User.ID);
             var isParticipant = roleplay.HasJoined(_context.User);

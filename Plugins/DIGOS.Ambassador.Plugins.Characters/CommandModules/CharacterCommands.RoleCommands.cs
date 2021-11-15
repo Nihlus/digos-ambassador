@@ -280,7 +280,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             public async Task<Result<FeedbackMessage>> ClearCharacterRoleAsync
             (
                 [RequireEntityOwner]
-                [Autocomplete]
+                [AutocompleteProvider("character::owned")]
                 Character character
             )
             {

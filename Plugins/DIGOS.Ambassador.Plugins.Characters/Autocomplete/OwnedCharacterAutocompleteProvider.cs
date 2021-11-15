@@ -1,5 +1,5 @@
 //
-//  CharacterAutocompleteProvider.cs
+//  OwnedCharacterAutocompleteProvider.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -36,17 +36,20 @@ namespace DIGOS.Ambassador.Plugins.Characters.Autocomplete
     /// <summary>
     /// Provides autocomplete suggestions for character names.
     /// </summary>
-    public class CharacterAutocompleteProvider : IAutocompleteProvider<Character>
+    public class OwnedCharacterAutocompleteProvider : IAutocompleteProvider
     {
         private readonly InteractionContext _context;
         private readonly CharactersDatabaseContext _database;
 
+        /// <inheritdoc />
+        public string Identity => "character::owned";
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="CharacterAutocompleteProvider"/> class.
+        /// Initializes a new instance of the <see cref="OwnedCharacterAutocompleteProvider"/> class.
         /// </summary>
         /// <param name="context">The interaction context.</param>
         /// <param name="database">The database context.</param>
-        public CharacterAutocompleteProvider(InteractionContext context, CharactersDatabaseContext database)
+        public OwnedCharacterAutocompleteProvider(InteractionContext context, CharactersDatabaseContext database)
         {
             _context = context;
             _database = database;

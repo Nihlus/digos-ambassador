@@ -20,15 +20,30 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Errors;
+using DIGOS.Ambassador.Core.Services;
+using DIGOS.Ambassador.Plugins.Amby.Services;
+using OneOf;
 using Remora.Commands.Results;
+using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Commands.Services;
+using Remora.Discord.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.ExecutionEventServices
@@ -39,6 +54,8 @@ namespace DIGOS.Ambassador.ExecutionEventServices
     public class MessageRelayingPostExecutionEvent : IPostExecutionEvent
     {
         private readonly IDiscordRestInteractionAPI _interactionAPI;
+        private readonly ContentService _content;
+        private readonly PortraitService _portraits;
         private readonly FeedbackService _feedback;
 
         /// <summary>
@@ -46,10 +63,20 @@ namespace DIGOS.Ambassador.ExecutionEventServices
         /// </summary>
         /// <param name="interactionAPI">The webhook API.</param>
         /// <param name="feedback">The feedback service.</param>
-        public MessageRelayingPostExecutionEvent(IDiscordRestInteractionAPI interactionAPI, FeedbackService feedback)
+        /// <param name="portraits">The portrait service.</param>
+        /// <param name="content">The content service.</param>
+        public MessageRelayingPostExecutionEvent
+        (
+            IDiscordRestInteractionAPI interactionAPI,
+            FeedbackService feedback,
+            PortraitService portraits,
+            ContentService content
+        )
         {
             _interactionAPI = interactionAPI;
             _feedback = feedback;
+            _portraits = portraits;
+            _content = content;
         }
 
         /// <inheritdoc />
@@ -131,6 +158,117 @@ namespace DIGOS.Ambassador.ExecutionEventServices
                     if (!sendError.IsSuccess)
                     {
                         return Result.FromError(sendError);
+                    }
+
+                    break;
+                }
+                default:
+                {
+                    var errorEmbed = new Embed("Internal Error")
+                    {
+                        Description =
+                            "Oops! Looks like you've found a bug in the bot - fear not, though. If we " +
+                            "work together, we'll have it licked in no time at all.\n" +
+                            "\n" +
+                            "I've prepared a short report of the technical details of what happened, but it's not " +
+                            "going to be worth much without your help. In order to fix this problem, it would be " +
+                            "extremely helpful if you wrote down the exact steps you did to encounter this error, " +
+                            "and post them along with the generated report on the GitHub repository. You can go " +
+                            "there by clicking the link in this message.\n" +
+                            "\n" +
+                            "The report contains some information about you, so please check it and erase anything " +
+                            "you don't want to share before passing it on.\n" +
+                            "\n" +
+                            "Your assistance is essential, and very much appreciated!",
+                        Colour = _feedback.Theme.FaultOrDanger,
+                        Timestamp = DateTimeOffset.UtcNow,
+                        Thumbnail = new EmbedThumbnail(_portraits.BrokenAmbyUri.ToString())
+                    };
+
+                    var sendError = await _feedback.SendPrivateEmbedAsync(context.User.ID, errorEmbed, ct: ct);
+                    if (!sendError.IsSuccess)
+                    {
+                        return Result.FromError(sendError);
+                    }
+
+                    var reportEmbed = new Embed("Click here to create a new issue")
+                    {
+                        Url = _content.AutomaticBugReportCreationUri.ToString(),
+                        Colour = _feedback.Theme.Primary
+                    };
+
+                    await using var ms = new MemoryStream();
+                    var now = DateTime.UtcNow;
+
+                    await using (var sw = new StreamWriter(ms, Encoding.Default, 1024, true))
+                    {
+                        await sw.WriteLineAsync("Automatic bug report");
+                        await sw.WriteLineAsync("====================");
+                        await sw.WriteLineAsync();
+                        await sw.WriteLineAsync($"Generated at: {now}");
+
+                        var entryAssembly = Assembly.GetEntryAssembly();
+                        if (entryAssembly is not null)
+                        {
+                            await sw.WriteLineAsync($"Bot version: {entryAssembly.GetName().Version}");
+                        }
+
+                        string command;
+                        switch (context)
+                        {
+                            case MessageContext messageContext:
+                            {
+                                command = messageContext.Message.Content.IsDefined(out var messageContent)
+                                    ? messageContent
+                                    : "Unknown";
+                                break;
+                            }
+                            case InteractionContext interactionContext:
+                            {
+                                interactionContext.Data.UnpackInteraction(out var commandPath, out var parameters);
+                                command = string.Join(" ", commandPath) +
+                                          " " +
+                                          string.Join(" ", parameters.Select(kvp => string.Join(" ", kvp.Key, string.Join(" ", kvp.Value))));
+                                break;
+                            }
+                            default:
+                            {
+                                command = "Unknown";
+                                break;
+                            }
+                        }
+
+                        await sw.WriteLineAsync($"Full command: {command}");
+                        await sw.WriteLineAsync();
+                        await sw.WriteLineAsync("### Error");
+                    }
+
+                    await JsonSerializer.SerializeAsync
+                    (
+                        ms,
+                        result,
+                        new JsonSerializerOptions { WriteIndented = true },
+                        ct
+                    );
+
+                    ms.Position = 0;
+
+                    var date = now.ToShortDateString();
+                    var time = now.ToShortTimeString();
+                    var sendReport = await _feedback.SendPrivateEmbedAsync
+                    (
+                        context.User.ID,
+                        reportEmbed,
+                        new FeedbackMessageOptions(Attachments: new List<OneOf<FileData, IPartialAttachment>>
+                        {
+                            new FileData($"bug-report-{date}-{time}.md", ms, "Generated bug report")
+                        }),
+                        ct
+                    );
+
+                    if (!sendReport.IsSuccess)
+                    {
+                        return Result.FromError(sendReport);
                     }
 
                     break;

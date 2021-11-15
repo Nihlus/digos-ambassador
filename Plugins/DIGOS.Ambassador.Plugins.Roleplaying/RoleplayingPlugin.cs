@@ -29,6 +29,7 @@ using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Plugins.Core.Preconditions;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
 using DIGOS.Ambassador.Plugins.Roleplaying;
+using DIGOS.Ambassador.Plugins.Roleplaying.Autocomplete;
 using DIGOS.Ambassador.Plugins.Roleplaying.Behaviours;
 using DIGOS.Ambassador.Plugins.Roleplaying.CommandModules;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
@@ -42,6 +43,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Remora.Behaviours.Extensions;
 using Remora.Commands.Extensions;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Gateway.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
@@ -78,6 +80,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying
 
             serviceCollection.AddCondition<RequireActiveRoleplayCondition>();
             serviceCollection.AddCondition<RequireEntityOwnerCondition<Roleplay>>();
+
+            serviceCollection.AddAutocompleteProvider<AnyRoleplayAutocompleteProvider>();
+            serviceCollection.AddAutocompleteProvider<OwnedRoleplayAutocompleteProvider>();
+            serviceCollection.AddAutocompleteProvider<JoinedRoleplayAutocompleteProvider>();
+            serviceCollection.AddAutocompleteProvider<NotJoinedRoleplayAutocompleteProvider>();
 
             serviceCollection
                 .AddBehaviour<RoleplayArchivalBehaviour>()

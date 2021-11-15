@@ -28,6 +28,7 @@ using DIGOS.Ambassador.Plugins.Roleplaying.Services;
 using JetBrains.Annotations;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
+using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
@@ -76,6 +77,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             (
                 string newRoleplayName,
                 [RequireEntityOwner]
+                [AutocompleteProvider("roleplay::owned")]
                 Roleplay roleplay
             )
             {
@@ -103,6 +105,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             (
                 string newRoleplaySummary,
                 [RequireEntityOwner]
+                [AutocompleteProvider("roleplay::owned")]
                 Roleplay roleplay
             )
             {
@@ -127,6 +130,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             (
                 bool isNSFW,
                 [RequireEntityOwner]
+                [AutocompleteProvider("roleplay::owned")]
                 Roleplay roleplay
             )
             {
@@ -150,6 +154,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             (
                 bool isPrivate,
                 [RequireEntityOwner]
+                [AutocompleteProvider("roleplay::owned")]
                 Roleplay roleplay
             )
                 => SetRoleplayIsPublic(!isPrivate, roleplay);
@@ -168,6 +173,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             (
                 bool isPublic,
                 [RequireEntityOwner]
+                [AutocompleteProvider("roleplay::owned")]
                 Roleplay roleplay
             )
             {

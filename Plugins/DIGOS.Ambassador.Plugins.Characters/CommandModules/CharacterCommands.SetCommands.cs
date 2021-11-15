@@ -100,7 +100,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             public async Task<Result<FeedbackMessage>> SetCharacterNameAsync
             (
                 [RequireEntityOwner]
-                [Autocomplete]
+                [AutocompleteProvider("character::owned")]
                 Character character,
                 string newCharacterName
             )
@@ -124,7 +124,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             public async Task<Result<FeedbackMessage>> SetCharacterAvatarAsync
             (
                 [RequireEntityOwner]
-                [Autocomplete]
+                [AutocompleteProvider("character::owned")]
                 Character character,
                 string? newCharacterAvatarUrl = null
             )
@@ -180,7 +180,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             public async Task<Result<FeedbackMessage>> SetCharacterNicknameAsync
             (
                 [RequireEntityOwner]
-                [Autocomplete]
+                [AutocompleteProvider("character::owned")]
                 Character character,
                 string newCharacterNickname
             )
@@ -211,7 +211,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             public async Task<Result<FeedbackMessage>> SetCharacterSummaryAsync
             (
                 [RequireEntityOwner]
-                [Autocomplete]
+                [AutocompleteProvider("character::owned")]
                 Character character,
                 string newCharacterSummary
             )
@@ -236,7 +236,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             public async Task<Result<FeedbackMessage>> SetCharacterDescriptionAsync
             (
                 [RequireEntityOwner]
-                [Autocomplete]
+                [AutocompleteProvider("character::owned")]
                 Character character,
                 string newCharacterDescription
             )
@@ -265,7 +265,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             public async Task<Result<FeedbackMessage>> SetCharacterIsNSFWAsync
             (
                 [RequireEntityOwner]
-                [Autocomplete]
+                [AutocompleteProvider("character::owned")]
                 Character character,
                 bool isNSFW
             )
@@ -290,7 +290,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             public async Task<Result<FeedbackMessage>> SetCharacterPronounAsync
             (
                 [RequireEntityOwner]
-                [Autocomplete]
+                [AutocompleteProvider("character::owned")]
                 Character character,
                 string pronounFamily
             )
@@ -315,7 +315,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             public async Task<Result<FeedbackMessage>> SetCharacterRoleAsync
             (
                 [RequireEntityOwner]
-                [Autocomplete]
+                [AutocompleteProvider("character::owned")]
                 Character character,
                 IRole discordRole
             )
@@ -426,7 +426,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             public async Task<Result<FeedbackMessage>> SetDefaultCharacterAsync
             (
                 [RequireEntityOwner]
-                [Autocomplete]
+                [AutocompleteProvider("character::owned")]
                 Character character
             )
             {
