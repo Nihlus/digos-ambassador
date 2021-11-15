@@ -270,7 +270,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
 
         private async Task<Result<Embed>> CreateCharacterInfoEmbedAsync
         (
-            Character character,
+            [Autocomplete] Character character,
             CancellationToken ct = default
         )
         {
@@ -415,6 +415,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         public async Task<Result<FeedbackMessage>> DeleteCharacterAsync
         (
             [RequireEntityOwner]
+            [Autocomplete]
             Character character
         )
         {
@@ -514,6 +515,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         public async Task<Result<FeedbackMessage>> AssumeCharacterFormAsync
         (
             [RequireEntityOwner]
+            [Autocomplete]
             Character character
         )
         {
@@ -601,7 +603,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Command("view-gallery")]
         [Description("View the images in a character's gallery.")]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result> ViewCharacterGalleryAsync(Character character)
+        public async Task<Result> ViewCharacterGalleryAsync([Autocomplete] Character character)
         {
             if (character.Images.Count <= 0)
             {
@@ -636,7 +638,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Command("list-images")]
         [Description("Lists the images in a character's gallery.")]
         [RequireContext(ChannelContext.Guild)]
-        public Task<Result> ListImagesAsync(Character character)
+        public Task<Result> ListImagesAsync([Autocomplete] Character character)
         {
             var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
@@ -671,6 +673,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         public async Task<Result<FeedbackMessage>> AddImageAsync
         (
             [RequireEntityOwner]
+            [Autocomplete]
             Character character,
             string? imageName = null,
             string? imageCaption = null,
@@ -719,6 +722,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         public async Task<Result<FeedbackMessage>> AddImageAsync
         (
             [RequireEntityOwner]
+            [Autocomplete]
             Character character,
             string imageName,
             string imageUrl,
@@ -753,6 +757,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         public async Task<Result<FeedbackMessage>> RemoveImageAsync
         (
             [RequireEntityOwner]
+            [Autocomplete]
             Character character,
             string imageName
         )
@@ -784,6 +789,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         (
             IUser newOwner,
             [RequireEntityOwner]
+            [Autocomplete]
             Character character
         )
         {

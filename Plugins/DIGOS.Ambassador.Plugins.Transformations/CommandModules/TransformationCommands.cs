@@ -37,6 +37,7 @@ using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Feedback.Messages;
@@ -300,7 +301,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command("describe")]
         [Description("Describes the current physical appearance of a character.")]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result> DescribeCharacterAsync(Character? character = null)
+        public async Task<Result> DescribeCharacterAsync([Autocomplete] Character? character = null)
         {
             if (character is null)
             {
