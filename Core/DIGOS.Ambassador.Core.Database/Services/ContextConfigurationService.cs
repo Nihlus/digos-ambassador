@@ -23,11 +23,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using DIGOS.Ambassador.Core.Database.Context;
 using DIGOS.Ambassador.Core.Database.Credentials;
 using DIGOS.Ambassador.Core.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Remora.EntityFrameworkCore.Modular;
 
 namespace DIGOS.Ambassador.Core.Database.Services
 {
@@ -49,7 +49,7 @@ namespace DIGOS.Ambassador.Core.Database.Services
             _knownSchemas = new Dictionary<Type, string>();
         }
 
-        private void EnsureSchemaIsCached<TContext>() where TContext : SchemaAwareDbContext
+        private void EnsureSchemaIsCached<TContext>() where TContext : AmbassadorDbContext
         {
             if (_knownSchemas.ContainsKey(typeof(TContext)))
             {
@@ -72,7 +72,7 @@ namespace DIGOS.Ambassador.Core.Database.Services
         /// <param name="optionsBuilder">The unconfigured options builder.</param>
         /// <typeparam name="TContext">The context type.</typeparam>
         public void ConfigureSchemaAwareContext<TContext>(DbContextOptionsBuilder optionsBuilder)
-            where TContext : SchemaAwareDbContext
+            where TContext : AmbassadorDbContext
         {
             EnsureSchemaIsCached<TContext>();
             var schema = _knownSchemas[typeof(TContext)];

@@ -87,8 +87,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DIGOS.Ambassador.Plugins.Au
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DIGOS.Ambassador.Plugins.Drone", "Plugins\DIGOS.Ambassador.Plugins.Drone\DIGOS.Ambassador.Plugins.Drone.csproj", "{4232D243-8996-4DA1-9B1F-E2309AC8C5E3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Remora.EntityFrameworkCore.Modular", "..\Remora\EntityFrameworkCore\Remora.EntityFrameworkCore.Modular\Remora.EntityFrameworkCore.Modular.csproj", "{27FB8D90-9BFC-48A7-9DCA-6192009C79E1}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -211,10 +209,6 @@ Global
 		{4232D243-8996-4DA1-9B1F-E2309AC8C5E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4232D243-8996-4DA1-9B1F-E2309AC8C5E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4232D243-8996-4DA1-9B1F-E2309AC8C5E3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{27FB8D90-9BFC-48A7-9DCA-6192009C79E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{27FB8D90-9BFC-48A7-9DCA-6192009C79E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{27FB8D90-9BFC-48A7-9DCA-6192009C79E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{27FB8D90-9BFC-48A7-9DCA-6192009C79E1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
