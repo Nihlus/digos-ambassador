@@ -98,7 +98,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <summary>
         /// Gets the last time the roleplay was updated.
         /// </summary>
-        public DateTime? LastUpdated { get; internal set; }
+        public DateTimeOffset? LastUpdated { get; internal set; }
 
         /// <summary>
         /// Gets the users that have joined the roleplay.

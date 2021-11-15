@@ -70,7 +70,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
 
             var member = getMember.Entity;
 
-            var timeSinceJoin = DateTime.UtcNow - member.JoinedAt.UtcDateTime;
+            var timeSinceJoin = DateTimeOffset.UtcNow - member.JoinedAt.UtcDateTime;
             return timeSinceJoin >= this.RequiredTime;
         }
     }

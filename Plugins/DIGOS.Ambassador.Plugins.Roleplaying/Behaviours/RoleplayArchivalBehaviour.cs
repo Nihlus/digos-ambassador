@@ -84,7 +84,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 q => q
                     .Where(r => r.DedicatedChannelID.HasValue)
                     .Where(r => r.LastUpdated.HasValue)
-                    .Where(r => DateTime.Now - r.LastUpdated > TimeSpan.FromDays(28))
+                    .Where(r => DateTimeOffset.UtcNow - r.LastUpdated > TimeSpan.FromDays(28))
             );
 
             foreach (var roleplay in roleplays)
@@ -190,7 +190,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 Colour = feedback.Theme.Secondary,
                 Title = $"{exportedRoleplay.Title} - Archived",
                 Description = roleplay.Summary,
-                Footer = new EmbedFooter($"Archived on {DateTime.Now:d}.")
+                Footer = new EmbedFooter($"Archived on {DateTimeOffset.UtcNow:d}.")
             };
 
             var fileData = new FileData

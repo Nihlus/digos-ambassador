@@ -174,7 +174,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             Snowflake guildID,
             string reason,
             Snowflake? messageID = null,
-            DateTime? expiresOn = null,
+            DateTimeOffset? expiresOn = null,
             CancellationToken ct = default
         )
         {
@@ -313,7 +313,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         public async Task<Result> SetWarningExpiryDateAsync
         (
             UserWarning warning,
-            DateTime expiresOn,
+            DateTimeOffset expiresOn,
             CancellationToken ct = default
         )
         {
@@ -322,7 +322,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                 return new UserError("That's already the warning's expiry date.");
             }
 
-            if (expiresOn < DateTime.UtcNow)
+            if (expiresOn < DateTimeOffset.UtcNow)
             {
                 return new UserError("Warnings can't expire in the past.");
             }

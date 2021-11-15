@@ -152,7 +152,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             roleplay.ActiveChannelID = channelID;
             roleplay.IsActive = true;
-            roleplay.LastUpdated = DateTime.Now;
+            roleplay.LastUpdated = DateTimeOffset.UtcNow;
 
             await _database.SaveChangesAsync(ct);
 
@@ -195,7 +195,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 existingMessage.Contents = contents;
 
                 // Update roleplay timestamp
-                roleplay.LastUpdated = DateTime.Now;
+                roleplay.LastUpdated = DateTimeOffset.UtcNow;
 
                 await _database.SaveChangesAsync(ct);
                 return Result.FromSuccess();
@@ -207,7 +207,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             roleplay.Messages.Add(newMessage);
 
             // Update roleplay timestamp
-            roleplay.LastUpdated = DateTime.Now;
+            roleplay.LastUpdated = DateTimeOffset.UtcNow;
 
             await _database.SaveChangesAsync(ct);
             return Result.FromSuccess();
@@ -697,7 +697,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             CancellationToken ct = default
         )
         {
-            roleplay.LastUpdated = DateTime.Now;
+            roleplay.LastUpdated = DateTimeOffset.UtcNow;
 
             await _database.SaveChangesAsync(ct);
             return Result.FromSuccess();

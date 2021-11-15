@@ -222,10 +222,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             TimeSpan? expiresAfter = null
         )
         {
-            DateTime? expiresOn = null;
+            DateTimeOffset? expiresOn = null;
             if (expiresAfter is not null)
             {
-                expiresOn = DateTime.Now.Add(expiresAfter.Value);
+                expiresOn = DateTimeOffset.UtcNow.Add(expiresAfter.Value);
             }
 
             var addWarning = await _warnings.CreateWarningAsync

@@ -49,8 +49,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
             [Fact]
             public async Task ReturnsUnsuccessfulIfNewExpiryDateIsSameAsExistingExpiryDate()
             {
-                await this.Warnings.SetWarningExpiryDateAsync(_warning, DateTime.Today.AddDays(1));
-                var result = await this.Warnings.SetWarningExpiryDateAsync(_warning, DateTime.Today.AddDays(1));
+                await this.Warnings.SetWarningExpiryDateAsync(_warning, DateTimeOffset.UtcNow.Date.AddDays(1));
+                var result = await this.Warnings.SetWarningExpiryDateAsync(_warning, DateTimeOffset.UtcNow.Date.AddDays(1));
 
                 Assert.False(result.IsSuccess);
             }
@@ -58,7 +58,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
             [Fact]
             public async Task ReturnsUnsuccessfulIfNewExpiryDateIsInThePast()
             {
-                var result = await this.Warnings.SetWarningExpiryDateAsync(_warning, DateTime.Today.AddDays(-1));
+                var result = await this.Warnings.SetWarningExpiryDateAsync(_warning, DateTimeOffset.UtcNow.Date.AddDays(-1));
 
                 Assert.False(result.IsSuccess);
             }
@@ -66,7 +66,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
             [Fact]
             public async Task ReturnsSuccessfulIfNewExpiryDateIsWellFormed()
             {
-                var result = await this.Warnings.SetWarningExpiryDateAsync(_warning, DateTime.Today.AddDays(2));
+                var result = await this.Warnings.SetWarningExpiryDateAsync(_warning, DateTimeOffset.UtcNow.Date.AddDays(2));
 
                 Assert.True(result.IsSuccess);
             }
@@ -74,7 +74,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
             [Fact]
             public async Task ActuallySetsExpiryDate()
             {
-                var expiryDate = DateTime.Today.AddDays(1);
+                var expiryDate = DateTimeOffset.UtcNow.Date.AddDays(1);
 
                 await this.Warnings.SetWarningExpiryDateAsync(_warning, expiryDate);
 
@@ -86,7 +86,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
             {
                 var before = _warning.UpdatedAt;
 
-                var expiryDate = DateTime.Today.AddDays(1);
+                var expiryDate = DateTimeOffset.UtcNow.Date.AddDays(1);
                 await this.Warnings.SetWarningExpiryDateAsync(_warning, expiryDate);
 
                 var after = _warning.UpdatedAt;

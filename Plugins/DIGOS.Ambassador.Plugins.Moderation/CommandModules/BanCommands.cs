@@ -106,10 +106,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             TimeSpan? expiresAfter = null
         )
         {
-            DateTime? expiresOn = null;
+            DateTimeOffset? expiresOn = null;
             if (expiresAfter is not null)
             {
-                expiresOn = DateTime.Now.Add(expiresAfter.Value);
+                expiresOn = DateTimeOffset.UtcNow.Add(expiresAfter.Value);
             }
 
             var createBan = await _bans.CreateBanAsync

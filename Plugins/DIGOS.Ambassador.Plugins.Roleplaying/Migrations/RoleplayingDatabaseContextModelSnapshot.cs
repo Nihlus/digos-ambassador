@@ -14,6 +14,8 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
+#nullable disable
+
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Migrations
 {
     [DbContext(typeof(RoleplayingDatabaseContext))]
@@ -25,16 +27,19 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("RoleplayModule")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "5.0.11")
-                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                .HasAnnotation("ProductVersion", "6.0.0")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "fuzzystrmatch");
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Core.Model.Servers.Server", b =>
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
 
                     b.Property<string>("Description")
                         .HasColumnType("text");
@@ -63,13 +68,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Migrations
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
 
                     b.Property<long>("ServerID")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("UserID")
+                    b.Property<long>("UserID")
                         .HasColumnType("bigint");
 
                     b.HasKey("ID");
@@ -85,8 +91,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Migrations
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
 
                     b.Property<string>("Bio")
                         .IsRequired()
@@ -107,8 +114,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Migrations
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
 
                     b.Property<long?>("ActiveChannelID")
                         .HasColumnType("bigint");
@@ -125,17 +133,17 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Migrations
                     b.Property<bool>("IsPublic")
                         .HasColumnType("boolean");
 
-                    b.Property<DateTime?>("LastUpdated")
-                        .HasColumnType("timestamp without time zone");
+                    b.Property<DateTimeOffset?>("LastUpdated")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<long?>("OwnerID")
+                    b.Property<long>("OwnerID")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("ServerID")
+                    b.Property<long>("ServerID")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Summary")
@@ -155,8 +163,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Migrations
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
 
                     b.Property<long>("RoleplayID")
                         .HasColumnType("bigint");
@@ -180,8 +189,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Migrations
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
 
                     b.Property<long?>("ArchiveChannel")
                         .HasColumnType("bigint");
@@ -192,7 +202,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Migrations
                     b.Property<long?>("DefaultUserRole")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("ServerID")
+                    b.Property<long>("ServerID")
                         .HasColumnType("bigint");
 
                     b.HasKey("ID");
@@ -206,10 +216,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Migrations
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
 
-                    b.Property<long?>("AuthorID")
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
+
+                    b.Property<long>("AuthorID")
                         .HasColumnType("bigint");
 
                     b.Property<string>("AuthorNickname")
@@ -248,7 +259,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Migrations
 
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Users.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserID");
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Server");
 
@@ -259,11 +272,15 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Migrations
                 {
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Users.User", "Owner")
                         .WithMany()
-                        .HasForeignKey("OwnerID");
+                        .HasForeignKey("OwnerID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Servers.Server", "Server")
                         .WithMany()
-                        .HasForeignKey("ServerID");
+                        .HasForeignKey("ServerID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Owner");
 
@@ -293,7 +310,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Migrations
                 {
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Servers.Server", "Server")
                         .WithMany()
-                        .HasForeignKey("ServerID");
+                        .HasForeignKey("ServerID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Server");
                 });
@@ -302,7 +321,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Migrations
                 {
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Users.User", "Author")
                         .WithMany()
-                        .HasForeignKey("AuthorID");
+                        .HasForeignKey("AuthorID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("DIGOS.Ambassador.Plugins.Roleplaying.Model.Roleplay", null)
                         .WithMany("Messages")

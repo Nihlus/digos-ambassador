@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Classes.UserWarning
                     new User(new Snowflake(0)),
                     new User(new Snowflake(1)),
                     string.Empty,
-                    expiresOn: DateTime.UtcNow
+                    expiresOn: DateTimeOffset.UtcNow
                 );
 
                 Assert.True(instance.ExpiresOn.HasValue);

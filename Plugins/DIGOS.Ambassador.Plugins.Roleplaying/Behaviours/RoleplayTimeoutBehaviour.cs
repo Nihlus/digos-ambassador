@@ -74,7 +74,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 q => q
                     .Where(r => r.IsActive)
                     .Where(r => r.LastUpdated.HasValue)
-                    .Where(r => DateTime.Now - r.LastUpdated > TimeSpan.FromHours(72))
+                    .Where(r => DateTimeOffset.UtcNow - r.LastUpdated > TimeSpan.FromHours(72))
             );
 
             foreach (var roleplay in timedOutRoleplays)

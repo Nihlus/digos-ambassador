@@ -46,7 +46,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <summary>
         /// Gets the time at which the note was last updated.
         /// </summary>
-        public DateTime UpdatedAt { get; internal set; }
+        public DateTimeOffset UpdatedAt { get; internal set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserNote"/> class.
@@ -77,7 +77,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         {
             this.Content = content;
 
-            this.UpdatedAt = DateTime.UtcNow;
+            this.UpdatedAt = DateTimeOffset.UtcNow;
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// </summary>
         public void NotifyUpdate()
         {
-            this.UpdatedAt = DateTime.UtcNow;
+            this.UpdatedAt = DateTimeOffset.UtcNow;
         }
     }
 }

@@ -52,12 +52,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <summary>
         /// Gets the time at which the ban was last updated.
         /// </summary>
-        public DateTime UpdatedAt { get; internal set; }
+        public DateTimeOffset UpdatedAt { get; internal set; }
 
         /// <summary>
         /// Gets the time at which the ban expires.
         /// </summary>
-        public DateTime? ExpiresOn { get; internal set; }
+        public DateTimeOffset? ExpiresOn { get; internal set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserBan"/> class.
@@ -86,14 +86,14 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
             User author,
             string reason,
             Snowflake? messageID = null,
-            DateTime? expiresOn = null
+            DateTimeOffset? expiresOn = null
         )
             : base(server, user, author)
         {
             this.Reason = reason;
             this.MessageID = messageID;
 
-            this.UpdatedAt = DateTime.UtcNow;
+            this.UpdatedAt = DateTimeOffset.UtcNow;
             this.ExpiresOn = expiresOn;
         }
 
@@ -102,7 +102,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// </summary>
         public void NotifyUpdate()
         {
-            this.UpdatedAt = DateTime.UtcNow;
+            this.UpdatedAt = DateTimeOffset.UtcNow;
         }
     }
 }

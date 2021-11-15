@@ -60,7 +60,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
             [Fact]
             private async Task CanCreateWithExpiryDate()
             {
-                var expiryDate = DateTime.Today.AddDays(1);
+                var expiryDate = DateTimeOffset.UtcNow.Date.AddDays(1);
 
                 var result = await this.Warnings.CreateWarningAsync
                 (

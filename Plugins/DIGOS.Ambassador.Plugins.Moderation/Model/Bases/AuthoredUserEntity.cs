@@ -55,7 +55,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model.Bases
         /// <summary>
         /// Gets the time at which the entity was created.
         /// </summary>
-        public DateTime CreatedAt { get; private set; }
+        public DateTimeOffset CreatedAt { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthoredUserEntity"/> class.
@@ -79,7 +79,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model.Bases
             this.User = user;
             this.Author = author;
 
-            this.CreatedAt = DateTime.UtcNow;
+            this.CreatedAt = DateTimeOffset.UtcNow;
         }
     }
 }

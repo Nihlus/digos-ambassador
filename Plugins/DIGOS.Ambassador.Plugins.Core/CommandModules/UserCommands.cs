@@ -195,7 +195,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             var technicalInfo = new StringBuilder();
             technicalInfo.AppendLine($"ID: {discordUser.ID}");
 
-            var span = DateTime.UtcNow - discordUser.ID.Timestamp;
+            var span = DateTimeOffset.UtcNow - discordUser.ID.Timestamp;
 
             var humanizedTimeAgo = span > TimeSpan.FromSeconds(60)
                 ? span.Humanize(maxUnit: TimeUnit.Year, culture: CultureInfo.InvariantCulture)

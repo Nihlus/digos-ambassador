@@ -77,7 +77,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
                 return false;
             }
 
-            var timeSinceLastActivity = DateTime.UtcNow - userStatistics.LastActivityTime;
+            var timeSinceLastActivity = DateTimeOffset.UtcNow - userStatistics.LastActivityTime;
             return timeSinceLastActivity <= this.RequiredTime;
         }
     }

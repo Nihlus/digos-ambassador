@@ -142,7 +142,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Responders
 
             // Ignore all changes except text changes
             var isTextUpdate = gatewayEvent.EditedTimestamp.HasValue &&
-                               gatewayEvent.EditedTimestamp.Value > DateTimeOffset.Now - 1.Minutes();
+                               gatewayEvent.EditedTimestamp.Value > DateTimeOffset.UtcNow - 1.Minutes();
 
             if (!isTextUpdate)
             {

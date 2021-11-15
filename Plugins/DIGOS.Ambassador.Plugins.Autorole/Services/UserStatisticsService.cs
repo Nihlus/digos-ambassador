@@ -248,7 +248,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             CancellationToken ct = default
         )
         {
-            var now = DateTime.UtcNow;
+            var now = DateTimeOffset.UtcNow;
             if (globalStats.LastActivityTime == now)
             {
                 return new UserError("That's already the latest timestamp.");

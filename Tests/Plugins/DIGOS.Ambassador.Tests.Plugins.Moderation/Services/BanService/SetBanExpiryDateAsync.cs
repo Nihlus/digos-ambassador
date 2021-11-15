@@ -49,8 +49,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
             [Fact]
             public async Task ReturnsUnsuccessfulIfNewExpiryDateIsSameAsExistingExpiryDate()
             {
-                await this.Bans.SetBanExpiryDateAsync(_ban, DateTime.Today.AddDays(1));
-                var result = await this.Bans.SetBanExpiryDateAsync(_ban, DateTime.Today.AddDays(1));
+                await this.Bans.SetBanExpiryDateAsync(_ban, DateTimeOffset.UtcNow.Date.AddDays(1));
+                var result = await this.Bans.SetBanExpiryDateAsync(_ban, DateTimeOffset.UtcNow.Date.AddDays(1));
 
                 Assert.False(result.IsSuccess);
             }
@@ -58,7 +58,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
             [Fact]
             public async Task ReturnsUnsuccessfulIfNewExpiryDateIsInThePast()
             {
-                var result = await this.Bans.SetBanExpiryDateAsync(_ban, DateTime.Today.AddDays(-1));
+                var result = await this.Bans.SetBanExpiryDateAsync(_ban, DateTimeOffset.UtcNow.Date.AddDays(-1));
 
                 Assert.False(result.IsSuccess);
             }
@@ -66,7 +66,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
             [Fact]
             public async Task ReturnsSuccessfulIfNewExpiryDateIsWellFormed()
             {
-                var result = await this.Bans.SetBanExpiryDateAsync(_ban, DateTime.Today.AddDays(2));
+                var result = await this.Bans.SetBanExpiryDateAsync(_ban, DateTimeOffset.UtcNow.Date.AddDays(2));
 
                 Assert.True(result.IsSuccess);
             }
@@ -74,7 +74,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
             [Fact]
             public async Task ActuallySetsExpiryDate()
             {
-                var expiryDate = DateTime.Today.AddDays(1);
+                var expiryDate = DateTimeOffset.UtcNow.Date.AddDays(1);
 
                 await this.Bans.SetBanExpiryDateAsync(_ban, expiryDate);
 
@@ -86,7 +86,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
             {
                 var before = _ban.UpdatedAt;
 
-                var expiryDate = DateTime.Today.AddDays(1);
+                var expiryDate = DateTimeOffset.UtcNow.Date.AddDays(1);
                 await this.Bans.SetBanExpiryDateAsync(_ban, expiryDate);
 
                 var after = _ban.UpdatedAt;

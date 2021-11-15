@@ -336,7 +336,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
                 var currentRoleplay = currentRoleplayResult.Entity;
                 var timeOfLastMessage = currentRoleplay.Messages.Last().Timestamp;
-                var currentTime = DateTimeOffset.Now;
+                var currentTime = DateTimeOffset.UtcNow;
 
                 if (timeOfLastMessage < currentTime.AddHours(-4))
                 {
