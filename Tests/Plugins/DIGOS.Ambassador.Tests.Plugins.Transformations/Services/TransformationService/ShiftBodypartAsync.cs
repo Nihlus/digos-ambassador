@@ -80,11 +80,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
                 // Create a test character
                 var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
+                var server = (await this.Servers.GetOrRegisterServerAsync(_guild)).Entity;
 
                 var character = new Character
                 (
                     owner,
-                    new Server(_guild),
+                    server,
                     string.Empty,
                     string.Empty,
                     string.Empty,

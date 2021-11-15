@@ -69,8 +69,14 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Bases
         /// <inheritdoc />
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
+            var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
+            var coreCreateScript = coreDatabase.Database.GenerateCreateScript();
+
             var moderationDatabase = serviceProvider.GetRequiredService<ModerationDatabaseContext>();
-            moderationDatabase.Database.Migrate();
+            var moderationCreateScript = moderationDatabase.Database.GenerateCreateScript();
+
+            moderationDatabase.Database.ExecuteSqlRaw(coreCreateScript);
+            moderationDatabase.Database.ExecuteSqlRaw(moderationCreateScript);
 
             this.Database = moderationDatabase;
             this.Moderation = serviceProvider.GetRequiredService<ModerationService>();

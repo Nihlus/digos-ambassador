@@ -104,7 +104,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
         protected sealed override void ConfigureServices(IServiceProvider serviceProvider)
         {
             this.Database = serviceProvider.GetRequiredService<PermissionsDatabaseContext>();
-            this.Database.Database.Migrate();
+            this.Database.Database.Create();
 
             this.Permissions = serviceProvider.GetRequiredService<PermissionService>();
         }

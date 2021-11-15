@@ -66,7 +66,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
             this.Database = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            this.Database.Database.Migrate();
+            this.Database.Database.Create();
 
             this.Users = serviceProvider.GetRequiredService<UserService>();
         }

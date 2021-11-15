@@ -75,11 +75,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Roleplaying
         /// <inheritdoc />
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
-            var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            coreDatabase.Database.Migrate();
-
             this.Database = serviceProvider.GetRequiredService<RoleplayingDatabaseContext>();
-            this.Database.Database.Migrate();
+            this.Database.Database.Create();
 
             this.Roleplays = serviceProvider.GetRequiredService<RoleplayService>();
         }

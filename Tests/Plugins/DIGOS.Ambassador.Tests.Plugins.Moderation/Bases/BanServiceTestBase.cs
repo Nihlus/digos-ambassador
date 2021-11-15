@@ -72,10 +72,13 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Bases
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
             var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            coreDatabase.Database.Migrate();
+            var coreCreateScript = coreDatabase.Database.GenerateCreateScript();
 
             var banDatabase = serviceProvider.GetRequiredService<ModerationDatabaseContext>();
-            banDatabase.Database.Migrate();
+            var banCreateScript = banDatabase.Database.GenerateCreateScript();
+
+            banDatabase.Database.ExecuteSqlRaw(coreCreateScript);
+            banDatabase.Database.ExecuteSqlRaw(banCreateScript);
 
             this.Database = banDatabase;
             this.Bans = serviceProvider.GetRequiredService<BanService>();

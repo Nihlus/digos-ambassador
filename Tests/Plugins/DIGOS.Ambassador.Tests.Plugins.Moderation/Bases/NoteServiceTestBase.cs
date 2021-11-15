@@ -72,12 +72,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Bases
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
             var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            coreDatabase.Database.Migrate();
+            coreDatabase.Database.Create();
 
-            var noteDatabase = serviceProvider.GetRequiredService<ModerationDatabaseContext>();
-            noteDatabase.Database.Migrate();
+            var moderationDatabase = serviceProvider.GetRequiredService<ModerationDatabaseContext>();
+            moderationDatabase.Database.Create();
 
-            this.Database = noteDatabase;
+            this.Database = moderationDatabase;
             this.Notes = serviceProvider.GetRequiredService<NoteService>();
         }
 

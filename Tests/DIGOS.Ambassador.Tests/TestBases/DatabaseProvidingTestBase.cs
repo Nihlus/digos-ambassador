@@ -23,6 +23,7 @@
 using System;
 using DoomedDatabases.Postgres;
 using JetBrains.Annotations;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 
@@ -34,20 +35,7 @@ namespace DIGOS.Ambassador.Tests.TestBases
     [PublicAPI]
     public abstract class DatabaseProvidingTestBase : ServiceProvidingTestBase, IDisposable
     {
-        private static readonly string ConnectionString =
-            "User ID=integration_test_user;Password=integration_test_password;Server=localhost;Port=6432;Database=integration_test_db";
-
-        private readonly ITestDatabase _testDatabase = new TestDatabaseBuilder()
-            .WithConnectionString(ConnectionString)
-            .Build();
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DatabaseProvidingTestBase"/> class.
-        /// </summary>
-        protected DatabaseProvidingTestBase()
-        {
-            _testDatabase.Create();
-        }
+        private SqliteConnection _connection = new("Filename=:memory:");
 
         /// <summary>
         /// Configures the given options builder to use the underlying test database.
@@ -56,11 +44,13 @@ namespace DIGOS.Ambassador.Tests.TestBases
         /// <param name="schema">The schema of the context to configure.</param>
         protected void ConfigureOptions(DbContextOptionsBuilder optionsBuilder, string schema)
         {
+            _connection.Open();
+
             optionsBuilder
                 .UseLazyLoadingProxies()
-                .UseNpgsql
+                .UseSqlite
                 (
-                    ConnectionString,
+                    _connection,
                     b => b.MigrationsHistoryTable(HistoryRepository.DefaultTableName + schema)
                 );
         }
@@ -69,7 +59,7 @@ namespace DIGOS.Ambassador.Tests.TestBases
         public void Dispose()
         {
             GC.SuppressFinalize(this);
-            _testDatabase.Drop();
+            _connection.Dispose();
         }
     }
 }
