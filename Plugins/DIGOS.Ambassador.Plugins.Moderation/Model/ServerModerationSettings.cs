@@ -39,7 +39,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <summary>
         /// Gets the server.
         /// </summary>
-        [Required]
         public virtual Server Server { get; private set; } = null!;
 
         /// <summary>

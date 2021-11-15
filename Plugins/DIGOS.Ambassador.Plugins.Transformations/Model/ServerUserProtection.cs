@@ -41,13 +41,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// <summary>
         /// Gets the user that owns this protection data.
         /// </summary>
-        [Required]
         public virtual User User { get; private set; } = null!;
 
         /// <summary>
         /// Gets the server that this protection data is valid on.
         /// </summary>
-        [Required]
         public virtual Server Server { get; private set; } = null!;
 
         /// <summary>

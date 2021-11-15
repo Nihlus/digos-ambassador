@@ -41,7 +41,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <summary>
         /// Gets the reason for the ban.
         /// </summary>
-        [Required]
         public string Reason { get; internal set; } = null!;
 
         /// <summary>

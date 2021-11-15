@@ -37,13 +37,11 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Users
         /// <summary>
         /// Gets the server the user has joined.
         /// </summary>
-        [Required]
         public virtual Server Server { get; private set; } = null!;
 
         /// <summary>
         /// Gets the user that has joined the server.
         /// </summary>
-        [Required]
         public virtual User User { get; private set; } = null!;
 
         /// <summary>

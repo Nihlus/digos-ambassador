@@ -47,7 +47,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         public virtual Server Server { get; private set; } = null!;
 
         /// <inheritdoc />
-        [Required]
         public virtual User Owner { get; set; } = null!;
 
         /// <summary>
@@ -81,14 +80,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         public virtual List<RoleplayParticipant> ParticipatingUsers { get; private set; } = new();
 
         /// <inheritdoc />
-        [Required]
         public string Name { get; internal set; } = null!;
 
         /// <summary>
         /// Gets the summary of the roleplay.
         /// </summary>
-        [Required]
-        public string Summary { get; internal set; } = null!;
+        public string? Summary { get; internal set; }
 
         /// <summary>
         /// Gets the saved messages in the roleplay.
@@ -147,6 +144,16 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
             this.Owner = owner;
             this.Name = name;
             this.Summary = summary;
+        }
+
+        /// <summary>
+        /// Gets the summary if it is set; otherwise, return <paramref name="defaultSummary"/>.
+        /// </summary>
+        /// <param name="defaultSummary">The default summary to use when one is not present.</param>
+        /// <returns>The description.</returns>
+        public string GetSummaryOrDefault(string defaultSummary = "No summary set.")
+        {
+            return this.Summary ?? defaultSummary;
         }
 
         /// <inheritdoc />

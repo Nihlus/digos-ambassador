@@ -52,7 +52,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <summary>
         /// Gets the character that the appearance belongs to.
         /// </summary>
-        [Required]
         public virtual Character Character { get; private set; } = null!;
 
         /// <summary>

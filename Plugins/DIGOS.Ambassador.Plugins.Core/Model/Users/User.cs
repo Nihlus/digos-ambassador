@@ -41,7 +41,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Users
         /// <summary>
         /// Gets the biography of the user. This contains useful information that the users provide themselves.
         /// </summary>
-        [Required]
         public string Bio { get; internal set; }
 
         /// <summary>

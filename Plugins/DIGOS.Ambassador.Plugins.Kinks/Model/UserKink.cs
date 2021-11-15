@@ -39,13 +39,11 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Model
         /// <summary>
         /// Gets the user the kink belongs to.
         /// </summary>
-        [Required]
         public virtual User User { get; private set; } = null!;
 
         /// <summary>
         /// Gets the kink.
         /// </summary>
-        [Required]
         public virtual Kink Kink { get; private set; } = null!;
 
         /// <summary>

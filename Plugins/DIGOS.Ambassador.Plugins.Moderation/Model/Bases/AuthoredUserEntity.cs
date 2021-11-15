@@ -37,19 +37,16 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model.Bases
         /// <summary>
         /// Gets the server that the entity was authored on.
         /// </summary>
-        [Required]
         public virtual Server Server { get; private set; } = null!;
 
         /// <summary>
         /// Gets the user that the entity is associated with.
         /// </summary>
-        [Required]
         public virtual User User { get; private set; } = null!;
 
         /// <summary>
         /// Gets the user that created the entity.
         /// </summary>
-        [Required]
         public virtual User Author { get; private set; } = null!;
 
         /// <summary>

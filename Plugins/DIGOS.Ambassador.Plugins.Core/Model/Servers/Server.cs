@@ -54,7 +54,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Servers
         /// <summary>
         /// Gets the users known to the bot on this server.
         /// </summary>
-        [Required]
         public virtual List<ServerUser> KnownUsers { get; internal set; } = new();
 
         /// <summary>

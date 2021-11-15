@@ -139,7 +139,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             {
                 Colour = _feedback.Theme.Secondary,
                 Title = roleplay.Name,
-                Description = roleplay.Summary,
+                Description = roleplay.GetSummaryOrDefault(),
                 Fields = fields
             };
 
@@ -184,7 +184,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             (
                 roleplays,
                 r => r.Name,
-                r => r.Summary,
+                r => r.GetSummaryOrDefault(),
                 "There are no roleplays in the server that you can view."
             );
 
@@ -218,7 +218,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             (
                 roleplays,
                 r => r.Name,
-                r => r.Summary,
+                r => r.GetSummaryOrDefault(),
                 "You don't have any roleplays."
             );
 

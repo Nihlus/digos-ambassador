@@ -189,7 +189,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             {
                 Colour = feedback.Theme.Secondary,
                 Title = $"{exportedRoleplay.Title} - Archived",
-                Description = roleplay.Summary,
+                Description = roleplay.GetSummaryOrDefault(),
                 Footer = new EmbedFooter($"Archived on {DateTimeOffset.UtcNow:d}.")
             };
 

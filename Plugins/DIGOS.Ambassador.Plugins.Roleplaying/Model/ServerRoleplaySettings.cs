@@ -39,7 +39,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <summary>
         /// Gets the server the settings are relevant for.
         /// </summary>
-        [Required]
         public virtual Server Server { get; private set; } = null!;
 
         /// <summary>

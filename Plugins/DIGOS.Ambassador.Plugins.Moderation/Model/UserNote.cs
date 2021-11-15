@@ -40,7 +40,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <summary>
         /// Gets the content of the note.
         /// </summary>
-        [Required]
         public string Content { get; internal set; } = null!;
 
         /// <summary>
