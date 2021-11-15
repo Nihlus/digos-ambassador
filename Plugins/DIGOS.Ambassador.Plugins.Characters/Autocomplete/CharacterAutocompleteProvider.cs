@@ -70,10 +70,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.Autocomplete
             var suggestedCharacters = await scopedCharacters
                 .OrderBy(c => EF.Functions.FuzzyStringMatchLevenshtein(c.Name, userInput))
                 .Take(25)
-                .Select(c => c.Name)
+                .Select(c => new { c.Nickname, c.Name })
                 .ToListAsync(ct);
 
-            return suggestedCharacters.Select(n => new ApplicationCommandOptionChoice(n, n)).ToList();
+            return suggestedCharacters.Select
+            (
+                n => new ApplicationCommandOptionChoice(n.Nickname ?? n.Name, n.Name)
+            ).ToList();
         }
     }
 }

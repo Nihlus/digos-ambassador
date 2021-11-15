@@ -44,11 +44,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         public virtual Server Server { get; private set; } = null!;
 
         /// <inheritdoc />
-        [Required]
         public virtual User Owner { get; set; } = null!;
 
         /// <inheritdoc />
-        [Required]
         public string Name { get; internal set; } = null!;
 
         /// <summary>
@@ -64,26 +62,22 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         /// <summary>
         /// Gets a URL pointing to the character's avatar.
         /// </summary>
-        [Required]
-        public string AvatarUrl { get; internal set; } = null!;
+        public string? AvatarUrl { get; internal set; }
 
         /// <summary>
         /// Gets the nickname that a user should have when playing as the character.
         /// </summary>
-        [Required]
-        public string Nickname { get; internal set; } = null!;
+        public string? Nickname { get; internal set; }
 
         /// <summary>
         /// Gets the character summary.
         /// </summary>
-        [Required]
-        public string Summary { get; internal set; } = null!;
+        public string? Summary { get; internal set; }
 
         /// <summary>
         /// Gets the full description of the character.
         /// </summary>
-        [Required]
-        public string Description { get; internal set; } = null!;
+        public string? Description { get; internal set; }
 
         /// <summary>
         /// Gets a value indicating whether the character is NSFW.
@@ -98,7 +92,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         /// <summary>
         /// Gets the preferred pronoun family of the character.
         /// </summary>
-        [Required]
         public string PronounProviderFamily { get; internal set; } = null!;
 
         /// <summary>
@@ -156,6 +149,26 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
             this.Description = description;
             this.PronounProviderFamily = pronounProviderFamily;
             this.Nickname = nickname;
+        }
+
+        /// <summary>
+        /// Gets the description if it is set; otherwise, return <paramref name="defaultDescription"/>.
+        /// </summary>
+        /// <param name="defaultDescription">The default description to use when one is not present.</param>
+        /// <returns>The description.</returns>
+        public string GetDescriptionOrDefault(string defaultDescription = "No description set.")
+        {
+            return this.Description ?? defaultDescription;
+        }
+
+        /// <summary>
+        /// Gets the summary if it is set; otherwise, return <paramref name="defaultSummary"/>.
+        /// </summary>
+        /// <param name="defaultSummary">The default summary to use when one is not present.</param>
+        /// <returns>The description.</returns>
+        public string GetSummaryOrDefault(string defaultSummary = "No summary set.")
+        {
+            return this.Summary ?? defaultSummary;
         }
 
         /// <inheritdoc />

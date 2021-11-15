@@ -339,7 +339,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
                         ? character.AvatarUrl
                         : _content.GetDefaultAvatarUri().ToString()
                 ),
-                Fields = new[] { new EmbedField("Description", character.Description) }
+                Fields = new[] { new EmbedField("Description", character.GetDescriptionOrDefault()) }
             };
 
             var sendCharacter = await _feedback.SendPrivateEmbedAsync(_context.User.ID, characterEmbed);

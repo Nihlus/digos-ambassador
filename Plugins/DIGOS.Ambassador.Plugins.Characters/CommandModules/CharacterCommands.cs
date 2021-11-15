@@ -48,6 +48,7 @@ using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Feedback.Messages;
@@ -191,7 +192,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Command("show")]
         [Description("Shows quick information about a character.")]
         [RequireContext(ChannelContext.Guild)]
-        public async Task<Result> ShowCharacterAsync(Character character)
+        public async Task<Result> ShowCharacterAsync([Autocomplete] Character character)
         {
             var createEmbed = await CreateCharacterInfoEmbedAsync(character);
             if (!createEmbed.IsSuccess)
@@ -315,7 +316,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             eb = eb with
             {
                 Title = characterInfoTitle,
-                Description = character.Summary,
+                Description = character.GetSummaryOrDefault(),
                 Thumbnail = new EmbedThumbnail(characterAvatarUrl),
                 Fields = embedFields,
                 Author = author
@@ -353,9 +354,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             // Finally, the description
             embedFields.Add
             (
-                eb.CalculateEmbedLength() + character.Description.Length > 2000
+                eb.CalculateEmbedLength() + character.GetDescriptionOrDefault().Length > 2000
                     ? new EmbedField("Description", "Your description is really long, and can't be displayed.")
-                    : new EmbedField("Description", character.Description)
+                    : new EmbedField("Description", character.GetDescriptionOrDefault())
             );
 
             return eb;
@@ -460,7 +461,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             (
                 characters,
                 c => c.Name,
-                c => c.Summary,
+                c => c.GetSummaryOrDefault(),
                 "You don't have any characters."
             );
 

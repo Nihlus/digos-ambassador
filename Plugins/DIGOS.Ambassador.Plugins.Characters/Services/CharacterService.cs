@@ -92,8 +92,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             avatarUrl ??= _content.GetDefaultAvatarUri().ToString();
             nickname ??= name;
-            summary ??= "No summary set.";
-            description ??= "No description set.";
             pronounFamily ??= new TheyPronounProvider().Family;
 
             // Use dummy values here - we'll set them with the service so we can ensure they're correctly formatted.
@@ -129,16 +127,22 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return Result<Character>.FromError(result);
             }
 
-            result = await SetCharacterSummaryAsync(character, summary, ct);
-            if (!result.IsSuccess)
+            if (summary is not null)
             {
-                return Result<Character>.FromError(result);
+                result = await SetCharacterSummaryAsync(character, summary, ct);
+                if (!result.IsSuccess)
+                {
+                    return Result<Character>.FromError(result);
+                }
             }
 
-            result = await SetCharacterDescriptionAsync(character, description, ct);
-            if (!result.IsSuccess)
+            if (description is not null)
             {
-                return Result<Character>.FromError(result);
+                result = await SetCharacterDescriptionAsync(character, description, ct);
+                if (!result.IsSuccess)
+                {
+                    return Result<Character>.FromError(result);
+                }
             }
 
             result = await SetCharacterPronounsAsync(character, pronounFamily, ct);
