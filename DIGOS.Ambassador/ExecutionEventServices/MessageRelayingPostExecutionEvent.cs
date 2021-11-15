@@ -241,15 +241,14 @@ namespace DIGOS.Ambassador.ExecutionEventServices
                         await sw.WriteLineAsync($"Full command: {command}");
                         await sw.WriteLineAsync();
                         await sw.WriteLineAsync("### Error");
-                    }
+                        var errorJson = JsonSerializer.Serialize
+                        (
+                            result,
+                            new JsonSerializerOptions { WriteIndented = true }
+                        );
 
-                    await JsonSerializer.SerializeAsync
-                    (
-                        ms,
-                        result,
-                        new JsonSerializerOptions { WriteIndented = true },
-                        ct
-                    );
+                        await sw.WriteLineAsync(errorJson);
+                    }
 
                     ms.Position = 0;
 
@@ -271,7 +270,18 @@ namespace DIGOS.Ambassador.ExecutionEventServices
                         return Result.FromError(sendReport);
                     }
 
-                    break;
+                    if (context is not InteractionContext inter || _feedback.HasEditedOriginalMessage)
+                    {
+                        return Result.FromSuccess();
+                    }
+
+                    // Erase the original interaction
+                    return await _interactionAPI.DeleteOriginalInteractionResponseAsync
+                    (
+                        inter.ApplicationID,
+                        inter.Token,
+                        ct
+                    );
                 }
             }
 
