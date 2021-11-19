@@ -27,6 +27,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Remora.Discord.Gateway.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
+using Remora.Results;
 
 [assembly: RemoraPlugin(typeof(QuotesPlugin))]
 
@@ -44,10 +45,12 @@ public sealed class QuotesPlugin : PluginDescriptor
     public override string Description => "Provides automatic conversion of message links to quotes.";
 
     /// <inheritdoc/>
-    public override void ConfigureServices(IServiceCollection serviceCollection)
+    public override Result ConfigureServices(IServiceCollection serviceCollection)
     {
         serviceCollection
             .AddSingleton<QuoteService>()
             .AddResponder<MessageQuoteResponder>();
+
+        return Result.FromSuccess();
     }
 }

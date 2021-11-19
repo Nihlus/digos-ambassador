@@ -24,6 +24,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Discord.Interactivity.Extensions;
@@ -60,7 +61,7 @@ public sealed class AutorolePlugin : PluginDescriptor, IMigratablePlugin
     public override string Description => "Allows administrators to create automated role assignments.";
 
     /// <inheritdoc />
-    public override void ConfigureServices(IServiceCollection serviceCollection)
+    public override Result ConfigureServices(IServiceCollection serviceCollection)
     {
         serviceCollection.TryAddInteractivityResponder<PaginatedMessageResponder>();
         serviceCollection.TryAddScoped<AutoroleService>();
@@ -81,10 +82,12 @@ public sealed class AutorolePlugin : PluginDescriptor, IMigratablePlugin
 
         serviceCollection.Configure<DiscordGatewayClientOptions>(o => o.Intents |= GatewayIntents.GuildPresences);
         */
+
+        return Result.FromSuccess();
     }
 
     /// <inheritdoc />
-    public override ValueTask<Result> InitializeAsync(IServiceProvider serviceProvider)
+    public override ValueTask<Result> InitializeAsync(IServiceProvider serviceProvider, CancellationToken ct = default)
     {
         var permissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
         return new ValueTask<Result>(permissionRegistry.RegisterPermissions
@@ -95,21 +98,12 @@ public sealed class AutorolePlugin : PluginDescriptor, IMigratablePlugin
     }
 
     /// <inheritdoc />
-    public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
+    public async Task<Result> MigrateAsync(IServiceProvider serviceProvider, CancellationToken ct = default)
     {
         var context = serviceProvider.GetRequiredService<AutoroleDatabaseContext>();
 
-        await context.Database.MigrateAsync();
+        await context.Database.MigrateAsync(ct);
 
         return Result.FromSuccess();
-    }
-
-    /// <inheritdoc />
-    public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
-    {
-        var context = serviceProvider.GetRequiredService<AutoroleDatabaseContext>();
-        var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
-
-        return appliedMigrations.Any();
     }
 }

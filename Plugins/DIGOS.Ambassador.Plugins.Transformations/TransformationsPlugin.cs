@@ -23,6 +23,7 @@
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Services;
@@ -61,7 +62,7 @@ public sealed class TransformationsPlugin : PluginDescriptor, IMigratablePlugin
     public override string Description => "Provides user-managed transformation services.";
 
     /// <inheritdoc />
-    public override void ConfigureServices(IServiceCollection serviceCollection)
+    public override Result ConfigureServices(IServiceCollection serviceCollection)
     {
         serviceCollection.TryAddSingleton<TransformationDescriptionBuilder>();
         serviceCollection.TryAddSingleton(services =>
@@ -90,23 +91,16 @@ public sealed class TransformationsPlugin : PluginDescriptor, IMigratablePlugin
 
         serviceCollection.AddParser<ColourTypeParser>();
         serviceCollection.AddCommandGroup<TransformationCommands>();
-    }
 
-    /// <inheritdoc />
-    public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
-    {
-        var context = serviceProvider.GetRequiredService<TransformationsDatabaseContext>();
-
-        await context.Database.MigrateAsync();
         return Result.FromSuccess();
     }
 
     /// <inheritdoc />
-    public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
+    public async Task<Result> MigrateAsync(IServiceProvider serviceProvider, CancellationToken ct = default)
     {
         var context = serviceProvider.GetRequiredService<TransformationsDatabaseContext>();
-        var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
 
-        return appliedMigrations.Any();
+        await context.Database.MigrateAsync(ct);
+        return Result.FromSuccess();
     }
 }

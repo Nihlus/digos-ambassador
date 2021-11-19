@@ -22,6 +22,7 @@
 
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Discord.Interactivity.Extensions;
@@ -60,7 +61,7 @@ public sealed class KinksPlugin : PluginDescriptor, IMigratablePlugin
     public override string Description => "Provides user-managed kink libraries.";
 
     /// <inheritdoc />
-    public override void ConfigureServices(IServiceCollection serviceCollection)
+    public override Result ConfigureServices(IServiceCollection serviceCollection)
     {
         serviceCollection.TryAddScoped<KinkService>();
         serviceCollection.AddConfiguredSchemaAwareDbContextPool<KinksDatabaseContext>();
@@ -75,24 +76,17 @@ public sealed class KinksPlugin : PluginDescriptor, IMigratablePlugin
         {
             o.Intents |= GatewayIntents.DirectMessages;
         });
-    }
-
-    /// <inheritdoc />
-    public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
-    {
-        var context = serviceProvider.GetRequiredService<KinksDatabaseContext>();
-
-        await context.Database.MigrateAsync();
 
         return Result.FromSuccess();
     }
 
     /// <inheritdoc />
-    public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
+    public async Task<Result> MigrateAsync(IServiceProvider serviceProvider, CancellationToken ct = default)
     {
         var context = serviceProvider.GetRequiredService<KinksDatabaseContext>();
-        var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
 
-        return appliedMigrations.Any();
+        await context.Database.MigrateAsync(ct);
+
+        return Result.FromSuccess();
     }
 }

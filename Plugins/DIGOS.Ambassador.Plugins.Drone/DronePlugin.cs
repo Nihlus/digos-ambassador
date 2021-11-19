@@ -29,6 +29,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Remora.Commands.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
+using Remora.Results;
 
 [assembly: RemoraPlugin(typeof(DronePlugin))]
 
@@ -46,11 +47,13 @@ public sealed class DronePlugin : PluginDescriptor
     public override string Description => "Provides a single command to drone people.";
 
     /// <inheritdoc/>
-    public override void ConfigureServices(IServiceCollection serviceCollection)
+    public override Result ConfigureServices(IServiceCollection serviceCollection)
     {
         serviceCollection.TryAddScoped<DroneService>();
         serviceCollection.TryAddSingleton<Random>();
 
         serviceCollection.AddCommandGroup<DroneCommands>();
+
+        return Result.FromSuccess();
     }
 }

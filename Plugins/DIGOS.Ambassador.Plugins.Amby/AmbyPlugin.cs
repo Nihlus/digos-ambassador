@@ -27,6 +27,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Remora.Commands.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
+using Remora.Results;
 
 [assembly: RemoraPlugin(typeof(AmbyPlugin))]
 
@@ -44,12 +45,14 @@ public sealed class AmbyPlugin : PluginDescriptor
     public override string Description => "Contains various Amby-specific commands.";
 
     /// <inheritdoc/>
-    public override void ConfigureServices(IServiceCollection serviceCollection)
+    public override Result ConfigureServices(IServiceCollection serviceCollection)
     {
         serviceCollection
             .AddSingleton<PortraitService>()
             .AddSingleton<SassService>();
 
         serviceCollection.AddCommandGroup<AmbyCommands>();
+
+        return Result.FromSuccess();
     }
 }

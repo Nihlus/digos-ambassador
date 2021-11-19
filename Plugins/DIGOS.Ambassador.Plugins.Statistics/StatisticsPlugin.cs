@@ -28,6 +28,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Remora.Commands.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
+using Remora.Results;
 
 [assembly: RemoraPlugin(typeof(StatisticsPlugin))]
 
@@ -45,11 +46,13 @@ public sealed class StatisticsPlugin : PluginDescriptor
     public override string Description => "Provides various commands for view statistics about the bot.";
 
     /// <inheritdoc />
-    public override void ConfigureServices(IServiceCollection serviceCollection)
+    public override Result ConfigureServices(IServiceCollection serviceCollection)
     {
         serviceCollection
             .AddCommandGroup<StatCommands>();
 
         serviceCollection.TryAddInteractivityResponder<PaginatedMessageResponder>();
+
+        return Result.FromSuccess();
     }
 }

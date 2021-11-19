@@ -23,6 +23,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Discord.Interactivity.Extensions;
@@ -59,7 +60,7 @@ public class ModerationPlugin : PluginDescriptor, IMigratablePlugin
     public override string Description => "Provides simple moderation tools.";
 
     /// <inheritdoc />
-    public override void ConfigureServices(IServiceCollection serviceCollection)
+    public override Result ConfigureServices(IServiceCollection serviceCollection)
     {
         serviceCollection.TryAddInteractivityResponder<PaginatedMessageResponder>();
         serviceCollection
@@ -80,10 +81,12 @@ public class ModerationPlugin : PluginDescriptor, IMigratablePlugin
 
         serviceCollection.AddResponder<EventLoggingResponder>();
         serviceCollection.AddBehaviour<ExpirationBehaviour>();
+
+        return Result.FromSuccess();
     }
 
     /// <inheritdoc />
-    public override ValueTask<Result> InitializeAsync(IServiceProvider serviceProvider)
+    public override ValueTask<Result> InitializeAsync(IServiceProvider serviceProvider, CancellationToken ct = default)
     {
         var permissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
         return new ValueTask<Result>(permissionRegistry.RegisterPermissions
@@ -94,21 +97,12 @@ public class ModerationPlugin : PluginDescriptor, IMigratablePlugin
     }
 
     /// <inheritdoc />
-    public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
+    public async Task<Result> MigrateAsync(IServiceProvider serviceProvider, CancellationToken ct = default)
     {
         var context = serviceProvider.GetRequiredService<ModerationDatabaseContext>();
 
-        await context.Database.MigrateAsync();
+        await context.Database.MigrateAsync(ct);
 
         return Result.FromSuccess();
-    }
-
-    /// <inheritdoc />
-    public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
-    {
-        var context = serviceProvider.GetRequiredService<ModerationDatabaseContext>();
-        var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
-
-        return appliedMigrations.Any();
     }
 }

@@ -26,6 +26,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Remora.Discord.Gateway.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
+using Remora.Results;
 
 [assembly: RemoraPlugin(typeof(JoinMessagesPlugin))]
 
@@ -43,9 +44,11 @@ public sealed class JoinMessagesPlugin : PluginDescriptor
     public override string Description => "Sends initial join messages to new guild members.";
 
     /// <inheritdoc />
-    public override void ConfigureServices(IServiceCollection serviceCollection)
+    public override Result ConfigureServices(IServiceCollection serviceCollection)
     {
         serviceCollection
             .AddResponder<JoinMessageResponder>();
+
+        return Result.FromSuccess();
     }
 }

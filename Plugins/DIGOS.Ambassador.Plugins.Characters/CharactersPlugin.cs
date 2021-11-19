@@ -24,6 +24,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Discord.Interactivity.Extensions;
@@ -63,7 +64,7 @@ public sealed class CharactersPlugin : PluginDescriptor, IMigratablePlugin
     public override string Description => "Provides user-managed character libraries.";
 
     /// <inheritdoc />
-    public override void ConfigureServices(IServiceCollection serviceCollection)
+    public override Result ConfigureServices(IServiceCollection serviceCollection)
     {
         // Dependencies
         serviceCollection.AddInteractivity();
@@ -85,10 +86,12 @@ public sealed class CharactersPlugin : PluginDescriptor, IMigratablePlugin
 
         serviceCollection.AddAutocompleteProvider<AnyCharacterAutocompleteProvider>();
         serviceCollection.AddAutocompleteProvider<OwnedCharacterAutocompleteProvider>();
+
+        return Result.FromSuccess();
     }
 
     /// <inheritdoc />
-    public override ValueTask<Result> InitializeAsync(IServiceProvider serviceProvider)
+    public override ValueTask<Result> InitializeAsync(IServiceProvider serviceProvider, CancellationToken ct = default)
     {
         var permissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
         var registrationResult = permissionRegistry.RegisterPermissions
@@ -109,21 +112,12 @@ public sealed class CharactersPlugin : PluginDescriptor, IMigratablePlugin
     }
 
     /// <inheritdoc />
-    public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
+    public async Task<Result> MigrateAsync(IServiceProvider serviceProvider, CancellationToken ct = default)
     {
         var context = serviceProvider.GetRequiredService<CharactersDatabaseContext>();
 
-        await context.Database.MigrateAsync();
+        await context.Database.MigrateAsync(ct);
 
         return Result.FromSuccess();
-    }
-
-    /// <inheritdoc />
-    public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
-    {
-        var context = serviceProvider.GetRequiredService<CharactersDatabaseContext>();
-        var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
-
-        return appliedMigrations.Any();
     }
 }

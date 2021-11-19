@@ -27,6 +27,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Remora.Commands.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
+using Remora.Results;
 
 [assembly: RemoraPlugin(typeof(JumboEmotesPlugin))]
 
@@ -44,10 +45,12 @@ public sealed class JumboEmotesPlugin : PluginDescriptor
     public override string Description => "Provides a command for jumbofying emotes.";
 
     /// <inheritdoc />
-    public override void ConfigureServices(IServiceCollection serviceCollection)
+    public override Result ConfigureServices(IServiceCollection serviceCollection)
     {
         serviceCollection
             .AddParser<EmojiTypeReader>()
             .AddCommandGroup<JumboCommands>();
+
+        return Result.FromSuccess();
     }
 }

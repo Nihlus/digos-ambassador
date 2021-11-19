@@ -24,6 +24,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Plugins.Core;
@@ -58,7 +59,7 @@ public sealed class CorePlugin : PluginDescriptor, IMigratablePlugin
     public override string Description => "Provides core functionality related to users and servers.";
 
     /// <inheritdoc/>
-    public override void ConfigureServices(IServiceCollection serviceCollection)
+    public override Result ConfigureServices(IServiceCollection serviceCollection)
     {
         serviceCollection.TryAddScoped<ServerService>();
         serviceCollection.TryAddScoped<UserService>();
@@ -70,10 +71,12 @@ public sealed class CorePlugin : PluginDescriptor, IMigratablePlugin
             .AddCommandGroup<PrivacyCommands>()
             .AddCommandGroup<UserCommands>()
             .AddCommandGroup<ServerCommands>();
+
+        return Result.FromSuccess();
     }
 
     /// <inheritdoc />
-    public override ValueTask<Result> InitializeAsync(IServiceProvider serviceProvider)
+    public override ValueTask<Result> InitializeAsync(IServiceProvider serviceProvider, CancellationToken ct = default)
     {
         var permissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
         return new ValueTask<Result>(permissionRegistry.RegisterPermissions
@@ -84,21 +87,12 @@ public sealed class CorePlugin : PluginDescriptor, IMigratablePlugin
     }
 
     /// <inheritdoc />
-    public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
+    public async Task<Result> MigrateAsync(IServiceProvider serviceProvider, CancellationToken ct = default)
     {
         var context = serviceProvider.GetRequiredService<CoreDatabaseContext>();
 
-        await context.Database.MigrateAsync();
+        await context.Database.MigrateAsync(ct);
 
         return Result.FromSuccess();
-    }
-
-    /// <inheritdoc />
-    public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
-    {
-        var context = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-        var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
-
-        return appliedMigrations.Any();
     }
 }

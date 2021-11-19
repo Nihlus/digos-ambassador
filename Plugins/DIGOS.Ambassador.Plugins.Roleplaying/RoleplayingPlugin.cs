@@ -23,6 +23,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Discord.TypeReaders;
@@ -65,7 +66,7 @@ public sealed class RoleplayingPlugin : PluginDescriptor, IMigratablePlugin
     public override string Description => "Provides user-managed roleplay libraries.";
 
     /// <inheritdoc />
-    public override void ConfigureServices(IServiceCollection serviceCollection)
+    public override Result ConfigureServices(IServiceCollection serviceCollection)
     {
         serviceCollection.TryAddScoped<RoleplayService>();
         serviceCollection.TryAddScoped<RoleplayDiscordService>();
@@ -92,10 +93,12 @@ public sealed class RoleplayingPlugin : PluginDescriptor, IMigratablePlugin
 
         serviceCollection
             .AddResponder<RoleplayLoggingResponder>();
+
+        return Result.FromSuccess();
     }
 
     /// <inheritdoc />
-    public override ValueTask<Result> InitializeAsync(IServiceProvider serviceProvider)
+    public override ValueTask<Result> InitializeAsync(IServiceProvider serviceProvider, CancellationToken ct = default)
     {
         var permissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
         var registrationResult = permissionRegistry.RegisterPermissions
@@ -110,21 +113,12 @@ public sealed class RoleplayingPlugin : PluginDescriptor, IMigratablePlugin
     }
 
     /// <inheritdoc />
-    public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
+    public async Task<Result> MigrateAsync(IServiceProvider serviceProvider, CancellationToken ct = default)
     {
         var context = serviceProvider.GetRequiredService<RoleplayingDatabaseContext>();
 
-        await context.Database.MigrateAsync();
+        await context.Database.MigrateAsync(ct);
 
         return Result.FromSuccess();
-    }
-
-    /// <inheritdoc />
-    public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
-    {
-        var context = serviceProvider.GetRequiredService<RoleplayingDatabaseContext>();
-        var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
-
-        return appliedMigrations.Any();
     }
 }

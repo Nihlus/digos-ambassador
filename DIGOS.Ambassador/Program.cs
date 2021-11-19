@@ -39,6 +39,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Remora.Behaviours.Services;
 using Remora.Commands.Trees.Nodes;
 using Remora.Discord.API.Abstractions.Objects;
@@ -54,6 +55,7 @@ using Remora.Discord.Gateway.Extensions;
 using Remora.Discord.Hosting.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Services;
+using Remora.Results;
 
 namespace DIGOS.Ambassador;
 
@@ -103,8 +105,10 @@ internal class Program
 
         var token = getBotToken.Entity.Trim();
 
-        var pluginService = new PluginService();
-        var plugins = pluginService.LoadAvailablePlugins().ToList();
+        var options = Options.Create(new PluginServiceOptions(Array.Empty<string>()));
+        var pluginService = new PluginService(options);
+
+        var plugins = pluginService.LoadPluginTree();
 
         var hostBuilder = Host.CreateDefaultBuilder()
             .AddDiscordService(_ => token)
@@ -158,9 +162,10 @@ internal class Program
                 services.Replace(ServiceDescriptor.Scoped<CommandResponder, AmbassadorCommandResponder>());
                 services.Replace(ServiceDescriptor.Scoped<InteractionResponder, AmbassadorInteractionResponder>());
 
-                foreach (var plugin in plugins)
+                var configurePlugins = plugins.ConfigureServices(services);
+                if (!configurePlugins.IsSuccess)
                 {
-                    plugin.ConfigureServices(services);
+                    throw new InvalidOperationException();
                 }
             })
             .ConfigureLogging(l =>
@@ -224,41 +229,54 @@ internal class Program
             }
         }
 
-        foreach (var plugin in plugins)
+        log.LogInformation("Initializing plugins...");
+        var initializePlugins = await plugins.InitializeAsync(hostServices, cancellationSource.Token);
+        if (!initializePlugins.IsSuccess)
         {
-            log.LogInformation("Initializing plugin {Name}, version {Version}...", plugin.Name, plugin.Version);
-            var initializePlugin = await plugin.InitializeAsync(hostServices);
-            if (!initializePlugin.IsSuccess)
-            {
-                log.LogError
-                (
-                    "Failed to initialize plugin {Name}: {Error}",
-                    plugin.Name,
-                    initializePlugin.Error.Message
-                );
+            log.LogError("Failed to initialize the plugin tree");
 
-                return;
+            if (initializePlugins.Error is AggregateError a)
+            {
+                foreach (var error in a.Errors)
+                {
+                    if (error.IsSuccess)
+                    {
+                        continue;
+                    }
+
+                    log.LogError("Initialization error: {Error}", error.Error!.Message);
+                }
+            }
+            else
+            {
+                log.LogError("Initialization error: {Error}", initializePlugins.Error);
             }
 
-            if (plugin is not IMigratablePlugin migratablePlugin)
+            return;
+        }
+
+        log.LogInformation("Migrating plugins...");
+        var migratePlugins = await plugins.MigrateAsync(hostServices, cancellationSource.Token);
+        if (!migratePlugins.IsSuccess)
+        {
+            log.LogError("Failed to initialize the plugin tree");
+
+            if (migratePlugins.Error is AggregateError a)
             {
-                continue;
+                foreach (var error in a.Errors)
+                {
+                    if (error.IsSuccess)
+                    {
+                        continue;
+                    }
+
+                    log.LogError("Migration error: {Error}", error.Error!.Message);
+                }
             }
-
-            log.LogInformation("Applying plugin migrations...");
-
-            var migratePlugin = await migratablePlugin.MigratePluginAsync(hostServices);
-            if (migratePlugin.IsSuccess)
+            else
             {
-                continue;
+                log.LogError("Migration error: {Error}", migratePlugins.Error);
             }
-
-            log.LogError
-            (
-                "Failed to migrate plugin {Name}: {Error}",
-                plugin.Name,
-                migratePlugin.Error.Message
-            );
 
             return;
         }
