@@ -40,85 +40,84 @@ using Remora.Results;
 using Xunit;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Permissions
+namespace DIGOS.Ambassador.Tests.Plugins.Permissions;
+
+/// <summary>
+/// Serves as a test base for permission service tests.
+/// </summary>
+[PublicAPI]
+public abstract class PermissionServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
 {
     /// <summary>
-    /// Serves as a test base for permission service tests.
+    /// Gets the permission service instance.
     /// </summary>
-    [PublicAPI]
-    public abstract class PermissionServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
+    protected PermissionService Permissions { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the permission database.
+    /// </summary>
+    protected PermissionsDatabaseContext Database { get; private set; } = null!;
+
+    /// <inheritdoc />
+    protected sealed override void RegisterServices(IServiceCollection serviceCollection)
     {
-        /// <summary>
-        /// Gets the permission service instance.
-        /// </summary>
-        protected PermissionService Permissions { get; private set; } = null!;
+        serviceCollection.AddDbContext<PermissionsDatabaseContext>(o => ConfigureOptions(o, "Permissions"));
 
-        /// <summary>
-        /// Gets the permission database.
-        /// </summary>
-        protected PermissionsDatabaseContext Database { get; private set; } = null!;
+        var guildMock = new Mock<IGuild>();
+        guildMock.SetupGet(g => g.OwnerID).Returns(new Snowflake(3));
 
-        /// <inheritdoc />
-        protected sealed override void RegisterServices(IServiceCollection serviceCollection)
-        {
-            serviceCollection.AddDbContext<PermissionsDatabaseContext>(o => ConfigureOptions(o, "Permissions"));
+        var guildMemberMock = new Mock<IGuildMember>();
+        guildMemberMock.SetupGet(g => g.Roles).Returns(new List<Snowflake> { new Snowflake(2) });
 
-            var guildMock = new Mock<IGuild>();
-            guildMock.SetupGet(g => g.OwnerID).Returns(new Snowflake(3));
-
-            var guildMemberMock = new Mock<IGuildMember>();
-            guildMemberMock.SetupGet(g => g.Roles).Returns(new List<Snowflake> { new Snowflake(2) });
-
-            var guildAPIMock = new Mock<IDiscordRestGuildAPI>();
-            guildAPIMock
-                .Setup
+        var guildAPIMock = new Mock<IDiscordRestGuildAPI>();
+        guildAPIMock
+            .Setup
+            (
+                a => a.GetGuildAsync
                 (
-                    a => a.GetGuildAsync
-                    (
-                        It.IsAny<Snowflake>(),
-                        It.IsAny<Optional<bool>>(),
-                        It.IsAny<CancellationToken>()
-                    )
+                    It.IsAny<Snowflake>(),
+                    It.IsAny<Optional<bool>>(),
+                    It.IsAny<CancellationToken>()
                 )
-                .Returns(Task.FromResult(Result<IGuild>.FromSuccess(guildMock.Object)));
+            )
+            .Returns(Task.FromResult(Result<IGuild>.FromSuccess(guildMock.Object)));
 
-            guildAPIMock
-                .Setup
+        guildAPIMock
+            .Setup
+            (
+                a => a.GetGuildMemberAsync
                 (
-                    a => a.GetGuildMemberAsync
-                    (
-                        It.IsAny<Snowflake>(),
-                        It.IsAny<Snowflake>(),
-                        It.IsAny<CancellationToken>()
-                    )
+                    It.IsAny<Snowflake>(),
+                    It.IsAny<Snowflake>(),
+                    It.IsAny<CancellationToken>()
                 )
-                .Returns(Task.FromResult(Result<IGuildMember>.FromSuccess(guildMemberMock.Object)));
+            )
+            .Returns(Task.FromResult(Result<IGuildMember>.FromSuccess(guildMemberMock.Object)));
 
-            serviceCollection
-                .AddScoped<PermissionService>()
-                .AddSingleton(guildAPIMock.Object)
-                .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
-        }
+        serviceCollection
+            .AddScoped<PermissionService>()
+            .AddSingleton(guildAPIMock.Object)
+            .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
+    }
 
-        /// <inheritdoc />
-        protected sealed override void ConfigureServices(IServiceProvider serviceProvider)
-        {
-            this.Database = serviceProvider.GetRequiredService<PermissionsDatabaseContext>();
-            this.Database.Database.Create();
+    /// <inheritdoc />
+    protected sealed override void ConfigureServices(IServiceProvider serviceProvider)
+    {
+        this.Database = serviceProvider.GetRequiredService<PermissionsDatabaseContext>();
+        this.Database.Database.Create();
 
-            this.Permissions = serviceProvider.GetRequiredService<PermissionService>();
-        }
+        this.Permissions = serviceProvider.GetRequiredService<PermissionService>();
+    }
 
-        /// <inheritdoc />
-        public Task InitializeAsync()
-        {
-            return Task.CompletedTask;
-        }
+    /// <inheritdoc />
+    public Task InitializeAsync()
+    {
+        return Task.CompletedTask;
+    }
 
-        /// <inheritdoc />
-        public Task DisposeAsync()
-        {
-            return Task.CompletedTask;
-        }
+    /// <inheritdoc />
+    public Task DisposeAsync()
+    {
+        return Task.CompletedTask;
     }
 }

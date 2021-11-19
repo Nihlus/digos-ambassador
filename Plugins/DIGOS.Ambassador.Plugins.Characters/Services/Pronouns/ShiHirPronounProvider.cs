@@ -20,29 +20,28 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
+namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
+
+/// <summary>
+/// Provides shi and hir pronouns.
+/// </summary>
+public class ShiHirPronounProvider : PronounProvider
 {
-    /// <summary>
-    /// Provides shi and hir pronouns.
-    /// </summary>
-    public class ShiHirPronounProvider : PronounProvider
-    {
-        /// <inheritdoc />
-        public override string Family => "Shi and hir";
+    /// <inheritdoc />
+    public override string Family => "Shi and hir";
 
-        /// <inheritdoc />
-        public override string GetSubjectForm(bool withVerb = false) => withVerb ? "shi is" : "shi";
+    /// <inheritdoc />
+    public override string GetSubjectForm(bool withVerb = false) => withVerb ? "shi is" : "shi";
 
-        /// <inheritdoc />
-        public override string GetObjectForm() => "hir";
+    /// <inheritdoc />
+    public override string GetObjectForm() => "hir";
 
-        /// <inheritdoc />
-        public override string GetPossessiveAdjectiveForm() => "hir";
+    /// <inheritdoc />
+    public override string GetPossessiveAdjectiveForm() => "hir";
 
-        /// <inheritdoc />
-        public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "shi has" : "hirs";
+    /// <inheritdoc />
+    public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "shi has" : "hirs";
 
-        /// <inheritdoc />
-        public override string GetReflexiveForm() => "hirself";
-    }
+    /// <inheritdoc />
+    public override string GetReflexiveForm() => "hirself";
 }

@@ -22,47 +22,46 @@
 
 using Remora.Discord.Core;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
+namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
+
+/// <summary>
+/// Represents a condition where a role would be assigned after a user posts a certain number of messages in a
+/// given source location.
+/// </summary>
+/// <typeparam name="TActualCondition">The actual condition type.</typeparam>
+public abstract class MessageCountInSourceCondition<TActualCondition> : AutoroleCondition
+    where TActualCondition : MessageCountInSourceCondition<TActualCondition>
 {
     /// <summary>
-    /// Represents a condition where a role would be assigned after a user posts a certain number of messages in a
-    /// given source location.
+    /// Gets the Discord ID of the message source.
     /// </summary>
-    /// <typeparam name="TActualCondition">The actual condition type.</typeparam>
-    public abstract class MessageCountInSourceCondition<TActualCondition> : AutoroleCondition
-        where TActualCondition : MessageCountInSourceCondition<TActualCondition>
+    public Snowflake SourceID { get; internal set; }
+
+    /// <summary>
+    /// Gets the required number of messages.
+    /// </summary>
+    public long RequiredCount { get; internal set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MessageCountInSourceCondition{TActualCondition}"/> class.
+    /// </summary>
+    /// <param name="sourceID">The source ID.</param>
+    /// <param name="requiredCount">The required message count.</param>
+    protected MessageCountInSourceCondition(Snowflake sourceID, long requiredCount)
     {
-        /// <summary>
-        /// Gets the Discord ID of the message source.
-        /// </summary>
-        public Snowflake SourceID { get; internal set; }
+        this.SourceID = sourceID;
+        this.RequiredCount = requiredCount;
+    }
 
-        /// <summary>
-        /// Gets the required number of messages.
-        /// </summary>
-        public long RequiredCount { get; internal set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MessageCountInSourceCondition{TActualCondition}"/> class.
-        /// </summary>
-        /// <param name="sourceID">The source ID.</param>
-        /// <param name="requiredCount">The required message count.</param>
-        protected MessageCountInSourceCondition(Snowflake sourceID, long requiredCount)
+    /// <inheritdoc />
+    public override bool HasSameConditionsAs(IAutoroleCondition autoroleCondition)
+    {
+        if (autoroleCondition is not TActualCondition channelCondition)
         {
-            this.SourceID = sourceID;
-            this.RequiredCount = requiredCount;
+            return false;
         }
 
-        /// <inheritdoc />
-        public override bool HasSameConditionsAs(IAutoroleCondition autoroleCondition)
-        {
-            if (autoroleCondition is not TActualCondition channelCondition)
-            {
-                return false;
-            }
-
-            return this.SourceID == channelCondition.SourceID &&
-                   this.RequiredCount == channelCondition.RequiredCount;
-        }
+        return this.SourceID == channelCondition.SourceID &&
+               this.RequiredCount == channelCondition.RequiredCount;
     }
 }

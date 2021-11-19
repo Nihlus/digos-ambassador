@@ -37,86 +37,85 @@ using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTa
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
-namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
+namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules;
+
+public partial class AutoroleCommands
 {
-    public partial class AutoroleCommands
+    public partial class AutoroleConditionCommands
     {
-        public partial class AutoroleConditionCommands
+        /// <summary>
+        /// Adds an instance of the condition to the role.
+        /// </summary>
+        /// <param name="autorole">The autorole configuration.</param>
+        /// <param name="count">The message count.</param>
+        [UsedImplicitly]
+        [Command("add-total-messages")]
+        [Description("Adds an instance of the condition to the role.")]
+        [RequireContext(ChannelContext.Guild)]
+        [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
+        public async Task<Result<FeedbackMessage>> AddConditionAsync
+        (
+            [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole,
+            long count
+        )
         {
-            /// <summary>
-            /// Adds an instance of the condition to the role.
-            /// </summary>
-            /// <param name="autorole">The autorole configuration.</param>
-            /// <param name="count">The message count.</param>
-            [UsedImplicitly]
-            [Command("add-total-messages")]
-            [Description("Adds an instance of the condition to the role.")]
-            [RequireContext(ChannelContext.Guild)]
-            [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-            public async Task<Result<FeedbackMessage>> AddConditionAsync
+            var condition = _autoroles.CreateConditionProxy<MessageCountInGuildCondition>
+                            (
+                                _context.GuildID.Value,
+                                count
+                            )
+                            ?? throw new InvalidOperationException();
+
+            var addCondition = await _autoroles.AddConditionAsync(autorole, condition);
+
+            return !addCondition.IsSuccess
+                ? Result<FeedbackMessage>.FromError(addCondition)
+                : new FeedbackMessage("Condition added.", _feedback.Theme.Secondary);
+        }
+
+        /// <summary>
+        /// Modifies an instance of the condition on the role.
+        /// </summary>
+        /// <param name="autorole">The autorole configuration.</param>
+        /// <param name="conditionID">The ID of the condition.</param>
+        /// <param name="count">The message count.</param>
+        [UsedImplicitly]
+        [Command("set-total-messages")]
+        [Description("Modifies an instance of the condition on the role.")]
+        [RequireContext(ChannelContext.Guild)]
+        [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
+        public async Task<Result<FeedbackMessage>> ModifyConditionAsync
+        (
+            [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole,
+            long conditionID,
+            long count
+        )
+        {
+            var getCondition = _autoroles.GetCondition<MessageCountInGuildCondition>
             (
-                [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole,
-                long count
-            )
+                autorole,
+                conditionID
+            );
+
+            if (!getCondition.IsSuccess)
             {
-                var condition = _autoroles.CreateConditionProxy<MessageCountInGuildCondition>
-                (
-                    _context.GuildID.Value,
-                    count
-                )
-                ?? throw new InvalidOperationException();
-
-                var addCondition = await _autoroles.AddConditionAsync(autorole, condition);
-
-                return !addCondition.IsSuccess
-                    ? Result<FeedbackMessage>.FromError(addCondition)
-                    : new FeedbackMessage("Condition added.", _feedback.Theme.Secondary);
+                return Result<FeedbackMessage>.FromError(getCondition);
             }
 
-            /// <summary>
-            /// Modifies an instance of the condition on the role.
-            /// </summary>
-            /// <param name="autorole">The autorole configuration.</param>
-            /// <param name="conditionID">The ID of the condition.</param>
-            /// <param name="count">The message count.</param>
-            [UsedImplicitly]
-            [Command("set-total-messages")]
-            [Description("Modifies an instance of the condition on the role.")]
-            [RequireContext(ChannelContext.Guild)]
-            [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-            public async Task<Result<FeedbackMessage>> ModifyConditionAsync
+            var condition = getCondition.Entity;
+            var modifyResult = await _autoroles.ModifyConditionAsync
             (
-                [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole,
-                long conditionID,
-                long count
-            )
-            {
-                var getCondition = _autoroles.GetCondition<MessageCountInGuildCondition>
-                (
-                    autorole,
-                    conditionID
-                );
-
-                if (!getCondition.IsSuccess)
+                condition,
+                c =>
                 {
-                    return Result<FeedbackMessage>.FromError(getCondition);
+                    c.RequiredCount = count;
+                    c.SourceID = _context.GuildID.Value;
                 }
+            );
 
-                var condition = getCondition.Entity;
-                var modifyResult = await _autoroles.ModifyConditionAsync
-                (
-                    condition,
-                    c =>
-                    {
-                        c.RequiredCount = count;
-                        c.SourceID = _context.GuildID.Value;
-                    }
-                );
-
-                return !modifyResult.IsSuccess
-                    ? Result<FeedbackMessage>.FromError(modifyResult)
-                    : new FeedbackMessage("Condition updated.", _feedback.Theme.Secondary);
-            }
+            return !modifyResult.IsSuccess
+                ? Result<FeedbackMessage>.FromError(modifyResult)
+                : new FeedbackMessage("Condition updated.", _feedback.Theme.Secondary);
         }
     }
 }

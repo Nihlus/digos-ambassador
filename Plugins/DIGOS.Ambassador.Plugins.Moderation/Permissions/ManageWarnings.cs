@@ -23,20 +23,19 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
 
-namespace DIGOS.Ambassador.Plugins.Moderation.Permissions
+namespace DIGOS.Ambassador.Plugins.Moderation.Permissions;
+
+/// <summary>
+/// Represents a permission that allows a user to manage warnings in the bot.
+/// </summary>
+public sealed class ManageWarnings : Permission
 {
-    /// <summary>
-    /// Represents a permission that allows a user to manage warnings in the bot.
-    /// </summary>
-    public sealed class ManageWarnings : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("76E0384E-AC3A-42E1-A6DC-CB717AB5BD96");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("76E0384E-AC3A-42E1-A6DC-CB717AB5BD96");
 
-        /// <inheritdoc />
-        public override string FriendlyName => nameof(ManageWarnings);
+    /// <inheritdoc />
+    public override string FriendlyName => nameof(ManageWarnings);
 
-        /// <inheritdoc />
-        public override string Description => "Allows you to manage warnings in the bot.";
-    }
+    /// <inheritdoc />
+    public override string Description => "Allows you to manage warnings in the bot.";
 }

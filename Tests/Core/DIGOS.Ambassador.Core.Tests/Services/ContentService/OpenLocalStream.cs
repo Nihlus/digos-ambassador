@@ -28,50 +28,49 @@ using Zio;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Core.Tests.Services.ContentService
+namespace DIGOS.Ambassador.Core.Tests.Services.ContentService;
+
+public static partial class ContentServiceTests
 {
-    public static partial class ContentServiceTests
+    public class OpenLocalStream : ContentServiceTestBase
     {
-        public class OpenLocalStream : ContentServiceTestBase
+        private readonly UPath _testFile = UPath.Combine(UPath.Root, "test");
+        private readonly UPath _invalidTestFile = UPath.Combine("test");
+
+        [Fact]
+        public void ReturnsFalseIfFileDoesNotExist()
         {
-            private readonly UPath _testFile = UPath.Combine(UPath.Root, "test");
-            private readonly UPath _invalidTestFile = UPath.Combine("test");
+            var result = this.ContentService.OpenLocalStream(_testFile);
 
-            [Fact]
-            public void ReturnsFalseIfFileDoesNotExist()
-            {
-                var result = this.ContentService.OpenLocalStream(_testFile);
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public void ReturnsFalseIfPathIsNotAbsolute()
+        {
+            var result = this.ContentService.OpenLocalStream(_invalidTestFile);
 
-            [Fact]
-            public void ReturnsFalseIfPathIsNotAbsolute()
-            {
-                var result = this.ContentService.OpenLocalStream(_invalidTestFile);
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public void ReturnsTrueIfFileExists()
+        {
+            this.FileSystem.CreateFile(_testFile).Dispose();
 
-            [Fact]
-            public void ReturnsTrueIfFileExists()
-            {
-                this.FileSystem.CreateFile(_testFile).Dispose();
+            var result = this.ContentService.OpenLocalStream(_testFile);
 
-                var result = this.ContentService.OpenLocalStream(_testFile);
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public void ActuallyReturnsFile()
+        {
+            this.FileSystem.CreateFile(_testFile).Dispose();
 
-            [Fact]
-            public void ActuallyReturnsFile()
-            {
-                this.FileSystem.CreateFile(_testFile).Dispose();
+            var result = this.ContentService.OpenLocalStream(_testFile);
 
-                var result = this.ContentService.OpenLocalStream(_testFile);
-
-                Assert.NotNull(result.Entity);
-            }
+            Assert.NotNull(result.Entity);
         }
     }
 }

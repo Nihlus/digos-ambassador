@@ -28,36 +28,35 @@ using Remora.Discord.API.Objects;
 using Remora.Discord.Core;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Discord.Pagination.Extensions
+namespace DIGOS.Ambassador.Discord.Pagination.Extensions;
+
+/// <summary>
+/// Defines extension methods for the <see cref="InteractivityService"/> class.
+/// </summary>
+public static class InteractivityServiceExtensions
 {
     /// <summary>
-    /// Defines extension methods for the <see cref="InteractivityService"/> class.
+    /// Sends an interactive message.
     /// </summary>
-    public static class InteractivityServiceExtensions
+    /// <param name="interactivityService">The interactivity service.</param>
+    /// <param name="sourceUser">The source user.</param>
+    /// <param name="pages">The pages to send.</param>
+    /// <param name="appearanceOptions">Custom appearance options, if any.</param>
+    /// <param name="ct">The cancellation token for this operation.</param>
+    /// <returns>A result which may or may not have succeeded.</returns>
+    public static Task<Result> SendContextualInteractiveMessageAsync
+    (
+        this InteractivityService interactivityService,
+        Snowflake sourceUser,
+        IReadOnlyList<Embed> pages,
+        PaginatedAppearanceOptions? appearanceOptions = default,
+        CancellationToken ct = default
+    )
     {
-        /// <summary>
-        /// Sends an interactive message.
-        /// </summary>
-        /// <param name="interactivityService">The interactivity service.</param>
-        /// <param name="sourceUser">The source user.</param>
-        /// <param name="pages">The pages to send.</param>
-        /// <param name="appearanceOptions">Custom appearance options, if any.</param>
-        /// <param name="ct">The cancellation token for this operation.</param>
-        /// <returns>A result which may or may not have succeeded.</returns>
-        public static Task<Result> SendContextualInteractiveMessageAsync
+        return interactivityService.SendContextualInteractiveMessageAsync
         (
-            this InteractivityService interactivityService,
-            Snowflake sourceUser,
-            IReadOnlyList<Embed> pages,
-            PaginatedAppearanceOptions? appearanceOptions = default,
-            CancellationToken ct = default
-        )
-        {
-            return interactivityService.SendContextualInteractiveMessageAsync
-            (
-                (c, m) => new PaginatedMessage(c, m, sourceUser, pages, appearanceOptions),
-                ct
-            );
-        }
+            (c, m) => new PaginatedMessage(c, m, sourceUser, pages, appearanceOptions),
+            ct
+        );
     }
 }

@@ -34,53 +34,52 @@ using Xunit;
 #pragma warning disable SA1648
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Core
+namespace DIGOS.Ambassador.Tests.Plugins.Core;
+
+/// <summary>
+/// Serves as a test base for server service tests.
+/// </summary>
+public abstract class ServerServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
 {
     /// <summary>
-    /// Serves as a test base for server service tests.
+    /// Gets the server service object.
     /// </summary>
-    public abstract class ServerServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
+    protected ServerService Servers { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the database.
+    /// </summary>
+    protected CoreDatabaseContext Database { get; private set; } = null!;
+
+    /// <inheritdoc />
+    protected override void RegisterServices(IServiceCollection serviceCollection)
     {
-        /// <summary>
-        /// Gets the server service object.
-        /// </summary>
-        protected ServerService Servers { get; private set; } = null!;
+        serviceCollection
+            .AddDbContext<CoreDatabaseContext>(o => ConfigureOptions(o, "Core"));
 
-        /// <summary>
-        /// Gets the database.
-        /// </summary>
-        protected CoreDatabaseContext Database { get; private set; } = null!;
+        serviceCollection
+            .AddScoped<ServerService>()
+            .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
+    }
 
-        /// <inheritdoc />
-        protected override void RegisterServices(IServiceCollection serviceCollection)
-        {
-            serviceCollection
-                .AddDbContext<CoreDatabaseContext>(o => ConfigureOptions(o, "Core"));
+    /// <inheritdoc />
+    protected override void ConfigureServices(IServiceProvider serviceProvider)
+    {
+        this.Database = serviceProvider.GetRequiredService<CoreDatabaseContext>();
+        this.Database.Database.Create();
 
-            serviceCollection
-                .AddScoped<ServerService>()
-                .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
-        }
+        this.Servers = serviceProvider.GetRequiredService<ServerService>();
+    }
 
-        /// <inheritdoc />
-        protected override void ConfigureServices(IServiceProvider serviceProvider)
-        {
-            this.Database = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            this.Database.Database.Create();
+    /// <inheritdoc />
+    public virtual Task InitializeAsync()
+    {
+        return Task.CompletedTask;
+    }
 
-            this.Servers = serviceProvider.GetRequiredService<ServerService>();
-        }
-
-        /// <inheritdoc />
-        public virtual Task InitializeAsync()
-        {
-            return Task.CompletedTask;
-        }
-
-        /// <inheritdoc />
-        public Task DisposeAsync()
-        {
-            return Task.CompletedTask;
-        }
+    /// <inheritdoc />
+    public Task DisposeAsync()
+    {
+        return Task.CompletedTask;
     }
 }

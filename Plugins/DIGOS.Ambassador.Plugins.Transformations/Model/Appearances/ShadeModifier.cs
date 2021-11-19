@@ -23,26 +23,25 @@
 using JetBrains.Annotations;
 
 #pragma warning disable 1591, SA1602
-namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
+namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
+
+/// <summary>
+/// Modifying adjectives for shades.
+/// </summary>
+[PublicAPI]
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+public enum ShadeModifier
 {
-    /// <summary>
-    /// Modifying adjectives for shades.
-    /// </summary>
-    [PublicAPI]
-    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    public enum ShadeModifier
-    {
-        Dull,
-        Bright,
-        Fluorescent,
-        Glowing,
-        Off,
-        Dark,
-        Light,
-        Shimmering,
-        Neon,
-        Milky,
-        Soft,
-        Deep
-    }
+    Dull,
+    Bright,
+    Fluorescent,
+    Glowing,
+    Off,
+    Dark,
+    Light,
+    Shimmering,
+    Neon,
+    Milky,
+    Soft,
+    Deep
 }

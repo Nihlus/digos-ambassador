@@ -28,128 +28,127 @@ using JetBrains.Annotations;
 using Remora.Results;
 using Zio;
 
-namespace DIGOS.Ambassador.Core.Services
+namespace DIGOS.Ambassador.Core.Services;
+
+/// <summary>
+/// Management class for content that comes bundled with the bot. Responsible for loading and providing access to
+/// the content.
+/// </summary>
+public class ContentService
 {
     /// <summary>
-    /// Management class for content that comes bundled with the bot. Responsible for loading and providing access to
-    /// the content.
+    /// Gets the virtual filesystem that encapsulates the content.
     /// </summary>
-    public class ContentService
+    public IFileSystem FileSystem { get; }
+
+    /// <summary>
+    /// Gets the path to the database credentials.
+    /// </summary>
+    private UPath DatabaseCredentialsPath { get; }
+
+    /// <summary>
+    /// Gets the base remote content URI.
+    /// </summary>
+    public Uri BaseCDNUri { get; }
+
+    /// <summary>
+    /// Gets the <see cref="Uri"/> pointing to a templated issue creator on github.
+    /// </summary>
+    public Uri AutomaticBugReportCreationUri { get; }
+
+    /// <summary>
+    /// Gets the <see cref="Uri"/> pointing to to the privacy policy.
+    /// </summary>
+    public Uri PrivacyPolicyUri { get; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ContentService"/> class.
+    /// </summary>
+    /// <param name="fileSystem">The filesystem abstraction.</param>
+    public ContentService(IFileSystem fileSystem)
     {
-        /// <summary>
-        /// Gets the virtual filesystem that encapsulates the content.
-        /// </summary>
-        public IFileSystem FileSystem { get; }
+        this.FileSystem = fileSystem;
 
-        /// <summary>
-        /// Gets the path to the database credentials.
-        /// </summary>
-        private UPath DatabaseCredentialsPath { get; }
+        this.BaseCDNUri = new Uri("https://cdn.algiz.nu/amby/");
 
-        /// <summary>
-        /// Gets the base remote content URI.
-        /// </summary>
-        public Uri BaseCDNUri { get; }
-
-        /// <summary>
-        /// Gets the <see cref="Uri"/> pointing to a templated issue creator on github.
-        /// </summary>
-        public Uri AutomaticBugReportCreationUri { get; }
-
-        /// <summary>
-        /// Gets the <see cref="Uri"/> pointing to to the privacy policy.
-        /// </summary>
-        public Uri PrivacyPolicyUri { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ContentService"/> class.
-        /// </summary>
-        /// <param name="fileSystem">The filesystem abstraction.</param>
-        public ContentService(IFileSystem fileSystem)
-        {
-            this.FileSystem = fileSystem;
-
-            this.BaseCDNUri = new Uri("https://cdn.algiz.nu/amby/");
-
-            this.AutomaticBugReportCreationUri = new Uri
-            (
-                "https://github.com/Nihlus/digos-ambassador/issues/new?template=automated-bug-report.md"
-            );
-            this.PrivacyPolicyUri = new Uri(this.BaseCDNUri, "privacy/PrivacyPolicy.pdf");
-
-            this.DatabaseCredentialsPath = UPath.Combine(UPath.Root, "Database", "database.credentials");
-        }
-
-        /// <summary>
-        /// Retrieves the database credentials.
-        /// </summary>
-        /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public Result<Stream> GetDatabaseCredentialStream()
-        {
-            return OpenLocalStream(this.DatabaseCredentialsPath);
-        }
-
-        /// <summary>
-        /// Loads the bot token from disk.
-        /// </summary>
-        /// <exception cref="FileNotFoundException">Thrown if the bot token file can't be found.</exception>
-        /// <exception cref="InvalidDataException">Thrown if no token exists in the file.</exception>
-        /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<Result<string>> GetBotTokenAsync()
-        {
-            var tokenPath = UPath.Combine(UPath.Root, "Discord", "bot.token");
-
-            if (!this.FileSystem.FileExists(tokenPath))
-            {
-                return new InvalidOperationError("The token file could not be found.");
-            }
-
-            var getTokenStream = OpenLocalStream(tokenPath);
-            if (!getTokenStream.IsSuccess)
-            {
-                return new InvalidOperationError("The token file could not be opened.");
-            }
-
-            await using var tokenStream = getTokenStream.Entity;
-            var token = await AsyncIO.ReadAllTextAsync(tokenStream);
-
-            return string.IsNullOrEmpty(token)
-                ? new InvalidOperationError("The token file did not contain a valid token.")
-                : Result<string>.FromSuccess(token);
-        }
-
-        /// <summary>
-        /// Gets the stream of a local content file.
-        /// </summary>
-        /// <param name="path">The path to the file.</param>
-        /// <param name="fileMode">The mode with which to open the stream.</param>
-        /// <param name="fileAccess">The access rights with which to open the stream.</param>
-        /// <param name="fileShare">The sharing rights with which to open the stream.</param>
-        /// <returns>A <see cref="FileStream"/> with the file data.</returns>
-        [Pure]
-        [MustUseReturnValue("The resulting file stream must be disposed.")]
-        public Result<Stream> OpenLocalStream
+        this.AutomaticBugReportCreationUri = new Uri
         (
-            [PathReference] UPath path,
-            FileMode fileMode = FileMode.Open,
-            FileAccess fileAccess = FileAccess.Read,
-            FileShare fileShare = FileShare.Read
-        )
-        {
-            if (!path.IsAbsolute)
-            {
-                return new InvalidOperationError("Content paths must be absolute.");
-            }
+            "https://github.com/Nihlus/digos-ambassador/issues/new?template=automated-bug-report.md"
+        );
+        this.PrivacyPolicyUri = new Uri(this.BaseCDNUri, "privacy/PrivacyPolicy.pdf");
 
-            try
-            {
-                var file = this.FileSystem.OpenFile(path, fileMode, fileAccess, fileShare);
-                return Result<Stream>.FromSuccess(file);
-            }
-            catch (IOException iex)
-            {
-                return Result<Stream>.FromError(iex);
-            }
+        this.DatabaseCredentialsPath = UPath.Combine(UPath.Root, "Database", "database.credentials");
+    }
+
+    /// <summary>
+    /// Retrieves the database credentials.
+    /// </summary>
+    /// <returns>A retrieval result which may or may not have succeeded.</returns>
+    public Result<Stream> GetDatabaseCredentialStream()
+    {
+        return OpenLocalStream(this.DatabaseCredentialsPath);
+    }
+
+    /// <summary>
+    /// Loads the bot token from disk.
+    /// </summary>
+    /// <exception cref="FileNotFoundException">Thrown if the bot token file can't be found.</exception>
+    /// <exception cref="InvalidDataException">Thrown if no token exists in the file.</exception>
+    /// <returns>A retrieval result which may or may not have succeeded.</returns>
+    public async Task<Result<string>> GetBotTokenAsync()
+    {
+        var tokenPath = UPath.Combine(UPath.Root, "Discord", "bot.token");
+
+        if (!this.FileSystem.FileExists(tokenPath))
+        {
+            return new InvalidOperationError("The token file could not be found.");
+        }
+
+        var getTokenStream = OpenLocalStream(tokenPath);
+        if (!getTokenStream.IsSuccess)
+        {
+            return new InvalidOperationError("The token file could not be opened.");
+        }
+
+        await using var tokenStream = getTokenStream.Entity;
+        var token = await AsyncIO.ReadAllTextAsync(tokenStream);
+
+        return string.IsNullOrEmpty(token)
+            ? new InvalidOperationError("The token file did not contain a valid token.")
+            : Result<string>.FromSuccess(token);
+    }
+
+    /// <summary>
+    /// Gets the stream of a local content file.
+    /// </summary>
+    /// <param name="path">The path to the file.</param>
+    /// <param name="fileMode">The mode with which to open the stream.</param>
+    /// <param name="fileAccess">The access rights with which to open the stream.</param>
+    /// <param name="fileShare">The sharing rights with which to open the stream.</param>
+    /// <returns>A <see cref="FileStream"/> with the file data.</returns>
+    [Pure]
+    [MustUseReturnValue("The resulting file stream must be disposed.")]
+    public Result<Stream> OpenLocalStream
+    (
+        [PathReference] UPath path,
+        FileMode fileMode = FileMode.Open,
+        FileAccess fileAccess = FileAccess.Read,
+        FileShare fileShare = FileShare.Read
+    )
+    {
+        if (!path.IsAbsolute)
+        {
+            return new InvalidOperationError("Content paths must be absolute.");
+        }
+
+        try
+        {
+            var file = this.FileSystem.OpenFile(path, fileMode, fileAccess, fileShare);
+            return Result<Stream>.FromSuccess(file);
+        }
+        catch (IOException iex)
+        {
+            return Result<Stream>.FromError(iex);
         }
     }
 }

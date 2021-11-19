@@ -42,218 +42,217 @@ using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.NodeDeserializers;
 using Zio;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
+namespace DIGOS.Ambassador.Plugins.Transformations.Extensions;
+
+/// <summary>
+/// Extension methods for the <see cref="ContentService"/> class.
+/// </summary>
+internal static class ContentServiceExtensions
 {
     /// <summary>
-    /// Extension methods for the <see cref="ContentService"/> class.
+    /// Gets the base dossier path.
     /// </summary>
-    internal static class ContentServiceExtensions
+    private static UPath BaseTransformationSpeciesPath { get; } = UPath.Combine
+    (
+        UPath.Root,
+        "Transformations",
+        "Species"
+    );
+
+    /// <summary>
+    /// Gets the path to the transformation messages.
+    /// </summary>
+    private static UPath TransformationMessagesPath { get; } = UPath.Combine
+    (
+        UPath.Root,
+        "Transformations",
+        "messages.json"
+    );
+
+    /// <summary>
+    /// Loads and retrieves the bundled transformation messages.
+    /// </summary>
+    /// <param name="this">The content service.</param>
+    /// <returns>A retrieval result which may or may not have succeeded.</returns>
+    public static Result<TransformationText> GetTransformationMessages
+    (
+        this ContentService @this
+    )
     {
-        /// <summary>
-        /// Gets the base dossier path.
-        /// </summary>
-        private static UPath BaseTransformationSpeciesPath { get; } = UPath.Combine
+        if (!@this.FileSystem.FileExists(TransformationMessagesPath))
+        {
+            return new InvalidOperationError("Transformation messages not found.");
+        }
+
+        using var reader = new StreamReader
         (
-            UPath.Root,
-            "Transformations",
-            "Species"
+            @this.FileSystem.OpenFile
+            (
+                TransformationMessagesPath,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read
+            )
         );
 
-        /// <summary>
-        /// Gets the path to the transformation messages.
-        /// </summary>
-        private static UPath TransformationMessagesPath { get; } = UPath.Combine
+        var content = reader.ReadToEnd();
+        return TransformationText.TryDeserialize(content, out var text)
+            ? Result<TransformationText>.FromSuccess(text)
+            : new ParsingError<TransformationText>("Failed to parse the messages.");
+    }
+
+    /// <summary>
+    /// Discovers the species that have been bundled with the program.
+    /// </summary>
+    /// <param name="this">The content service.</param>
+    /// <returns>A retrieval result which may or may not have succeeded.</returns>
+    [Pure]
+    public static async Task<Result<IReadOnlyList<Species>>> DiscoverBundledSpeciesAsync
+    (
+        this ContentService @this
+    )
+    {
+        const string speciesFilename = "Species.yml";
+
+        var deserializer = new DeserializerBuilder()
+            .WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
+            .WithNamingConvention(UnderscoredNamingConvention.Instance)
+            .Build();
+
+        var species = new List<Species>();
+        var speciesFolders = @this.FileSystem.EnumerateDirectories
         (
-            UPath.Root,
-            "Transformations",
-            "messages.json"
+            BaseTransformationSpeciesPath
         );
 
-        /// <summary>
-        /// Loads and retrieves the bundled transformation messages.
-        /// </summary>
-        /// <param name="this">The content service.</param>
-        /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public static Result<TransformationText> GetTransformationMessages
-        (
-            this ContentService @this
-        )
+        foreach (var directory in speciesFolders)
         {
-            if (!@this.FileSystem.FileExists(TransformationMessagesPath))
+            var speciesFilePath = UPath.Combine(directory, speciesFilename);
+            if (!@this.FileSystem.FileExists(speciesFilePath))
             {
-                return new InvalidOperationError("Transformation messages not found.");
+                continue;
             }
 
-            using var reader = new StreamReader
-            (
-                @this.FileSystem.OpenFile
-                (
-                    TransformationMessagesPath,
-                    FileMode.Open,
-                    FileAccess.Read,
-                    FileShare.Read
-                )
-            );
-
-            var content = reader.ReadToEnd();
-            return TransformationText.TryDeserialize(content, out var text)
-                ? Result<TransformationText>.FromSuccess(text)
-                : new ParsingError<TransformationText>("Failed to parse the messages.");
-        }
-
-        /// <summary>
-        /// Discovers the species that have been bundled with the program.
-        /// </summary>
-        /// <param name="this">The content service.</param>
-        /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure]
-        public static async Task<Result<IReadOnlyList<Species>>> DiscoverBundledSpeciesAsync
-        (
-            this ContentService @this
-        )
-        {
-            const string speciesFilename = "Species.yml";
-
-            var deserializer = new DeserializerBuilder()
-                .WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
-                .WithNamingConvention(UnderscoredNamingConvention.Instance)
-                .Build();
-
-            var species = new List<Species>();
-            var speciesFolders = @this.FileSystem.EnumerateDirectories
-            (
-                BaseTransformationSpeciesPath
-            );
-
-            foreach (var directory in speciesFolders)
+            var openStreamResult = @this.OpenLocalStream(speciesFilePath);
+            if (!openStreamResult.IsSuccess)
             {
-                var speciesFilePath = UPath.Combine(directory, speciesFilename);
-                if (!@this.FileSystem.FileExists(speciesFilePath))
-                {
-                    continue;
-                }
-
-                var openStreamResult = @this.OpenLocalStream(speciesFilePath);
-                if (!openStreamResult.IsSuccess)
-                {
-                    return Result<IReadOnlyList<Species>>.FromError(openStreamResult);
-                }
-
-                await using var speciesFile = openStreamResult.Entity;
-                var content = await AsyncIO.ReadAllTextAsync(speciesFile, Encoding.UTF8);
-
-                try
-                {
-                    species.Add(deserializer.Deserialize<Species>(content));
-                }
-                catch (YamlException yex)
-                {
-                    if (yex.InnerException is SerializationException sex)
-                    {
-                        return Result<IReadOnlyList<Species>>.FromError(sex);
-                    }
-
-                    return Result<IReadOnlyList<Species>>.FromError(yex);
-                }
+                return Result<IReadOnlyList<Species>>.FromError(openStreamResult);
             }
 
-            return Result<IReadOnlyList<Species>>.FromSuccess(species);
+            await using var speciesFile = openStreamResult.Entity;
+            var content = await AsyncIO.ReadAllTextAsync(speciesFile, Encoding.UTF8);
+
+            try
+            {
+                species.Add(deserializer.Deserialize<Species>(content));
+            }
+            catch (YamlException yex)
+            {
+                if (yex.InnerException is SerializationException sex)
+                {
+                    return Result<IReadOnlyList<Species>>.FromError(sex);
+                }
+
+                return Result<IReadOnlyList<Species>>.FromError(yex);
+            }
         }
 
-        /// <summary>
-        /// Discovers the transformations of a specific species that have been bundled with the program. The species
-        /// must already be registered in the database.
-        /// </summary>
-        /// <param name="this">The content service.</param>
-        /// <param name="transformation">The transformation service.</param>
-        /// <param name="species">The species to discover transformations for.</param>
-        /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure]
-        public static async Task<Result<IReadOnlyList<Transformation>>> DiscoverBundledTransformationsAsync
-        (
-            this ContentService @this,
-            TransformationService transformation,
-            Species species
-        )
+        return Result<IReadOnlyList<Species>>.FromSuccess(species);
+    }
+
+    /// <summary>
+    /// Discovers the transformations of a specific species that have been bundled with the program. The species
+    /// must already be registered in the database.
+    /// </summary>
+    /// <param name="this">The content service.</param>
+    /// <param name="transformation">The transformation service.</param>
+    /// <param name="species">The species to discover transformations for.</param>
+    /// <returns>A retrieval result which may or may not have succeeded.</returns>
+    [Pure]
+    public static async Task<Result<IReadOnlyList<Transformation>>> DiscoverBundledTransformationsAsync
+    (
+        this ContentService @this,
+        TransformationService transformation,
+        Species species
+    )
+    {
+        const string speciesFilename = "Species.yml";
+
+        var speciesDir = GetSpeciesDirectory(species);
+        var transformationFiles = @this.FileSystem.EnumerateFiles(speciesDir)
+            .Where(p => !p.ToString().EndsWith(speciesFilename));
+
+        var transformations = new List<Transformation>();
+        var deserializer = new DeserializerBuilder()
+            .WithTypeConverter(new ColourYamlConverter())
+            .WithTypeConverter(new SpeciesYamlConverter(transformation))
+            .WithTypeConverter(new EnumYamlConverter<Pattern>())
+            .WithTypeConverter(new NullableEnumYamlConverter<Pattern>())
+            .WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
+            .WithNamingConvention(UnderscoredNamingConvention.Instance)
+            .Build();
+
+        foreach (var transformationFile in transformationFiles)
         {
-            const string speciesFilename = "Species.yml";
-
-            var speciesDir = GetSpeciesDirectory(species);
-            var transformationFiles = @this.FileSystem.EnumerateFiles(speciesDir)
-                .Where(p => !p.ToString().EndsWith(speciesFilename));
-
-            var transformations = new List<Transformation>();
-            var deserializer = new DeserializerBuilder()
-                .WithTypeConverter(new ColourYamlConverter())
-                .WithTypeConverter(new SpeciesYamlConverter(transformation))
-                .WithTypeConverter(new EnumYamlConverter<Pattern>())
-                .WithTypeConverter(new NullableEnumYamlConverter<Pattern>())
-                .WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
-                .WithNamingConvention(UnderscoredNamingConvention.Instance)
-                .Build();
-
-            foreach (var transformationFile in transformationFiles)
+            var getTransformationFileStream = @this.OpenLocalStream(transformationFile);
+            if (!getTransformationFileStream.IsSuccess)
             {
-                var getTransformationFileStream = @this.OpenLocalStream(transformationFile);
-                if (!getTransformationFileStream.IsSuccess)
-                {
-                    continue;
-                }
-
-                string content;
-                await using (var transformationFileStream = getTransformationFileStream.Entity)
-                {
-                    content = await AsyncIO.ReadAllTextAsync(transformationFileStream);
-                }
-
-                try
-                {
-                    transformations.Add(deserializer.Deserialize<Transformation>(content));
-                }
-                catch (YamlException yex)
-                {
-                    if (yex.InnerException is SerializationException sex)
-                    {
-                        return Result<IReadOnlyList<Transformation>>.FromError(sex);
-                    }
-
-                    return Result<IReadOnlyList<Transformation>>.FromError(yex);
-                }
+                continue;
             }
 
-            return Result<IReadOnlyList<Transformation>>.FromSuccess(transformations);
+            string content;
+            await using (var transformationFileStream = getTransformationFileStream.Entity)
+            {
+                content = await AsyncIO.ReadAllTextAsync(transformationFileStream);
+            }
+
+            try
+            {
+                transformations.Add(deserializer.Deserialize<Transformation>(content));
+            }
+            catch (YamlException yex)
+            {
+                if (yex.InnerException is SerializationException sex)
+                {
+                    return Result<IReadOnlyList<Transformation>>.FromError(sex);
+                }
+
+                return Result<IReadOnlyList<Transformation>>.FromError(yex);
+            }
         }
 
-        [Pure]
-        private static UPath GetSpeciesDirectory(Species species)
-        {
-            return UPath.Combine(BaseTransformationSpeciesPath, species.Name);
-        }
+        return Result<IReadOnlyList<Transformation>>.FromSuccess(transformations);
+    }
 
-        /// <summary>
-        /// Gets the absolute path to a named lua script belonging to the given transformation.
-        /// </summary>
-        /// <param name="transformation">The transformation that the script belongs to.</param>
-        /// <param name="scriptName">The name of the script.</param>
-        /// <returns>The path to the script.</returns>
-        [Pure]
-        public static UPath GetLuaScriptPath
+    [Pure]
+    private static UPath GetSpeciesDirectory(Species species)
+    {
+        return UPath.Combine(BaseTransformationSpeciesPath, species.Name);
+    }
+
+    /// <summary>
+    /// Gets the absolute path to a named lua script belonging to the given transformation.
+    /// </summary>
+    /// <param name="transformation">The transformation that the script belongs to.</param>
+    /// <param name="scriptName">The name of the script.</param>
+    /// <returns>The path to the script.</returns>
+    [Pure]
+    public static UPath GetLuaScriptPath
+    (
+        Transformation transformation,
+        string scriptName
+    )
+    {
+        var scriptNameWithoutExtension = scriptName.EndsWith(".lua")
+            ? scriptName
+            : $"{scriptName}.lua";
+
+        return UPath.Combine
         (
-            Transformation transformation,
-            string scriptName
-        )
-        {
-            var scriptNameWithoutExtension = scriptName.EndsWith(".lua")
-                ? scriptName
-                : $"{scriptName}.lua";
-
-            return UPath.Combine
-            (
-                BaseTransformationSpeciesPath,
-                transformation.Species.Name,
-                "Scripts",
-                scriptNameWithoutExtension
-            );
-        }
+            BaseTransformationSpeciesPath,
+            transformation.Species.Name,
+            "Scripts",
+            scriptNameWithoutExtension
+        );
     }
 }

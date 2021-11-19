@@ -29,50 +29,49 @@ using Xunit;
 #pragma warning disable SA1649
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Characters
+namespace DIGOS.Ambassador.Tests.Plugins.Characters;
+
+public partial class CharacterServiceTests
 {
-    public partial class CharacterServiceTests
+    public class DeleteCharacterAsync : CharacterServiceTestBase
     {
-        public class DeleteCharacterAsync : CharacterServiceTestBase
+        private readonly Character _character;
+
+        public DeleteCharacterAsync()
         {
-            private readonly Character _character;
+            _character = CreateCharacter
+            (
+                this.DefaultOwner,
+                this.DefaultServer,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty
+            );
+        }
 
-            public DeleteCharacterAsync()
-            {
-                _character = CreateCharacter
-                (
-                    this.DefaultOwner,
-                    this.DefaultServer,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty
-                );
-            }
+        [Fact]
+        public async Task ReturnsTrueWhenDeletingCharacter()
+        {
+            var result = await this.Characters.DeleteCharacterAsync
+            (
+                _character
+            );
 
-            [Fact]
-            public async Task ReturnsTrueWhenDeletingCharacter()
-            {
-                var result = await this.Characters.DeleteCharacterAsync
-                (
-                    _character
-                );
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ActuallyDeletesCharacter()
+        {
+            await this.Characters.DeleteCharacterAsync
+            (
+                _character
+            );
 
-            [Fact]
-            public async Task ActuallyDeletesCharacter()
-            {
-                await this.Characters.DeleteCharacterAsync
-                (
-                    _character
-                );
-
-                Assert.Empty(this.Database.Characters);
-            }
+            Assert.Empty(this.Database.Characters);
         }
     }
 }

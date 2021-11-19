@@ -40,121 +40,120 @@ using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTa
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
-namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
+namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules;
+
+public partial class AutoroleCommands
 {
-    public partial class AutoroleCommands
+    /// <summary>
+    /// Contains commands for server-wide autorole settings.
+    /// </summary>
+    [UsedImplicitly]
+    [Group("settings")]
+    [Description("Commands for server-wide autorole settings.")]
+    public class AutoroleSettingCommands : CommandGroup
     {
+        private readonly AutoroleService _autoroles;
+        private readonly FeedbackService _feedback;
+        private readonly ICommandContext _context;
+
         /// <summary>
-        /// Contains commands for server-wide autorole settings.
+        /// Initializes a new instance of the <see cref="AutoroleSettingCommands"/> class.
+        /// </summary>
+        /// <param name="autoroles">The autorole service.</param>
+        /// <param name="feedback">The feedback service.</param>
+        /// <param name="context">The command context.</param>
+        public AutoroleSettingCommands
+        (
+            AutoroleService autoroles,
+            FeedbackService feedback,
+            ICommandContext context
+        )
+        {
+            _autoroles = autoroles;
+            _feedback = feedback;
+            _context = context;
+        }
+
+        /// <summary>
+        /// Shows the server-wide settings.
         /// </summary>
         [UsedImplicitly]
-        [Group("settings")]
-        [Description("Commands for server-wide autorole settings.")]
-        public class AutoroleSettingCommands : CommandGroup
+        [Command("show")]
+        [Description("Shows the server-wide autorole settings.")]
+        [RequireContext(ChannelContext.Guild)]
+        [RequirePermission(typeof(ShowAutoroleServerSettings), PermissionTarget.Self)]
+        public async Task<Result> ShowSettingsAsync()
         {
-            private readonly AutoroleService _autoroles;
-            private readonly FeedbackService _feedback;
-            private readonly ICommandContext _context;
+            var getSettings = await _autoroles.GetOrCreateServerSettingsAsync(_context.GuildID.Value);
+            if (!getSettings.IsSuccess)
+            {
+                return Result.FromError(getSettings);
+            }
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="AutoroleSettingCommands"/> class.
-            /// </summary>
-            /// <param name="autoroles">The autorole service.</param>
-            /// <param name="feedback">The feedback service.</param>
-            /// <param name="context">The command context.</param>
-            public AutoroleSettingCommands
+            var settings = getSettings.Entity;
+
+            var notificationChannelValue = settings.AffirmationRequiredNotificationChannelID.HasValue
+                ? $"<#{settings.AffirmationRequiredNotificationChannelID.Value}"
+                : "None";
+
+            var embed = new Embed
+            {
+                Colour = _feedback.Theme.Secondary,
+                Title = "Autorole Settings",
+                Fields = new[] { new EmbedField("Confirmation Notification Channel", notificationChannelValue) }
+            };
+
+            var send = await _feedback.SendContextualEmbedAsync(embed, ct: this.CancellationToken);
+            return send.IsSuccess
+                ? Result.FromSuccess()
+                : Result.FromError(send);
+        }
+
+        /// <summary>
+        /// Clears the confirmation notification channel.
+        /// </summary>
+        [UsedImplicitly]
+        [Command("clear-notification-channel")]
+        [Description("clears the confirmation notification channel.")]
+        [RequireContext(ChannelContext.Guild)]
+        [RequirePermission(typeof(EditAutoroleServerSettings), PermissionTarget.Self)]
+        public async Task<Result<FeedbackMessage>> ClearAffirmationNotificationChannel()
+        {
+            var clearResult = await _autoroles.ClearAffirmationNotificationChannelAsync
             (
-                AutoroleService autoroles,
-                FeedbackService feedback,
-                ICommandContext context
-            )
+                _context.GuildID.Value
+            );
+
+            return !clearResult.IsSuccess
+                ? Result<FeedbackMessage>.FromError(clearResult)
+                : new FeedbackMessage("Channel cleared.", _feedback.Theme.Secondary);
+        }
+
+        /// <summary>
+        /// Sets the confirmation notification channel.
+        /// </summary>
+        /// <param name="channel">The channel.</param>
+        [UsedImplicitly]
+        [Command("set-notification-channel")]
+        [Description("Sets the confirmation notification channel.")]
+        [RequireContext(ChannelContext.Guild)]
+        [RequirePermission(typeof(EditAutoroleServerSettings), PermissionTarget.Self)]
+        public async Task<Result<FeedbackMessage>> SetAffirmationNotificationChannel(IChannel channel)
+        {
+            if (channel.Type is not ChannelType.GuildText)
             {
-                _autoroles = autoroles;
-                _feedback = feedback;
-                _context = context;
+                return new UserError("That's not a text channel.");
             }
 
-            /// <summary>
-            /// Shows the server-wide settings.
-            /// </summary>
-            [UsedImplicitly]
-            [Command("show")]
-            [Description("Shows the server-wide autorole settings.")]
-            [RequireContext(ChannelContext.Guild)]
-            [RequirePermission(typeof(ShowAutoroleServerSettings), PermissionTarget.Self)]
-            public async Task<Result> ShowSettingsAsync()
-            {
-                var getSettings = await _autoroles.GetOrCreateServerSettingsAsync(_context.GuildID.Value);
-                if (!getSettings.IsSuccess)
-                {
-                    return Result.FromError(getSettings);
-                }
+            var setResult = await _autoroles.SetAffirmationNotificationChannelAsync
+            (
+                _context.GuildID.Value,
+                channel.ID
+            );
 
-                var settings = getSettings.Entity;
-
-                var notificationChannelValue = settings.AffirmationRequiredNotificationChannelID.HasValue
-                    ? $"<#{settings.AffirmationRequiredNotificationChannelID.Value}"
-                    : "None";
-
-                var embed = new Embed
-                {
-                    Colour = _feedback.Theme.Secondary,
-                    Title = "Autorole Settings",
-                    Fields = new[] { new EmbedField("Confirmation Notification Channel", notificationChannelValue) }
-                };
-
-                var send = await _feedback.SendContextualEmbedAsync(embed, ct: this.CancellationToken);
-                return send.IsSuccess
-                    ? Result.FromSuccess()
-                    : Result.FromError(send);
-            }
-
-            /// <summary>
-            /// Clears the confirmation notification channel.
-            /// </summary>
-            [UsedImplicitly]
-            [Command("clear-notification-channel")]
-            [Description("clears the confirmation notification channel.")]
-            [RequireContext(ChannelContext.Guild)]
-            [RequirePermission(typeof(EditAutoroleServerSettings), PermissionTarget.Self)]
-            public async Task<Result<FeedbackMessage>> ClearAffirmationNotificationChannel()
-            {
-                var clearResult = await _autoroles.ClearAffirmationNotificationChannelAsync
-                (
-                    _context.GuildID.Value
-                );
-
-                return !clearResult.IsSuccess
-                    ? Result<FeedbackMessage>.FromError(clearResult)
-                    : new FeedbackMessage("Channel cleared.", _feedback.Theme.Secondary);
-            }
-
-            /// <summary>
-            /// Sets the confirmation notification channel.
-            /// </summary>
-            /// <param name="channel">The channel.</param>
-            [UsedImplicitly]
-            [Command("set-notification-channel")]
-            [Description("Sets the confirmation notification channel.")]
-            [RequireContext(ChannelContext.Guild)]
-            [RequirePermission(typeof(EditAutoroleServerSettings), PermissionTarget.Self)]
-            public async Task<Result<FeedbackMessage>> SetAffirmationNotificationChannel(IChannel channel)
-            {
-                if (channel.Type is not ChannelType.GuildText)
-                {
-                    return new UserError("That's not a text channel.");
-                }
-
-                var setResult = await _autoroles.SetAffirmationNotificationChannelAsync
-                (
-                    _context.GuildID.Value,
-                    channel.ID
-                );
-
-                return !setResult.IsSuccess
-                    ? Result<FeedbackMessage>.FromError(setResult)
-                    : new FeedbackMessage("Channel set.", _feedback.Theme.Secondary);
-            }
+            return !setResult.IsSuccess
+                ? Result<FeedbackMessage>.FromError(setResult)
+                : new FeedbackMessage("Channel set.", _feedback.Theme.Secondary);
         }
     }
 }

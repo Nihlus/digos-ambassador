@@ -29,56 +29,55 @@ using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using JetBrains.Annotations;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Plugins.Transformations.Model
+namespace DIGOS.Ambassador.Plugins.Transformations.Model;
+
+/// <summary>
+/// Holds protection data for a specific user on a specific server.
+/// </summary>
+[PublicAPI]
+[Table("ServerUserProtections", Schema = "TransformationModule")]
+public class ServerUserProtection : EFEntity
 {
     /// <summary>
-    /// Holds protection data for a specific user on a specific server.
+    /// Gets the user that owns this protection data.
     /// </summary>
-    [PublicAPI]
-    [Table("ServerUserProtections", Schema = "TransformationModule")]
-    public class ServerUserProtection : EFEntity
+    public virtual User User { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the server that this protection data is valid on.
+    /// </summary>
+    public virtual Server Server { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the active protection type on this server.
+    /// </summary>
+    public ProtectionType Type { get; internal set; }
+
+    /// <summary>
+    /// Gets a value indicating whether or not the user has opted in to transformations.
+    /// </summary>
+    public bool HasOptedIn { get; internal set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ServerUserProtection"/> class.
+    /// </summary>
+    /// <remarks>
+    /// Required by EF Core.
+    /// </remarks>
+    protected ServerUserProtection()
     {
-        /// <summary>
-        /// Gets the user that owns this protection data.
-        /// </summary>
-        public virtual User User { get; private set; } = null!;
+    }
 
-        /// <summary>
-        /// Gets the server that this protection data is valid on.
-        /// </summary>
-        public virtual Server Server { get; private set; } = null!;
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ServerUserProtection"/> class.
+    /// </summary>
+    /// <param name="server">The server the user is protected on.</param>
+    /// <param name="user">The user that is protected.</param>
+    public ServerUserProtection(Server server, User user)
+    {
+        this.Server = server;
+        this.User = user;
 
-        /// <summary>
-        /// Gets the active protection type on this server.
-        /// </summary>
-        public ProtectionType Type { get; internal set; }
-
-        /// <summary>
-        /// Gets a value indicating whether or not the user has opted in to transformations.
-        /// </summary>
-        public bool HasOptedIn { get; internal set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ServerUserProtection"/> class.
-        /// </summary>
-        /// <remarks>
-        /// Required by EF Core.
-        /// </remarks>
-        protected ServerUserProtection()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ServerUserProtection"/> class.
-        /// </summary>
-        /// <param name="server">The server the user is protected on.</param>
-        /// <param name="user">The user that is protected.</param>
-        public ServerUserProtection(Server server, User user)
-        {
-            this.Server = server;
-            this.User = user;
-
-            this.Type = ProtectionType.Blacklist;
-        }
+        this.Type = ProtectionType.Blacklist;
     }
 }

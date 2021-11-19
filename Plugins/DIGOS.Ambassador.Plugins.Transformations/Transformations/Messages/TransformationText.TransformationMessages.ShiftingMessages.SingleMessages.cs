@@ -23,35 +23,34 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages;
+
+public sealed partial class TransformationText
 {
-    public sealed partial class TransformationText
+    public sealed partial class TransformationMessages
     {
-        public sealed partial class TransformationMessages
+        public sealed partial class ShiftingMessages
         {
-            public sealed partial class ShiftingMessages
+            /// <summary>
+            /// Holds singular messages.
+            /// </summary>
+            public sealed class SingleMessages
             {
                 /// <summary>
-                /// Holds singular messages.
+                /// Gets a list of colour shifting messages.
                 /// </summary>
-                public sealed class SingleMessages
-                {
-                    /// <summary>
-                    /// Gets a list of colour shifting messages.
-                    /// </summary>
-                    public IReadOnlyList<string> Colour { get; init; } = new List<string>();
+                public IReadOnlyList<string> Colour { get; init; } = new List<string>();
 
-                    /// <summary>
-                    /// Gets a list of pattern shifting messages.
-                    /// </summary>
-                    public IReadOnlyList<string> Pattern { get; init; } = new List<string>();
+                /// <summary>
+                /// Gets a list of pattern shifting messages.
+                /// </summary>
+                public IReadOnlyList<string> Pattern { get; init; } = new List<string>();
 
-                    /// <summary>
-                    /// Gets a list of pattern colour shifting messages.
-                    /// </summary>
-                    [JsonPropertyName("patternColour")]
-                    public IReadOnlyList<string> PatternColour { get; init; } = new List<string>();
-                }
+                /// <summary>
+                /// Gets a list of pattern colour shifting messages.
+                /// </summary>
+                [JsonPropertyName("patternColour")]
+                public IReadOnlyList<string> PatternColour { get; init; } = new List<string>();
             }
         }
     }

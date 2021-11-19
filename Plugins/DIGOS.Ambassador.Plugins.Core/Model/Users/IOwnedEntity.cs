@@ -20,16 +20,15 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Plugins.Core.Model.Users
+namespace DIGOS.Ambassador.Plugins.Core.Model.Users;
+
+/// <summary>
+/// Represents an entity that's owned by a user.
+/// </summary>
+public interface IOwnedEntity
 {
     /// <summary>
-    /// Represents an entity that's owned by a user.
+    /// Gets or sets the user that owns this entity.
     /// </summary>
-    public interface IOwnedEntity
-    {
-        /// <summary>
-        /// Gets or sets the user that owns this entity.
-        /// </summary>
-        User Owner { get; set; }
-    }
+    User Owner { get; set; }
 }

@@ -24,39 +24,38 @@ using System;
 using System.Threading;
 using Remora.Discord.Core;
 
-namespace DIGOS.Ambassador.Discord.Interactivity.Messages
+namespace DIGOS.Ambassador.Discord.Interactivity.Messages;
+
+/// <summary>
+/// Acts as a base class for interactive messages.
+/// </summary>
+public abstract class InteractiveMessage : IInteractiveMessage
 {
+    /// <inheritdoc />
+    public Snowflake ChannelID { get; }
+
+    /// <inheritdoc />
+    public Snowflake MessageID { get; }
+
+    /// <inheritdoc />
+    public SemaphoreSlim Semaphore { get; }
+
     /// <summary>
-    /// Acts as a base class for interactive messages.
+    /// Initializes a new instance of the <see cref="InteractiveMessage"/> class.
     /// </summary>
-    public abstract class InteractiveMessage : IInteractiveMessage
+    /// <param name="channelID">The ID of the channel the message is in.</param>
+    /// <param name="messageID">The ID of the message.</param>
+    protected InteractiveMessage(Snowflake channelID, Snowflake messageID)
     {
-        /// <inheritdoc />
-        public Snowflake ChannelID { get; }
+        this.ChannelID = channelID;
+        this.MessageID = messageID;
+        this.Semaphore = new SemaphoreSlim(1);
+    }
 
-        /// <inheritdoc />
-        public Snowflake MessageID { get; }
-
-        /// <inheritdoc />
-        public SemaphoreSlim Semaphore { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InteractiveMessage"/> class.
-        /// </summary>
-        /// <param name="channelID">The ID of the channel the message is in.</param>
-        /// <param name="messageID">The ID of the message.</param>
-        protected InteractiveMessage(Snowflake channelID, Snowflake messageID)
-        {
-            this.ChannelID = channelID;
-            this.MessageID = messageID;
-            this.Semaphore = new SemaphoreSlim(1);
-        }
-
-        /// <inheritdoc />
-        public void Dispose()
-        {
-            GC.SuppressFinalize(this);
-            this.Semaphore.Dispose();
-        }
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        this.Semaphore.Dispose();
     }
 }

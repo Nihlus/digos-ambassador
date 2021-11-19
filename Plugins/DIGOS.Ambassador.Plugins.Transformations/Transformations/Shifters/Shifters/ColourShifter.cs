@@ -28,105 +28,104 @@ using DIGOS.Ambassador.Plugins.Transformations.Results;
 using Humanizer;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters;
+
+/// <summary>
+/// Shifts the colour of components.
+/// </summary>
+internal sealed class ColourShifter : AppearanceShifter
 {
+    private readonly TransformationDescriptionBuilder _descriptionBuilder;
+
+    private readonly Colour _colour;
+
     /// <summary>
-    /// Shifts the colour of components.
+    /// Initializes a new instance of the <see cref="ColourShifter"/> class.
     /// </summary>
-    internal sealed class ColourShifter : AppearanceShifter
+    /// <param name="appearance">The appearance to shift.</param>
+    /// <param name="colour">The colour to shift into.</param>
+    /// <param name="descriptionBuilder">The description builder.</param>
+    public ColourShifter
+    (
+        Appearance appearance,
+        Colour colour,
+        TransformationDescriptionBuilder descriptionBuilder
+    )
+        : base(appearance)
     {
-        private readonly TransformationDescriptionBuilder _descriptionBuilder;
+        _colour = colour;
+        _descriptionBuilder = descriptionBuilder;
+    }
 
-        private readonly Colour _colour;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ColourShifter"/> class.
-        /// </summary>
-        /// <param name="appearance">The appearance to shift.</param>
-        /// <param name="colour">The colour to shift into.</param>
-        /// <param name="descriptionBuilder">The description builder.</param>
-        public ColourShifter
-        (
-            Appearance appearance,
-            Colour colour,
-            TransformationDescriptionBuilder descriptionBuilder
-        )
-            : base(appearance)
+    /// <inheritdoc />
+    protected override async Task<Result<ShiftBodypartResult>> ShiftBodypartAsync
+    (
+        Bodypart bodypart,
+        Chirality chirality
+    )
+    {
+        if (!this.Appearance.TryGetAppearanceComponent(bodypart, chirality, out var currentComponent))
         {
-            _colour = colour;
-            _descriptionBuilder = descriptionBuilder;
+            return new UserError("The character doesn't have that bodypart.");
         }
 
-        /// <inheritdoc />
-        protected override async Task<Result<ShiftBodypartResult>> ShiftBodypartAsync
-        (
-            Bodypart bodypart,
-            Chirality chirality
-        )
+        if (currentComponent.BaseColour.IsSameColourAs(_colour))
         {
-            if (!this.Appearance.TryGetAppearanceComponent(bodypart, chirality, out var currentComponent))
-            {
-                return new UserError("The character doesn't have that bodypart.");
-            }
-
-            if (currentComponent.BaseColour.IsSameColourAs(_colour))
-            {
-                return new ShiftBodypartResult(await GetNoChangeMessageAsync(bodypart), ShiftBodypartAction.Nothing);
-            }
-
-            currentComponent.BaseColour = _colour.Clone();
-
-            var shiftMessage = await GetShiftMessageAsync(bodypart, chirality);
-            return new ShiftBodypartResult(shiftMessage, ShiftBodypartAction.Shift);
+            return new ShiftBodypartResult(await GetNoChangeMessageAsync(bodypart), ShiftBodypartAction.Nothing);
         }
 
-        /// <inheritdoc />
-        protected override Task<string> GetUniformShiftMessageAsync(Bodypart bodypart)
+        currentComponent.BaseColour = _colour.Clone();
+
+        var shiftMessage = await GetShiftMessageAsync(bodypart, chirality);
+        return new ShiftBodypartResult(shiftMessage, ShiftBodypartAction.Shift);
+    }
+
+    /// <inheritdoc />
+    protected override Task<string> GetUniformShiftMessageAsync(Bodypart bodypart)
+    {
+        var component = this.Appearance.GetAppearanceComponent(bodypart, Chirality.Left);
+        return Task.FromResult(_descriptionBuilder.BuildUniformColourShiftMessage(this.Appearance, component));
+    }
+
+    /// <inheritdoc />
+    protected override Task<string> GetUniformAddMessageAsync(Bodypart bodypart)
+    {
+        throw new InvalidOperationException("Colours can't be added.");
+    }
+
+    /// <inheritdoc />
+    protected override Task<string> GetShiftMessageAsync(Bodypart bodypart, Chirality chirality)
+    {
+        var component = this.Appearance.GetAppearanceComponent(bodypart, chirality);
+        return Task.FromResult(_descriptionBuilder.BuildColourShiftMessage(this.Appearance, component));
+    }
+
+    /// <inheritdoc />
+    protected override Task<string> GetAddMessageAsync(Bodypart bodypart, Chirality chirality)
+    {
+        throw new InvalidOperationException("Colours can't be added.");
+    }
+
+    /// <inheritdoc />
+    protected override Task<string> GetNoChangeMessageAsync(Bodypart bodypart)
+    {
+        var character = this.Appearance.Character;
+
+        var bodypartHumanized = bodypart.Humanize();
+
+        if (bodypart == Bodypart.Full)
         {
-            var component = this.Appearance.GetAppearanceComponent(bodypart, Chirality.Left);
-            return Task.FromResult(_descriptionBuilder.BuildUniformColourShiftMessage(this.Appearance, component));
+            var fullMessage = $"{character.Nickname} is already that colour.";
+            fullMessage = fullMessage.Transform(To.LowerCase, To.SentenceCase);
+
+            return Task.FromResult(fullMessage);
         }
 
-        /// <inheritdoc />
-        protected override Task<string> GetUniformAddMessageAsync(Bodypart bodypart)
-        {
-            throw new InvalidOperationException("Colours can't be added.");
-        }
+        var message =
+            $"{character.Nickname}'s {bodypartHumanized} " +
+            $"{(bodypartHumanized.EndsWith("s") ? "are" : "is")} already that colour.";
 
-        /// <inheritdoc />
-        protected override Task<string> GetShiftMessageAsync(Bodypart bodypart, Chirality chirality)
-        {
-            var component = this.Appearance.GetAppearanceComponent(bodypart, chirality);
-            return Task.FromResult(_descriptionBuilder.BuildColourShiftMessage(this.Appearance, component));
-        }
-
-        /// <inheritdoc />
-        protected override Task<string> GetAddMessageAsync(Bodypart bodypart, Chirality chirality)
-        {
-            throw new InvalidOperationException("Colours can't be added.");
-        }
-
-        /// <inheritdoc />
-        protected override Task<string> GetNoChangeMessageAsync(Bodypart bodypart)
-        {
-            var character = this.Appearance.Character;
-
-            var bodypartHumanized = bodypart.Humanize();
-
-            if (bodypart == Bodypart.Full)
-            {
-                var fullMessage = $"{character.Nickname} is already that colour.";
-                fullMessage = fullMessage.Transform(To.LowerCase, To.SentenceCase);
-
-                return Task.FromResult(fullMessage);
-            }
-
-            var message =
-                $"{character.Nickname}'s {bodypartHumanized} " +
-                $"{(bodypartHumanized.EndsWith("s") ? "are" : "is")} already that colour.";
-
-            message = message.Transform(To.LowerCase, To.SentenceCase);
-            return Task.FromResult(message);
-        }
+        message = message.Transform(To.LowerCase, To.SentenceCase);
+        return Task.FromResult(message);
     }
 }

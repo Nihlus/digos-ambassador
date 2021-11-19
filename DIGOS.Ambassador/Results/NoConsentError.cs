@@ -22,10 +22,9 @@
 
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Results
-{
-    /// <summary>
-    /// Represents a failure to perform an action due to the user not having given data processing consent.
-    /// </summary>
-    public record NoConsentError() : ResultError("The user has not given data processing consent.");
-}
+namespace DIGOS.Ambassador.Results;
+
+/// <summary>
+/// Represents a failure to perform an action due to the user not having given data processing consent.
+/// </summary>
+public record NoConsentError() : ResultError("The user has not given data processing consent.");

@@ -29,67 +29,66 @@ using Xunit;
 #pragma warning disable SA1649
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Characters
+namespace DIGOS.Ambassador.Tests.Plugins.Characters;
+
+public partial class CharacterServiceTests
 {
-    public partial class CharacterServiceTests
+    public class SetDefaultCharacterAsync : CharacterServiceTestBase
     {
-        public class SetDefaultCharacterAsync : CharacterServiceTestBase
+        private readonly Character _character;
+
+        public SetDefaultCharacterAsync()
         {
-            private readonly Character _character;
+            _character = CreateCharacter();
+        }
 
-            public SetDefaultCharacterAsync()
-            {
-                _character = CreateCharacter();
-            }
+        [Fact]
+        public async Task CanSetDefaultCharacter()
+        {
+            var result = await this.Characters.SetDefaultCharacterAsync
+            (
+                this.DefaultOwner,
+                this.DefaultServer,
+                _character
+            );
 
-            [Fact]
-            public async Task CanSetDefaultCharacter()
-            {
-                var result = await this.Characters.SetDefaultCharacterAsync
-                (
-                    this.DefaultOwner,
-                    this.DefaultServer,
-                    _character
-                );
+            Assert.True(result.IsSuccess);
 
-                Assert.True(result.IsSuccess);
+            var defaultCharacterResult = await this.Characters.GetDefaultCharacterAsync
+            (
+                this.DefaultOwner,
+                this.DefaultServer
+            );
 
-                var defaultCharacterResult = await this.Characters.GetDefaultCharacterAsync
-                (
-                    this.DefaultOwner,
-                    this.DefaultServer
-                );
+            Assert.Same(_character, defaultCharacterResult.Entity);
+        }
 
-                Assert.Same(_character, defaultCharacterResult.Entity);
-            }
+        [Fact]
+        public async Task ReturnsErrorIfDefaultCharacterIsAlreadySetToTheSameCharacter()
+        {
+            await this.Characters.SetDefaultCharacterAsync
+            (
+                this.DefaultOwner,
+                this.DefaultServer,
+                _character
+            );
 
-            [Fact]
-            public async Task ReturnsErrorIfDefaultCharacterIsAlreadySetToTheSameCharacter()
-            {
-                await this.Characters.SetDefaultCharacterAsync
-                (
-                    this.DefaultOwner,
-                    this.DefaultServer,
-                    _character
-                );
+            var result = await this.Characters.SetDefaultCharacterAsync
+            (
+                this.DefaultOwner,
+                this.DefaultServer,
+                _character
+            );
 
-                var result = await this.Characters.SetDefaultCharacterAsync
-                (
-                    this.DefaultOwner,
-                    this.DefaultServer,
-                    _character
-                );
+            Assert.False(result.IsSuccess);
 
-                Assert.False(result.IsSuccess);
+            var defaultCharacterResult = await this.Characters.GetDefaultCharacterAsync
+            (
+                this.DefaultOwner,
+                this.DefaultServer
+            );
 
-                var defaultCharacterResult = await this.Characters.GetDefaultCharacterAsync
-                (
-                    this.DefaultOwner,
-                    this.DefaultServer
-                );
-
-                Assert.Same(_character, defaultCharacterResult.Entity);
-            }
+            Assert.Same(_character, defaultCharacterResult.Entity);
         }
     }
 }

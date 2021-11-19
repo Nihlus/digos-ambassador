@@ -29,69 +29,68 @@ using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using Remora.Discord.Core;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
+namespace DIGOS.Ambassador.Plugins.Roleplaying.Model;
+
+/// <summary>
+/// Represents a saved user message.
+/// </summary>
+[Table("UserMessages", Schema = "RoleplayModule")]
+public class UserMessage : EFEntity
 {
     /// <summary>
-    /// Represents a saved user message.
+    /// Gets the unique Discord message ID.
     /// </summary>
-    [Table("UserMessages", Schema = "RoleplayModule")]
-    public class UserMessage : EFEntity
+    public Snowflake DiscordMessageID { get; private set; }
+
+    /// <summary>
+    /// Gets the author of the message.
+    /// </summary>
+    public virtual User Author { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the timestamp of the message.
+    /// </summary>
+    public DateTimeOffset Timestamp { get; private set; }
+
+    /// <summary>
+    /// Gets the author's nickname at the time of sending.
+    /// </summary>
+    public string AuthorNickname { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the contents of the message.
+    /// </summary>
+    public string Contents { get; internal set; } = null!;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserMessage"/> class.
+    /// </summary>
+    [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Required by EF Core.")]
+    protected UserMessage()
     {
-        /// <summary>
-        /// Gets the unique Discord message ID.
-        /// </summary>
-        public Snowflake DiscordMessageID { get; private set; }
+    }
 
-        /// <summary>
-        /// Gets the author of the message.
-        /// </summary>
-        public virtual User Author { get; private set; } = null!;
-
-        /// <summary>
-        /// Gets the timestamp of the message.
-        /// </summary>
-        public DateTimeOffset Timestamp { get; private set; }
-
-        /// <summary>
-        /// Gets the author's nickname at the time of sending.
-        /// </summary>
-        public string AuthorNickname { get; private set; } = null!;
-
-        /// <summary>
-        /// Gets the contents of the message.
-        /// </summary>
-        public string Contents { get; internal set; } = null!;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserMessage"/> class.
-        /// </summary>
-        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Required by EF Core.")]
-        protected UserMessage()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserMessage"/> class.
-        /// </summary>
-        /// <param name="author">The author.</param>
-        /// <param name="discordMessageID">The Discord ID of the message.</param>
-        /// <param name="timestamp">The timestamp of the message.</param>
-        /// <param name="authorNickname">The nickname in use by the author at the time of sending.</param>
-        /// <param name="contents">The contents of the message.</param>
-        public UserMessage
-        (
-            User author,
-            Snowflake discordMessageID,
-            DateTimeOffset timestamp,
-            string authorNickname,
-            string contents
-        )
-        {
-            this.Author = author;
-            this.DiscordMessageID = discordMessageID;
-            this.Timestamp = timestamp;
-            this.AuthorNickname = authorNickname;
-            this.Contents = contents;
-        }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserMessage"/> class.
+    /// </summary>
+    /// <param name="author">The author.</param>
+    /// <param name="discordMessageID">The Discord ID of the message.</param>
+    /// <param name="timestamp">The timestamp of the message.</param>
+    /// <param name="authorNickname">The nickname in use by the author at the time of sending.</param>
+    /// <param name="contents">The contents of the message.</param>
+    public UserMessage
+    (
+        User author,
+        Snowflake discordMessageID,
+        DateTimeOffset timestamp,
+        string authorNickname,
+        string contents
+    )
+    {
+        this.Author = author;
+        this.DiscordMessageID = discordMessageID;
+        this.Timestamp = timestamp;
+        this.AuthorNickname = authorNickname;
+        this.Contents = contents;
     }
 }

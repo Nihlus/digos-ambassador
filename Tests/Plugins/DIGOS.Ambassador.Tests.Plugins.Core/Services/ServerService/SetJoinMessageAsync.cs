@@ -31,65 +31,64 @@ using Xunit;
 #pragma warning disable CS8625
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Core
+namespace DIGOS.Ambassador.Tests.Plugins.Core;
+
+public static partial class ServerServiceTests
 {
-    public static partial class ServerServiceTests
+    public class SetJoinMessageAsync : ServerServiceTestBase
     {
-        public class SetJoinMessageAsync : ServerServiceTestBase
+        private Server _server = null!;
+
+        public override async Task InitializeAsync()
         {
-            private Server _server = null!;
+            var serverMock = new Snowflake(0);
+            _server = (await this.Servers.GetOrRegisterServerAsync(serverMock)).Entity;
+        }
 
-            public override async Task InitializeAsync()
-            {
-                var serverMock = new Snowflake(0);
-                _server = (await this.Servers.GetOrRegisterServerAsync(serverMock)).Entity;
-            }
+        [Fact]
+        public async Task ReturnsErrorIfNewJoinMessageIsEmpty()
+        {
+            var result = await this.Servers.SetJoinMessageAsync(_server, string.Empty);
 
-            [Fact]
-            public async Task ReturnsErrorIfNewJoinMessageIsEmpty()
-            {
-                var result = await this.Servers.SetJoinMessageAsync(_server, string.Empty);
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsErrorIfNewJoinMessageIsWhitespace()
+        {
+            var result = await this.Servers.SetJoinMessageAsync(_server, "     ");
 
-            [Fact]
-            public async Task ReturnsErrorIfNewJoinMessageIsWhitespace()
-            {
-                var result = await this.Servers.SetJoinMessageAsync(_server, "     ");
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsErrorIfNewJoinMessageIsSameAsOldJoinMessage()
+        {
+            const string old = "oogabooga";
+            await this.Servers.SetJoinMessageAsync(_server, old);
 
-            [Fact]
-            public async Task ReturnsErrorIfNewJoinMessageIsSameAsOldJoinMessage()
-            {
-                const string old = "oogabooga";
-                await this.Servers.SetJoinMessageAsync(_server, old);
+            var result = await this.Servers.SetJoinMessageAsync(_server, old);
 
-                var result = await this.Servers.SetJoinMessageAsync(_server, old);
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsErrorIfNewJoinMessageIsTooLong()
+        {
+            var newJoinMessage = new string('a', 1201);
+            var result = await this.Servers.SetJoinMessageAsync(_server, newJoinMessage);
 
-            [Fact]
-            public async Task ReturnsErrorIfNewJoinMessageIsTooLong()
-            {
-                var newJoinMessage = new string('a', 1201);
-                var result = await this.Servers.SetJoinMessageAsync(_server, newJoinMessage);
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task CanSetJoinMessage()
+        {
+            var newJoinMessage = "oogabooga";
+            var result = await this.Servers.SetJoinMessageAsync(_server, newJoinMessage);
 
-            [Fact]
-            public async Task CanSetJoinMessage()
-            {
-                var newJoinMessage = "oogabooga";
-                var result = await this.Servers.SetJoinMessageAsync(_server, newJoinMessage);
-
-                Assert.True(result.IsSuccess);
-                Assert.Equal(newJoinMessage, _server.JoinMessage);
-            }
+            Assert.True(result.IsSuccess);
+            Assert.Equal(newJoinMessage, _server.JoinMessage);
         }
     }
 }

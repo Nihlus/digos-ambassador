@@ -47,179 +47,178 @@ using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
-namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
+namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules;
+
+/// <summary>
+/// Note-related commands, such as viewing or editing info about a specific note.
+/// </summary>
+[Group("note")]
+[Description("Note-related commands, such as viewing or editing info about a specific note.")]
+public partial class NoteCommands : CommandGroup
 {
+    private readonly NoteService _notes;
+    private readonly InteractivityService _interactivity;
+    private readonly ChannelLoggingService _logging;
+    private readonly ICommandContext _context;
+    private readonly IDiscordRestUserAPI _userAPI;
+    private readonly FeedbackService _feedback;
+
     /// <summary>
-    /// Note-related commands, such as viewing or editing info about a specific note.
+    /// Initializes a new instance of the <see cref="NoteCommands"/> class.
     /// </summary>
-    [Group("note")]
-    [Description("Note-related commands, such as viewing or editing info about a specific note.")]
-    public partial class NoteCommands : CommandGroup
+    /// <param name="notes">The moderation service.</param>
+    /// <param name="interactivity">The interactivity service.</param>
+    /// <param name="logging">The logging service.</param>
+    /// <param name="context">The command context.</param>
+    /// <param name="userAPI">The user API.</param>
+    /// <param name="feedback">The feedback service.</param>
+    public NoteCommands
+    (
+        NoteService notes,
+        InteractivityService interactivity,
+        ChannelLoggingService logging,
+        ICommandContext context,
+        IDiscordRestUserAPI userAPI,
+        FeedbackService feedback
+    )
     {
-        private readonly NoteService _notes;
-        private readonly InteractivityService _interactivity;
-        private readonly ChannelLoggingService _logging;
-        private readonly ICommandContext _context;
-        private readonly IDiscordRestUserAPI _userAPI;
-        private readonly FeedbackService _feedback;
+        _notes = notes;
+        _interactivity = interactivity;
+        _logging = logging;
+        _context = context;
+        _userAPI = userAPI;
+        _feedback = feedback;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NoteCommands"/> class.
-        /// </summary>
-        /// <param name="notes">The moderation service.</param>
-        /// <param name="interactivity">The interactivity service.</param>
-        /// <param name="logging">The logging service.</param>
-        /// <param name="context">The command context.</param>
-        /// <param name="userAPI">The user API.</param>
-        /// <param name="feedback">The feedback service.</param>
-        public NoteCommands
+    /// <summary>
+    /// Lists the notes attached to the given user.
+    /// </summary>
+    /// <param name="user">The user.</param>
+    [Command("list")]
+    [Description("Lists the notes attached to the given user.")]
+    [RequirePermission(typeof(ManageNotes), PermissionTarget.Other)]
+    [RequireContext(ChannelContext.Guild)]
+    public async Task<IResult> ListNotesAsync(IUser user)
+    {
+        var notes = await _notes.GetNotesAsync(_context.GuildID.Value, user.ID);
+
+        var createPages = await PaginatedEmbedFactory.PagesFromCollectionAsync
         (
-            NoteService notes,
-            InteractivityService interactivity,
-            ChannelLoggingService logging,
-            ICommandContext context,
-            IDiscordRestUserAPI userAPI,
-            FeedbackService feedback
-        )
-        {
-            _notes = notes;
-            _interactivity = interactivity;
-            _logging = logging;
-            _context = context;
-            _userAPI = userAPI;
-            _feedback = feedback;
-        }
-
-        /// <summary>
-        /// Lists the notes attached to the given user.
-        /// </summary>
-        /// <param name="user">The user.</param>
-        [Command("list")]
-        [Description("Lists the notes attached to the given user.")]
-        [RequirePermission(typeof(ManageNotes), PermissionTarget.Other)]
-        [RequireContext(ChannelContext.Guild)]
-        public async Task<IResult> ListNotesAsync(IUser user)
-        {
-            var notes = await _notes.GetNotesAsync(_context.GuildID.Value, user.ID);
-
-            var createPages = await PaginatedEmbedFactory.PagesFromCollectionAsync
-            (
-                notes,
-                async note =>
+            notes,
+            async note =>
+            {
+                var getAuthor = await _userAPI.GetUserAsync(note.Author.DiscordID);
+                if (!getAuthor.IsSuccess)
                 {
-                    var getAuthor = await _userAPI.GetUserAsync(note.Author.DiscordID);
-                    if (!getAuthor.IsSuccess)
-                    {
-                        return Result<Embed>.FromError(getAuthor);
-                    }
-
-                    var author = getAuthor.Entity;
-
-                    var getAuthorAvatar = CDN.GetUserAvatarUrl(author);
-
-                    var embedFields = new List<EmbedField>();
-                    var eb = new Embed
-                    {
-                        Title = $"Note #{note.ID} for {user.Username}:{user.Discriminator}",
-                        Colour = Color.Gold,
-                        Author = new EmbedAuthor(author.Username)
-                        {
-                            IconUrl = getAuthorAvatar.IsSuccess
-                                ? getAuthorAvatar.Entity.ToString()
-                                : default(Optional<string>)
-                        },
-                        Description = note.Content,
-                        Fields = embedFields
-                    };
-
-                    embedFields.Add(new EmbedField("Created", note.CreatedAt.Humanize()));
-
-                    if (note.CreatedAt != note.UpdatedAt)
-                    {
-                        embedFields.Add(new EmbedField("Last Updated", note.UpdatedAt.Humanize()));
-                    }
-
-                    return eb;
+                    return Result<Embed>.FromError(getAuthor);
                 }
-            );
 
-            if (createPages.Any(p => !p.IsSuccess))
-            {
-                return createPages.First(p => !p.IsSuccess);
+                var author = getAuthor.Entity;
+
+                var getAuthorAvatar = CDN.GetUserAvatarUrl(author);
+
+                var embedFields = new List<EmbedField>();
+                var eb = new Embed
+                {
+                    Title = $"Note #{note.ID} for {user.Username}:{user.Discriminator}",
+                    Colour = Color.Gold,
+                    Author = new EmbedAuthor(author.Username)
+                    {
+                        IconUrl = getAuthorAvatar.IsSuccess
+                            ? getAuthorAvatar.Entity.ToString()
+                            : default(Optional<string>)
+                    },
+                    Description = note.Content,
+                    Fields = embedFields
+                };
+
+                embedFields.Add(new EmbedField("Created", note.CreatedAt.Humanize()));
+
+                if (note.CreatedAt != note.UpdatedAt)
+                {
+                    embedFields.Add(new EmbedField("Last Updated", note.UpdatedAt.Humanize()));
+                }
+
+                return eb;
             }
+        );
 
-            var pages = createPages.Select(p => p.Entity).ToList();
+        if (createPages.Any(p => !p.IsSuccess))
+        {
+            return createPages.First(p => !p.IsSuccess);
+        }
 
-            await _interactivity.SendContextualInteractiveMessageAsync
+        var pages = createPages.Select(p => p.Entity).ToList();
+
+        await _interactivity.SendContextualInteractiveMessageAsync
+        (
+            (channelID, messageID) => new PaginatedMessage
             (
-                (channelID, messageID) => new PaginatedMessage
-                (
-                    channelID,
-                    messageID,
-                    _context.User.ID,
-                    pages
-                )
-            );
+                channelID,
+                messageID,
+                _context.User.ID,
+                pages
+            )
+        );
 
-            return Result.FromSuccess();
-        }
+        return Result.FromSuccess();
+    }
 
-        /// <summary>
-        /// Adds a note to the given user.
-        /// </summary>
-        /// <param name="user">The user to add the note to.</param>
-        /// <param name="content">The contents of the note.</param>
-        [Command("add")]
-        [Description("Adds a note to the given user.")]
-        [RequirePermission(typeof(ManageNotes), PermissionTarget.All)]
-        [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<FeedbackMessage>> AddNoteAsync(IUser user, string content)
+    /// <summary>
+    /// Adds a note to the given user.
+    /// </summary>
+    /// <param name="user">The user to add the note to.</param>
+    /// <param name="content">The contents of the note.</param>
+    [Command("add")]
+    [Description("Adds a note to the given user.")]
+    [RequirePermission(typeof(ManageNotes), PermissionTarget.All)]
+    [RequireContext(ChannelContext.Guild)]
+    public async Task<Result<FeedbackMessage>> AddNoteAsync(IUser user, string content)
+    {
+        var addNote = await _notes.CreateNoteAsync(_context.User.ID, user.ID, _context.GuildID.Value, content);
+        if (!addNote.IsSuccess)
         {
-            var addNote = await _notes.CreateNoteAsync(_context.User.ID, user.ID, _context.GuildID.Value, content);
-            if (!addNote.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(addNote);
-            }
-
-            var note = addNote.Entity;
-
-            await _logging.NotifyUserNoteAddedAsync(note);
-            return new FeedbackMessage($"Note added (ID {note.ID}).", _feedback.Theme.Secondary);
+            return Result<FeedbackMessage>.FromError(addNote);
         }
 
-        /// <summary>
-        /// Deletes the given note.
-        /// </summary>
-        /// <param name="noteID">The ID of the note to delete.</param>
-        [Command("delete")]
-        [Description("Deletes the given note.")]
-        [RequirePermission(typeof(ManageNotes), PermissionTarget.All)]
-        [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<FeedbackMessage>> DeleteNoteAsync(long noteID)
+        var note = addNote.Entity;
+
+        await _logging.NotifyUserNoteAddedAsync(note);
+        return new FeedbackMessage($"Note added (ID {note.ID}).", _feedback.Theme.Secondary);
+    }
+
+    /// <summary>
+    /// Deletes the given note.
+    /// </summary>
+    /// <param name="noteID">The ID of the note to delete.</param>
+    [Command("delete")]
+    [Description("Deletes the given note.")]
+    [RequirePermission(typeof(ManageNotes), PermissionTarget.All)]
+    [RequireContext(ChannelContext.Guild)]
+    public async Task<Result<FeedbackMessage>> DeleteNoteAsync(long noteID)
+    {
+        var getNote = await _notes.GetNoteAsync(_context.GuildID.Value, noteID);
+        if (!getNote.IsSuccess)
         {
-            var getNote = await _notes.GetNoteAsync(_context.GuildID.Value, noteID);
-            if (!getNote.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(getNote);
-            }
-
-            var note = getNote.Entity;
-
-            // This has to be done before the warning is actually deleted - otherwise, the lazy loader is removed and
-            // navigation properties can't be evaluated
-            var notifyResult = await _logging.NotifyUserNoteRemovedAsync(note, _context.User.ID);
-            if (!notifyResult.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(notifyResult);
-            }
-
-            var deleteNote = await _notes.DeleteNoteAsync(note);
-            if (!deleteNote.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(deleteNote);
-            }
-
-            return new FeedbackMessage("Note deleted.", _feedback.Theme.Secondary);
+            return Result<FeedbackMessage>.FromError(getNote);
         }
+
+        var note = getNote.Entity;
+
+        // This has to be done before the warning is actually deleted - otherwise, the lazy loader is removed and
+        // navigation properties can't be evaluated
+        var notifyResult = await _logging.NotifyUserNoteRemovedAsync(note, _context.User.ID);
+        if (!notifyResult.IsSuccess)
+        {
+            return Result<FeedbackMessage>.FromError(notifyResult);
+        }
+
+        var deleteNote = await _notes.DeleteNoteAsync(note);
+        if (!deleteNote.IsSuccess)
+        {
+            return Result<FeedbackMessage>.FromError(deleteNote);
+        }
+
+        return new FeedbackMessage("Note deleted.", _feedback.Theme.Secondary);
     }
 }

@@ -29,35 +29,34 @@ using Remora.Commands.Parsers;
 using Remora.Commands.Results;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Discord.TypeReaders
+namespace DIGOS.Ambassador.Discord.TypeReaders;
+
+/// <summary>
+/// Reads enums using Humanizer's DehumanizeTo function.
+/// </summary>
+/// <typeparam name="T">The enum type.</typeparam>
+public class HumanizerEnumTypeReader<T> : AbstractTypeParser<T> where T : struct, Enum
 {
-    /// <summary>
-    /// Reads enums using Humanizer's DehumanizeTo function.
-    /// </summary>
-    /// <typeparam name="T">The enum type.</typeparam>
-    public class HumanizerEnumTypeReader<T> : AbstractTypeParser<T> where T : struct, Enum
+    /// <inheritdoc />
+    public override ValueTask<Result<T>> TryParseAsync(string value, CancellationToken ct)
     {
-        /// <inheritdoc />
-        public override ValueTask<Result<T>> TryParseAsync(string value, CancellationToken ct)
+        value = value.Trim();
+
+        var defaultLocator = Configurator.EnumDescriptionPropertyLocator;
+        Configurator.EnumDescriptionPropertyLocator = _ => false;
+
+        try
         {
-            value = value.Trim();
-
-            var defaultLocator = Configurator.EnumDescriptionPropertyLocator;
-            Configurator.EnumDescriptionPropertyLocator = _ => false;
-
-            try
-            {
-                var result = value.DehumanizeTo<T>();
-                return new ValueTask<Result<T>>(result);
-            }
-            catch (NoMatchFoundException)
-            {
-                return new ValueTask<Result<T>>(new ParsingError<T>(value));
-            }
-            finally
-            {
-                Configurator.EnumDescriptionPropertyLocator = defaultLocator;
-            }
+            var result = value.DehumanizeTo<T>();
+            return new ValueTask<Result<T>>(result);
+        }
+        catch (NoMatchFoundException)
+        {
+            return new ValueTask<Result<T>>(new ParsingError<T>(value));
+        }
+        finally
+        {
+            Configurator.EnumDescriptionPropertyLocator = defaultLocator;
         }
     }
 }

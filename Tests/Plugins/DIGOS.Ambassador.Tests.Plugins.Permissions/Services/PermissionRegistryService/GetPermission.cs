@@ -27,95 +27,94 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Permissions
+namespace DIGOS.Ambassador.Tests.Plugins.Permissions;
+
+public static partial class PermissionRegistryServiceTests
 {
-    public static partial class PermissionRegistryServiceTests
+    public class GetPermission : PermissionRegistryServiceTestBase
     {
-        public class GetPermission : PermissionRegistryServiceTestBase
+        [Fact]
+        public void GettingUnregisteredPermissionsByTypeReturnsFalse()
         {
-            [Fact]
-            public void GettingUnregisteredPermissionsByTypeReturnsFalse()
-            {
-                var result = this.PermissionRegistry.GetPermission(typeof(TestPermission));
+            var result = this.PermissionRegistry.GetPermission(typeof(TestPermission));
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public void GettingRegisteredPermissionsByTypeReturnsTrue()
-            {
-                this.PermissionRegistry.RegisterPermission<TestPermission>(this.Services);
+        [Fact]
+        public void GettingRegisteredPermissionsByTypeReturnsTrue()
+        {
+            this.PermissionRegistry.RegisterPermission<TestPermission>(this.Services);
 
-                var result = this.PermissionRegistry.GetPermission(typeof(TestPermission));
+            var result = this.PermissionRegistry.GetPermission(typeof(TestPermission));
 
-                Assert.True(result.IsSuccess);
-            }
+            Assert.True(result.IsSuccess);
+        }
 
-            [Fact]
-            public void GettingRegisteredPermissionsByTypeReturnsCorrectPermission()
-            {
-                var registered = this.PermissionRegistry.RegisterPermission<TestPermission>(this.Services).Entity;
+        [Fact]
+        public void GettingRegisteredPermissionsByTypeReturnsCorrectPermission()
+        {
+            var registered = this.PermissionRegistry.RegisterPermission<TestPermission>(this.Services).Entity;
 
-                var result = this.PermissionRegistry.GetPermission(typeof(TestPermission));
+            var result = this.PermissionRegistry.GetPermission(typeof(TestPermission));
 
-                Assert.Equal(registered, result.Entity);
-            }
+            Assert.Equal(registered, result.Entity);
+        }
 
-            [Fact]
-            public void GettingUnregisteredPermissionsByGenericParameterReturnsFalse()
-            {
-                var result = this.PermissionRegistry.GetPermission<TestPermission>();
+        [Fact]
+        public void GettingUnregisteredPermissionsByGenericParameterReturnsFalse()
+        {
+            var result = this.PermissionRegistry.GetPermission<TestPermission>();
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public void GettingRegisteredPermissionsByGenericParameterReturnsTrue()
-            {
-                this.PermissionRegistry.RegisterPermission<TestPermission>(this.Services);
+        [Fact]
+        public void GettingRegisteredPermissionsByGenericParameterReturnsTrue()
+        {
+            this.PermissionRegistry.RegisterPermission<TestPermission>(this.Services);
 
-                var result = this.PermissionRegistry.GetPermission<TestPermission>();
+            var result = this.PermissionRegistry.GetPermission<TestPermission>();
 
-                Assert.True(result.IsSuccess);
-            }
+            Assert.True(result.IsSuccess);
+        }
 
-            [Fact]
-            public void GettingRegisteredPermissionsByGenericParameterReturnsCorrectPermission()
-            {
-                var registered = this.PermissionRegistry.RegisterPermission<TestPermission>(this.Services).Entity;
+        [Fact]
+        public void GettingRegisteredPermissionsByGenericParameterReturnsCorrectPermission()
+        {
+            var registered = this.PermissionRegistry.RegisterPermission<TestPermission>(this.Services).Entity;
 
-                var result = this.PermissionRegistry.GetPermission<TestPermission>();
+            var result = this.PermissionRegistry.GetPermission<TestPermission>();
 
-                Assert.Equal(registered, result.Entity);
-            }
+            Assert.Equal(registered, result.Entity);
+        }
 
-            [Fact]
-            public void GettingUnregisteredPermissionsByFriendlyNameReturnsFalse()
-            {
-                var result = this.PermissionRegistry.GetPermission("I'm not registered");
+        [Fact]
+        public void GettingUnregisteredPermissionsByFriendlyNameReturnsFalse()
+        {
+            var result = this.PermissionRegistry.GetPermission("I'm not registered");
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public void GettingRegisteredPermissionsByFriendlyNameReturnsTrue()
-            {
-                this.PermissionRegistry.RegisterPermission<TestPermission>(this.Services);
+        [Fact]
+        public void GettingRegisteredPermissionsByFriendlyNameReturnsTrue()
+        {
+            this.PermissionRegistry.RegisterPermission<TestPermission>(this.Services);
 
-                var result = this.PermissionRegistry.GetPermission(nameof(TestPermission));
+            var result = this.PermissionRegistry.GetPermission(nameof(TestPermission));
 
-                Assert.True(result.IsSuccess);
-            }
+            Assert.True(result.IsSuccess);
+        }
 
-            [Fact]
-            public void GettingRegisteredPermissionsByFriendlyNameReturnsCorrectPermission()
-            {
-                var registered = this.PermissionRegistry.RegisterPermission<TestPermission>(this.Services).Entity;
+        [Fact]
+        public void GettingRegisteredPermissionsByFriendlyNameReturnsCorrectPermission()
+        {
+            var registered = this.PermissionRegistry.RegisterPermission<TestPermission>(this.Services).Entity;
 
-                var result = this.PermissionRegistry.GetPermission(nameof(TestPermission));
+            var result = this.PermissionRegistry.GetPermission(nameof(TestPermission));
 
-                Assert.Equal(registered, result.Entity);
-            }
+            Assert.Equal(registered, result.Entity);
         }
     }
 }

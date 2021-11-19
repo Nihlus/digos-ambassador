@@ -23,23 +23,22 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
 
-namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions
+namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions;
+
+/// <summary>
+/// Represents a permission that allows a user to kick roleplay members.
+/// </summary>
+public sealed class KickRoleplayMember : Permission
 {
-    /// <summary>
-    /// Represents a permission that allows a user to kick roleplay members.
-    /// </summary>
-    public sealed class KickRoleplayMember : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("DB14E9B1-DE8B-4B3D-BE25-A117191073C3");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("DB14E9B1-DE8B-4B3D-BE25-A117191073C3");
 
-        /// <inheritdoc />
-        public override string FriendlyName => nameof(KickRoleplayMember);
+    /// <inheritdoc />
+    public override string FriendlyName => nameof(KickRoleplayMember);
 
-        /// <inheritdoc />
-        public override string Description => "Allows you to kick roleplay members.";
+    /// <inheritdoc />
+    public override string Description => "Allows you to kick roleplay members.";
 
-        /// <inheritdoc />
-        public override bool IsGrantedByDefaultToSelf => true;
-    }
+    /// <inheritdoc />
+    public override bool IsGrantedByDefaultToSelf => true;
 }

@@ -25,20 +25,19 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
+namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters;
+
+/// <summary>
+/// Public interface for a class that can export a roleplay to a file.
+/// </summary>
+internal interface IRoleplayExporter
 {
     /// <summary>
-    /// Public interface for a class that can export a roleplay to a file.
+    /// Exports the given roleplay, handing back an object that wraps the exported data.
     /// </summary>
-    internal interface IRoleplayExporter
-    {
-        /// <summary>
-        /// Exports the given roleplay, handing back an object that wraps the exported data.
-        /// </summary>
-        /// <param name="services">The available services.</param>
-        /// <param name="roleplay">The roleplay to export.</param>
-        /// <returns>An exported roleplay.</returns>
-        [Pure]
-        Task<ExportedRoleplay> ExportAsync(IServiceProvider services, Roleplay roleplay);
-    }
+    /// <param name="services">The available services.</param>
+    /// <param name="roleplay">The roleplay to export.</param>
+    /// <returns>An exported roleplay.</returns>
+    [Pure]
+    Task<ExportedRoleplay> ExportAsync(IServiceProvider services, Roleplay roleplay);
 }

@@ -24,19 +24,18 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Transformations.Results;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters;
+
+/// <summary>
+/// Defines the public interface of a type that can perform a shifting operation on an appearance.
+/// </summary>
+internal interface IAppearanceShifter
 {
     /// <summary>
-    /// Defines the public interface of a type that can perform a shifting operation on an appearance.
+    /// Shifts the given bodypart.
     /// </summary>
-    internal interface IAppearanceShifter
-    {
-        /// <summary>
-        /// Shifts the given bodypart.
-        /// </summary>
-        /// <param name="bodypart">The bodypart to shift.</param>
-        /// <param name="chirality">The chirality of the bodypart.</param>
-        /// <returns>A shifting result which may or may not have succeeded.</returns>
-        Task<Result<ShiftBodypartResult>> ShiftAsync(Bodypart bodypart, Chirality chirality);
-    }
+    /// <param name="bodypart">The bodypart to shift.</param>
+    /// <param name="chirality">The chirality of the bodypart.</param>
+    /// <returns>A shifting result which may or may not have succeeded.</returns>
+    Task<Result<ShiftBodypartResult>> ShiftAsync(Bodypart bodypart, Chirality chirality);
 }

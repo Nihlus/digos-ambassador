@@ -29,45 +29,44 @@ using System.Threading.Tasks;
 using Remora.Discord.Core;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Transformations
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
+
+public partial class TransformationServiceTests
 {
-    public partial class TransformationServiceTests
+    public class WhitelistUserAsync : TransformationServiceTestBase
     {
-        public class WhitelistUserAsync : TransformationServiceTestBase
+        private readonly Snowflake _user = new Snowflake(0);
+        private readonly Snowflake _whitelistedUser = new Snowflake(1);
+
+        [Fact]
+        public async Task CanWhitelistUser()
         {
-            private readonly Snowflake _user = new Snowflake(0);
-            private readonly Snowflake _whitelistedUser = new Snowflake(1);
+            var result = await this.Transformations.WhitelistUserAsync(_user, _whitelistedUser);
 
-            [Fact]
-            public async Task CanWhitelistUser()
-            {
-                var result = await this.Transformations.WhitelistUserAsync(_user, _whitelistedUser);
+            Assert.True(result.IsSuccess);
 
-                Assert.True(result.IsSuccess);
+            Assert.NotEmpty(this.Database.GlobalUserProtections.First().Whitelist);
+            Assert.Equal(_whitelistedUser, this.Database.GlobalUserProtections.First().Whitelist.First().DiscordID);
+        }
 
-                Assert.NotEmpty(this.Database.GlobalUserProtections.First().Whitelist);
-                Assert.Equal(_whitelistedUser, this.Database.GlobalUserProtections.First().Whitelist.First().DiscordID);
-            }
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfUserIsAlreadyWhitelisted()
+        {
+            // Whitelist the user
+            await this.Transformations.WhitelistUserAsync(_user, _whitelistedUser);
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfUserIsAlreadyWhitelisted()
-            {
-                // Whitelist the user
-                await this.Transformations.WhitelistUserAsync(_user, _whitelistedUser);
+            // Then Whitelist them again
+            var result = await this.Transformations.WhitelistUserAsync(_user, _whitelistedUser);
 
-                // Then Whitelist them again
-                var result = await this.Transformations.WhitelistUserAsync(_user, _whitelistedUser);
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfTargetUserIsInvokingUser()
+        {
+            var result = await this.Transformations.WhitelistUserAsync(_user, _user);
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfTargetUserIsInvokingUser()
-            {
-                var result = await this.Transformations.WhitelistUserAsync(_user, _user);
-
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
         }
     }
 }

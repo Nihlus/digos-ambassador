@@ -22,28 +22,27 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-namespace DIGOS.Ambassador.Plugins.Core.Extensions
+namespace DIGOS.Ambassador.Plugins.Core.Extensions;
+
+/// <summary>
+/// Contains extension methods for the string class.
+/// </summary>
+public static class StringExtensions
 {
     /// <summary>
-    /// Contains extension methods for the string class.
+    /// Ellipsizes the given string, truncating it with the ellipsis character if required.
     /// </summary>
-    public static class StringExtensions
+    /// <param name="this">The base value.</param>
+    /// <param name="length">The maximum length.</param>
+    /// <returns>The ellipsized string.</returns>
+    [return: NotNullIfNotNull("this")]
+    public static string? Ellipsize(this string? @this, int length)
     {
-        /// <summary>
-        /// Ellipsizes the given string, truncating it with the ellipsis character if required.
-        /// </summary>
-        /// <param name="this">The base value.</param>
-        /// <param name="length">The maximum length.</param>
-        /// <returns>The ellipsized string.</returns>
-        [return: NotNullIfNotNull("this")]
-        public static string? Ellipsize(this string? @this, int length)
+        if (@this is null)
         {
-            if (@this is null)
-            {
-                return null;
-            }
-
-            return @this.Length <= length ? @this : @this.Substring(0, length - 1) + (char)0x2026;
+            return null;
         }
+
+        return @this.Length <= length ? @this : @this.Substring(0, length - 1) + (char)0x2026;
     }
 }

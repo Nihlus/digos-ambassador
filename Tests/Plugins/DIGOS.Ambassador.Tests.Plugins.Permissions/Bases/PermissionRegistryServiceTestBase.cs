@@ -27,29 +27,28 @@ using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Permissions
+namespace DIGOS.Ambassador.Tests.Plugins.Permissions;
+
+/// <summary>
+/// Serves as a test base for permission service tests.
+/// </summary>
+[PublicAPI]
+public abstract class PermissionRegistryServiceTestBase : ServiceProvidingTestBase
 {
     /// <summary>
-    /// Serves as a test base for permission service tests.
+    /// Gets the permission service instance.
     /// </summary>
-    [PublicAPI]
-    public abstract class PermissionRegistryServiceTestBase : ServiceProvidingTestBase
+    protected PermissionRegistryService PermissionRegistry { get; private set; } = null!;
+
+    /// <inheritdoc />
+    protected sealed override void RegisterServices(IServiceCollection serviceCollection)
     {
-        /// <summary>
-        /// Gets the permission service instance.
-        /// </summary>
-        protected PermissionRegistryService PermissionRegistry { get; private set; } = null!;
+        serviceCollection.AddScoped<PermissionRegistryService>();
+    }
 
-        /// <inheritdoc />
-        protected sealed override void RegisterServices(IServiceCollection serviceCollection)
-        {
-            serviceCollection.AddScoped<PermissionRegistryService>();
-        }
-
-        /// <inheritdoc />
-        protected sealed override void ConfigureServices(IServiceProvider serviceProvider)
-        {
-            this.PermissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
-        }
+    /// <inheritdoc />
+    protected sealed override void ConfigureServices(IServiceProvider serviceProvider)
+    {
+        this.PermissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
     }
 }

@@ -25,47 +25,46 @@ using System.Text.Json;
 using JetBrains.Annotations;
 using Remora.Discord.API.Json;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages;
+
+/// <summary>
+/// Database class for various data-driven transformation messages.
+/// </summary>
+public sealed partial class TransformationText
 {
     /// <summary>
-    /// Database class for various data-driven transformation messages.
+    /// Gets a set of description messages.
     /// </summary>
-    public sealed partial class TransformationText
+    public DescriptionMessages Descriptions { get; init; } = new();
+
+    /// <summary>
+    /// Gets a set of transformation messages.
+    /// </summary>
+    public TransformationMessages Messages { get; init; } = new();
+
+    /// <summary>
+    /// Attempts to deserialize a <see cref="TransformationText"/> instance from the given JSON text.
+    /// </summary>
+    /// <param name="json">The JSON text.</param>
+    /// <param name="text">The deserialized database.</param>
+    /// <returns>true if the deserialization was successful; otherwise, false.</returns>
+    [Pure]
+    public static bool TryDeserialize(string json, [NotNullWhen(true)] out TransformationText? text)
     {
-        /// <summary>
-        /// Gets a set of description messages.
-        /// </summary>
-        public DescriptionMessages Descriptions { get; init; } = new();
-
-        /// <summary>
-        /// Gets a set of transformation messages.
-        /// </summary>
-        public TransformationMessages Messages { get; init; } = new();
-
-        /// <summary>
-        /// Attempts to deserialize a <see cref="TransformationText"/> instance from the given JSON text.
-        /// </summary>
-        /// <param name="json">The JSON text.</param>
-        /// <param name="text">The deserialized database.</param>
-        /// <returns>true if the deserialization was successful; otherwise, false.</returns>
-        [Pure]
-        public static bool TryDeserialize(string json, [NotNullWhen(true)] out TransformationText? text)
+        text = null;
+        try
         {
-            text = null;
-            try
+            var jsonOptions = new JsonSerializerOptions
             {
-                var jsonOptions = new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = new SnakeCaseNamingPolicy()
-                };
+                PropertyNamingPolicy = new SnakeCaseNamingPolicy()
+            };
 
-                text = JsonSerializer.Deserialize<TransformationText>(json, jsonOptions) ?? throw new JsonException();
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            text = JsonSerializer.Deserialize<TransformationText>(json, jsonOptions) ?? throw new JsonException();
+            return true;
+        }
+        catch
+        {
+            return false;
         }
     }
 }

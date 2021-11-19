@@ -29,122 +29,121 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Plugins.Autorole.Model
+namespace DIGOS.Ambassador.Plugins.Autorole.Model;
+
+/// <summary>
+/// Represents the database model of the dossier plugin.
+/// </summary>
+public class AutoroleDatabaseContext : AmbassadorDbContext
 {
+    private const string SchemaName = "AutoroleModule";
+
     /// <summary>
-    /// Represents the database model of the dossier plugin.
+    /// Gets or sets the table where autoroles are stored.
     /// </summary>
-    public class AutoroleDatabaseContext : AmbassadorDbContext
+    public DbSet<AutoroleConfiguration> Autoroles { get; [UsedImplicitly] set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the table where user statistics are stored.
+    /// </summary>
+    public DbSet<UserStatistics> UserStatistics { get; [UsedImplicitly] set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the table where autorole confirmations are stored.
+    /// </summary>
+    public DbSet<AutoroleConfirmation> AutoroleConfirmations { get; [UsedImplicitly] set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the table where autorole server settings are stored.
+    /// </summary>
+    public DbSet<AutoroleServerSettings> AutoroleServerSettings { get; [UsedImplicitly] set; } = null!;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AutoroleDatabaseContext"/> class.
+    /// </summary>
+    /// <param name="contextOptions">The context options.</param>
+    public AutoroleDatabaseContext(DbContextOptions<AutoroleDatabaseContext> contextOptions)
+        : base(SchemaName, contextOptions)
     {
-        private const string SchemaName = "AutoroleModule";
+    }
 
-        /// <summary>
-        /// Gets or sets the table where autoroles are stored.
-        /// </summary>
-        public DbSet<AutoroleConfiguration> Autoroles { get; [UsedImplicitly] set; } = null!;
+    /// <inheritdoc />
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
 
-        /// <summary>
-        /// Gets or sets the table where user statistics are stored.
-        /// </summary>
-        public DbSet<UserStatistics> UserStatistics { get; [UsedImplicitly] set; } = null!;
+        modelBuilder.Entity<AutoroleConfiguration>()
+            .HasMany(ac => ac.Conditions)
+            .WithOne()
+            .OnDelete(DeleteBehavior.Cascade);
 
-        /// <summary>
-        /// Gets or sets the table where autorole confirmations are stored.
-        /// </summary>
-        public DbSet<AutoroleConfirmation> AutoroleConfirmations { get; [UsedImplicitly] set; } = null!;
+        modelBuilder.Entity<AutoroleConfiguration>()
+            .HasOne(a => a.Server)
+            .WithMany()
+            .OnDelete(DeleteBehavior.Cascade);
 
-        /// <summary>
-        /// Gets or sets the table where autorole server settings are stored.
-        /// </summary>
-        public DbSet<AutoroleServerSettings> AutoroleServerSettings { get; [UsedImplicitly] set; } = null!;
+        modelBuilder.Entity<ReactionCondition>()
+            .HasBaseType<AutoroleCondition>();
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AutoroleDatabaseContext"/> class.
-        /// </summary>
-        /// <param name="contextOptions">The context options.</param>
-        public AutoroleDatabaseContext(DbContextOptions<AutoroleDatabaseContext> contextOptions)
-            : base(SchemaName, contextOptions)
-        {
-        }
+        modelBuilder.Entity<RoleCondition>()
+            .HasBaseType<AutoroleCondition>();
 
-        /// <inheritdoc />
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
+        ConfigureTimeSinceEventCondition<TimeSinceJoinCondition>(modelBuilder);
+        ConfigureTimeSinceEventCondition<TimeSinceLastActivityCondition>(modelBuilder);
 
-            modelBuilder.Entity<AutoroleConfiguration>()
-                .HasMany(ac => ac.Conditions)
-                .WithOne()
-                .OnDelete(DeleteBehavior.Cascade);
+        ConfigureMessageCountCondition<MessageCountInChannelCondition>(modelBuilder);
+        ConfigureMessageCountCondition<MessageCountInGuildCondition>(modelBuilder);
 
-            modelBuilder.Entity<AutoroleConfiguration>()
-                .HasOne(a => a.Server)
-                .WithMany()
-                .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<UserStatistics>()
+            .HasMany(s => s.ServerStatistics)
+            .WithOne()
+            .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<ReactionCondition>()
-                .HasBaseType<AutoroleCondition>();
+        modelBuilder.Entity<UserStatistics>()
+            .HasIndex("UserID")
+            .IsUnique();
 
-            modelBuilder.Entity<RoleCondition>()
-                .HasBaseType<AutoroleCondition>();
+        modelBuilder.Entity<UserServerStatistics>()
+            .HasMany(s => s.ChannelStatistics)
+            .WithOne()
+            .OnDelete(DeleteBehavior.Cascade);
 
-            ConfigureTimeSinceEventCondition<TimeSinceJoinCondition>(modelBuilder);
-            ConfigureTimeSinceEventCondition<TimeSinceLastActivityCondition>(modelBuilder);
+        modelBuilder.Entity<UserServerStatistics>()
+            .HasIndex("ServerID", "UserStatisticsID")
+            .IsUnique();
 
-            ConfigureMessageCountCondition<MessageCountInChannelCondition>(modelBuilder);
-            ConfigureMessageCountCondition<MessageCountInGuildCondition>(modelBuilder);
+        modelBuilder.Entity<UserChannelStatistics>()
+            .HasIndex("ChannelID", "UserServerStatisticsID")
+            .IsUnique();
+    }
 
-            modelBuilder.Entity<UserStatistics>()
-                .HasMany(s => s.ServerStatistics)
-                .WithOne()
-                .OnDelete(DeleteBehavior.Cascade);
+    private void ConfigureTimeSinceEventCondition<TTimeSinceEventCondition>(ModelBuilder modelBuilder)
+        where TTimeSinceEventCondition : TimeSinceEventCondition<TTimeSinceEventCondition>
+    {
+        modelBuilder.Entity<TTimeSinceEventCondition>()
+            .HasBaseType<TimeSinceEventCondition<TTimeSinceEventCondition>>()
+            .HasDiscriminator()
+            .HasValue(typeof(TTimeSinceEventCondition).Name);
 
-            modelBuilder.Entity<UserStatistics>()
-                .HasIndex("UserID")
-                .IsUnique();
+        modelBuilder.Entity<TTimeSinceEventCondition>()
+            .Property(c => c.RequiredTime)
+            .HasColumnName(nameof(TimeSinceEventCondition<TTimeSinceEventCondition>.RequiredTime));
+    }
 
-            modelBuilder.Entity<UserServerStatistics>()
-                .HasMany(s => s.ChannelStatistics)
-                .WithOne()
-                .OnDelete(DeleteBehavior.Cascade);
+    private void ConfigureMessageCountCondition<TMessageCountCondition>(ModelBuilder modelBuilder)
+        where TMessageCountCondition : MessageCountInSourceCondition<TMessageCountCondition>
+    {
+        modelBuilder.Entity<TMessageCountCondition>()
+            .HasBaseType<MessageCountInSourceCondition<TMessageCountCondition>>()
+            .HasDiscriminator()
+            .HasValue(typeof(TMessageCountCondition).Name);
 
-            modelBuilder.Entity<UserServerStatistics>()
-                .HasIndex("ServerID", "UserStatisticsID")
-                .IsUnique();
+        modelBuilder.Entity<TMessageCountCondition>()
+            .Property(e => e.RequiredCount)
+            .HasColumnName(nameof(MessageCountInSourceCondition<TMessageCountCondition>.RequiredCount));
 
-            modelBuilder.Entity<UserChannelStatistics>()
-                .HasIndex("ChannelID", "UserServerStatisticsID")
-                .IsUnique();
-        }
-
-        private void ConfigureTimeSinceEventCondition<TTimeSinceEventCondition>(ModelBuilder modelBuilder)
-            where TTimeSinceEventCondition : TimeSinceEventCondition<TTimeSinceEventCondition>
-        {
-            modelBuilder.Entity<TTimeSinceEventCondition>()
-                .HasBaseType<TimeSinceEventCondition<TTimeSinceEventCondition>>()
-                .HasDiscriminator()
-                .HasValue(typeof(TTimeSinceEventCondition).Name);
-
-            modelBuilder.Entity<TTimeSinceEventCondition>()
-                .Property(c => c.RequiredTime)
-                .HasColumnName(nameof(TimeSinceEventCondition<TTimeSinceEventCondition>.RequiredTime));
-        }
-
-        private void ConfigureMessageCountCondition<TMessageCountCondition>(ModelBuilder modelBuilder)
-            where TMessageCountCondition : MessageCountInSourceCondition<TMessageCountCondition>
-        {
-            modelBuilder.Entity<TMessageCountCondition>()
-                .HasBaseType<MessageCountInSourceCondition<TMessageCountCondition>>()
-                .HasDiscriminator()
-                .HasValue(typeof(TMessageCountCondition).Name);
-
-            modelBuilder.Entity<TMessageCountCondition>()
-                .Property(e => e.RequiredCount)
-                .HasColumnName(nameof(MessageCountInSourceCondition<TMessageCountCondition>.RequiredCount));
-
-            modelBuilder.Entity<TMessageCountCondition>()
-                .Property(e => e.SourceID)
-                .HasColumnName(nameof(MessageCountInSourceCondition<TMessageCountCondition>.SourceID));
-        }
+        modelBuilder.Entity<TMessageCountCondition>()
+            .Property(e => e.SourceID)
+            .HasColumnName(nameof(MessageCountInSourceCondition<TMessageCountCondition>.SourceID));
     }
 }

@@ -31,60 +31,59 @@ using Zio;
 using Zio.FileSystems;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Core.Tests.Bases
+namespace DIGOS.Ambassador.Core.Tests.Bases;
+
+/// <summary>
+/// Serves as a base class for content service tests.
+/// </summary>
+[PublicAPI]
+public abstract class ContentServiceTestBase : ServiceProvidingTestBase, IAsyncLifetime
 {
     /// <summary>
-    /// Serves as a base class for content service tests.
+    /// Gets the file system implementation that's in use.
     /// </summary>
-    [PublicAPI]
-    public abstract class ContentServiceTestBase : ServiceProvidingTestBase, IAsyncLifetime
+    protected IFileSystem FileSystem { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the content service.
+    /// </summary>
+    protected ContentService ContentService { get; private set; } = null!;
+
+    /// <summary>
+    /// Configures the file system.
+    /// </summary>
+    /// <param name="fileSystem">The file system to configure.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    protected virtual Task ConfigureFileSystemAsync(IFileSystem fileSystem)
     {
-        /// <summary>
-        /// Gets the file system implementation that's in use.
-        /// </summary>
-        protected IFileSystem FileSystem { get; private set; } = null!;
+        return Task.CompletedTask;
+    }
 
-        /// <summary>
-        /// Gets the content service.
-        /// </summary>
-        protected ContentService ContentService { get; private set; } = null!;
+    /// <inheritdoc />
+    protected sealed override void RegisterServices(IServiceCollection serviceCollection)
+    {
+        this.FileSystem = new MemoryFileSystem();
 
-        /// <summary>
-        /// Configures the file system.
-        /// </summary>
-        /// <param name="fileSystem">The file system to configure.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        protected virtual Task ConfigureFileSystemAsync(IFileSystem fileSystem)
-        {
-            return Task.CompletedTask;
-        }
+        serviceCollection
+            .AddSingleton(this.FileSystem)
+            .AddSingleton<ContentService>();
+    }
 
-        /// <inheritdoc />
-        protected sealed override void RegisterServices(IServiceCollection serviceCollection)
-        {
-            this.FileSystem = new MemoryFileSystem();
+    /// <inheritdoc />
+    protected sealed override void ConfigureServices(IServiceProvider serviceProvider)
+    {
+        this.ContentService = this.Services.GetRequiredService<ContentService>();
+    }
 
-            serviceCollection
-                .AddSingleton(this.FileSystem)
-                .AddSingleton<ContentService>();
-        }
+    /// <inheritdoc />
+    public virtual async Task InitializeAsync()
+    {
+        await ConfigureFileSystemAsync(this.FileSystem);
+    }
 
-        /// <inheritdoc />
-        protected sealed override void ConfigureServices(IServiceProvider serviceProvider)
-        {
-            this.ContentService = this.Services.GetRequiredService<ContentService>();
-        }
-
-        /// <inheritdoc />
-        public virtual async Task InitializeAsync()
-        {
-            await ConfigureFileSystemAsync(this.FileSystem);
-        }
-
-        /// <inheritdoc />
-        public Task DisposeAsync()
-        {
-            return Task.CompletedTask;
-        }
+    /// <inheritdoc />
+    public Task DisposeAsync()
+    {
+        return Task.CompletedTask;
     }
 }

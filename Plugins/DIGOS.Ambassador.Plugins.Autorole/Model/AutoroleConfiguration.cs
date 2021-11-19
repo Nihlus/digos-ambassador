@@ -29,69 +29,68 @@ using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Core;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Model
+namespace DIGOS.Ambassador.Plugins.Autorole.Model;
+
+/// <summary>
+/// Represents an automatic role.
+/// </summary>
+[Table("AutoroleConfigurations", Schema = "AutoroleModule")]
+public class AutoroleConfiguration : EFEntity
 {
     /// <summary>
-    /// Represents an automatic role.
+    /// Gets the server the autorole belongs to.
     /// </summary>
-    [Table("AutoroleConfigurations", Schema = "AutoroleModule")]
-    public class AutoroleConfiguration : EFEntity
+    public virtual Server Server { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the ID of the Discord role.
+    /// </summary>
+    public Snowflake DiscordRoleID { get; private set; }
+
+    /// <summary>
+    /// Gets the conditions for acquiring the role.
+    /// </summary>
+    public virtual List<AutoroleCondition> Conditions { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets a value indicating whether the role needs external confirmation (from a moderator, for example)
+    /// to be applied after all conditions are met.
+    /// </summary>
+    public bool RequiresConfirmation { get; internal set; }
+
+    /// <summary>
+    /// Gets a value indicating whether the role is currently enabled; that is, whether new users meeting the
+    /// conditions will have the role applied.
+    /// </summary>
+    public bool IsEnabled { get; internal set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AutoroleConfiguration"/> class.
+    /// </summary>
+    [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
+    protected AutoroleConfiguration()
     {
-        /// <summary>
-        /// Gets the server the autorole belongs to.
-        /// </summary>
-        public virtual Server Server { get; private set; } = null!;
+    }
 
-        /// <summary>
-        /// Gets the ID of the Discord role.
-        /// </summary>
-        public Snowflake DiscordRoleID { get; private set; }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AutoroleConfiguration"/> class.
+    /// </summary>
+    /// <param name="server">The server.</param>
+    /// <param name="discordRoleID">The ID of the discord role to assign.</param>
+    protected AutoroleConfiguration(Server server, Snowflake discordRoleID)
+    {
+        this.Server = server;
+        this.DiscordRoleID = discordRoleID;
+        this.Conditions = new List<AutoroleCondition>();
+    }
 
-        /// <summary>
-        /// Gets the conditions for acquiring the role.
-        /// </summary>
-        public virtual List<AutoroleCondition> Conditions { get; private set; } = null!;
-
-        /// <summary>
-        /// Gets a value indicating whether the role needs external confirmation (from a moderator, for example)
-        /// to be applied after all conditions are met.
-        /// </summary>
-        public bool RequiresConfirmation { get; internal set; }
-
-        /// <summary>
-        /// Gets a value indicating whether the role is currently enabled; that is, whether new users meeting the
-        /// conditions will have the role applied.
-        /// </summary>
-        public bool IsEnabled { get; internal set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AutoroleConfiguration"/> class.
-        /// </summary>
-        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
-        protected AutoroleConfiguration()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AutoroleConfiguration"/> class.
-        /// </summary>
-        /// <param name="server">The server.</param>
-        /// <param name="discordRoleID">The ID of the discord role to assign.</param>
-        protected AutoroleConfiguration(Server server, Snowflake discordRoleID)
-        {
-            this.Server = server;
-            this.DiscordRoleID = discordRoleID;
-            this.Conditions = new List<AutoroleCondition>();
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AutoroleConfiguration"/> class.
-        /// </summary>
-        /// <param name="server">The server.</param>
-        /// <param name="discordRole">The Discord role.</param>
-        public AutoroleConfiguration(Server server, IRole discordRole)
-            : this(server, discordRole.ID)
-        {
-        }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AutoroleConfiguration"/> class.
+    /// </summary>
+    /// <param name="server">The server.</param>
+    /// <param name="discordRole">The Discord role.</param>
+    public AutoroleConfiguration(Server server, IRole discordRole)
+        : this(server, discordRole.ID)
+    {
     }
 }

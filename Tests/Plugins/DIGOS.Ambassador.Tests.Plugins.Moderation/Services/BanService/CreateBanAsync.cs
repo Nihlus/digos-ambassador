@@ -30,67 +30,66 @@ using DIGOS.Ambassador.Tests.Plugins.Moderation.Bases;
 using Remora.Discord.Core;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
+namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService;
+
+public partial class BanService
 {
-    public partial class BanService
+    public class CreateBanAsync : BanServiceTestBase
     {
-        public class CreateBanAsync : BanServiceTestBase
+        private readonly Snowflake _user = new(0);
+        private readonly Snowflake _guild = new(1);
+        private readonly Snowflake _author = new(1);
+
+        [Fact]
+        private async Task ReturnsSuccessful()
         {
-            private readonly Snowflake _user = new(0);
-            private readonly Snowflake _guild = new(1);
-            private readonly Snowflake _author = new(1);
+            var result = await this.Bans.CreateBanAsync(_author, _user, _guild, "Dummy thicc");
 
-            [Fact]
-            private async Task ReturnsSuccessful()
-            {
-                var result = await this.Bans.CreateBanAsync(_author, _user, _guild, "Dummy thicc");
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        private async Task ActuallyCreatesBan()
+        {
+            await this.Bans.CreateBanAsync(_author, _user, _guild, "Dummy thicc");
 
-            [Fact]
-            private async Task ActuallyCreatesBan()
-            {
-                await this.Bans.CreateBanAsync(_author, _user, _guild, "Dummy thicc");
+            Assert.NotEmpty(this.Database.UserBans);
+        }
 
-                Assert.NotEmpty(this.Database.UserBans);
-            }
+        [Fact]
+        private async Task CanCreateWithExpiryDate()
+        {
+            var expiryDate = DateTimeOffset.UtcNow.Date.ToUniversalTime().AddDays(1);
 
-            [Fact]
-            private async Task CanCreateWithExpiryDate()
-            {
-                var expiryDate = DateTimeOffset.UtcNow.Date.ToUniversalTime().AddDays(1);
+            var result = await this.Bans.CreateBanAsync
+            (
+                _author,
+                _user,
+                _guild,
+                "Dummy thicc",
+                expiresOn: expiryDate
+            );
 
-                var result = await this.Bans.CreateBanAsync
-                (
-                    _author,
-                    _user,
-                    _guild,
-                    "Dummy thicc",
-                    expiresOn: expiryDate
-                );
+            Assert.True(result.IsSuccess);
+            Assert.Equal(expiryDate, result.Entity.ExpiresOn);
+        }
 
-                Assert.True(result.IsSuccess);
-                Assert.Equal(expiryDate, result.Entity.ExpiresOn);
-            }
+        [Fact]
+        private async Task CanCreateWithMessage()
+        {
+            var messageID = new Snowflake(1);
 
-            [Fact]
-            private async Task CanCreateWithMessage()
-            {
-                var messageID = new Snowflake(1);
+            var result = await this.Bans.CreateBanAsync
+            (
+                _author,
+                _user,
+                _guild,
+                "Dummy thicc",
+                messageID
+            );
 
-                var result = await this.Bans.CreateBanAsync
-                (
-                    _author,
-                    _user,
-                    _guild,
-                    "Dummy thicc",
-                    messageID
-                );
-
-                Assert.True(result.IsSuccess);
-                Assert.Equal(messageID, result.Entity.MessageID);
-            }
+            Assert.True(result.IsSuccess);
+            Assert.Equal(messageID, result.Entity.MessageID);
         }
     }
 }

@@ -22,16 +22,15 @@
 
 using DIGOS.Ambassador.Core.Database.Entities;
 
-namespace DIGOS.Ambassador.Plugins.Core.Model.Servers
+namespace DIGOS.Ambassador.Plugins.Core.Model.Servers;
+
+/// <summary>
+/// Represents an EF entity unique to a server.
+/// </summary>
+public interface IServerEntity : IEFEntity
 {
     /// <summary>
-    /// Represents an EF entity unique to a server.
+    /// Gets the Discord server ID.
     /// </summary>
-    public interface IServerEntity : IEFEntity
-    {
-        /// <summary>
-        /// Gets the Discord server ID.
-        /// </summary>
-        Server Server { get; }
-    }
+    Server Server { get; }
 }

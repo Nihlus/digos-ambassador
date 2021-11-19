@@ -30,39 +30,38 @@ using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Core;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Parsers
+namespace DIGOS.Ambassador.Plugins.Autorole.Parsers;
+
+/// <summary>
+/// A type parser for autorole configurations.
+/// </summary>
+public class AutoroleConfigurationParser : AbstractTypeParser<AutoroleConfiguration>
 {
+    private readonly AutoroleService _autoroles;
+
     /// <summary>
-    /// A type parser for autorole configurations.
+    /// Initializes a new instance of the <see cref="AutoroleConfigurationParser"/> class.
     /// </summary>
-    public class AutoroleConfigurationParser : AbstractTypeParser<AutoroleConfiguration>
+    /// <param name="autoroles">The autorole service.</param>
+    public AutoroleConfigurationParser(AutoroleService autoroles)
     {
-        private readonly AutoroleService _autoroles;
+        _autoroles = autoroles;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AutoroleConfigurationParser"/> class.
-        /// </summary>
-        /// <param name="autoroles">The autorole service.</param>
-        public AutoroleConfigurationParser(AutoroleService autoroles)
+    /// <inheritdoc />
+    public override async ValueTask<Result<AutoroleConfiguration>> TryParseAsync(string value, CancellationToken ct = default)
+    {
+        value = value.Trim();
+
+        if (!Snowflake.TryParse(value.Unmention(), out var roleID))
         {
-            _autoroles = autoroles;
+            return new ParsingError<AutoroleConfiguration>(value);
         }
 
-        /// <inheritdoc />
-        public override async ValueTask<Result<AutoroleConfiguration>> TryParseAsync(string value, CancellationToken ct = default)
-        {
-            value = value.Trim();
+        var getAutorole = await _autoroles.GetAutoroleAsync(roleID.Value, ct);
 
-            if (!Snowflake.TryParse(value.Unmention(), out var roleID))
-            {
-                return new ParsingError<AutoroleConfiguration>(value);
-            }
-
-            var getAutorole = await _autoroles.GetAutoroleAsync(roleID.Value, ct);
-
-            return !getAutorole.IsSuccess
-                ? Result<AutoroleConfiguration>.FromError(getAutorole)
-                : getAutorole.Entity;
-        }
+        return !getAutorole.IsSuccess
+            ? Result<AutoroleConfiguration>.FromError(getAutorole)
+            : getAutorole.Entity;
     }
 }

@@ -22,26 +22,25 @@
 
 using Remora.Commands.Conditions;
 
-namespace DIGOS.Ambassador.Plugins.Roleplaying.Preconditions
+namespace DIGOS.Ambassador.Plugins.Roleplaying.Preconditions;
+
+/// <summary>
+/// Restricts the usage of a command to a channel where a roleplay is currently active. Optionally, it may also
+/// restrict the usage to the owner of that roleplay.
+/// </summary>
+public class RequireActiveRoleplayAttribute : ConditionAttribute
 {
     /// <summary>
-    /// Restricts the usage of a command to a channel where a roleplay is currently active. Optionally, it may also
-    /// restrict the usage to the owner of that roleplay.
+    /// Gets a value indicating whether the invoker is also required to be the owner of the roleplay.
     /// </summary>
-    public class RequireActiveRoleplayAttribute : ConditionAttribute
-    {
-        /// <summary>
-        /// Gets a value indicating whether the invoker is also required to be the owner of the roleplay.
-        /// </summary>
-        public bool RequireOwner { get; }
+    public bool RequireOwner { get; }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RequireActiveRoleplayAttribute"/> class.
-        /// </summary>
-        /// <param name="requireOwner">Whether or not it is required that the current roleplay is owned by the invoker.</param>
-        public RequireActiveRoleplayAttribute(bool requireOwner = false)
-        {
-            this.RequireOwner = requireOwner;
-        }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RequireActiveRoleplayAttribute"/> class.
+    /// </summary>
+    /// <param name="requireOwner">Whether or not it is required that the current roleplay is owned by the invoker.</param>
+    public RequireActiveRoleplayAttribute(bool requireOwner = false)
+    {
+        this.RequireOwner = requireOwner;
     }
 }

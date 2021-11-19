@@ -33,66 +33,65 @@ using DIGOS.Ambassador.Tests.Plugins.Moderation.Bases;
 using Remora.Discord.Core;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
+namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService;
+
+public partial class BanService
 {
-    public partial class BanService
+    public class SetBanExpiryDateAsync : BanServiceTestBase
     {
-        public class SetBanExpiryDateAsync : BanServiceTestBase
+        private readonly UserBan _ban = new(
+            new Server(new Snowflake(0)),
+            new User(new Snowflake(0)),
+            new User(new Snowflake(1)),
+            string.Empty
+        );
+
+        [Fact]
+        public async Task ReturnsUnsuccessfulIfNewExpiryDateIsSameAsExistingExpiryDate()
         {
-            private readonly UserBan _ban = new(
-                new Server(new Snowflake(0)),
-                new User(new Snowflake(0)),
-                new User(new Snowflake(1)),
-                string.Empty
-            );
+            await this.Bans.SetBanExpiryDateAsync(_ban, DateTimeOffset.UtcNow.Date.AddDays(1));
+            var result = await this.Bans.SetBanExpiryDateAsync(_ban, DateTimeOffset.UtcNow.Date.AddDays(1));
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulIfNewExpiryDateIsSameAsExistingExpiryDate()
-            {
-                await this.Bans.SetBanExpiryDateAsync(_ban, DateTimeOffset.UtcNow.Date.AddDays(1));
-                var result = await this.Bans.SetBanExpiryDateAsync(_ban, DateTimeOffset.UtcNow.Date.AddDays(1));
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsUnsuccessfulIfNewExpiryDateIsInThePast()
+        {
+            var result = await this.Bans.SetBanExpiryDateAsync(_ban, DateTimeOffset.UtcNow.Date.AddDays(-1));
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulIfNewExpiryDateIsInThePast()
-            {
-                var result = await this.Bans.SetBanExpiryDateAsync(_ban, DateTimeOffset.UtcNow.Date.AddDays(-1));
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsSuccessfulIfNewExpiryDateIsWellFormed()
+        {
+            var result = await this.Bans.SetBanExpiryDateAsync(_ban, DateTimeOffset.UtcNow.Date.AddDays(2));
 
-            [Fact]
-            public async Task ReturnsSuccessfulIfNewExpiryDateIsWellFormed()
-            {
-                var result = await this.Bans.SetBanExpiryDateAsync(_ban, DateTimeOffset.UtcNow.Date.AddDays(2));
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ActuallySetsExpiryDate()
+        {
+            var expiryDate = DateTimeOffset.UtcNow.Date.AddDays(1);
 
-            [Fact]
-            public async Task ActuallySetsExpiryDate()
-            {
-                var expiryDate = DateTimeOffset.UtcNow.Date.AddDays(1);
+            await this.Bans.SetBanExpiryDateAsync(_ban, expiryDate);
 
-                await this.Bans.SetBanExpiryDateAsync(_ban, expiryDate);
+            Assert.Equal(expiryDate, _ban.ExpiresOn);
+        }
 
-                Assert.Equal(expiryDate, _ban.ExpiresOn);
-            }
+        [Fact]
+        public async Task SetterUpdatesTimestamp()
+        {
+            var before = _ban.UpdatedAt;
 
-            [Fact]
-            public async Task SetterUpdatesTimestamp()
-            {
-                var before = _ban.UpdatedAt;
+            var expiryDate = DateTimeOffset.UtcNow.Date.AddDays(1);
+            await this.Bans.SetBanExpiryDateAsync(_ban, expiryDate);
 
-                var expiryDate = DateTimeOffset.UtcNow.Date.AddDays(1);
-                await this.Bans.SetBanExpiryDateAsync(_ban, expiryDate);
+            var after = _ban.UpdatedAt;
 
-                var after = _ban.UpdatedAt;
-
-                Assert.True(before < after);
-            }
+            Assert.True(before < after);
         }
     }
 }

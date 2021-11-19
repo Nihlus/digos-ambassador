@@ -40,64 +40,63 @@ using Xunit;
 #pragma warning disable SA1648
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Core
+namespace DIGOS.Ambassador.Tests.Plugins.Core;
+
+/// <summary>
+/// Serves as a test base for privacy service tests.
+/// </summary>
+public abstract class PrivacyServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
 {
     /// <summary>
-    /// Serves as a test base for privacy service tests.
+    /// Gets the privacy service object.
     /// </summary>
-    public abstract class PrivacyServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
+    protected PrivacyService Privacy { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the database.
+    /// </summary>
+    protected CoreDatabaseContext Database { get; private set; } = null!;
+
+    /// <inheritdoc />
+    protected override void RegisterServices(IServiceCollection serviceCollection)
     {
-        /// <summary>
-        /// Gets the privacy service object.
-        /// </summary>
-        protected PrivacyService Privacy { get; private set; } = null!;
+        serviceCollection.AddDbContext<CoreDatabaseContext>(o => ConfigureOptions(o, "Core"));
 
-        /// <summary>
-        /// Gets the database.
-        /// </summary>
-        protected CoreDatabaseContext Database { get; private set; } = null!;
+        var channelAPIMock = new Mock<IDiscordRestChannelAPI>();
+        var userAPIMock = new Mock<IDiscordRestUserAPI>();
+        var interactionAPIMock = new Mock<IDiscordRestInteractionAPI>();
 
-        /// <inheritdoc />
-        protected override void RegisterServices(IServiceCollection serviceCollection)
-        {
-            serviceCollection.AddDbContext<CoreDatabaseContext>(o => ConfigureOptions(o, "Core"));
+        serviceCollection
+            .AddSingleton(FileSystemFactory.CreateContentFileSystem())
+            .AddScoped<ContentService>()
+            .AddScoped<FeedbackService>()
+            .AddScoped<PrivacyService>()
+            .AddScoped<ContextInjectionService>()
+            .AddSingleton(FeedbackTheme.DiscordDark)
+            .AddSingleton(channelAPIMock.Object)
+            .AddSingleton(userAPIMock.Object)
+            .AddSingleton(interactionAPIMock.Object)
+            .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
+    }
 
-            var channelAPIMock = new Mock<IDiscordRestChannelAPI>();
-            var userAPIMock = new Mock<IDiscordRestUserAPI>();
-            var interactionAPIMock = new Mock<IDiscordRestInteractionAPI>();
+    /// <inheritdoc />
+    protected override void ConfigureServices(IServiceProvider serviceProvider)
+    {
+        this.Database = serviceProvider.GetRequiredService<CoreDatabaseContext>();
+        this.Database.Database.Create();
 
-            serviceCollection
-                .AddSingleton(FileSystemFactory.CreateContentFileSystem())
-                .AddScoped<ContentService>()
-                .AddScoped<FeedbackService>()
-                .AddScoped<PrivacyService>()
-                .AddScoped<ContextInjectionService>()
-                .AddSingleton(FeedbackTheme.DiscordDark)
-                .AddSingleton(channelAPIMock.Object)
-                .AddSingleton(userAPIMock.Object)
-                .AddSingleton(interactionAPIMock.Object)
-                .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
-        }
+        this.Privacy = serviceProvider.GetRequiredService<PrivacyService>();
+    }
 
-        /// <inheritdoc />
-        protected override void ConfigureServices(IServiceProvider serviceProvider)
-        {
-            this.Database = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            this.Database.Database.Create();
+    /// <inheritdoc />
+    public virtual Task InitializeAsync()
+    {
+        return Task.CompletedTask;
+    }
 
-            this.Privacy = serviceProvider.GetRequiredService<PrivacyService>();
-        }
-
-        /// <inheritdoc />
-        public virtual Task InitializeAsync()
-        {
-            return Task.CompletedTask;
-        }
-
-        /// <inheritdoc />
-        public Task DisposeAsync()
-        {
-            return Task.CompletedTask;
-        }
+    /// <inheritdoc />
+    public Task DisposeAsync()
+    {
+        return Task.CompletedTask;
     }
 }

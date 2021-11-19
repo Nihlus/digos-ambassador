@@ -33,67 +33,66 @@ using DIGOS.Ambassador.Tests.Plugins.Moderation.Bases;
 using Remora.Discord.Core;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
+namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService;
+
+public partial class WarningService
 {
-    public partial class WarningService
+    public class SetWarningReasonAsync : WarningServiceTestBase
     {
-        public class SetWarningReasonAsync : WarningServiceTestBase
+        private readonly UserWarning _warning = new(new Server(new Snowflake(0)), new User(new Snowflake(0)), new User(new Snowflake(1)), string.Empty);
+
+        [Fact]
+        public async Task ReturnsUnsuccessfulIfNewReasonIsEmpty()
         {
-            private readonly UserWarning _warning = new(new Server(new Snowflake(0)), new User(new Snowflake(0)), new User(new Snowflake(1)), string.Empty);
+            var result = await this.Warnings.SetWarningReasonAsync(_warning, string.Empty);
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulIfNewReasonIsEmpty()
-            {
-                var result = await this.Warnings.SetWarningReasonAsync(_warning, string.Empty);
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsUnsuccessfulIfNewReasonIsTooLong()
+        {
+            var result = await this.Warnings.SetWarningReasonAsync(_warning, new string('a', 1025));
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulIfNewReasonIsTooLong()
-            {
-                var result = await this.Warnings.SetWarningReasonAsync(_warning, new string('a', 1025));
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsUnsuccessfulIfNewReasonIsIdentical()
+        {
+            await this.Warnings.SetWarningReasonAsync(_warning, "Dummy thicc");
+            var result = await this.Warnings.SetWarningReasonAsync(_warning, "Dummy thicc");
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulIfNewReasonIsIdentical()
-            {
-                await this.Warnings.SetWarningReasonAsync(_warning, "Dummy thicc");
-                var result = await this.Warnings.SetWarningReasonAsync(_warning, "Dummy thicc");
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsSuccessfulIfNewReasonIsWellFormed()
+        {
+            await this.Warnings.SetWarningReasonAsync(_warning, "Dummy thicc");
+            var result = await this.Warnings.SetWarningReasonAsync(_warning, "Not dummy thicc");
 
-            [Fact]
-            public async Task ReturnsSuccessfulIfNewReasonIsWellFormed()
-            {
-                await this.Warnings.SetWarningReasonAsync(_warning, "Dummy thicc");
-                var result = await this.Warnings.SetWarningReasonAsync(_warning, "Not dummy thicc");
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ActuallySetsReason()
+        {
+            await this.Warnings.SetWarningReasonAsync(_warning, "Dummy thicc");
 
-            [Fact]
-            public async Task ActuallySetsReason()
-            {
-                await this.Warnings.SetWarningReasonAsync(_warning, "Dummy thicc");
+            Assert.Equal("Dummy thicc", _warning.Reason);
+        }
 
-                Assert.Equal("Dummy thicc", _warning.Reason);
-            }
+        [Fact]
+        public async Task SetterUpdatesTimestamp()
+        {
+            var before = _warning.UpdatedAt;
 
-            [Fact]
-            public async Task SetterUpdatesTimestamp()
-            {
-                var before = _warning.UpdatedAt;
+            await this.Warnings.SetWarningReasonAsync(_warning, "Dummy thicc");
 
-                await this.Warnings.SetWarningReasonAsync(_warning, "Dummy thicc");
+            var after = _warning.UpdatedAt;
 
-                var after = _warning.UpdatedAt;
-
-                Assert.True(before < after);
-            }
+            Assert.True(before < after);
         }
     }
 }

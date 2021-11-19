@@ -22,24 +22,23 @@
 
 using System.Collections.Generic;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages;
+
+public sealed partial class TransformationText
 {
-    public sealed partial class TransformationText
+    public sealed partial class TransformationMessages
     {
-        public sealed partial class TransformationMessages
+        public sealed partial class AddingMessages
         {
-            public sealed partial class AddingMessages
+            /// <summary>
+            /// Holds singular messages.
+            /// </summary>
+            public sealed class SingleMessages
             {
                 /// <summary>
-                /// Holds singular messages.
+                /// Gets a list of pattern addition messages.
                 /// </summary>
-                public sealed class SingleMessages
-                {
-                    /// <summary>
-                    /// Gets a list of pattern addition messages.
-                    /// </summary>
-                    public IReadOnlyList<string> Pattern { get; init; } = new List<string>();
-                }
+                public IReadOnlyList<string> Pattern { get; init; } = new List<string>();
             }
         }
     }

@@ -22,97 +22,96 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-namespace DIGOS.Ambassador.Core.Database.Credentials
+namespace DIGOS.Ambassador.Core.Database.Credentials;
+
+/// <summary>
+/// Represents a set of configured database credentials.
+/// </summary>
+public class DatabaseCredentials
 {
     /// <summary>
-    /// Represents a set of configured database credentials.
+    /// Gets the hostname the database is on.
     /// </summary>
-    public class DatabaseCredentials
+    public string Host { get; }
+
+    /// <summary>
+    /// Gets the port the database listens on.
+    /// </summary>
+    public ushort Port { get; }
+
+    /// <summary>
+    /// Gets the name of the database.
+    /// </summary>
+    public string Database { get; }
+
+    /// <summary>
+    /// Gets the username to use when logging in to the database.
+    /// </summary>
+    public string Username { get; }
+
+    /// <summary>
+    /// Gets the password to use when logging in to the database.
+    /// </summary>
+    public string Password { get; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DatabaseCredentials"/> class.
+    /// </summary>
+    /// <param name="host">The host the database is on.</param>
+    /// <param name="port">The port the database listens on.</param>
+    /// <param name="database">The name of the database.</param>
+    /// <param name="username">The username to use when logging in to the database.</param>
+    /// <param name="password">The password to use when logging in to the database.</param>
+    public DatabaseCredentials(string host, ushort port, string database, string username, string password)
     {
-        /// <summary>
-        /// Gets the hostname the database is on.
-        /// </summary>
-        public string Host { get; }
+        this.Host = host;
+        this.Port = port;
+        this.Database = database;
+        this.Username = username;
+        this.Password = password;
+    }
 
-        /// <summary>
-        /// Gets the port the database listens on.
-        /// </summary>
-        public ushort Port { get; }
+    /// <summary>
+    /// Gets a connection string formed from the credentials.
+    /// </summary>
+    /// <returns>The connection string.</returns>
+    public string GetConnectionString()
+    {
+        return $"Server={this.Host};" +
+               $"Port={this.Port};" +
+               $"Database={this.Database};" +
+               $"Username={this.Username};" +
+               $"Password={this.Password}";
+    }
 
-        /// <summary>
-        /// Gets the name of the database.
-        /// </summary>
-        public string Database { get; }
+    /// <summary>
+    /// Attempts to parse a <see cref="DatabaseCredentials"/> object from the contents of the file at the given
+    /// path.
+    /// </summary>
+    /// <param name="value">The string to parse.</param>
+    /// <param name="credentials">The resulting credentials.</param>
+    /// <returns>true if the credentials were successfully parsed; otherwise, false.</returns>
+    public static bool TryParse(string value, [NotNullWhen(true)] out DatabaseCredentials? credentials)
+    {
+        credentials = null;
 
-        /// <summary>
-        /// Gets the username to use when logging in to the database.
-        /// </summary>
-        public string Username { get; }
-
-        /// <summary>
-        /// Gets the password to use when logging in to the database.
-        /// </summary>
-        public string Password { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DatabaseCredentials"/> class.
-        /// </summary>
-        /// <param name="host">The host the database is on.</param>
-        /// <param name="port">The port the database listens on.</param>
-        /// <param name="database">The name of the database.</param>
-        /// <param name="username">The username to use when logging in to the database.</param>
-        /// <param name="password">The password to use when logging in to the database.</param>
-        public DatabaseCredentials(string host, ushort port, string database, string username, string password)
+        var parts = value.Split(':');
+        if (parts.Length != 5)
         {
-            this.Host = host;
-            this.Port = port;
-            this.Database = database;
-            this.Username = username;
-            this.Password = password;
+            return false;
         }
 
-        /// <summary>
-        /// Gets a connection string formed from the credentials.
-        /// </summary>
-        /// <returns>The connection string.</returns>
-        public string GetConnectionString()
+        var hostname = parts[0];
+        if (!ushort.TryParse(parts[1], out var port))
         {
-            return $"Server={this.Host};" +
-                   $"Port={this.Port};" +
-                   $"Database={this.Database};" +
-                   $"Username={this.Username};" +
-                   $"Password={this.Password}";
+            return false;
         }
 
-        /// <summary>
-        /// Attempts to parse a <see cref="DatabaseCredentials"/> object from the contents of the file at the given
-        /// path.
-        /// </summary>
-        /// <param name="value">The string to parse.</param>
-        /// <param name="credentials">The resulting credentials.</param>
-        /// <returns>true if the credentials were successfully parsed; otherwise, false.</returns>
-        public static bool TryParse(string value, [NotNullWhen(true)] out DatabaseCredentials? credentials)
-        {
-            credentials = null;
+        var database = parts[2];
+        var username = parts[3];
+        var password = parts[4];
 
-            var parts = value.Split(':');
-            if (parts.Length != 5)
-            {
-                return false;
-            }
-
-            var hostname = parts[0];
-            if (!ushort.TryParse(parts[1], out var port))
-            {
-                return false;
-            }
-
-            var database = parts[2];
-            var username = parts[3];
-            var password = parts[4];
-
-            credentials = new DatabaseCredentials(hostname, port, database, username, password);
-            return true;
-        }
+        credentials = new DatabaseCredentials(hostname, port, database, username, password);
+        return true;
     }
 }

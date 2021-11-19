@@ -26,40 +26,39 @@ using System.Threading.Tasks;
 using Remora.Discord.Core;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
+namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
+
+/// <summary>
+/// Defines the public API of an autorole condition.
+/// </summary>
+public interface IAutoroleCondition
 {
     /// <summary>
-    /// Defines the public API of an autorole condition.
+    /// Gets a piece of text that sufficiently describes what the condition requires, suitable for display in a UI.
     /// </summary>
-    public interface IAutoroleCondition
-    {
-        /// <summary>
-        /// Gets a piece of text that sufficiently describes what the condition requires, suitable for display in a UI.
-        /// </summary>
-        /// <returns>The descriptive UI text.</returns>
-        string GetDescriptiveUIText();
+    /// <returns>The descriptive UI text.</returns>
+    string GetDescriptiveUIText();
 
-        /// <summary>
-        /// Determines whether this condition has the same conditions as another condition.
-        /// </summary>
-        /// <param name="autoroleCondition">The other condition.</param>
-        /// <returns>true if this condition has the same conditions as another condition; otherwise, false.</returns>
-        bool HasSameConditionsAs(IAutoroleCondition autoroleCondition);
+    /// <summary>
+    /// Determines whether this condition has the same conditions as another condition.
+    /// </summary>
+    /// <param name="autoroleCondition">The other condition.</param>
+    /// <returns>true if this condition has the same conditions as another condition; otherwise, false.</returns>
+    bool HasSameConditionsAs(IAutoroleCondition autoroleCondition);
 
-        /// <summary>
-        /// Determines whether the condition is fulfilled for the given Discord user.
-        /// </summary>
-        /// <param name="services">The service provider.</param>
-        /// <param name="guildID">The ID of the guild the user is on.</param>
-        /// <param name="userID">The ID of the user.</param>
-        /// <param name="ct">The cancellation token in use.</param>
-        /// <returns>true if the condition is fulfilled; otherwise, false.</returns>
-        Task<Result<bool>> IsConditionFulfilledForUserAsync
-        (
-            IServiceProvider services,
-            Snowflake guildID,
-            Snowflake userID,
-            CancellationToken ct = default
-        );
-    }
+    /// <summary>
+    /// Determines whether the condition is fulfilled for the given Discord user.
+    /// </summary>
+    /// <param name="services">The service provider.</param>
+    /// <param name="guildID">The ID of the guild the user is on.</param>
+    /// <param name="userID">The ID of the user.</param>
+    /// <param name="ct">The cancellation token in use.</param>
+    /// <returns>true if the condition is fulfilled; otherwise, false.</returns>
+    Task<Result<bool>> IsConditionFulfilledForUserAsync
+    (
+        IServiceProvider services,
+        Snowflake guildID,
+        Snowflake userID,
+        CancellationToken ct = default
+    );
 }

@@ -25,32 +25,31 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Transformations
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
+
+/// <summary>
+/// Provides a feed of paths to bundled transformation files for use as test parameters.
+/// </summary>
+public class TransformationDataProvider : IEnumerable<object[]>
 {
-    /// <summary>
-    /// Provides a feed of paths to bundled transformation files for use as test parameters.
-    /// </summary>
-    public class TransformationDataProvider : IEnumerable<object[]>
+    /// <inheritdoc />
+    public IEnumerator<object[]> GetEnumerator()
     {
-        /// <inheritdoc />
-        public IEnumerator<object[]> GetEnumerator()
+        var baseContentPath = Path.Combine("Content", "Transformations", "Species");
+        var speciesDirectories = Directory.EnumerateDirectories(baseContentPath);
+
+        foreach (var speciesDirectory in speciesDirectories)
         {
-            var baseContentPath = Path.Combine("Content", "Transformations", "Species");
-            var speciesDirectories = Directory.EnumerateDirectories(baseContentPath);
+            var transformationFiles = Directory.EnumerateFiles(speciesDirectory)
+                .Where(p => !p.EndsWith("Species.yml"));
 
-            foreach (var speciesDirectory in speciesDirectories)
+            foreach (var transformationFile in transformationFiles)
             {
-                var transformationFiles = Directory.EnumerateFiles(speciesDirectory)
-                        .Where(p => !p.EndsWith("Species.yml"));
-
-                foreach (var transformationFile in transformationFiles)
-                {
-                    yield return new object[] { transformationFile };
-                }
+                yield return new object[] { transformationFile };
             }
         }
-
-        /// <inheritdoc/>
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
+
+    /// <inheritdoc/>
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

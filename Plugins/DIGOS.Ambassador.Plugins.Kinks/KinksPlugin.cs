@@ -45,55 +45,54 @@ using Remora.Results;
 
 [assembly: RemoraPlugin(typeof(KinksPlugin))]
 
-namespace DIGOS.Ambassador.Plugins.Kinks
+namespace DIGOS.Ambassador.Plugins.Kinks;
+
+/// <summary>
+/// Describes the kink plugin.
+/// </summary>
+[PublicAPI]
+public sealed class KinksPlugin : PluginDescriptor, IMigratablePlugin
 {
-    /// <summary>
-    /// Describes the kink plugin.
-    /// </summary>
-    [PublicAPI]
-    public sealed class KinksPlugin : PluginDescriptor, IMigratablePlugin
+    /// <inheritdoc />
+    public override string Name => "Kinks";
+
+    /// <inheritdoc />
+    public override string Description => "Provides user-managed kink libraries.";
+
+    /// <inheritdoc />
+    public override void ConfigureServices(IServiceCollection serviceCollection)
     {
-        /// <inheritdoc />
-        public override string Name => "Kinks";
+        serviceCollection.TryAddScoped<KinkService>();
+        serviceCollection.AddConfiguredSchemaAwareDbContextPool<KinksDatabaseContext>();
+        serviceCollection.TryAddInteractivityResponder<PaginatedMessageResponder>();
+        serviceCollection.TryAddInteractivityResponder<KinkWizardResponder>();
 
-        /// <inheritdoc />
-        public override string Description => "Provides user-managed kink libraries.";
+        serviceCollection.AddCommandGroup<KinkCommands>();
 
-        /// <inheritdoc />
-        public override void ConfigureServices(IServiceCollection serviceCollection)
+        serviceCollection.AddParser<EnumParser<KinkPreference>>();
+
+        serviceCollection.Configure<DiscordGatewayClientOptions>(o =>
         {
-            serviceCollection.TryAddScoped<KinkService>();
-            serviceCollection.AddConfiguredSchemaAwareDbContextPool<KinksDatabaseContext>();
-            serviceCollection.TryAddInteractivityResponder<PaginatedMessageResponder>();
-            serviceCollection.TryAddInteractivityResponder<KinkWizardResponder>();
+            o.Intents |= GatewayIntents.DirectMessages;
+        });
+    }
 
-            serviceCollection.AddCommandGroup<KinkCommands>();
+    /// <inheritdoc />
+    public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
+    {
+        var context = serviceProvider.GetRequiredService<KinksDatabaseContext>();
 
-            serviceCollection.AddParser<EnumParser<KinkPreference>>();
+        await context.Database.MigrateAsync();
 
-            serviceCollection.Configure<DiscordGatewayClientOptions>(o =>
-            {
-                o.Intents |= GatewayIntents.DirectMessages;
-            });
-        }
+        return Result.FromSuccess();
+    }
 
-        /// <inheritdoc />
-        public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
-        {
-            var context = serviceProvider.GetRequiredService<KinksDatabaseContext>();
+    /// <inheritdoc />
+    public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
+    {
+        var context = serviceProvider.GetRequiredService<KinksDatabaseContext>();
+        var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
 
-            await context.Database.MigrateAsync();
-
-            return Result.FromSuccess();
-        }
-
-        /// <inheritdoc />
-        public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
-        {
-            var context = serviceProvider.GetRequiredService<KinksDatabaseContext>();
-            var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
-
-            return appliedMigrations.Any();
-        }
+        return appliedMigrations.Any();
     }
 }

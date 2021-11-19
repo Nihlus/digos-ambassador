@@ -29,47 +29,46 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Core
+namespace DIGOS.Ambassador.Tests.Plugins.Core;
+
+public static partial class ServerServiceTests
 {
-    public static partial class ServerServiceTests
+    public class AddServerAsync : ServerServiceTestBase
     {
-        public class AddServerAsync : ServerServiceTestBase
+        private readonly Snowflake _discordGuild;
+
+        public AddServerAsync()
         {
-            private readonly Snowflake _discordGuild;
+            _discordGuild = new Snowflake(0);
+        }
 
-            public AddServerAsync()
-            {
-                _discordGuild = new Snowflake(0);
-            }
+        [Fact]
+        public async Task ReturnsTrueIfServerHasNotBeenRegisteredBefore()
+        {
+            var result = await this.Servers.AddServerAsync(_discordGuild);
 
-            [Fact]
-            public async Task ReturnsTrueIfServerHasNotBeenRegisteredBefore()
-            {
-                var result = await this.Servers.AddServerAsync(_discordGuild);
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ActuallyRegistersServerIfServerHasNotBeenRegisteredBefore()
+        {
+            await this.Servers.AddServerAsync(_discordGuild);
 
-            [Fact]
-            public async Task ActuallyRegistersServerIfServerHasNotBeenRegisteredBefore()
-            {
-                await this.Servers.AddServerAsync(_discordGuild);
+            var server = this.Database.Servers.First();
 
-                var server = this.Database.Servers.First();
+            Assert.NotNull(server);
+            Assert.Equal(_discordGuild, server.DiscordID);
+        }
 
-                Assert.NotNull(server);
-                Assert.Equal(_discordGuild, server.DiscordID);
-            }
+        [Fact]
+        public async Task ReturnsFalseIfServerHasBeenRegisteredBefore()
+        {
+            await this.Servers.AddServerAsync(_discordGuild);
 
-            [Fact]
-            public async Task ReturnsFalseIfServerHasBeenRegisteredBefore()
-            {
-                await this.Servers.AddServerAsync(_discordGuild);
+            var result = await this.Servers.AddServerAsync(_discordGuild);
 
-                var result = await this.Servers.AddServerAsync(_discordGuild);
-
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
         }
     }
 }

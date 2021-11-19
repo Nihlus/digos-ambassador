@@ -20,29 +20,28 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
+namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
+
+/// <summary>
+/// Provides per pronouns.
+/// </summary>
+public class PerPronounProvider : PronounProvider
 {
-    /// <summary>
-    /// Provides per pronouns.
-    /// </summary>
-    public class PerPronounProvider : PronounProvider
-    {
-        /// <inheritdoc />
-        public override string Family => "Per";
+    /// <inheritdoc />
+    public override string Family => "Per";
 
-        /// <inheritdoc />
-        public override string GetSubjectForm(bool withVerb = false) => withVerb ? "per is" : "per";
+    /// <inheritdoc />
+    public override string GetSubjectForm(bool withVerb = false) => withVerb ? "per is" : "per";
 
-        /// <inheritdoc />
-        public override string GetObjectForm() => "per";
+    /// <inheritdoc />
+    public override string GetObjectForm() => "per";
 
-        /// <inheritdoc />
-        public override string GetPossessiveAdjectiveForm() => "per";
+    /// <inheritdoc />
+    public override string GetPossessiveAdjectiveForm() => "per";
 
-        /// <inheritdoc />
-        public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "per has" : "pers";
+    /// <inheritdoc />
+    public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "per has" : "pers";
 
-        /// <inheritdoc />
-        public override string GetReflexiveForm() => "perself";
-    }
+    /// <inheritdoc />
+    public override string GetReflexiveForm() => "perself";
 }

@@ -22,21 +22,20 @@
 
 using Remora.Discord.API.Abstractions.Objects;
 
-namespace DIGOS.Ambassador.Plugins.Characters.Model
+namespace DIGOS.Ambassador.Plugins.Characters.Model;
+
+/// <summary>
+/// Represents access conditions for character roles (who can apply them and when).
+/// </summary>
+public enum RoleAccess
 {
     /// <summary>
-    /// Represents access conditions for character roles (who can apply them and when).
+    /// The role can be applied by anyone to a character.
     /// </summary>
-    public enum RoleAccess
-    {
-        /// <summary>
-        /// The role can be applied by anyone to a character.
-        /// </summary>
-        Open,
+    Open,
 
-        /// <summary>
-        /// The role can only be applied by people with the <see cref="DiscordPermission.ManageRoles"/> permission.
-        /// </summary>
-        Restricted
-    }
+    /// <summary>
+    /// The role can only be applied by people with the <see cref="DiscordPermission.ManageRoles"/> permission.
+    /// </summary>
+    Restricted
 }

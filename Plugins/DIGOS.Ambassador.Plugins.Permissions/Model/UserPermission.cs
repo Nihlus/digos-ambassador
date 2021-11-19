@@ -25,52 +25,51 @@ using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Core.Database.Entities;
 using Remora.Discord.Core;
 
-namespace DIGOS.Ambassador.Plugins.Permissions.Model
+namespace DIGOS.Ambassador.Plugins.Permissions.Model;
+
+/// <summary>
+/// Represents a record of a permission associated with a user.
+/// </summary>
+[Table("UserPermissions", Schema = "PermissionModule")]
+public class UserPermission : EFEntity
 {
     /// <summary>
-    /// Represents a record of a permission associated with a user.
+    /// Gets the Discord ID of the server that the permission is associated with.
     /// </summary>
-    [Table("UserPermissions", Schema = "PermissionModule")]
-    public class UserPermission : EFEntity
+    public Snowflake ServerID { get; private set; }
+
+    /// <summary>
+    /// Gets the user's Discord ID.
+    /// </summary>
+    public Snowflake UserID { get; private set; }
+
+    /// <summary>
+    /// Gets the permission's unique identifier.
+    /// </summary>
+    public Guid Permission { get; private set; }
+
+    /// <summary>
+    /// Gets the allowed targets for the permission.
+    /// </summary>
+    public PermissionTarget Target { get; private set; }
+
+    /// <summary>
+    /// Gets a value indicating whether the permission has been granted.
+    /// </summary>
+    public bool IsGranted { get; internal set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserPermission"/> class.
+    /// </summary>
+    /// <param name="serverID">The ID of the server that the permission is associated with.</param>
+    /// <param name="userID">The ID of the user that the permission applies to.</param>
+    /// <param name="permission">The unique identifier of the permission.</param>
+    /// <param name="target">The allowed targets for the permission.</param>
+    public UserPermission(Snowflake serverID, Snowflake userID, Guid permission, PermissionTarget target)
     {
-        /// <summary>
-        /// Gets the Discord ID of the server that the permission is associated with.
-        /// </summary>
-        public Snowflake ServerID { get; private set; }
-
-        /// <summary>
-        /// Gets the user's Discord ID.
-        /// </summary>
-        public Snowflake UserID { get; private set; }
-
-        /// <summary>
-        /// Gets the permission's unique identifier.
-        /// </summary>
-        public Guid Permission { get; private set; }
-
-        /// <summary>
-        /// Gets the allowed targets for the permission.
-        /// </summary>
-        public PermissionTarget Target { get; private set; }
-
-        /// <summary>
-        /// Gets a value indicating whether the permission has been granted.
-        /// </summary>
-        public bool IsGranted { get; internal set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserPermission"/> class.
-        /// </summary>
-        /// <param name="serverID">The ID of the server that the permission is associated with.</param>
-        /// <param name="userID">The ID of the user that the permission applies to.</param>
-        /// <param name="permission">The unique identifier of the permission.</param>
-        /// <param name="target">The allowed targets for the permission.</param>
-        public UserPermission(Snowflake serverID, Snowflake userID, Guid permission, PermissionTarget target)
-        {
-            this.UserID = userID;
-            this.Permission = permission;
-            this.Target = target;
-            this.ServerID = serverID;
-        }
+        this.UserID = userID;
+        this.Permission = permission;
+        this.Target = target;
+        this.ServerID = serverID;
     }
 }

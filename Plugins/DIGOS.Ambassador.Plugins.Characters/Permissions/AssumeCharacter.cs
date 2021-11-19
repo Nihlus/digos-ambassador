@@ -23,23 +23,22 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
 
-namespace DIGOS.Ambassador.Plugins.Characters.Permissions
+namespace DIGOS.Ambassador.Plugins.Characters.Permissions;
+
+/// <summary>
+/// Represents a permission that allows a user to assume characters.
+/// </summary>
+public sealed class AssumeCharacter : Permission
 {
-    /// <summary>
-    /// Represents a permission that allows a user to assume characters.
-    /// </summary>
-    public sealed class AssumeCharacter : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("01051A8C-A038-4F15-ABFB-368FC1564BDA");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("01051A8C-A038-4F15-ABFB-368FC1564BDA");
 
-        /// <inheritdoc />
-        public override string FriendlyName => nameof(AssumeCharacter);
+    /// <inheritdoc />
+    public override string FriendlyName => nameof(AssumeCharacter);
 
-        /// <inheritdoc />
-        public override string Description => "Allows you to assume characters.";
+    /// <inheritdoc />
+    public override string Description => "Allows you to assume characters.";
 
-        /// <inheritdoc />
-        public override bool IsGrantedByDefaultToSelf => true;
-    }
+    /// <inheritdoc />
+    public override bool IsGrantedByDefaultToSelf => true;
 }

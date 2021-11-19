@@ -29,58 +29,57 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Core
+namespace DIGOS.Ambassador.Tests.Plugins.Core;
+
+public partial class OwnedEntityServiceTests
 {
-    public partial class OwnedEntityServiceTests
+    public class IsEntityNameUniqueForUser : OwnedEntityServiceTestBase
     {
-        public class IsEntityNameUniqueForUser : OwnedEntityServiceTestBase
+        [Fact]
+        public void ReturnsTrueForEmptySet()
         {
-            [Fact]
-            public void ReturnsTrueForEmptySet()
-            {
-                var entityMock = new Mock<IOwnedNamedEntity>();
-                entityMock.Setup(e => e.Name).Returns("Test");
+            var entityMock = new Mock<IOwnedNamedEntity>();
+            entityMock.Setup(e => e.Name).Returns("Test");
 
-                var result = this.Entities.IsEntityNameUniqueForUser(new List<IOwnedNamedEntity>(), "Test2");
+            var result = this.Entities.IsEntityNameUniqueForUser(new List<IOwnedNamedEntity>(), "Test2");
 
-                Assert.True(result);
-            }
+            Assert.True(result);
+        }
 
-            [Fact]
-            public void ReturnsTrueForUniqueName()
-            {
-                var entityMock = new Mock<IOwnedNamedEntity>();
-                entityMock.Setup(e => e.Name).Returns("Test");
+        [Fact]
+        public void ReturnsTrueForUniqueName()
+        {
+            var entityMock = new Mock<IOwnedNamedEntity>();
+            entityMock.Setup(e => e.Name).Returns("Test");
 
-                var collection = new List<IOwnedNamedEntity> { entityMock.Object };
-                var result = this.Entities.IsEntityNameUniqueForUser(collection, "Test2");
+            var collection = new List<IOwnedNamedEntity> { entityMock.Object };
+            var result = this.Entities.IsEntityNameUniqueForUser(collection, "Test2");
 
-                Assert.True(result);
-            }
+            Assert.True(result);
+        }
 
-            [Fact]
-            public void ReturnsFalseForNonUniqueName()
-            {
-                var entityMock = new Mock<IOwnedNamedEntity>();
-                entityMock.Setup(e => e.Name).Returns("Test");
+        [Fact]
+        public void ReturnsFalseForNonUniqueName()
+        {
+            var entityMock = new Mock<IOwnedNamedEntity>();
+            entityMock.Setup(e => e.Name).Returns("Test");
 
-                var collection = new List<IOwnedNamedEntity> { entityMock.Object };
-                var result = this.Entities.IsEntityNameUniqueForUser(collection, "Test");
+            var collection = new List<IOwnedNamedEntity> { entityMock.Object };
+            var result = this.Entities.IsEntityNameUniqueForUser(collection, "Test");
 
-                Assert.False(result);
-            }
+            Assert.False(result);
+        }
 
-            [Fact]
-            public void ReturnsFalseForNonUniqueNameAndIsCaseInsensitive()
-            {
-                var entityMock = new Mock<IOwnedNamedEntity>();
-                entityMock.Setup(e => e.Name).Returns("Test");
+        [Fact]
+        public void ReturnsFalseForNonUniqueNameAndIsCaseInsensitive()
+        {
+            var entityMock = new Mock<IOwnedNamedEntity>();
+            entityMock.Setup(e => e.Name).Returns("Test");
 
-                var collection = new List<IOwnedNamedEntity> { entityMock.Object };
-                var result = this.Entities.IsEntityNameUniqueForUser(collection, "TEST");
+            var collection = new List<IOwnedNamedEntity> { entityMock.Object };
+            var result = this.Entities.IsEntityNameUniqueForUser(collection, "TEST");
 
-                Assert.False(result);
-            }
+            Assert.False(result);
         }
     }
 }

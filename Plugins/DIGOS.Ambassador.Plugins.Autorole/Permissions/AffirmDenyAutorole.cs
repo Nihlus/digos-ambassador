@@ -23,20 +23,19 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Permissions
+namespace DIGOS.Ambassador.Plugins.Autorole.Permissions;
+
+/// <summary>
+/// Represents a permission that allows a user to affirm or deny autorole qualifications.
+/// </summary>
+public class AffirmDenyAutorole : Permission
 {
-    /// <summary>
-    /// Represents a permission that allows a user to affirm or deny autorole qualifications.
-    /// </summary>
-    public class AffirmDenyAutorole : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("385AA18B-CBA2-4D5E-9B8A-077D18EE0225");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("385AA18B-CBA2-4D5E-9B8A-077D18EE0225");
 
-        /// <inheritdoc/>
-        public override string FriendlyName { get; } = nameof(AffirmDenyAutorole);
+    /// <inheritdoc/>
+    public override string FriendlyName { get; } = nameof(AffirmDenyAutorole);
 
-        /// <inheritdoc/>
-        public override string Description { get; } = "Allows you to affirm or deny autorole qualifications.";
-    }
+    /// <inheritdoc/>
+    public override string Description { get; } = "Allows you to affirm or deny autorole qualifications.";
 }

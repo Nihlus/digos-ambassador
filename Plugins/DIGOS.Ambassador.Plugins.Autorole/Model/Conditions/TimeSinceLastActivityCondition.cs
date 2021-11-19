@@ -30,55 +30,54 @@ using Microsoft.Extensions.DependencyInjection;
 using Remora.Discord.Core;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
+namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
+
+/// <summary>
+/// Represents a requirement for an elapsed time since the user joined.
+/// </summary>
+public class TimeSinceLastActivityCondition : TimeSinceEventCondition<TimeSinceLastActivityCondition>
 {
     /// <summary>
-    /// Represents a requirement for an elapsed time since the user joined.
+    /// Initializes a new instance of the <see cref="TimeSinceLastActivityCondition"/> class.
     /// </summary>
-    public class TimeSinceLastActivityCondition : TimeSinceEventCondition<TimeSinceLastActivityCondition>
+    /// <param name="requiredTime">The required time.</param>
+    public TimeSinceLastActivityCondition(TimeSpan requiredTime)
+        : base(requiredTime)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TimeSinceLastActivityCondition"/> class.
-        /// </summary>
-        /// <param name="requiredTime">The required time.</param>
-        public TimeSinceLastActivityCondition(TimeSpan requiredTime)
-            : base(requiredTime)
+    }
+
+    /// <inheritdoc />
+    public override string GetDescriptiveUIText()
+    {
+        return $"Has been active in the last {this.RequiredTime.Humanize(toWords: true, precision: 3)}";
+    }
+
+    /// <inheritdoc />
+    public override async Task<Result<bool>> IsConditionFulfilledForUserAsync
+    (
+        IServiceProvider services,
+        Snowflake guildID,
+        Snowflake userID,
+        CancellationToken ct = default
+    )
+    {
+        var statistics = services.GetRequiredService<UserStatisticsService>();
+
+        var getUserStatistics = await statistics.GetOrCreateUserServerStatisticsAsync(guildID, userID, ct);
+        if (!getUserStatistics.IsSuccess)
         {
+            return Result<bool>.FromError(getUserStatistics);
         }
 
-        /// <inheritdoc />
-        public override string GetDescriptiveUIText()
+        var userStatistics = getUserStatistics.Entity;
+
+        if (userStatistics.LastActivityTime is null)
         {
-            return $"Has been active in the last {this.RequiredTime.Humanize(toWords: true, precision: 3)}";
+            // The user has never been active
+            return false;
         }
 
-        /// <inheritdoc />
-        public override async Task<Result<bool>> IsConditionFulfilledForUserAsync
-        (
-            IServiceProvider services,
-            Snowflake guildID,
-            Snowflake userID,
-            CancellationToken ct = default
-        )
-        {
-            var statistics = services.GetRequiredService<UserStatisticsService>();
-
-            var getUserStatistics = await statistics.GetOrCreateUserServerStatisticsAsync(guildID, userID, ct);
-            if (!getUserStatistics.IsSuccess)
-            {
-                return Result<bool>.FromError(getUserStatistics);
-            }
-
-            var userStatistics = getUserStatistics.Entity;
-
-            if (userStatistics.LastActivityTime is null)
-            {
-                // The user has never been active
-                return false;
-            }
-
-            var timeSinceLastActivity = DateTimeOffset.UtcNow - userStatistics.LastActivityTime;
-            return timeSinceLastActivity <= this.RequiredTime;
-        }
+        var timeSinceLastActivity = DateTimeOffset.UtcNow - userStatistics.LastActivityTime;
+        return timeSinceLastActivity <= this.RequiredTime;
     }
 }

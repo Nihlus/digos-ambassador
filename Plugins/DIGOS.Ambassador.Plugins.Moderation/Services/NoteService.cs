@@ -34,213 +34,212 @@ using Microsoft.EntityFrameworkCore;
 using Remora.Discord.Core;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Moderation.Services
+namespace DIGOS.Ambassador.Plugins.Moderation.Services;
+
+/// <summary>
+/// Acts as an interface for accessing and modifying notes.
+/// </summary>
+public sealed class NoteService
 {
+    private readonly ModerationDatabaseContext _database;
+    private readonly ServerService _servers;
+    private readonly UserService _users;
+
     /// <summary>
-    /// Acts as an interface for accessing and modifying notes.
+    /// Initializes a new instance of the <see cref="NoteService"/> class.
     /// </summary>
-    public sealed class NoteService
+    /// <param name="database">The database context.</param>
+    /// <param name="servers">The server service.</param>
+    /// <param name="users">The user service.</param>
+    public NoteService
+    (
+        ModerationDatabaseContext database,
+        ServerService servers,
+        UserService users
+    )
     {
-        private readonly ModerationDatabaseContext _database;
-        private readonly ServerService _servers;
-        private readonly UserService _users;
+        _database = database;
+        _servers = servers;
+        _users = users;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NoteService"/> class.
-        /// </summary>
-        /// <param name="database">The database context.</param>
-        /// <param name="servers">The server service.</param>
-        /// <param name="users">The user service.</param>
-        public NoteService
+    /// <summary>
+    /// Gets the notes attached to the given user.
+    /// </summary>
+    /// <param name="guildID">The ID of the guild the user is on.</param>
+    /// <param name="userID">The ID of the user.</param>
+    /// <param name="ct">The cancellation token in use.</param>
+    /// <returns>The notes.</returns>
+    public Task<IReadOnlyList<UserNote>> GetNotesAsync
+    (
+        Snowflake guildID,
+        Snowflake userID,
+        CancellationToken ct = default
+    )
+    {
+        return _database.UserNotes.ServersideQueryAsync
         (
-            ModerationDatabaseContext database,
-            ServerService servers,
-            UserService users
-        )
-        {
-            _database = database;
-            _servers = servers;
-            _users = users;
-        }
-
-        /// <summary>
-        /// Gets the notes attached to the given user.
-        /// </summary>
-        /// <param name="guildID">The ID of the guild the user is on.</param>
-        /// <param name="userID">The ID of the user.</param>
-        /// <param name="ct">The cancellation token in use.</param>
-        /// <returns>The notes.</returns>
-        public Task<IReadOnlyList<UserNote>> GetNotesAsync
-        (
-            Snowflake guildID,
-            Snowflake userID,
-            CancellationToken ct = default
-        )
-        {
-            return _database.UserNotes.ServersideQueryAsync
+            q => q.Where
             (
-                q => q.Where
-                (
-                    n => n.User.DiscordID == userID && n.Server.DiscordID == guildID
-                ),
+                n => n.User.DiscordID == userID && n.Server.DiscordID == guildID
+            ),
+            ct
+        );
+    }
+
+    /// <summary>
+    /// Retrieves a note with the given ID from the database.
+    /// </summary>
+    /// <param name="guildID">The ID of the guild the note is on.</param>
+    /// <param name="noteID">The note ID.</param>
+    /// <param name="ct">The cancellation token in use.</param>
+    /// <returns>A retrieval result which may or may not have succeeded.</returns>
+    public async Task<Result<UserNote>> GetNoteAsync
+    (
+        Snowflake guildID,
+        long noteID,
+        CancellationToken ct = default
+    )
+    {
+        // The server isn't strictly required here, but it prevents leaking notes between servers.
+        var note = await _database.UserNotes.ServersideQueryAsync
+        (
+            q => q.FirstOrDefaultAsync
+            (
+                n => n.ID == noteID && n.Server.DiscordID == guildID,
                 ct
-            );
+            )
+        );
+
+        if (note is null)
+        {
+            return new UserError("There's no note with that ID in the database.");
         }
 
-        /// <summary>
-        /// Retrieves a note with the given ID from the database.
-        /// </summary>
-        /// <param name="guildID">The ID of the guild the note is on.</param>
-        /// <param name="noteID">The note ID.</param>
-        /// <param name="ct">The cancellation token in use.</param>
-        /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<Result<UserNote>> GetNoteAsync
-        (
-            Snowflake guildID,
-            long noteID,
-            CancellationToken ct = default
-        )
+        return note;
+    }
+
+    /// <summary>
+    /// Creates a note for the given user.
+    /// </summary>
+    /// <param name="authorID">The ID of the author of the warning.</param>
+    /// <param name="userID">The ID of the warned user.</param>
+    /// <param name="guildID">The ID of the guild the user is on.</param>
+    /// <param name="content">The content of the note.</param>
+    /// <param name="ct">The cancellation token in use.</param>
+    /// <returns>A creation result which may or may not have succeeded.</returns>
+    public async Task<Result<UserNote>> CreateNoteAsync
+    (
+        Snowflake authorID,
+        Snowflake userID,
+        Snowflake guildID,
+        string content,
+        CancellationToken ct = default
+    )
+    {
+        var getServer = await _servers.GetOrRegisterServerAsync(guildID, ct);
+        if (!getServer.IsSuccess)
         {
-            // The server isn't strictly required here, but it prevents leaking notes between servers.
-            var note = await _database.UserNotes.ServersideQueryAsync
+            return Result<UserNote>.FromError(getServer);
+        }
+
+        var server = getServer.Entity;
+
+        var getUser = await _users.GetOrRegisterUserAsync(userID, ct);
+        if (!getUser.IsSuccess)
+        {
+            return Result<UserNote>.FromError(getUser);
+        }
+
+        var user = getUser.Entity;
+
+        var getAuthor = await _users.GetOrRegisterUserAsync(authorID, ct);
+        if (!getAuthor.IsSuccess)
+        {
+            return Result<UserNote>.FromError(getAuthor);
+        }
+
+        var author = getAuthor.Entity;
+
+        var note = _database.CreateProxy<UserNote>(server, user, author, string.Empty);
+        _database.UserNotes.Update(note);
+
+        var setContent = await SetNoteContentsAsync(note, content, ct);
+        if (!setContent.IsSuccess)
+        {
+            return Result<UserNote>.FromError(setContent);
+        }
+
+        await _database.SaveChangesAsync(ct);
+
+        return note;
+    }
+
+    /// <summary>
+    /// Sets the contents of the given note.
+    /// </summary>
+    /// <param name="note">The note.</param>
+    /// <param name="content">The content.</param>
+    /// <param name="ct">The cancellation token in use.</param>
+    /// <returns>A modification result which may or may not have succeeded.</returns>
+    public async Task<Result> SetNoteContentsAsync
+    (
+        UserNote note,
+        string content,
+        CancellationToken ct = default
+    )
+    {
+        content = content.Trim();
+
+        if (content.IsNullOrWhitespace())
+        {
+            return new UserError("You must provide some content for the note.");
+        }
+
+        if (content.Length > 1024)
+        {
+            return new UserError
             (
-                q => q.FirstOrDefaultAsync
-                (
-                    n => n.ID == noteID && n.Server.DiscordID == guildID,
-                    ct
-                )
+                "The note is too long. It can be at most 1024 characters."
             );
-
-            if (note is null)
-            {
-                return new UserError("There's no note with that ID in the database.");
-            }
-
-            return note;
         }
 
-        /// <summary>
-        /// Creates a note for the given user.
-        /// </summary>
-        /// <param name="authorID">The ID of the author of the warning.</param>
-        /// <param name="userID">The ID of the warned user.</param>
-        /// <param name="guildID">The ID of the guild the user is on.</param>
-        /// <param name="content">The content of the note.</param>
-        /// <param name="ct">The cancellation token in use.</param>
-        /// <returns>A creation result which may or may not have succeeded.</returns>
-        public async Task<Result<UserNote>> CreateNoteAsync
-        (
-            Snowflake authorID,
-            Snowflake userID,
-            Snowflake guildID,
-            string content,
-            CancellationToken ct = default
-        )
+        if (note.Content == content)
         {
-            var getServer = await _servers.GetOrRegisterServerAsync(guildID, ct);
-            if (!getServer.IsSuccess)
-            {
-                return Result<UserNote>.FromError(getServer);
-            }
-
-            var server = getServer.Entity;
-
-            var getUser = await _users.GetOrRegisterUserAsync(userID, ct);
-            if (!getUser.IsSuccess)
-            {
-                return Result<UserNote>.FromError(getUser);
-            }
-
-            var user = getUser.Entity;
-
-            var getAuthor = await _users.GetOrRegisterUserAsync(authorID, ct);
-            if (!getAuthor.IsSuccess)
-            {
-                return Result<UserNote>.FromError(getAuthor);
-            }
-
-            var author = getAuthor.Entity;
-
-            var note = _database.CreateProxy<UserNote>(server, user, author, string.Empty);
-            _database.UserNotes.Update(note);
-
-            var setContent = await SetNoteContentsAsync(note, content, ct);
-            if (!setContent.IsSuccess)
-            {
-                return Result<UserNote>.FromError(setContent);
-            }
-
-            await _database.SaveChangesAsync(ct);
-
-            return note;
+            return new UserError("That's already the note's contents.");
         }
 
-        /// <summary>
-        /// Sets the contents of the given note.
-        /// </summary>
-        /// <param name="note">The note.</param>
-        /// <param name="content">The content.</param>
-        /// <param name="ct">The cancellation token in use.</param>
-        /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<Result> SetNoteContentsAsync
-        (
-            UserNote note,
-            string content,
-            CancellationToken ct = default
-        )
+        note.Content = content;
+        note.NotifyUpdate();
+
+        await _database.SaveChangesAsync(ct);
+
+        return Result.FromSuccess();
+    }
+
+    /// <summary>
+    /// Deletes the given note.
+    /// </summary>
+    /// <param name="note">The note to delete.</param>
+    /// <param name="ct">The cancellation token in use.</param>
+    /// <returns>A deletion result which may or may note have succeeded.</returns>
+    public async Task<Result> DeleteNoteAsync
+    (
+        UserNote note,
+        CancellationToken ct = default
+    )
+    {
+        if (!_database.UserNotes.Any(n => n.ID == note.ID))
         {
-            content = content.Trim();
-
-            if (content.IsNullOrWhitespace())
-            {
-                return new UserError("You must provide some content for the note.");
-            }
-
-            if (content.Length > 1024)
-            {
-                return new UserError
-                (
-                    "The note is too long. It can be at most 1024 characters."
-                );
-            }
-
-            if (note.Content == content)
-            {
-                return new UserError("That's already the note's contents.");
-            }
-
-            note.Content = content;
-            note.NotifyUpdate();
-
-            await _database.SaveChangesAsync(ct);
-
-            return Result.FromSuccess();
+            return new UserError
+            (
+                "That note isn't in the database. This is probably an error in the bot."
+            );
         }
 
-        /// <summary>
-        /// Deletes the given note.
-        /// </summary>
-        /// <param name="note">The note to delete.</param>
-        /// <param name="ct">The cancellation token in use.</param>
-        /// <returns>A deletion result which may or may note have succeeded.</returns>
-        public async Task<Result> DeleteNoteAsync
-        (
-            UserNote note,
-            CancellationToken ct = default
-        )
-        {
-            if (!_database.UserNotes.Any(n => n.ID == note.ID))
-            {
-                return new UserError
-                (
-                    "That note isn't in the database. This is probably an error in the bot."
-                );
-            }
+        _database.UserNotes.Remove(note);
+        await _database.SaveChangesAsync(ct);
 
-            _database.UserNotes.Remove(note);
-            await _database.SaveChangesAsync(ct);
-
-            return Result.FromSuccess();
-        }
+        return Result.FromSuccess();
     }
 }

@@ -28,66 +28,65 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Core
+namespace DIGOS.Ambassador.Tests.Plugins.Core;
+
+public static partial class ServerServiceTests
 {
-    public static partial class ServerServiceTests
+    public class GetOrRegisterServerAsync : ServerServiceTestBase
     {
-        public class GetOrRegisterServerAsync : ServerServiceTestBase
+        private readonly Snowflake _discordGuild;
+
+        public GetOrRegisterServerAsync()
         {
-            private readonly Snowflake _discordGuild;
+            _discordGuild = new Snowflake(0);
+        }
 
-            public GetOrRegisterServerAsync()
-            {
-                _discordGuild = new Snowflake(0);
-            }
+        [Fact]
+        public async Task ReturnsTrueIfServerHasNotBeenRegistered()
+        {
+            var result = await this.Servers.GetOrRegisterServerAsync(_discordGuild);
 
-            [Fact]
-            public async Task ReturnsTrueIfServerHasNotBeenRegistered()
-            {
-                var result = await this.Servers.GetOrRegisterServerAsync(_discordGuild);
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsTrueIfServerHasBeenRegistered()
+        {
+            await this.Servers.AddServerAsync(_discordGuild);
+            var result = await this.Servers.GetOrRegisterServerAsync(_discordGuild);
 
-            [Fact]
-            public async Task ReturnsTrueIfServerHasBeenRegistered()
-            {
-                await this.Servers.AddServerAsync(_discordGuild);
-                var result = await this.Servers.GetOrRegisterServerAsync(_discordGuild);
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsCorrectServerIfServerHasNotBeenRegistered()
+        {
+            var result = await this.Servers.GetOrRegisterServerAsync(_discordGuild);
+            var server = result.Entity;
 
-            [Fact]
-            public async Task ReturnsCorrectServerIfServerHasNotBeenRegistered()
-            {
-                var result = await this.Servers.GetOrRegisterServerAsync(_discordGuild);
-                var server = result.Entity;
+            Assert.Equal(_discordGuild, server.DiscordID);
+        }
 
-                Assert.Equal(_discordGuild, server.DiscordID);
-            }
+        [Fact]
+        public async Task ReturnsCorrectServerIfServerHasBeenRegistered()
+        {
+            await this.Servers.AddServerAsync(_discordGuild);
+            var result = await this.Servers.GetOrRegisterServerAsync(_discordGuild);
+            var server = result.Entity;
 
-            [Fact]
-            public async Task ReturnsCorrectServerIfServerHasBeenRegistered()
-            {
-                await this.Servers.AddServerAsync(_discordGuild);
-                var result = await this.Servers.GetOrRegisterServerAsync(_discordGuild);
-                var server = result.Entity;
+            Assert.Equal(_discordGuild, server.DiscordID);
+        }
 
-                Assert.Equal(_discordGuild, server.DiscordID);
-            }
+        [Fact]
+        public async Task ReturnsSameServerForMultipleCalls()
+        {
+            var firstResult = await this.Servers.GetOrRegisterServerAsync(_discordGuild);
+            var firstServer = firstResult.Entity;
 
-            [Fact]
-            public async Task ReturnsSameServerForMultipleCalls()
-            {
-                var firstResult = await this.Servers.GetOrRegisterServerAsync(_discordGuild);
-                var firstServer = firstResult.Entity;
+            var secondResult = await this.Servers.GetOrRegisterServerAsync(_discordGuild);
+            var secondServer = secondResult.Entity;
 
-                var secondResult = await this.Servers.GetOrRegisterServerAsync(_discordGuild);
-                var secondServer = secondResult.Entity;
-
-                Assert.Same(firstServer, secondServer);
-            }
+            Assert.Same(firstServer, secondServer);
         }
     }
 }

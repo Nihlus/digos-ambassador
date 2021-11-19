@@ -20,31 +20,30 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
+namespace DIGOS.Ambassador.Plugins.Roleplaying.Model;
+
+/// <summary>
+/// Represents the status of a participant in a roleplay.
+/// </summary>
+public enum ParticipantStatus
 {
     /// <summary>
-    /// Represents the status of a participant in a roleplay.
+    /// The user isn't participating in the roleplay. They may have been a part of it previously, but isn't anymore.
     /// </summary>
-    public enum ParticipantStatus
-    {
-        /// <summary>
-        /// The user isn't participating in the roleplay. They may have been a part of it previously, but isn't anymore.
-        /// </summary>
-        None,
+    None,
 
-        /// <summary>
-        /// The user has been invited to the roleplay, but has not yet joined.
-        /// </summary>
-        Invited,
+    /// <summary>
+    /// The user has been invited to the roleplay, but has not yet joined.
+    /// </summary>
+    Invited,
 
-        /// <summary>
-        /// The user has joined the roleplay.
-        /// </summary>
-        Joined,
+    /// <summary>
+    /// The user has joined the roleplay.
+    /// </summary>
+    Joined,
 
-        /// <summary>
-        /// The user has been kicked from the roleplay, and cannot rejoin unless reinvited.
-        /// </summary>
-        Kicked
-    }
+    /// <summary>
+    /// The user has been kicked from the roleplay, and cannot rejoin unless reinvited.
+    /// </summary>
+    Kicked
 }

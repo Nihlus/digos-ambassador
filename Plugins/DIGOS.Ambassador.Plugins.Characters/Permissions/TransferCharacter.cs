@@ -23,23 +23,22 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
 
-namespace DIGOS.Ambassador.Plugins.Characters.Permissions
+namespace DIGOS.Ambassador.Plugins.Characters.Permissions;
+
+/// <summary>
+/// Represents a permission that allows a user to transfer characters to other users.
+/// </summary>
+public sealed class TransferCharacter : Permission
 {
-    /// <summary>
-    /// Represents a permission that allows a user to transfer characters to other users.
-    /// </summary>
-    public sealed class TransferCharacter : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("8299FDCB-8DA1-44E1-BFC0-310FDCC76121");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("8299FDCB-8DA1-44E1-BFC0-310FDCC76121");
 
-        /// <inheritdoc />
-        public override string FriendlyName => nameof(TransferCharacter);
+    /// <inheritdoc />
+    public override string FriendlyName => nameof(TransferCharacter);
 
-        /// <inheritdoc />
-        public override string Description => "Allows you to transfer ownership of characters to other users.";
+    /// <inheritdoc />
+    public override string Description => "Allows you to transfer ownership of characters to other users.";
 
-        /// <inheritdoc />
-        public override bool IsGrantedByDefaultToSelf => true;
-    }
+    /// <inheritdoc />
+    public override bool IsGrantedByDefaultToSelf => true;
 }

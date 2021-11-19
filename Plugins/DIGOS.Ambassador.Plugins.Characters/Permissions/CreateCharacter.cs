@@ -23,23 +23,22 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
 
-namespace DIGOS.Ambassador.Plugins.Characters.Permissions
+namespace DIGOS.Ambassador.Plugins.Characters.Permissions;
+
+/// <summary>
+/// Represents a permission that allows a user to create characters.
+/// </summary>
+public sealed class CreateCharacter : Permission
 {
-    /// <summary>
-    /// Represents a permission that allows a user to create characters.
-    /// </summary>
-    public sealed class CreateCharacter : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("DDA2F3A7-ECB4-4703-8724-A616B5662669");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("DDA2F3A7-ECB4-4703-8724-A616B5662669");
 
-        /// <inheritdoc />
-        public override string FriendlyName => nameof(CreateCharacter);
+    /// <inheritdoc />
+    public override string FriendlyName => nameof(CreateCharacter);
 
-        /// <inheritdoc />
-        public override string Description => "Allows you to create characters.";
+    /// <inheritdoc />
+    public override string Description => "Allows you to create characters.";
 
-        /// <inheritdoc />
-        public override bool IsGrantedByDefaultToSelf => true;
-    }
+    /// <inheritdoc />
+    public override bool IsGrantedByDefaultToSelf => true;
 }

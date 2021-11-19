@@ -31,26 +31,25 @@ using Remora.Plugins.Abstractions.Attributes;
 
 [assembly: RemoraPlugin(typeof(StatisticsPlugin))]
 
-namespace DIGOS.Ambassador.Plugins.Statistics
+namespace DIGOS.Ambassador.Plugins.Statistics;
+
+/// <summary>
+/// Describes the Statistics plugin.
+/// </summary>
+public sealed class StatisticsPlugin : PluginDescriptor
 {
-    /// <summary>
-    /// Describes the Statistics plugin.
-    /// </summary>
-    public sealed class StatisticsPlugin : PluginDescriptor
+    /// <inheritdoc />
+    public override string Name => "Statistics";
+
+    /// <inheritdoc />
+    public override string Description => "Provides various commands for view statistics about the bot.";
+
+    /// <inheritdoc />
+    public override void ConfigureServices(IServiceCollection serviceCollection)
     {
-        /// <inheritdoc />
-        public override string Name => "Statistics";
+        serviceCollection
+            .AddCommandGroup<StatCommands>();
 
-        /// <inheritdoc />
-        public override string Description => "Provides various commands for view statistics about the bot.";
-
-        /// <inheritdoc />
-        public override void ConfigureServices(IServiceCollection serviceCollection)
-        {
-            serviceCollection
-                .AddCommandGroup<StatCommands>();
-
-            serviceCollection.TryAddInteractivityResponder<PaginatedMessageResponder>();
-        }
+        serviceCollection.TryAddInteractivityResponder<PaginatedMessageResponder>();
     }
 }

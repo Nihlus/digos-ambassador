@@ -22,22 +22,21 @@
 
 using System.Collections.Generic;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages;
+
+public sealed partial class TransformationText
 {
-    public sealed partial class TransformationText
+    public sealed partial class DescriptionMessages
     {
-        public sealed partial class DescriptionMessages
+        /// <summary>
+        /// Holds singular descriptions.
+        /// </summary>
+        public sealed class SingleDescriptions
         {
             /// <summary>
-            /// Holds singular descriptions.
+            /// Gets a list of pattern descriptions. These are used when describing patterns on bodyparts.
             /// </summary>
-            public sealed class SingleDescriptions
-            {
-                /// <summary>
-                /// Gets a list of pattern descriptions. These are used when describing patterns on bodyparts.
-                /// </summary>
-                public IReadOnlyList<string> Pattern { get; init; } = new List<string>();
-            }
+            public IReadOnlyList<string> Pattern { get; init; } = new List<string>();
         }
     }
 }

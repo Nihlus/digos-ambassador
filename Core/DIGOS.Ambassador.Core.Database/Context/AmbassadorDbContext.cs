@@ -24,54 +24,53 @@ using DIGOS.Ambassador.Core.Database.Converters;
 using Microsoft.EntityFrameworkCore;
 using Remora.Discord.Core;
 
-namespace DIGOS.Ambassador.Core.Database.Context
+namespace DIGOS.Ambassador.Core.Database.Context;
+
+/// <summary>
+/// The base context for all ambassador contexts.
+/// </summary>
+public abstract class AmbassadorDbContext : DbContext
 {
     /// <summary>
-    /// The base context for all ambassador contexts.
+    /// Gets the schema of the database.
     /// </summary>
-    public abstract class AmbassadorDbContext : DbContext
+    public string Schema { get; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AmbassadorDbContext"/> class.
+    /// </summary>
+    /// <param name="schema">The schema managed by the context.</param>
+    /// <param name="contextOptions">The context options.</param>
+    public AmbassadorDbContext(string schema, DbContextOptions contextOptions)
+        : base(contextOptions)
     {
-        /// <summary>
-        /// Gets the schema of the database.
-        /// </summary>
-        public string Schema { get; }
+        this.Schema = schema;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AmbassadorDbContext"/> class.
-        /// </summary>
-        /// <param name="schema">The schema managed by the context.</param>
-        /// <param name="contextOptions">The context options.</param>
-        public AmbassadorDbContext(string schema, DbContextOptions contextOptions)
-            : base(contextOptions)
+    /// <inheritdoc />
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.HasDefaultSchema(this.Schema);
+
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            this.Schema = schema;
-        }
-
-        /// <inheritdoc />
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-            modelBuilder.HasDefaultSchema(this.Schema);
-
-            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            if (entityType.GetSchema() == this.Schema)
             {
-                if (entityType.GetSchema() == this.Schema)
-                {
-                    continue;
-                }
-
-                entityType.SetIsTableExcludedFromMigrations(true);
+                continue;
             }
 
-            modelBuilder.HasPostgresExtension("fuzzystrmatch");
+            entityType.SetIsTableExcludedFromMigrations(true);
         }
 
-        /// <inheritdoc />
-        protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
-        {
-            base.ConfigureConventions(configurationBuilder);
+        modelBuilder.HasPostgresExtension("fuzzystrmatch");
+    }
 
-            configurationBuilder.Properties<Snowflake>().HaveConversion(typeof(SnowflakeConverter));
-        }
+    /// <inheritdoc />
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        base.ConfigureConventions(configurationBuilder);
+
+        configurationBuilder.Properties<Snowflake>().HaveConversion(typeof(SnowflakeConverter));
     }
 }

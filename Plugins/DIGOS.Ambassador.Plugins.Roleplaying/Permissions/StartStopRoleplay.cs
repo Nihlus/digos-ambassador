@@ -23,23 +23,22 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
 
-namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions
+namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions;
+
+/// <summary>
+/// Represents a permission that allows a user to start and stop roleplays.
+/// </summary>
+public sealed class StartStopRoleplay : Permission
 {
-    /// <summary>
-    /// Represents a permission that allows a user to start and stop roleplays.
-    /// </summary>
-    public sealed class StartStopRoleplay : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("2B59B3EB-F4F7-4150-BB36-B55AE2D5C6D7");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("2B59B3EB-F4F7-4150-BB36-B55AE2D5C6D7");
 
-        /// <inheritdoc />
-        public override string FriendlyName => nameof(StartStopRoleplay);
+    /// <inheritdoc />
+    public override string FriendlyName => nameof(StartStopRoleplay);
 
-        /// <inheritdoc />
-        public override string Description => "Allows you to start and stop roleplays.";
+    /// <inheritdoc />
+    public override string Description => "Allows you to start and stop roleplays.";
 
-        /// <inheritdoc />
-        public override bool IsGrantedByDefaultToSelf => true;
-    }
+    /// <inheritdoc />
+    public override bool IsGrantedByDefaultToSelf => true;
 }

@@ -31,54 +31,53 @@ using Xunit;
 #pragma warning disable CS8625
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Characters
+namespace DIGOS.Ambassador.Tests.Plugins.Characters;
+
+public partial class CharacterServiceTests
 {
-    public partial class CharacterServiceTests
+    public class SetCharacterAvatarAsync : CharacterServiceTestBase
     {
-        public class SetCharacterAvatarAsync : CharacterServiceTestBase
+        private const string AvatarURL = "http://fake.com/avatar.png";
+
+        private readonly Character _character;
+
+        public SetCharacterAvatarAsync()
         {
-            private const string AvatarURL = "http://fake.com/avatar.png";
+            _character = CreateCharacter(avatarUrl: AvatarURL);
+        }
 
-            private readonly Character _character;
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfAvatarURLIsEmpty()
+        {
+            var result = await this.CharacterEditor.SetCharacterAvatarAsync(_character, string.Empty);
 
-            public SetCharacterAvatarAsync()
-            {
-                _character = CreateCharacter(avatarUrl: AvatarURL);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfAvatarURLIsEmpty()
-            {
-                var result = await this.CharacterEditor.SetCharacterAvatarAsync(_character, string.Empty);
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfAvatarURLIsTheSameAsTheCurrentURL()
+        {
+            var result = await this.CharacterEditor.SetCharacterAvatarAsync(_character, AvatarURL);
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfAvatarURLIsTheSameAsTheCurrentURL()
-            {
-                var result = await this.CharacterEditor.SetCharacterAvatarAsync(_character, AvatarURL);
+        [Fact]
+        public async Task ReturnsSuccessfulResultIfURLIsAccepted()
+        {
+            var result = await this.CharacterEditor.SetCharacterAvatarAsync(_character, "http://www.myfunkyavatars.com/avatar.png");
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.True(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsSuccessfulResultIfURLIsAccepted()
-            {
-                var result = await this.CharacterEditor.SetCharacterAvatarAsync(_character, "http://www.myfunkyavatars.com/avatar.png");
+        [Fact]
+        public async Task SetsURL()
+        {
+            const string newURL = "http://www.myfunkyavatars.com/avatar.png";
+            await this.CharacterEditor.SetCharacterAvatarAsync(_character, newURL);
 
-                Assert.True(result.IsSuccess);
-            }
-
-            [Fact]
-            public async Task SetsURL()
-            {
-                const string newURL = "http://www.myfunkyavatars.com/avatar.png";
-                await this.CharacterEditor.SetCharacterAvatarAsync(_character, newURL);
-
-                var character = this.Database.Characters.First();
-                Assert.Equal(newURL, character.AvatarUrl);
-            }
+            var character = this.Database.Characters.First();
+            Assert.Equal(newURL, character.AvatarUrl);
         }
     }
 }

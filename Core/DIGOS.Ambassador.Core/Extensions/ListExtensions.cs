@@ -24,36 +24,35 @@ using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Core.Extensions
+namespace DIGOS.Ambassador.Core.Extensions;
+
+/// <summary>
+/// Extension methods for lists.
+/// </summary>
+public static class ListExtensions
 {
     /// <summary>
-    /// Extension methods for lists.
+    /// Holds an entropy source for this extension set.
     /// </summary>
-    public static class ListExtensions
+    private static readonly Random Random = new Random();
+
+    /// <summary>
+    /// Holds a locking object for the entropy source.
+    /// </summary>
+    private static readonly object RandomLock = new object();
+
+    /// <summary>
+    /// Picks a random value from the list.
+    /// </summary>
+    /// <param name="list">The list to pick from.</param>
+    /// <typeparam name="T">The type contained in the list.</typeparam>
+    /// <returns>A random value.</returns>
+    [Pure]
+    public static T PickRandom<T>(this IReadOnlyList<T> list)
     {
-        /// <summary>
-        /// Holds an entropy source for this extension set.
-        /// </summary>
-        private static readonly Random Random = new Random();
-
-        /// <summary>
-        /// Holds a locking object for the entropy source.
-        /// </summary>
-        private static readonly object RandomLock = new object();
-
-        /// <summary>
-        /// Picks a random value from the list.
-        /// </summary>
-        /// <param name="list">The list to pick from.</param>
-        /// <typeparam name="T">The type contained in the list.</typeparam>
-        /// <returns>A random value.</returns>
-        [Pure]
-        public static T PickRandom<T>(this IReadOnlyList<T> list)
+        lock (RandomLock)
         {
-            lock (RandomLock)
-            {
-                return list[Random.Next(0, list.Count)];
-            }
+            return list[Random.Next(0, list.Count)];
         }
     }
 }

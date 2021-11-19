@@ -24,31 +24,30 @@ using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Core.Database.Entities;
 using Remora.Discord.Core;
 
-namespace DIGOS.Ambassador.Plugins.Core.Model.Users
+namespace DIGOS.Ambassador.Plugins.Core.Model.Users;
+
+/// <summary>
+/// Holds information about whether or not a user has granted consent to store user data.
+/// </summary>
+[Table("UserConsents", Schema = "Core")]
+public class UserConsent : EFEntity
 {
     /// <summary>
-    /// Holds information about whether or not a user has granted consent to store user data.
+    /// Gets the Discord ID of the user.
     /// </summary>
-    [Table("UserConsents", Schema = "Core")]
-    public class UserConsent : EFEntity
+    public Snowflake DiscordID { get; private set; }
+
+    /// <summary>
+    /// Gets a value indicating whether or not the user has consented.
+    /// </summary>
+    public bool HasConsented { get; internal set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserConsent"/> class.
+    /// </summary>
+    /// <param name="discordID">The Discord ID of the user.</param>
+    public UserConsent(Snowflake discordID)
     {
-        /// <summary>
-        /// Gets the Discord ID of the user.
-        /// </summary>
-        public Snowflake DiscordID { get; private set; }
-
-        /// <summary>
-        /// Gets a value indicating whether or not the user has consented.
-        /// </summary>
-        public bool HasConsented { get; internal set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserConsent"/> class.
-        /// </summary>
-        /// <param name="discordID">The Discord ID of the user.</param>
-        public UserConsent(Snowflake discordID)
-        {
-            this.DiscordID = discordID;
-        }
+        this.DiscordID = discordID;
     }
 }

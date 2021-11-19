@@ -30,25 +30,24 @@ using Remora.Plugins.Abstractions.Attributes;
 
 [assembly: RemoraPlugin(typeof(QuotesPlugin))]
 
-namespace DIGOS.Ambassador.Plugins.Quotes
+namespace DIGOS.Ambassador.Plugins.Quotes;
+
+/// <summary>
+/// Describes the Quotes plugin.
+/// </summary>
+public sealed class QuotesPlugin : PluginDescriptor
 {
-    /// <summary>
-    /// Describes the Quotes plugin.
-    /// </summary>
-    public sealed class QuotesPlugin : PluginDescriptor
+    /// <inheritdoc />
+    public override string Name => "Quotes";
+
+    /// <inheritdoc />
+    public override string Description => "Provides automatic conversion of message links to quotes.";
+
+    /// <inheritdoc/>
+    public override void ConfigureServices(IServiceCollection serviceCollection)
     {
-        /// <inheritdoc />
-        public override string Name => "Quotes";
-
-        /// <inheritdoc />
-        public override string Description => "Provides automatic conversion of message links to quotes.";
-
-        /// <inheritdoc/>
-        public override void ConfigureServices(IServiceCollection serviceCollection)
-        {
-            serviceCollection
-                .AddSingleton<QuoteService>()
-                .AddResponder<MessageQuoteResponder>();
-        }
+        serviceCollection
+            .AddSingleton<QuoteService>()
+            .AddResponder<MessageQuoteResponder>();
     }
 }

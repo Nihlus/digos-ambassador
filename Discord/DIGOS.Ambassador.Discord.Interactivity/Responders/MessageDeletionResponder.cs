@@ -27,40 +27,39 @@ using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Discord.Interactivity.Responders
+namespace DIGOS.Ambassador.Discord.Interactivity.Responders;
+
+/// <summary>
+/// Responds to events required for interactivity.
+/// </summary>
+public class MessageDeletionResponder :
+    IResponder<IMessageDelete>,
+    IResponder<IMessageDeleteBulk>
 {
+    private readonly InteractiveMessageTracker _messageTracker;
+
     /// <summary>
-    /// Responds to events required for interactivity.
+    /// Initializes a new instance of the <see cref="MessageDeletionResponder"/> class.
     /// </summary>
-    public class MessageDeletionResponder :
-        IResponder<IMessageDelete>,
-        IResponder<IMessageDeleteBulk>
+    /// <param name="messageTracker">The message tracker service.</param>
+    public MessageDeletionResponder(InteractiveMessageTracker messageTracker)
     {
-        private readonly InteractiveMessageTracker _messageTracker;
+        _messageTracker = messageTracker;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MessageDeletionResponder"/> class.
-        /// </summary>
-        /// <param name="messageTracker">The message tracker service.</param>
-        public MessageDeletionResponder(InteractiveMessageTracker messageTracker)
-        {
-            _messageTracker = messageTracker;
-        }
+    /// <inheritdoc />
+    public Task<Result> RespondAsync(IMessageDelete gatewayEvent, CancellationToken ct = default)
+        => _messageTracker.OnMessageDeletedAsync(gatewayEvent.ID, ct);
 
-        /// <inheritdoc />
-        public Task<Result> RespondAsync(IMessageDelete gatewayEvent, CancellationToken ct = default)
-            => _messageTracker.OnMessageDeletedAsync(gatewayEvent.ID, ct);
+    /// <inheritdoc />
+    public async Task<Result> RespondAsync(IMessageDeleteBulk gatewayEvent, CancellationToken ct = default)
+    {
+        var deletions = gatewayEvent.IDs.Select(id => _messageTracker.OnMessageDeletedAsync(id, ct));
+        var results = await Task.WhenAll(deletions);
 
-        /// <inheritdoc />
-        public async Task<Result> RespondAsync(IMessageDeleteBulk gatewayEvent, CancellationToken ct = default)
-        {
-            var deletions = gatewayEvent.IDs.Select(id => _messageTracker.OnMessageDeletedAsync(id, ct));
-            var results = await Task.WhenAll(deletions);
-
-            var firstFail = results.FirstOrDefault(r => !r.IsSuccess);
-            return firstFail.Equals(default)
-                ? Result.FromSuccess()
-                : firstFail;
-        }
+        var firstFail = results.FirstOrDefault(r => !r.IsSuccess);
+        return firstFail.Equals(default)
+            ? Result.FromSuccess()
+            : firstFail;
     }
 }

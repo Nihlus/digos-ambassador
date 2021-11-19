@@ -26,40 +26,39 @@ using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Model.Statistics
+namespace DIGOS.Ambassador.Plugins.Autorole.Model.Statistics;
+
+/// <summary>
+/// Represents simple statistics about a user.
+/// </summary>
+[Table("UserStatistics", Schema = "AutoroleModule")]
+public class UserStatistics : EFEntity
 {
     /// <summary>
-    /// Represents simple statistics about a user.
+    /// Gets the user that the statistics are for.
     /// </summary>
-    [Table("UserStatistics", Schema = "AutoroleModule")]
-    public class UserStatistics : EFEntity
+    public virtual User User { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the per-server statistics of the user.
+    /// </summary>
+    public virtual List<UserServerStatistics> ServerStatistics { get; private set; } = null!;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserStatistics"/> class.
+    /// </summary>
+    [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
+    protected UserStatistics()
     {
-        /// <summary>
-        /// Gets the user that the statistics are for.
-        /// </summary>
-        public virtual User User { get; private set; } = null!;
+    }
 
-        /// <summary>
-        /// Gets the per-server statistics of the user.
-        /// </summary>
-        public virtual List<UserServerStatistics> ServerStatistics { get; private set; } = null!;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserStatistics"/> class.
-        /// </summary>
-        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
-        protected UserStatistics()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserStatistics"/> class.
-        /// </summary>
-        /// <param name="user">The user that the statistics are for.</param>
-        public UserStatistics(User user)
-        {
-            this.User = user;
-            this.ServerStatistics = new List<UserServerStatistics>();
-        }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserStatistics"/> class.
+    /// </summary>
+    /// <param name="user">The user that the statistics are for.</param>
+    public UserStatistics(User user)
+    {
+        this.User = user;
+        this.ServerStatistics = new List<UserServerStatistics>();
     }
 }

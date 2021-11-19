@@ -28,36 +28,35 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Core
+namespace DIGOS.Ambassador.Tests.Plugins.Core;
+
+public static partial class PrivacyServiceTests
 {
-    public static partial class PrivacyServiceTests
+    public class HasUserConsentedAsync : PrivacyServiceTestBase
     {
-        public class HasUserConsentedAsync : PrivacyServiceTestBase
+        private readonly Snowflake _discordUser;
+
+        public HasUserConsentedAsync()
         {
-            private readonly Snowflake _discordUser;
+            _discordUser = new Snowflake(0);
+        }
 
-            public HasUserConsentedAsync()
-            {
-                _discordUser = new Snowflake(0);
-            }
+        [Fact]
+        public async Task ReturnsTrueIfUserHasConsented()
+        {
+            await this.Privacy.GrantUserConsentAsync(_discordUser);
 
-            [Fact]
-            public async Task ReturnsTrueIfUserHasConsented()
-            {
-                await this.Privacy.GrantUserConsentAsync(_discordUser);
+            var result = await this.Privacy.HasUserConsentedAsync(_discordUser);
 
-                var result = await this.Privacy.HasUserConsentedAsync(_discordUser);
+            Assert.True(result);
+        }
 
-                Assert.True(result);
-            }
+        [Fact]
+        public async Task ReturnsFalseIfUserHasNotConsented()
+        {
+            var result = await this.Privacy.HasUserConsentedAsync(_discordUser);
 
-            [Fact]
-            public async Task ReturnsFalseIfUserHasNotConsented()
-            {
-                var result = await this.Privacy.HasUserConsentedAsync(_discordUser);
-
-                Assert.False(result);
-            }
+            Assert.False(result);
         }
     }
 }

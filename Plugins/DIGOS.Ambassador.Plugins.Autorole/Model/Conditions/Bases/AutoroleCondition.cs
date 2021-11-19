@@ -28,27 +28,26 @@ using DIGOS.Ambassador.Core.Database.Entities;
 using Remora.Discord.Core;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
+namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
+
+/// <summary>
+/// Represents the base class for autorole conditions.
+/// </summary>
+[Table("AutoroleConditions", Schema = "AutoroleModule")]
+public abstract class AutoroleCondition : EFEntity, IAutoroleCondition
 {
-    /// <summary>
-    /// Represents the base class for autorole conditions.
-    /// </summary>
-    [Table("AutoroleConditions", Schema = "AutoroleModule")]
-    public abstract class AutoroleCondition : EFEntity, IAutoroleCondition
-    {
-        /// <inheritdoc />
-        public abstract string GetDescriptiveUIText();
+    /// <inheritdoc />
+    public abstract string GetDescriptiveUIText();
 
-        /// <inheritdoc />
-        public abstract bool HasSameConditionsAs(IAutoroleCondition autoroleCondition);
+    /// <inheritdoc />
+    public abstract bool HasSameConditionsAs(IAutoroleCondition autoroleCondition);
 
-        /// <inheritdoc/>
-        public abstract Task<Result<bool>> IsConditionFulfilledForUserAsync
-        (
-            IServiceProvider services,
-            Snowflake guildID,
-            Snowflake userID,
-            CancellationToken ct = default
-        );
-    }
+    /// <inheritdoc/>
+    public abstract Task<Result<bool>> IsConditionFulfilledForUserAsync
+    (
+        IServiceProvider services,
+        Snowflake guildID,
+        Snowflake userID,
+        CancellationToken ct = default
+    );
 }

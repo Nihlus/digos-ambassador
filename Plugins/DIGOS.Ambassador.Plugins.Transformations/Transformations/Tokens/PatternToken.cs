@@ -25,30 +25,29 @@ using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using Humanizer;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens;
+
+/// <summary>
+/// A token that gets replaced with a pattern name.
+/// </summary>
+[PublicAPI]
+[TokenIdentifier("pattern", "p")]
+public sealed class PatternToken : ReplaceableTextToken<PatternToken>
 {
-    /// <summary>
-    /// A token that gets replaced with a pattern name.
-    /// </summary>
-    [PublicAPI]
-    [TokenIdentifier("pattern", "p")]
-    public sealed class PatternToken : ReplaceableTextToken<PatternToken>
+    /// <inheritdoc />
+    public override string GetText(Appearance appearance, AppearanceComponent? component)
     {
-        /// <inheritdoc />
-        public override string GetText(Appearance appearance, AppearanceComponent? component)
+        if (component is null)
         {
-            if (component is null)
-            {
-                throw new ArgumentNullException(nameof(component));
-            }
-
-            return component.Pattern.ToString().Humanize().Transform(To.LowerCase);
+            throw new ArgumentNullException(nameof(component));
         }
 
-        /// <inheritdoc />
-        protected override PatternToken Initialize(string? data)
-        {
-            return this;
-        }
+        return component.Pattern.ToString().Humanize().Transform(To.LowerCase);
+    }
+
+    /// <inheritdoc />
+    protected override PatternToken Initialize(string? data)
+    {
+        return this;
     }
 }

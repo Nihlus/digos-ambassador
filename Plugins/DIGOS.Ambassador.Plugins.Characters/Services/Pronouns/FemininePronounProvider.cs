@@ -20,29 +20,28 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
+namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
+
+/// <summary>
+/// Provides feminine pronouns.
+/// </summary>
+public class FemininePronounProvider : PronounProvider
 {
-    /// <summary>
-    /// Provides feminine pronouns.
-    /// </summary>
-    public class FemininePronounProvider : PronounProvider
-    {
-        /// <inheritdoc />
-        public override string Family => "Feminine";
+    /// <inheritdoc />
+    public override string Family => "Feminine";
 
-        /// <inheritdoc />
-        public override string GetSubjectForm(bool withVerb = false) => withVerb ? "she is" : "she";
+    /// <inheritdoc />
+    public override string GetSubjectForm(bool withVerb = false) => withVerb ? "she is" : "she";
 
-        /// <inheritdoc />
-        public override string GetObjectForm() => "her";
+    /// <inheritdoc />
+    public override string GetObjectForm() => "her";
 
-        /// <inheritdoc />
-        public override string GetPossessiveAdjectiveForm() => "her";
+    /// <inheritdoc />
+    public override string GetPossessiveAdjectiveForm() => "her";
 
-        /// <inheritdoc />
-        public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "she has" : "hers";
+    /// <inheritdoc />
+    public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "she has" : "hers";
 
-        /// <inheritdoc />
-        public override string GetReflexiveForm() => "herself";
-    }
+    /// <inheritdoc />
+    public override string GetReflexiveForm() => "herself";
 }

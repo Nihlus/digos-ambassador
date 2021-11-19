@@ -20,31 +20,30 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Results
+namespace DIGOS.Ambassador.Plugins.Transformations.Results;
+
+/// <summary>
+/// Enumerates the actions that can be taken on a bodypart during a shift.
+/// </summary>
+public enum ShiftBodypartAction
 {
     /// <summary>
-    /// Enumerates the actions that can be taken on a bodypart during a shift.
+    /// The bodypart was added.
     /// </summary>
-    public enum ShiftBodypartAction
-    {
-        /// <summary>
-        /// The bodypart was added.
-        /// </summary>
-        Add,
+    Add,
 
-        /// <summary>
-        /// The bodypart was removed.
-        /// </summary>
-        Remove,
+    /// <summary>
+    /// The bodypart was removed.
+    /// </summary>
+    Remove,
 
-        /// <summary>
-        /// The bodypart was shifted.
-        /// </summary>
-        Shift,
+    /// <summary>
+    /// The bodypart was shifted.
+    /// </summary>
+    Shift,
 
-        /// <summary>
-        /// Nothing was done to the bodypart.
-        /// </summary>
-        Nothing
-    }
+    /// <summary>
+    /// Nothing was done to the bodypart.
+    /// </summary>
+    Nothing
 }

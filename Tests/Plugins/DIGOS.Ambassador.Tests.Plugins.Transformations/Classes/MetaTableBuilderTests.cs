@@ -27,22 +27,21 @@ using System.Linq;
 using DIGOS.Ambassador.Plugins.Transformations.Services.Lua;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Transformations
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
+
+public class MetaTableBuilderTests
 {
-    public class MetaTableBuilderTests
+    [Fact]
+    public void CanBuildMetaTable()
     {
-        [Fact]
-        public void CanBuildMetaTable()
-        {
-            const string expected = "env = { test = test,string = { format = string.format,subtable = { format = string.subtable.format } } }";
-            var entries = new[] { "test", "string.format", "string.subtable.format" };
-            var builder = new MetaTableBuilder();
+        const string expected = "env = { test = test,string = { format = string.format,subtable = { format = string.subtable.format } } }";
+        var entries = new[] { "test", "string.format", "string.subtable.format" };
+        var builder = new MetaTableBuilder();
 
-            builder = entries.Aggregate(builder, (current, entry) => current.WithEntry(entry));
+        builder = entries.Aggregate(builder, (current, entry) => current.WithEntry(entry));
 
-            var result = builder.Build();
+        var result = builder.Build();
 
-            Assert.Equal(expected, result);
-        }
+        Assert.Equal(expected, result);
     }
 }

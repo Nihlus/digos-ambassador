@@ -31,62 +31,61 @@ using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using Xunit;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Transformations
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
+
+public partial class TransformationServiceTests
 {
-    public partial class TransformationServiceTests
+    public class GetTransformationByPartAndSpeciesAsync : TransformationServiceTestBase
     {
-        public class GetTransformationByPartAndSpeciesAsync : TransformationServiceTestBase
+        private Species _templateSpecies = null!;
+
+        protected override async Task InitializeTestAsync()
         {
-            private Species _templateSpecies = null!;
+            await base.InitializeTestAsync();
+            _templateSpecies = this.Database.Species.First(s => s.Name == "template");
+        }
 
-            protected override async Task InitializeTestAsync()
-            {
-                await base.InitializeTestAsync();
-                _templateSpecies = this.Database.Species.First(s => s.Name == "template");
-            }
+        [Fact]
+        public async Task RetrievesCorrectBodypart()
+        {
+            var result = await this.Transformations.GetTransformationsByPartAndSpeciesAsync
+            (
+                Bodypart.Face,
+                _templateSpecies
+            );
 
-            [Fact]
-            public async Task RetrievesCorrectBodypart()
-            {
-                var result = await this.Transformations.GetTransformationsByPartAndSpeciesAsync
-                (
-                    Bodypart.Face,
-                    _templateSpecies
-                );
+            Assert.True(result.IsSuccess);
+            Assert.Single(result.Entity);
 
-                Assert.True(result.IsSuccess);
-                Assert.Single(result.Entity);
+            var transformation = result.Entity[0];
 
-                var transformation = result.Entity[0];
+            Assert.Equal(Bodypart.Face, transformation.Part);
+            Assert.Same(_templateSpecies, transformation.Species);
+        }
 
-                Assert.Equal(Bodypart.Face, transformation.Part);
-                Assert.Same(_templateSpecies, transformation.Species);
-            }
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfSpeciesDoesNotExist()
+        {
+            var nonexistentSpecies = new Species("ooga", "Dummy", "booga");
+            var result = await this.Transformations.GetTransformationsByPartAndSpeciesAsync
+            (
+                Bodypart.Face,
+                nonexistentSpecies
+            );
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfSpeciesDoesNotExist()
-            {
-                var nonexistentSpecies = new Species("ooga", "Dummy", "booga");
-                var result = await this.Transformations.GetTransformationsByPartAndSpeciesAsync
-                (
-                    Bodypart.Face,
-                    nonexistentSpecies
-                );
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfCombinationDoesNotExist()
+        {
+            var result = await this.Transformations.GetTransformationsByPartAndSpeciesAsync
+            (
+                Bodypart.Wings,
+                _templateSpecies
+            );
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfCombinationDoesNotExist()
-            {
-                var result = await this.Transformations.GetTransformationsByPartAndSpeciesAsync
-                (
-                    Bodypart.Wings,
-                    _templateSpecies
-                );
-
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
         }
     }
 }

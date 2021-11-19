@@ -25,38 +25,37 @@ using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using Remora.Discord.Core;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Model
+namespace DIGOS.Ambassador.Plugins.Autorole.Model;
+
+/// <summary>
+/// Represents a set of server-specific autorole settings.
+/// </summary>
+public class AutoroleServerSettings : EFEntity
 {
     /// <summary>
-    /// Represents a set of server-specific autorole settings.
+    /// Gets the server the settings are bound to.
     /// </summary>
-    public class AutoroleServerSettings : EFEntity
+    public virtual Server Server { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the channel that notifications about users requiring affirmation are sent.
+    /// </summary>
+    public Snowflake? AffirmationRequiredNotificationChannelID { get; internal set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AutoroleServerSettings"/> class.
+    /// </summary>
+    [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
+    protected AutoroleServerSettings()
     {
-        /// <summary>
-        /// Gets the server the settings are bound to.
-        /// </summary>
-        public virtual Server Server { get; private set; } = null!;
+    }
 
-        /// <summary>
-        /// Gets the channel that notifications about users requiring affirmation are sent.
-        /// </summary>
-        public Snowflake? AffirmationRequiredNotificationChannelID { get; internal set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AutoroleServerSettings"/> class.
-        /// </summary>
-        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
-        protected AutoroleServerSettings()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AutoroleServerSettings"/> class.
-        /// </summary>
-        /// <param name="server">The server.</param>
-        public AutoroleServerSettings(Server server)
-        {
-            this.Server = server;
-        }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AutoroleServerSettings"/> class.
+    /// </summary>
+    /// <param name="server">The server.</param>
+    public AutoroleServerSettings(Server server)
+    {
+        this.Server = server;
     }
 }

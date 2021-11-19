@@ -28,22 +28,21 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Characters
+namespace DIGOS.Ambassador.Tests.Plugins.Characters;
+
+public static partial class CharacterServiceTests
 {
-    public static partial class CharacterServiceTests
+    public class CreateCharacterAsync : CharacterServiceTestBase
     {
-        public class CreateCharacterAsync : CharacterServiceTestBase
+        [Fact]
+        public async Task CanCreateWithNameOnly()
         {
-            [Fact]
-            public async Task CanCreateWithNameOnly()
-            {
-                var result = await this.Characters.CreateCharacterAsync(this.DefaultOwner, this.DefaultServer, "Test");
+            var result = await this.Characters.CreateCharacterAsync(this.DefaultOwner, this.DefaultServer, "Test");
 
-                Assert.True(result.IsSuccess);
+            Assert.True(result.IsSuccess);
 
-                Assert.NotEmpty(this.Database.Characters);
-                Assert.Equal("Test", this.Database.Characters.First().Name);
-            }
+            Assert.NotEmpty(this.Database.Characters);
+            Assert.Equal("Test", this.Database.Characters.First().Name);
         }
     }
 }

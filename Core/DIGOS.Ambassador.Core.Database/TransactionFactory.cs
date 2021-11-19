@@ -22,32 +22,31 @@
 
 using System.Transactions;
 
-namespace DIGOS.Ambassador.Core.Database
+namespace DIGOS.Ambassador.Core.Database;
+
+/// <summary>
+/// Creates transactions.
+/// </summary>
+public static class TransactionFactory
 {
     /// <summary>
-    /// Creates transactions.
+    /// Creates a new ambient transaction with asynchronous flow enabled.
     /// </summary>
-    public static class TransactionFactory
+    /// <param name="isolationLevel">The isolation level to use.</param>
+    /// <returns>The created scope.</returns>
+    public static TransactionScope Create(IsolationLevel isolationLevel = IsolationLevel.Serializable)
     {
-        /// <summary>
-        /// Creates a new ambient transaction with asynchronous flow enabled.
-        /// </summary>
-        /// <param name="isolationLevel">The isolation level to use.</param>
-        /// <returns>The created scope.</returns>
-        public static TransactionScope Create(IsolationLevel isolationLevel = IsolationLevel.Serializable)
+        var options = new TransactionOptions
         {
-            var options = new TransactionOptions
-            {
-                IsolationLevel = isolationLevel,
-                Timeout = TransactionManager.DefaultTimeout
-            };
+            IsolationLevel = isolationLevel,
+            Timeout = TransactionManager.DefaultTimeout
+        };
 
-            return new TransactionScope
-            (
-                TransactionScopeOption.Required,
-                options,
-                TransactionScopeAsyncFlowOption.Enabled
-            );
-        }
+        return new TransactionScope
+        (
+            TransactionScopeOption.Required,
+            options,
+            TransactionScopeAsyncFlowOption.Enabled
+        );
     }
 }

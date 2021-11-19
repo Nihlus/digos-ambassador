@@ -31,54 +31,53 @@ using Xunit;
 #pragma warning disable CS8625
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Characters
+namespace DIGOS.Ambassador.Tests.Plugins.Characters;
+
+public partial class CharacterServiceTests
 {
-    public partial class CharacterServiceTests
+    public class SetCharacterDescriptionAsync : CharacterServiceTestBase
     {
-        public class SetCharacterDescriptionAsync : CharacterServiceTestBase
+        private const string Description = "A cool person";
+
+        private readonly Character _character;
+
+        public SetCharacterDescriptionAsync()
         {
-            private const string Description = "A cool person";
+            _character = CreateCharacter(description: Description);
+        }
 
-            private readonly Character _character;
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfDescriptionIsEmpty()
+        {
+            var result = await this.CharacterEditor.SetCharacterDescriptionAsync(_character, string.Empty);
 
-            public SetCharacterDescriptionAsync()
-            {
-                _character = CreateCharacter(description: Description);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfDescriptionIsEmpty()
-            {
-                var result = await this.CharacterEditor.SetCharacterDescriptionAsync(_character, string.Empty);
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfDescriptionIsTheSameAsTheCurrentDescription()
+        {
+            var result = await this.CharacterEditor.SetCharacterDescriptionAsync(_character, Description);
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfDescriptionIsTheSameAsTheCurrentDescription()
-            {
-                var result = await this.CharacterEditor.SetCharacterDescriptionAsync(_character, Description);
+        [Fact]
+        public async Task ReturnsSuccessfulResultIfDescriptionIsAccepted()
+        {
+            var result = await this.CharacterEditor.SetCharacterDescriptionAsync(_character, "Bobby");
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.True(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsSuccessfulResultIfDescriptionIsAccepted()
-            {
-                var result = await this.CharacterEditor.SetCharacterDescriptionAsync(_character, "Bobby");
+        [Fact]
+        public async Task SetsDescription()
+        {
+            const string newDescription = "An uncool person";
+            await this.CharacterEditor.SetCharacterDescriptionAsync(_character, newDescription);
 
-                Assert.True(result.IsSuccess);
-            }
-
-            [Fact]
-            public async Task SetsDescription()
-            {
-                const string newDescription = "An uncool person";
-                await this.CharacterEditor.SetCharacterDescriptionAsync(_character, newDescription);
-
-                var character = this.Database.Characters.First();
-                Assert.Equal(newDescription, character.Description);
-            }
+            var character = this.Database.Characters.First();
+            Assert.Equal(newDescription, character.Description);
         }
     }
 }

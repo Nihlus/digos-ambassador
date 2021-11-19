@@ -30,46 +30,45 @@ using Xunit;
 #pragma warning disable SA1649
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Characters
+namespace DIGOS.Ambassador.Tests.Plugins.Characters;
+
+public partial class CharacterServiceTests
 {
-    public partial class CharacterServiceTests
+    public class SetCharacterIsNSFWAsync : CharacterServiceTestBase
     {
-        public class SetCharacterIsNSFWAsync : CharacterServiceTestBase
+        private const bool IsNSFW = false;
+
+        private readonly Character _character;
+
+        public SetCharacterIsNSFWAsync()
         {
-            private const bool IsNSFW = false;
+            _character = CreateCharacter(isNSFW: IsNSFW);
+        }
 
-            private readonly Character _character;
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfIsNSFWIsTheSameAsTheCurrentIsNSFW()
+        {
+            var result = await this.CharacterEditor.SetCharacterIsNSFWAsync(_character, IsNSFW);
 
-            public SetCharacterIsNSFWAsync()
-            {
-                _character = CreateCharacter(isNSFW: IsNSFW);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfIsNSFWIsTheSameAsTheCurrentIsNSFW()
-            {
-                var result = await this.CharacterEditor.SetCharacterIsNSFWAsync(_character, IsNSFW);
+        [Fact]
+        public async Task ReturnsSuccessfulResultIfIsNSFWIsAccepted()
+        {
+            var result = await this.CharacterEditor.SetCharacterIsNSFWAsync(_character, true);
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.True(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsSuccessfulResultIfIsNSFWIsAccepted()
-            {
-                var result = await this.CharacterEditor.SetCharacterIsNSFWAsync(_character, true);
+        [Fact]
+        public async Task SetsIsNSFW()
+        {
+            const bool newIsNSFW = true;
+            await this.CharacterEditor.SetCharacterIsNSFWAsync(_character, newIsNSFW);
 
-                Assert.True(result.IsSuccess);
-            }
-
-            [Fact]
-            public async Task SetsIsNSFW()
-            {
-                const bool newIsNSFW = true;
-                await this.CharacterEditor.SetCharacterIsNSFWAsync(_character, newIsNSFW);
-
-                var character = this.Database.Characters.First();
-                Assert.Equal(newIsNSFW, character.IsNSFW);
-            }
+            var character = this.Database.Characters.First();
+            Assert.Equal(newIsNSFW, character.IsNSFW);
         }
     }
 }

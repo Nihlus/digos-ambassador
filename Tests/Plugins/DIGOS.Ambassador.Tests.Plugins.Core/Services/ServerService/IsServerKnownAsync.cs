@@ -28,36 +28,35 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Core
+namespace DIGOS.Ambassador.Tests.Plugins.Core;
+
+public static partial class ServerServiceTests
 {
-    public static partial class ServerServiceTests
+    public class IsServerKnownAsync : ServerServiceTestBase
     {
-        public class IsServerKnownAsync : ServerServiceTestBase
+        private readonly Snowflake _discordGuild;
+
+        public IsServerKnownAsync()
         {
-            private readonly Snowflake _discordGuild;
+            _discordGuild = new Snowflake(0);
+        }
 
-            public IsServerKnownAsync()
-            {
-                _discordGuild = new Snowflake(0);
-            }
+        [Fact]
+        public async Task ReturnsFalseIfServerHasNotBeenRegistered()
+        {
+            var result = await this.Servers.IsServerKnownAsync(_discordGuild);
 
-            [Fact]
-            public async Task ReturnsFalseIfServerHasNotBeenRegistered()
-            {
-                var result = await this.Servers.IsServerKnownAsync(_discordGuild);
+            Assert.False(result);
+        }
 
-                Assert.False(result);
-            }
+        [Fact]
+        public async Task ReturnsTrueIfServerHasBeenRegistered()
+        {
+            await this.Servers.AddServerAsync(_discordGuild);
 
-            [Fact]
-            public async Task ReturnsTrueIfServerHasBeenRegistered()
-            {
-                await this.Servers.AddServerAsync(_discordGuild);
+            var result = await this.Servers.IsServerKnownAsync(_discordGuild);
 
-                var result = await this.Servers.IsServerKnownAsync(_discordGuild);
-
-                Assert.True(result);
-            }
+            Assert.True(result);
         }
     }
 }

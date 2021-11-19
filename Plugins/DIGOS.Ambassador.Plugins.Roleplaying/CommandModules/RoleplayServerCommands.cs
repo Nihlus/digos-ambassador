@@ -37,77 +37,76 @@ using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
-namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
+namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules;
+
+public partial class RoleplayCommands
 {
-    public partial class RoleplayCommands
+    /// <summary>
+    /// Server-related commands, such as viewing or editing info about a specific server.
+    /// </summary>
+    [UsedImplicitly]
+    [Group("server")]
+    [Description("Server-related commands, such as viewing or editing info about a specific server.")]
+    public partial class RoleplayServerCommands : CommandGroup
     {
+        private readonly RoleplayServerSettingsService _serverSettings;
+        private readonly ICommandContext _context;
+        private readonly FeedbackService _feedback;
+
         /// <summary>
-        /// Server-related commands, such as viewing or editing info about a specific server.
+        /// Initializes a new instance of the <see cref="RoleplayServerCommands"/> class.
+        /// </summary>
+        /// <param name="serverSettings">The roleplaying server settings service.</param>
+        /// <param name="context">The command context.</param>
+        /// <param name="feedback">The feedback service.</param>
+        public RoleplayServerCommands
+        (
+            RoleplayServerSettingsService serverSettings,
+            ICommandContext context,
+            FeedbackService feedback
+        )
+        {
+            _serverSettings = serverSettings;
+            _context = context;
+            _feedback = feedback;
+        }
+
+        /// <summary>
+        /// Clears the channel category to use for dedicated roleplays.
         /// </summary>
         [UsedImplicitly]
-        [Group("server")]
-        [Description("Server-related commands, such as viewing or editing info about a specific server.")]
-        public partial class RoleplayServerCommands : CommandGroup
+        [Command("clear-roleplay-category")]
+        [Description("Clears the channel category to use for dedicated roleplays.")]
+        [RequireContext(ChannelContext.Guild)]
+        [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
+        public async Task<Result<FeedbackMessage>> ClearDedicatedRoleplayChannelCategory()
         {
-            private readonly RoleplayServerSettingsService _serverSettings;
-            private readonly ICommandContext _context;
-            private readonly FeedbackService _feedback;
+            var result = await _serverSettings.SetDedicatedChannelCategoryAsync(_context.GuildID.Value, null);
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="RoleplayServerCommands"/> class.
-            /// </summary>
-            /// <param name="serverSettings">The roleplaying server settings service.</param>
-            /// <param name="context">The command context.</param>
-            /// <param name="feedback">The feedback service.</param>
-            public RoleplayServerCommands
+            return !result.IsSuccess
+                ? Result<FeedbackMessage>.FromError(result)
+                : new FeedbackMessage("Dedicated channel category cleared.", _feedback.Theme.Secondary);
+        }
+
+        /// <summary>
+        /// Clears the role to use as a default @everyone role in dynamic roleplays.
+        /// </summary>
+        [UsedImplicitly]
+        [Command("clear-default-user-role")]
+        [Description("Clears the role to use as a default @everyone role in dynamic roleplays.")]
+        [RequireContext(ChannelContext.Guild)]
+        [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
+        public async Task<Result<FeedbackMessage>> SetDefaultUserRole()
+        {
+            var result = await _serverSettings.SetDefaultUserRoleAsync
             (
-                RoleplayServerSettingsService serverSettings,
-                ICommandContext context,
-                FeedbackService feedback
-            )
-            {
-                _serverSettings = serverSettings;
-                _context = context;
-                _feedback = feedback;
-            }
+                _context.GuildID.Value,
+                null
+            );
 
-            /// <summary>
-            /// Clears the channel category to use for dedicated roleplays.
-            /// </summary>
-            [UsedImplicitly]
-            [Command("clear-roleplay-category")]
-            [Description("Clears the channel category to use for dedicated roleplays.")]
-            [RequireContext(ChannelContext.Guild)]
-            [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
-            public async Task<Result<FeedbackMessage>> ClearDedicatedRoleplayChannelCategory()
-            {
-                var result = await _serverSettings.SetDedicatedChannelCategoryAsync(_context.GuildID.Value, null);
-
-                return !result.IsSuccess
-                    ? Result<FeedbackMessage>.FromError(result)
-                    : new FeedbackMessage("Dedicated channel category cleared.", _feedback.Theme.Secondary);
-            }
-
-            /// <summary>
-            /// Clears the role to use as a default @everyone role in dynamic roleplays.
-            /// </summary>
-            [UsedImplicitly]
-            [Command("clear-default-user-role")]
-            [Description("Clears the role to use as a default @everyone role in dynamic roleplays.")]
-            [RequireContext(ChannelContext.Guild)]
-            [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
-            public async Task<Result<FeedbackMessage>> SetDefaultUserRole()
-            {
-                var result = await _serverSettings.SetDefaultUserRoleAsync
-                (
-                    _context.GuildID.Value,
-                    null
-                );
-
-                return !result.IsSuccess
-                    ? Result<FeedbackMessage>.FromError(result)
-                    : new FeedbackMessage("Default user role cleared.", _feedback.Theme.Secondary);
-            }
+            return !result.IsSuccess
+                ? Result<FeedbackMessage>.FromError(result)
+                : new FeedbackMessage("Default user role cleared.", _feedback.Theme.Secondary);
         }
     }
 }

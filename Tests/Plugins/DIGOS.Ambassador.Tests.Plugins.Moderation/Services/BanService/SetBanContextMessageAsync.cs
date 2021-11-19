@@ -32,56 +32,55 @@ using DIGOS.Ambassador.Tests.Plugins.Moderation.Bases;
 using Remora.Discord.Core;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
+namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService;
+
+public partial class BanService
 {
-    public partial class BanService
+    public class SetBanContextMessageAsync : BanServiceTestBase
     {
-        public class SetBanContextMessageAsync : BanServiceTestBase
+        private readonly UserBan _ban = new(
+            new Server(new Snowflake(0)),
+            new User(new Snowflake(0)),
+            new User(new Snowflake(1)),
+            string.Empty
+        );
+
+        [Fact]
+        public async Task ReturnsUnsuccessfulIfNewMessageIsSameMessage()
         {
-            private readonly UserBan _ban = new(
-                new Server(new Snowflake(0)),
-                new User(new Snowflake(0)),
-                new User(new Snowflake(1)),
-                string.Empty
-            );
+            await this.Bans.SetBanContextMessageAsync(_ban, new Snowflake(1));
+            var result = await this.Bans.SetBanContextMessageAsync(_ban, new Snowflake(1));
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulIfNewMessageIsSameMessage()
-            {
-                await this.Bans.SetBanContextMessageAsync(_ban, new Snowflake(1));
-                var result = await this.Bans.SetBanContextMessageAsync(_ban, new Snowflake(1));
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsSuccessfulIfNewMessageIsAnotherMessage()
+        {
+            await this.Bans.SetBanContextMessageAsync(_ban, new Snowflake(1));
+            var result = await this.Bans.SetBanContextMessageAsync(_ban, new Snowflake(2));
 
-            [Fact]
-            public async Task ReturnsSuccessfulIfNewMessageIsAnotherMessage()
-            {
-                await this.Bans.SetBanContextMessageAsync(_ban, new Snowflake(1));
-                var result = await this.Bans.SetBanContextMessageAsync(_ban, new Snowflake(2));
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ActuallySetsMessage()
+        {
+            await this.Bans.SetBanContextMessageAsync(_ban, new Snowflake(1));
 
-            [Fact]
-            public async Task ActuallySetsMessage()
-            {
-                await this.Bans.SetBanContextMessageAsync(_ban, new Snowflake(1));
+            Assert.Equal(new Snowflake(1), _ban.MessageID);
+        }
 
-                Assert.Equal(new Snowflake(1), _ban.MessageID);
-            }
+        [Fact]
+        public async Task SetterUpdatesTimestamp()
+        {
+            var before = _ban.UpdatedAt;
 
-            [Fact]
-            public async Task SetterUpdatesTimestamp()
-            {
-                var before = _ban.UpdatedAt;
+            await this.Bans.SetBanContextMessageAsync(_ban, new Snowflake(1));
 
-                await this.Bans.SetBanContextMessageAsync(_ban, new Snowflake(1));
+            var after = _ban.UpdatedAt;
 
-                var after = _ban.UpdatedAt;
-
-                Assert.True(before < after);
-            }
+            Assert.True(before < after);
         }
     }
 }

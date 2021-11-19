@@ -29,47 +29,46 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Core
+namespace DIGOS.Ambassador.Tests.Plugins.Core;
+
+public static partial class UserServiceTests
 {
-    public static partial class UserServiceTests
+    public class AddUserAsync : UserServiceTestBase
     {
-        public class AddUserAsync : UserServiceTestBase
+        private readonly Snowflake _discordUser;
+
+        public AddUserAsync()
         {
-            private readonly Snowflake _discordUser;
+            _discordUser = new Snowflake(0);
+        }
 
-            public AddUserAsync()
-            {
-                _discordUser = new Snowflake(0);
-            }
+        [Fact]
+        public async Task ReturnsTrueIfUserHasNotBeenRegisteredBefore()
+        {
+            var result = await this.Users.AddUserAsync(_discordUser);
 
-            [Fact]
-            public async Task ReturnsTrueIfUserHasNotBeenRegisteredBefore()
-            {
-                var result = await this.Users.AddUserAsync(_discordUser);
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ActuallyRegistersUserIfUserHasNotBeenRegisteredBefore()
+        {
+            await this.Users.AddUserAsync(_discordUser);
 
-            [Fact]
-            public async Task ActuallyRegistersUserIfUserHasNotBeenRegisteredBefore()
-            {
-                await this.Users.AddUserAsync(_discordUser);
+            var user = this.Database.Users.First();
 
-                var user = this.Database.Users.First();
+            Assert.NotNull(user);
+            Assert.Equal(_discordUser, user.DiscordID);
+        }
 
-                Assert.NotNull(user);
-                Assert.Equal(_discordUser, user.DiscordID);
-            }
+        [Fact]
+        public async Task ReturnsFalseIfUserHasBeenRegisteredBefore()
+        {
+            await this.Users.AddUserAsync(_discordUser);
 
-            [Fact]
-            public async Task ReturnsFalseIfUserHasBeenRegisteredBefore()
-            {
-                await this.Users.AddUserAsync(_discordUser);
+            var result = await this.Users.AddUserAsync(_discordUser);
 
-                var result = await this.Users.AddUserAsync(_discordUser);
-
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
         }
     }
 }

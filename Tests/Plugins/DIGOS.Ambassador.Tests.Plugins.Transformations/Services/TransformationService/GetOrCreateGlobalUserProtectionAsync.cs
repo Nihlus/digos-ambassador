@@ -29,44 +29,43 @@ using System.Threading.Tasks;
 using Remora.Discord.Core;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Transformations
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
+
+public partial class TransformationServiceTests
 {
-    public partial class TransformationServiceTests
+    public class GetOrCreateGlobalUserProtectionAsync : TransformationServiceTestBase
     {
-        public class GetOrCreateGlobalUserProtectionAsync : TransformationServiceTestBase
+        private readonly Snowflake _user = new Snowflake(0);
+
+        [Fact]
+        public async Task CreatesObjectIfOneDoesNotExist()
         {
-            private readonly Snowflake _user = new Snowflake(0);
+            Assert.Empty(this.Database.ServerUserProtections);
 
-            [Fact]
-            public async Task CreatesObjectIfOneDoesNotExist()
-            {
-                Assert.Empty(this.Database.ServerUserProtections);
+            var result = await this.Transformations.GetOrCreateGlobalUserProtectionAsync(_user);
 
-                var result = await this.Transformations.GetOrCreateGlobalUserProtectionAsync(_user);
+            Assert.NotEmpty(this.Database.GlobalUserProtections);
+            Assert.Same(result.Entity, this.Database.GlobalUserProtections.First());
+        }
 
-                Assert.NotEmpty(this.Database.GlobalUserProtections);
-                Assert.Same(result.Entity, this.Database.GlobalUserProtections.First());
-            }
+        [Fact]
+        public async Task CreatedObjectIsBoundToTheCorrectUser()
+        {
+            var result = await this.Transformations.GetOrCreateGlobalUserProtectionAsync(_user);
 
-            [Fact]
-            public async Task CreatedObjectIsBoundToTheCorrectUser()
-            {
-                var result = await this.Transformations.GetOrCreateGlobalUserProtectionAsync(_user);
+            Assert.Equal(_user, result.Entity.User.DiscordID);
+        }
 
-                Assert.Equal(_user, result.Entity.User.DiscordID);
-            }
+        [Fact]
+        public async Task RetrievesCorrectObjectIfOneExists()
+        {
+            // Create an object
+            var created = await this.Transformations.GetOrCreateGlobalUserProtectionAsync(_user);
 
-            [Fact]
-            public async Task RetrievesCorrectObjectIfOneExists()
-            {
-                // Create an object
-                var created = await this.Transformations.GetOrCreateGlobalUserProtectionAsync(_user);
+            // Get it from the database
+            var retrieved = await this.Transformations.GetOrCreateGlobalUserProtectionAsync(_user);
 
-                // Get it from the database
-                var retrieved = await this.Transformations.GetOrCreateGlobalUserProtectionAsync(_user);
-
-                Assert.Same(created.Entity, retrieved.Entity);
-            }
+            Assert.Same(created.Entity, retrieved.Entity);
         }
     }
 }

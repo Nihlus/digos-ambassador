@@ -30,67 +30,66 @@ using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using JetBrains.Annotations;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Plugins.Transformations.Model
+namespace DIGOS.Ambassador.Plugins.Transformations.Model;
+
+/// <summary>
+/// Holds global protection data for a specific user.
+/// </summary>
+[PublicAPI]
+[Table("GlobalUserProtections", Schema = "TransformationModule")]
+public class GlobalUserProtection : EFEntity
 {
     /// <summary>
-    /// Holds global protection data for a specific user.
+    /// Gets the user that owns this protection data.
     /// </summary>
-    [PublicAPI]
-    [Table("GlobalUserProtections", Schema = "TransformationModule")]
-    public class GlobalUserProtection : EFEntity
+    public virtual User User { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the default protection type to use on new servers.
+    /// </summary>
+    public ProtectionType DefaultType { get; internal set; }
+
+    /// <summary>
+    /// Gets a value indicating whether or not the user should be opted in by default.
+    /// </summary>
+    public bool DefaultOptIn { get; internal set; }
+
+    /// <summary>
+    /// Gets the list of users that are listed in this protection entry.
+    /// </summary>
+    public virtual List<UserProtectionEntry> UserListing { get; private set; } = new List<UserProtectionEntry>();
+
+    /// <summary>
+    /// Gets the list of users that are allowed to transform the owner.
+    /// </summary>
+    [NotMapped]
+    public IEnumerable<User> Whitelist =>
+        this.UserListing.Where(u => u.Type == ListingType.Whitelist).Select(u => u.User);
+
+    /// <summary>
+    /// Gets the list of users that are prohibited from transforming the owner.
+    /// </summary>
+    [NotMapped]
+    public IEnumerable<User> Blacklist =>
+        this.UserListing.Where(u => u.Type == ListingType.Blacklist).Select(u => u.User);
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GlobalUserProtection"/> class.
+    /// </summary>
+    /// <remarks>
+    /// Required by EF Core.
+    /// </remarks>
+    protected GlobalUserProtection()
     {
-        /// <summary>
-        /// Gets the user that owns this protection data.
-        /// </summary>
-        public virtual User User { get; private set; } = null!;
+    }
 
-        /// <summary>
-        /// Gets the default protection type to use on new servers.
-        /// </summary>
-        public ProtectionType DefaultType { get; internal set; }
-
-        /// <summary>
-        /// Gets a value indicating whether or not the user should be opted in by default.
-        /// </summary>
-        public bool DefaultOptIn { get; internal set; }
-
-        /// <summary>
-        /// Gets the list of users that are listed in this protection entry.
-        /// </summary>
-        public virtual List<UserProtectionEntry> UserListing { get; private set; } = new List<UserProtectionEntry>();
-
-        /// <summary>
-        /// Gets the list of users that are allowed to transform the owner.
-        /// </summary>
-        [NotMapped]
-        public IEnumerable<User> Whitelist =>
-            this.UserListing.Where(u => u.Type == ListingType.Whitelist).Select(u => u.User);
-
-        /// <summary>
-        /// Gets the list of users that are prohibited from transforming the owner.
-        /// </summary>
-        [NotMapped]
-        public IEnumerable<User> Blacklist =>
-                this.UserListing.Where(u => u.Type == ListingType.Blacklist).Select(u => u.User);
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="GlobalUserProtection"/> class.
-        /// </summary>
-        /// <remarks>
-        /// Required by EF Core.
-        /// </remarks>
-        protected GlobalUserProtection()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="GlobalUserProtection"/> class.
-        /// </summary>
-        /// <param name="user">The protected user.</param>
-        public GlobalUserProtection(User user)
-        {
-            this.User = user;
-            this.DefaultType = ProtectionType.Blacklist;
-        }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GlobalUserProtection"/> class.
+    /// </summary>
+    /// <param name="user">The protected user.</param>
+    public GlobalUserProtection(User user)
+    {
+        this.User = user;
+        this.DefaultType = ProtectionType.Blacklist;
     }
 }

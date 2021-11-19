@@ -36,64 +36,63 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Bases
+namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Bases;
+
+/// <summary>
+/// Serves as a test base for warning service tests.
+/// </summary>
+[PublicAPI]
+public class WarningServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
 {
     /// <summary>
-    /// Serves as a test base for warning service tests.
+    /// Gets the database context.
     /// </summary>
-    [PublicAPI]
-    public class WarningServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
+    protected ModerationDatabaseContext Database { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the warning service.
+    /// </summary>
+    protected WarningService Warnings { get; private set; } = null!;
+
+    /// <inheritdoc />
+    protected override void RegisterServices(IServiceCollection serviceCollection)
     {
-        /// <summary>
-        /// Gets the database context.
-        /// </summary>
-        protected ModerationDatabaseContext Database { get; private set; } = null!;
+        serviceCollection
+            .AddDbContext<CoreDatabaseContext>(o => ConfigureOptions(o, "Core"))
+            .AddDbContext<ModerationDatabaseContext>(o => ConfigureOptions(o, "Moderation"));
 
-        /// <summary>
-        /// Gets the warning service.
-        /// </summary>
-        protected WarningService Warnings { get; private set; } = null!;
+        serviceCollection
+            .AddScoped<ServerService>()
+            .AddScoped<UserService>()
+            .AddScoped<WarningService>()
+            .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
+    }
 
-        /// <inheritdoc />
-        protected override void RegisterServices(IServiceCollection serviceCollection)
-        {
-            serviceCollection
-                .AddDbContext<CoreDatabaseContext>(o => ConfigureOptions(o, "Core"))
-                .AddDbContext<ModerationDatabaseContext>(o => ConfigureOptions(o, "Moderation"));
+    /// <inheritdoc />
+    protected override void ConfigureServices(IServiceProvider serviceProvider)
+    {
+        var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
+        var coreCreateScript = coreDatabase.Database.GenerateCreateScript();
 
-            serviceCollection
-                .AddScoped<ServerService>()
-                .AddScoped<UserService>()
-                .AddScoped<WarningService>()
-                .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
-        }
+        var moderationDatabase = serviceProvider.GetRequiredService<ModerationDatabaseContext>();
+        var moderationCreateScript = moderationDatabase.Database.GenerateCreateScript();
 
-        /// <inheritdoc />
-        protected override void ConfigureServices(IServiceProvider serviceProvider)
-        {
-            var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            var coreCreateScript = coreDatabase.Database.GenerateCreateScript();
+        moderationDatabase.Database.ExecuteSqlRaw(coreCreateScript);
+        moderationDatabase.Database.ExecuteSqlRaw(moderationCreateScript);
 
-            var moderationDatabase = serviceProvider.GetRequiredService<ModerationDatabaseContext>();
-            var moderationCreateScript = moderationDatabase.Database.GenerateCreateScript();
+        this.Database = moderationDatabase;
+        this.Warnings = serviceProvider.GetRequiredService<WarningService>();
+    }
 
-            moderationDatabase.Database.ExecuteSqlRaw(coreCreateScript);
-            moderationDatabase.Database.ExecuteSqlRaw(moderationCreateScript);
+    /// <inheritdoc />
+    public virtual Task InitializeAsync()
+    {
+        return Task.CompletedTask;
+    }
 
-            this.Database = moderationDatabase;
-            this.Warnings = serviceProvider.GetRequiredService<WarningService>();
-        }
-
-        /// <inheritdoc />
-        public virtual Task InitializeAsync()
-        {
-            return Task.CompletedTask;
-        }
-
-        /// <inheritdoc />
-        public Task DisposeAsync()
-        {
-            return Task.CompletedTask;
-        }
+    /// <inheritdoc />
+    public Task DisposeAsync()
+    {
+        return Task.CompletedTask;
     }
 }

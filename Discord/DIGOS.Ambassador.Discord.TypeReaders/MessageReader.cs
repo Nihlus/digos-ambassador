@@ -31,65 +31,64 @@ using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Core;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Discord.TypeReaders
+namespace DIGOS.Ambassador.Discord.TypeReaders;
+
+/// <summary>
+/// Parses Discord message links and IDs into complete message objects.
+/// </summary>
+public class MessageReader : AbstractTypeParser<IMessage>
 {
+    private static readonly Regex Pattern = new
+    (
+        @"(?<!<)https?://(?:(?:ptb|canary)\.)?discord(?:app)?\.com/channels/(?<GuildId>\d+)/(?<ChannelId>\d+)/(?<MessageId>\d+)(?!>)",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant
+    );
+
+    private readonly IDiscordRestChannelAPI _channelAPI;
+    private readonly ICommandContext _context;
+
     /// <summary>
-    /// Parses Discord message links and IDs into complete message objects.
+    /// Initializes a new instance of the <see cref="MessageReader"/> class.
     /// </summary>
-    public class MessageReader : AbstractTypeParser<IMessage>
+    /// <param name="channelAPI">The chanel API.</param>
+    /// <param name="context">The command context.</param>
+    public MessageReader(IDiscordRestChannelAPI channelAPI, ICommandContext context)
     {
-        private static readonly Regex Pattern = new
-        (
-            @"(?<!<)https?://(?:(?:ptb|canary)\.)?discord(?:app)?\.com/channels/(?<GuildId>\d+)/(?<ChannelId>\d+)/(?<MessageId>\d+)(?!>)",
-            RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant
-        );
+        _channelAPI = channelAPI;
+        _context = context;
+    }
 
-        private readonly IDiscordRestChannelAPI _channelAPI;
-        private readonly ICommandContext _context;
+    /// <inheritdoc />
+    public override async ValueTask<Result<IMessage>> TryParseAsync(string value, CancellationToken ct)
+    {
+        value = value.Trim();
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MessageReader"/> class.
-        /// </summary>
-        /// <param name="channelAPI">The chanel API.</param>
-        /// <param name="context">The command context.</param>
-        public MessageReader(IDiscordRestChannelAPI channelAPI, ICommandContext context)
+        var match = Pattern.Match(value);
+        if (!match.Success)
         {
-            _channelAPI = channelAPI;
-            _context = context;
-        }
-
-        /// <inheritdoc />
-        public override async ValueTask<Result<IMessage>> TryParseAsync(string value, CancellationToken ct)
-        {
-            value = value.Trim();
-
-            var match = Pattern.Match(value);
-            if (!match.Success)
-            {
-                if (!Snowflake.TryParse(value, out var parsedID))
-                {
-                    return new ParsingError<IMessage>(value);
-                }
-
-                var getParsedMessage = await _channelAPI.GetChannelMessageAsync(_context.ChannelID, parsedID.Value, ct);
-                return !getParsedMessage.IsSuccess
-                    ? getParsedMessage
-                    : Result<IMessage>.FromSuccess(getParsedMessage.Entity);
-            }
-
-            var rawChannelID = match.Groups["ChannelId"].Value;
-            var rawMessageID = match.Groups["MessageId"].Value;
-
-            if (!Snowflake.TryParse(rawChannelID, out var channelID) ||
-                !Snowflake.TryParse(rawMessageID, out var messageID))
+            if (!Snowflake.TryParse(value, out var parsedID))
             {
                 return new ParsingError<IMessage>(value);
             }
 
-            var getMessage = await _channelAPI.GetChannelMessageAsync(channelID.Value, messageID.Value, ct);
-            return !getMessage.IsSuccess
-                ? getMessage
-                : Result<IMessage>.FromSuccess(getMessage.Entity);
+            var getParsedMessage = await _channelAPI.GetChannelMessageAsync(_context.ChannelID, parsedID.Value, ct);
+            return !getParsedMessage.IsSuccess
+                ? getParsedMessage
+                : Result<IMessage>.FromSuccess(getParsedMessage.Entity);
         }
+
+        var rawChannelID = match.Groups["ChannelId"].Value;
+        var rawMessageID = match.Groups["MessageId"].Value;
+
+        if (!Snowflake.TryParse(rawChannelID, out var channelID) ||
+            !Snowflake.TryParse(rawMessageID, out var messageID))
+        {
+            return new ParsingError<IMessage>(value);
+        }
+
+        var getMessage = await _channelAPI.GetChannelMessageAsync(channelID.Value, messageID.Value, ct);
+        return !getMessage.IsSuccess
+            ? getMessage
+            : Result<IMessage>.FromSuccess(getMessage.Entity);
     }
 }

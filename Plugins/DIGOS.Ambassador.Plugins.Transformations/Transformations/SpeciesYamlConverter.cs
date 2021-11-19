@@ -27,58 +27,57 @@ using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations;
+
+/// <summary>
+/// YAML deserialization converter for species objects.
+/// </summary>
+internal class SpeciesYamlConverter : IYamlTypeConverter
 {
+    private TransformationService Transformation { get; }
+
     /// <summary>
-    /// YAML deserialization converter for species objects.
+    /// Initializes a new instance of the <see cref="SpeciesYamlConverter"/> class.
     /// </summary>
-    internal class SpeciesYamlConverter : IYamlTypeConverter
+    /// <param name="transformation">The transformation service.</param>
+    public SpeciesYamlConverter(TransformationService transformation)
     {
-        private TransformationService Transformation { get; }
+        this.Transformation = transformation;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SpeciesYamlConverter"/> class.
-        /// </summary>
-        /// <param name="transformation">The transformation service.</param>
-        public SpeciesYamlConverter(TransformationService transformation)
+    /// <inheritdoc />
+    public bool Accepts(Type type)
+    {
+        return type == typeof(Species);
+    }
+
+    /// <inheritdoc />
+    public object? ReadYaml(IParser parser, Type type)
+    {
+        if (!parser.TryConsume<Scalar>(out var speciesName))
         {
-            this.Transformation = transformation;
+            return null;
         }
 
-        /// <inheritdoc />
-        public bool Accepts(Type type)
+        var getSpeciesResult = this.Transformation.GetSpeciesByName(speciesName.Value);
+        if (!getSpeciesResult.IsSuccess)
         {
-            return type == typeof(Species);
+            throw new InvalidOperationException(getSpeciesResult.Error.Message);
         }
 
-        /// <inheritdoc />
-        public object? ReadYaml(IParser parser, Type type)
+        return getSpeciesResult.Entity;
+    }
+
+    /// <inheritdoc />
+    public void WriteYaml(IEmitter emitter, object? value, Type type)
+    {
+        if (value is null)
         {
-            if (!parser.TryConsume<Scalar>(out var speciesName))
-            {
-                return null;
-            }
-
-            var getSpeciesResult = this.Transformation.GetSpeciesByName(speciesName.Value);
-            if (!getSpeciesResult.IsSuccess)
-            {
-                throw new InvalidOperationException(getSpeciesResult.Error.Message);
-            }
-
-            return getSpeciesResult.Entity;
+            return;
         }
 
-        /// <inheritdoc />
-        public void WriteYaml(IEmitter emitter, object? value, Type type)
-        {
-            if (value is null)
-            {
-                return;
-            }
+        var species = (Species)value;
 
-            var species = (Species)value;
-
-            emitter.Emit(new Scalar(species.Name));
-        }
+        emitter.Emit(new Scalar(species.Name));
     }
 }

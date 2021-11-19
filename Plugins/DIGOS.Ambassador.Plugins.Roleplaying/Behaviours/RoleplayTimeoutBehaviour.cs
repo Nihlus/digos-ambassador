@@ -35,97 +35,96 @@ using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
+namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours;
+
+/// <summary>
+/// Times out roleplays, stopping them if they've been inactive for more than a set time.
+/// </summary>
+[UsedImplicitly]
+internal sealed class RoleplayTimeoutBehaviour : ContinuousBehaviour<RoleplayTimeoutBehaviour>
 {
+    /// <inheritdoc/>
+    protected override TimeSpan TickDelay => TimeSpan.FromMinutes(1);
+
+    /// <inheritdoc/>
+    protected override bool UseTransaction => false;
+
     /// <summary>
-    /// Times out roleplays, stopping them if they've been inactive for more than a set time.
+    /// Initializes a new instance of the <see cref="RoleplayTimeoutBehaviour"/> class.
     /// </summary>
-    [UsedImplicitly]
-    internal sealed class RoleplayTimeoutBehaviour : ContinuousBehaviour<RoleplayTimeoutBehaviour>
+    /// <param name="services">The services.</param>
+    /// <param name="logger">The logging instance for this type.</param>
+    public RoleplayTimeoutBehaviour
+    (
+        IServiceProvider services,
+        ILogger<RoleplayTimeoutBehaviour> logger
+    )
+        : base(services, logger)
     {
-        /// <inheritdoc/>
-        protected override TimeSpan TickDelay => TimeSpan.FromMinutes(1);
+    }
 
-        /// <inheritdoc/>
-        protected override bool UseTransaction => false;
+    /// <inheritdoc/>
+    protected override async Task<Result> OnTickAsync(CancellationToken ct, IServiceProvider tickServices)
+    {
+        var feedback = tickServices.GetRequiredService<FeedbackService>();
+        var roleplayService = tickServices.GetRequiredService<RoleplayDiscordService>();
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RoleplayTimeoutBehaviour"/> class.
-        /// </summary>
-        /// <param name="services">The services.</param>
-        /// <param name="logger">The logging instance for this type.</param>
-        public RoleplayTimeoutBehaviour
+        var timedOutRoleplays = await roleplayService.QueryRoleplaysAsync
         (
-            IServiceProvider services,
-            ILogger<RoleplayTimeoutBehaviour> logger
-        )
-            : base(services, logger)
-        {
-        }
+            q => q
+                .Where(r => r.IsActive)
+                .Where(r => r.LastUpdated.HasValue)
+                .Where(r => DateTimeOffset.UtcNow - r.LastUpdated > TimeSpan.FromHours(72))
+        );
 
-        /// <inheritdoc/>
-        protected override async Task<Result> OnTickAsync(CancellationToken ct, IServiceProvider tickServices)
+        foreach (var roleplay in timedOutRoleplays)
         {
-            var feedback = tickServices.GetRequiredService<FeedbackService>();
-            var roleplayService = tickServices.GetRequiredService<RoleplayDiscordService>();
+            ct.ThrowIfCancellationRequested();
 
-            var timedOutRoleplays = await roleplayService.QueryRoleplaysAsync
+            // We'll use a transaction per warning to avoid timeouts
+            using var timeoutTransaction = new TransactionScope
             (
-                q => q
-                    .Where(r => r.IsActive)
-                    .Where(r => r.LastUpdated.HasValue)
-                    .Where(r => DateTimeOffset.UtcNow - r.LastUpdated > TimeSpan.FromHours(72))
+                TransactionScopeOption.Required,
+                this.TransactionOptions,
+                TransactionScopeAsyncFlowOption.Enabled
             );
 
-            foreach (var roleplay in timedOutRoleplays)
+            var stopRoleplay = await roleplayService.StopRoleplayAsync(roleplay);
+            if (!stopRoleplay.IsSuccess)
             {
-                ct.ThrowIfCancellationRequested();
-
-                // We'll use a transaction per warning to avoid timeouts
-                using var timeoutTransaction = new TransactionScope
-                (
-                    TransactionScopeOption.Required,
-                    this.TransactionOptions,
-                    TransactionScopeAsyncFlowOption.Enabled
-                );
-
-                var stopRoleplay = await roleplayService.StopRoleplayAsync(roleplay);
-                if (!stopRoleplay.IsSuccess)
-                {
-                    return stopRoleplay;
-                }
-
-                var notifyResult = await NotifyOwnerAsync(feedback, roleplay);
-                if (!notifyResult.IsSuccess)
-                {
-                    return notifyResult;
-                }
-
-                timeoutTransaction.Complete();
+                return stopRoleplay;
             }
 
-            return Result.FromSuccess();
-        }
-
-        /// <summary>
-        /// Notifies the owner of the roleplay that it was stopped because it timed out.
-        /// </summary>
-        /// <param name="feedback">The feedback service.</param>
-        /// <param name="roleplay">The roleplay.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        private async Task<Result> NotifyOwnerAsync(FeedbackService feedback, Roleplay roleplay)
-        {
-            var notification = new Embed
+            var notifyResult = await NotifyOwnerAsync(feedback, roleplay);
+            if (!notifyResult.IsSuccess)
             {
-                Colour = feedback.Theme.Secondary,
-                Description = $"Due to inactivity, your roleplay \"{roleplay.Name}\" has been stopped.",
-                Footer = new EmbedFooter($"You can restart it by running !rp start \"{roleplay.Name}\".")
-            };
+                return notifyResult;
+            }
 
-            var send = await feedback.SendPrivateEmbedAsync(roleplay.Owner.DiscordID, notification);
-            return send.IsSuccess
-                ? Result.FromSuccess()
-                : Result.FromError(send);
+            timeoutTransaction.Complete();
         }
+
+        return Result.FromSuccess();
+    }
+
+    /// <summary>
+    /// Notifies the owner of the roleplay that it was stopped because it timed out.
+    /// </summary>
+    /// <param name="feedback">The feedback service.</param>
+    /// <param name="roleplay">The roleplay.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    private async Task<Result> NotifyOwnerAsync(FeedbackService feedback, Roleplay roleplay)
+    {
+        var notification = new Embed
+        {
+            Colour = feedback.Theme.Secondary,
+            Description = $"Due to inactivity, your roleplay \"{roleplay.Name}\" has been stopped.",
+            Footer = new EmbedFooter($"You can restart it by running !rp start \"{roleplay.Name}\".")
+        };
+
+        var send = await feedback.SendPrivateEmbedAsync(roleplay.Owner.DiscordID, notification);
+        return send.IsSuccess
+            ? Result.FromSuccess()
+            : Result.FromError(send);
     }
 }

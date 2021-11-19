@@ -22,12 +22,11 @@
 
 using Remora.Commands.Conditions;
 
-namespace DIGOS.Ambassador.Plugins.Core.Preconditions
+namespace DIGOS.Ambassador.Plugins.Core.Preconditions;
+
+/// <summary>
+/// Marks an entity parameter, limiting their use to their owner.
+/// </summary>
+public class RequireEntityOwnerAttribute : ConditionAttribute
 {
-    /// <summary>
-    /// Marks an entity parameter, limiting their use to their owner.
-    /// </summary>
-    public class RequireEntityOwnerAttribute : ConditionAttribute
-    {
-    }
 }

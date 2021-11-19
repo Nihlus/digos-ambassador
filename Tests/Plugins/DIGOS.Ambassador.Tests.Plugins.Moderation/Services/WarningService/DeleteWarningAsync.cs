@@ -32,45 +32,44 @@ using DIGOS.Ambassador.Tests.Plugins.Moderation.Bases;
 using Remora.Discord.Core;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
+namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService;
+
+public partial class WarningService
 {
-    public partial class WarningService
+    public class DeleteWarningAsync : WarningServiceTestBase
     {
-        public class DeleteWarningAsync : WarningServiceTestBase
+        private readonly Snowflake _user = new(0);
+        private readonly Snowflake _guild = new(1);
+
+        private readonly Snowflake _author = new(1);
+
+        [Fact]
+        private async Task ReturnsUnsuccessfulIfWarningDoesNotExist()
         {
-            private readonly Snowflake _user = new(0);
-            private readonly Snowflake _guild = new(1);
+            var warning = new UserWarning(new Server(new Snowflake(0)), new User(new Snowflake(0)), new User(new Snowflake(1)), "Dummy thicc");
 
-            private readonly Snowflake _author = new(1);
+            var result = await this.Warnings.DeleteWarningAsync(warning);
 
-            [Fact]
-            private async Task ReturnsUnsuccessfulIfWarningDoesNotExist()
-            {
-                var warning = new UserWarning(new Server(new Snowflake(0)), new User(new Snowflake(0)), new User(new Snowflake(1)), "Dummy thicc");
+            Assert.False(result.IsSuccess);
+        }
 
-                var result = await this.Warnings.DeleteWarningAsync(warning);
+        [Fact]
+        private async Task ReturnsSuccessfulIfWarningExists()
+        {
+            var warning = (await this.Warnings.CreateWarningAsync(_author, _user, _guild, "Dummy thicc")).Entity;
 
-                Assert.False(result.IsSuccess);
-            }
+            var result = await this.Warnings.DeleteWarningAsync(warning);
+            Assert.True(result.IsSuccess);
+        }
 
-            [Fact]
-            private async Task ReturnsSuccessfulIfWarningExists()
-            {
-                var warning = (await this.Warnings.CreateWarningAsync(_author, _user, _guild, "Dummy thicc")).Entity;
+        [Fact]
+        private async Task ActuallyDeletesWarning()
+        {
+            var warning = (await this.Warnings.CreateWarningAsync(_author, _user, _guild, "Dummy thicc")).Entity;
 
-                var result = await this.Warnings.DeleteWarningAsync(warning);
-                Assert.True(result.IsSuccess);
-            }
+            await this.Warnings.DeleteWarningAsync(warning);
 
-            [Fact]
-            private async Task ActuallyDeletesWarning()
-            {
-                var warning = (await this.Warnings.CreateWarningAsync(_author, _user, _guild, "Dummy thicc")).Entity;
-
-                await this.Warnings.DeleteWarningAsync(warning);
-
-                Assert.Empty(this.Database.UserWarnings);
-            }
+            Assert.Empty(this.Database.UserWarnings);
         }
     }
 }

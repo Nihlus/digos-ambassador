@@ -20,31 +20,30 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
+namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters;
+
+/// <summary>
+/// A format that roleplays can be exported to.
+/// </summary>
+public enum ExportFormat
 {
     /// <summary>
-    /// A format that roleplays can be exported to.
+    /// A PDF file.
     /// </summary>
-    public enum ExportFormat
-    {
-        /// <summary>
-        /// A PDF file.
-        /// </summary>
-        PDF,
+    PDF,
 
-        /// <summary>
-        /// A plaintext file.
-        /// </summary>
-        Plaintext,
+    /// <summary>
+    /// A plaintext file.
+    /// </summary>
+    Plaintext,
 
-        /// <summary>
-        /// A JSON file.
-        /// </summary>
-        JSON,
+    /// <summary>
+    /// A JSON file.
+    /// </summary>
+    JSON,
 
-        /// <summary>
-        /// An ODT file.
-        /// </summary>
-        ODT
-    }
+    /// <summary>
+    /// An ODT file.
+    /// </summary>
+    ODT
 }

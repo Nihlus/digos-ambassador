@@ -26,45 +26,44 @@ using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations;
+
+/// <summary>
+/// YAML deserialization converter for colour objects.
+/// </summary>
+public sealed class ColourYamlConverter : IYamlTypeConverter
 {
-    /// <summary>
-    /// YAML deserialization converter for colour objects.
-    /// </summary>
-    public sealed class ColourYamlConverter : IYamlTypeConverter
+    /// <inheritdoc />
+    public bool Accepts(Type type)
     {
-        /// <inheritdoc />
-        public bool Accepts(Type type)
+        return type == typeof(Colour);
+    }
+
+    /// <inheritdoc />
+    public object? ReadYaml(IParser parser, Type type)
+    {
+        if (!parser.TryConsume<Scalar>(out var rawColour))
         {
-            return type == typeof(Colour);
+            return null;
         }
 
-        /// <inheritdoc />
-        public object? ReadYaml(IParser parser, Type type)
+        if (!Colour.TryParse(rawColour.Value, out var value))
         {
-            if (!parser.TryConsume<Scalar>(out var rawColour))
-            {
-                return null;
-            }
-
-            if (!Colour.TryParse(rawColour.Value, out var value))
-            {
-                throw new ArgumentException("Failed to parse a valid colour.");
-            }
-
-            return value;
+            throw new ArgumentException("Failed to parse a valid colour.");
         }
 
-        /// <inheritdoc />
-        public void WriteYaml(IEmitter emitter, object? value, Type type)
-        {
-            var valueString = value?.ToString();
-            if (valueString is null)
-            {
-                return;
-            }
+        return value;
+    }
 
-            emitter.Emit(new Scalar(valueString));
+    /// <inheritdoc />
+    public void WriteYaml(IEmitter emitter, object? value, Type type)
+    {
+        var valueString = value?.ToString();
+        if (valueString is null)
+        {
+            return;
         }
+
+        emitter.Emit(new Scalar(valueString));
     }
 }

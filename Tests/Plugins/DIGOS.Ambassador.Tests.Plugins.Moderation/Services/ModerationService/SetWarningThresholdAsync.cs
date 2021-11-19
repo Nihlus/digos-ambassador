@@ -29,41 +29,40 @@ using DIGOS.Ambassador.Tests.Plugins.Moderation.Bases;
 using Remora.Discord.Core;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.ModerationService
+namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.ModerationService;
+
+public partial class ModerationServiceTests
 {
-    public partial class ModerationServiceTests
+    public class SetWarningThresholdAsync : ModerationServiceTestBase
     {
-        public class SetWarningThresholdAsync : ModerationServiceTestBase
+        private readonly Snowflake _guild = new(0);
+
+        [Fact]
+        public async Task ReturnsSuccessfulIfThresholdIsDifferent()
         {
-            private readonly Snowflake _guild = new(0);
+            var result = await this.Moderation.SetWarningThresholdAsync(_guild, 1);
 
-            [Fact]
-            public async Task ReturnsSuccessfulIfThresholdIsDifferent()
-            {
-                var result = await this.Moderation.SetWarningThresholdAsync(_guild, 1);
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsUnsuccessfulIfThresholdIsSame()
+        {
+            await this.Moderation.SetWarningThresholdAsync(_guild, 1);
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulIfThresholdIsSame()
-            {
-                await this.Moderation.SetWarningThresholdAsync(_guild, 1);
+            var result = await this.Moderation.SetWarningThresholdAsync(_guild, 1);
 
-                var result = await this.Moderation.SetWarningThresholdAsync(_guild, 1);
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ActuallySetsThreshold()
+        {
+            await this.Moderation.SetWarningThresholdAsync(_guild, 1);
 
-            [Fact]
-            public async Task ActuallySetsThreshold()
-            {
-                await this.Moderation.SetWarningThresholdAsync(_guild, 1);
+            var settings = (await this.Moderation.GetServerSettingsAsync(_guild)).Entity;
 
-                var settings = (await this.Moderation.GetServerSettingsAsync(_guild)).Entity;
-
-                Assert.Equal(1, settings.WarningThreshold);
-            }
+            Assert.Equal(1, settings.WarningThreshold);
         }
     }
 }

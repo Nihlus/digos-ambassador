@@ -25,62 +25,61 @@ using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Results;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters;
+
+/// <summary>
+/// Shifts the species of appearances.
+/// </summary>
+internal sealed class BodypartRemover : AppearanceRemover
 {
+    private readonly TransformationDescriptionBuilder _descriptionBuilder;
+
     /// <summary>
-    /// Shifts the species of appearances.
+    /// Initializes a new instance of the <see cref="BodypartRemover"/> class.
     /// </summary>
-    internal sealed class BodypartRemover : AppearanceRemover
+    /// <param name="appearance">The appearance that is being shifted.</param>
+    /// <param name="descriptionBuilder">The description builder.</param>
+    public BodypartRemover
+    (
+        Appearance appearance,
+        TransformationDescriptionBuilder descriptionBuilder
+    )
+        : base(appearance)
     {
-        private readonly TransformationDescriptionBuilder _descriptionBuilder;
+        _descriptionBuilder = descriptionBuilder;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="BodypartRemover"/> class.
-        /// </summary>
-        /// <param name="appearance">The appearance that is being shifted.</param>
-        /// <param name="descriptionBuilder">The description builder.</param>
-        public BodypartRemover
-        (
-            Appearance appearance,
-            TransformationDescriptionBuilder descriptionBuilder
-        )
-            : base(appearance)
+    /// <inheritdoc />
+    protected override async Task<Result<ShiftBodypartResult>> RemoveBodypartAsync(Bodypart bodypart, Chirality chirality)
+    {
+        if (!this.Appearance.TryGetAppearanceComponent(bodypart, chirality, out var component))
         {
-            _descriptionBuilder = descriptionBuilder;
+            return new ShiftBodypartResult(await GetNoChangeMessageAsync(bodypart), ShiftBodypartAction.Nothing);
         }
 
-        /// <inheritdoc />
-        protected override async Task<Result<ShiftBodypartResult>> RemoveBodypartAsync(Bodypart bodypart, Chirality chirality)
-        {
-            if (!this.Appearance.TryGetAppearanceComponent(bodypart, chirality, out var component))
-            {
-                return new ShiftBodypartResult(await GetNoChangeMessageAsync(bodypart), ShiftBodypartAction.Nothing);
-            }
+        this.Appearance.Components.Remove(component);
 
-            this.Appearance.Components.Remove(component);
+        var removeMessage = _descriptionBuilder.BuildRemoveMessage(this.Appearance, bodypart);
+        return new ShiftBodypartResult(removeMessage, ShiftBodypartAction.Remove);
+    }
 
-            var removeMessage = _descriptionBuilder.BuildRemoveMessage(this.Appearance, bodypart);
-            return new ShiftBodypartResult(removeMessage, ShiftBodypartAction.Remove);
-        }
+    /// <inheritdoc />
+    protected override Task<string> GetUniformRemoveMessageAsync(Bodypart bodypart)
+    {
+        return Task.FromResult(_descriptionBuilder.BuildUniformRemoveMessage(this.Appearance, bodypart));
+    }
 
-        /// <inheritdoc />
-        protected override Task<string> GetUniformRemoveMessageAsync(Bodypart bodypart)
-        {
-            return Task.FromResult(_descriptionBuilder.BuildUniformRemoveMessage(this.Appearance, bodypart));
-        }
+    /// <inheritdoc />
+    protected override Task<string> GetRemoveMessageAsync(Bodypart bodypart, Chirality chirality)
+    {
+        return Task.FromResult(_descriptionBuilder.BuildRemoveMessage(this.Appearance, bodypart));
+    }
 
-        /// <inheritdoc />
-        protected override Task<string> GetRemoveMessageAsync(Bodypart bodypart, Chirality chirality)
-        {
-            return Task.FromResult(_descriptionBuilder.BuildRemoveMessage(this.Appearance, bodypart));
-        }
+    /// <inheritdoc />
+    protected override Task<string> GetNoChangeMessageAsync(Bodypart bodypart)
+    {
+        var character = this.Appearance.Character;
 
-        /// <inheritdoc />
-        protected override Task<string> GetNoChangeMessageAsync(Bodypart bodypart)
-        {
-            var character = this.Appearance.Character;
-
-            return Task.FromResult($"{character.Nickname} doesn't have anything like that to remove.");
-        }
+        return Task.FromResult($"{character.Nickname} doesn't have anything like that to remove.");
     }
 }

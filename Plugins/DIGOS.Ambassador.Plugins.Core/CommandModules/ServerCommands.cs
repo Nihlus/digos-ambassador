@@ -41,176 +41,227 @@ using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTa
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
-namespace DIGOS.Ambassador.Plugins.Core.CommandModules
+namespace DIGOS.Ambassador.Plugins.Core.CommandModules;
+
+/// <summary>
+/// Server-related commands, such as viewing or editing info about a specific server.
+/// </summary>
+[UsedImplicitly]
+[Group("server")]
+[Description("Server-related commands, such as viewing or editing info about a specific server.")]
+public class ServerCommands : CommandGroup
 {
+    private readonly FeedbackService _feedback;
+    private readonly ServerService _servers;
+    private readonly ICommandContext _context;
+    private readonly IDiscordRestGuildAPI _guildAPI;
+    private readonly IDiscordRestChannelAPI _channelAPI;
+
     /// <summary>
-    /// Server-related commands, such as viewing or editing info about a specific server.
+    /// Initializes a new instance of the <see cref="ServerCommands"/> class.
+    /// </summary>
+    /// <param name="feedback">The user feedback service.</param>
+    /// <param name="servers">The servers service.</param>
+    /// <param name="context">The command context.</param>
+    /// <param name="guildAPI">The guild API.</param>
+    /// <param name="channelAPI">The channel API.</param>
+    public ServerCommands(FeedbackService feedback, ServerService servers, ICommandContext context, IDiscordRestGuildAPI guildAPI, IDiscordRestChannelAPI channelAPI)
+    {
+        _feedback = feedback;
+        _servers = servers;
+        _context = context;
+        _guildAPI = guildAPI;
+        _channelAPI = channelAPI;
+    }
+
+    /// <summary>
+    /// Shows general information about the current server.
     /// </summary>
     [UsedImplicitly]
-    [Group("server")]
-    [Description("Server-related commands, such as viewing or editing info about a specific server.")]
-    public class ServerCommands : CommandGroup
+    [Command("show")]
+    [Description("Shows general information about the current server.")]
+    [RequireContext(ChannelContext.Guild)]
+    [RequirePermission(typeof(ShowServerInfo), PermissionTarget.Self)]
+    public async Task<IResult> ShowServerAsync()
     {
-        private readonly FeedbackService _feedback;
-        private readonly ServerService _servers;
-        private readonly ICommandContext _context;
-        private readonly IDiscordRestGuildAPI _guildAPI;
-        private readonly IDiscordRestChannelAPI _channelAPI;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ServerCommands"/> class.
-        /// </summary>
-        /// <param name="feedback">The user feedback service.</param>
-        /// <param name="servers">The servers service.</param>
-        /// <param name="context">The command context.</param>
-        /// <param name="guildAPI">The guild API.</param>
-        /// <param name="channelAPI">The channel API.</param>
-        public ServerCommands(FeedbackService feedback, ServerService servers, ICommandContext context, IDiscordRestGuildAPI guildAPI, IDiscordRestChannelAPI channelAPI)
+        var getServerResult = await _servers.GetOrRegisterServerAsync(_context.GuildID.Value);
+        if (!getServerResult.IsSuccess)
         {
-            _feedback = feedback;
-            _servers = servers;
-            _context = context;
-            _guildAPI = guildAPI;
-            _channelAPI = channelAPI;
+            return getServerResult;
         }
 
-        /// <summary>
-        /// Shows general information about the current server.
-        /// </summary>
-        [UsedImplicitly]
-        [Command("show")]
-        [Description("Shows general information about the current server.")]
-        [RequireContext(ChannelContext.Guild)]
-        [RequirePermission(typeof(ShowServerInfo), PermissionTarget.Self)]
-        public async Task<IResult> ShowServerAsync()
+        var getGuild = await _guildAPI.GetGuildAsync(_context.GuildID.Value, ct: this.CancellationToken);
+        if (!getGuild.IsSuccess)
         {
-            var getServerResult = await _servers.GetOrRegisterServerAsync(_context.GuildID.Value);
-            if (!getServerResult.IsSuccess)
+            return getGuild;
+        }
+
+        var guild = getGuild.Entity;
+
+        var server = getServerResult.Entity;
+
+        var fields = new[]
+        {
+            new EmbedField("Permission Warnings", server.SuppressPermissionWarnings ? "On" : "Off", true),
+            new EmbedField("NSFW", server.IsNSFW ? "Yes" : "No"),
+            new EmbedField("Send first-join message", server.SendJoinMessage ? "Yes" : "No"),
+            new EmbedField
+            (
+                "First-join message",
+                server.JoinMessage is null ? "Not set" : server.JoinMessage.Ellipsize(1024)
+            )
+        };
+
+        var embed = new Embed
+        {
+            Colour = _feedback.Theme.Secondary,
+            Title = guild.Name,
+            Fields = fields
+        };
+
+        var getGuildSplash = CDN.GetGuildSplashUrl(guild);
+        if (getGuildSplash.IsSuccess)
+        {
+            embed = embed with
             {
-                return getServerResult;
-            }
-
-            var getGuild = await _guildAPI.GetGuildAsync(_context.GuildID.Value, ct: this.CancellationToken);
-            if (!getGuild.IsSuccess)
-            {
-                return getGuild;
-            }
-
-            var guild = getGuild.Entity;
-
-            var server = getServerResult.Entity;
-
-            var fields = new[]
-            {
-                new EmbedField("Permission Warnings", server.SuppressPermissionWarnings ? "On" : "Off", true),
-                new EmbedField("NSFW", server.IsNSFW ? "Yes" : "No"),
-                new EmbedField("Send first-join message", server.SendJoinMessage ? "Yes" : "No"),
-                new EmbedField
-                (
-                    "First-join message",
-                    server.JoinMessage is null ? "Not set" : server.JoinMessage.Ellipsize(1024)
-                )
+                Thumbnail = new EmbedThumbnail(getGuildSplash.Entity.ToString())
             };
-
-            var embed = new Embed
-            {
-                Colour = _feedback.Theme.Secondary,
-                Title = guild.Name,
-                Fields = fields
-            };
-
-            var getGuildSplash = CDN.GetGuildSplashUrl(guild);
-            if (getGuildSplash.IsSuccess)
+        }
+        else
+        {
+            var getGuildIcon = CDN.GetGuildIconUrl(guild);
+            if (getGuildIcon.IsSuccess)
             {
                 embed = embed with
                 {
-                    Thumbnail = new EmbedThumbnail(getGuildSplash.Entity.ToString())
+                    Thumbnail = new EmbedThumbnail(getGuildIcon.Entity.ToString())
                 };
             }
-            else
-            {
-                var getGuildIcon = CDN.GetGuildIconUrl(guild);
-                if (getGuildIcon.IsSuccess)
-                {
-                    embed = embed with
-                    {
-                        Thumbnail = new EmbedThumbnail(getGuildIcon.Entity.ToString())
-                    };
-                }
-            }
-
-            var getDescription = _servers.GetDescription(server);
-            embed = embed with
-            {
-                Description = getDescription.IsSuccess
-                    ? getDescription.Entity
-                    : "The server doesn't have a description set."
-            };
-
-            var sendResult = await _channelAPI.CreateMessageAsync
-            (
-                _context.ChannelID,
-                embeds: new[] { embed },
-                ct: this.CancellationToken
-            );
-
-            return sendResult.IsSuccess
-                ? Result.FromSuccess()
-                : Result.FromError(sendResult);
         }
 
-        /// <summary>
-        /// Shows the server's join message.
-        /// </summary>
-        [UsedImplicitly]
-        [Command("join-message")]
-        [Description("Shows the server's join message.")]
-        [RequireContext(ChannelContext.Guild)]
-        [RequirePermission(typeof(ShowServerInfo), PermissionTarget.Self)]
-        public async Task<IResult> ShowJoinMessageAsync()
+        var getDescription = _servers.GetDescription(server);
+        embed = embed with
         {
-            var getServerResult = await _servers.GetOrRegisterServerAsync(_context.GuildID.Value);
-            if (!getServerResult.IsSuccess)
-            {
-                return getServerResult;
-            }
+            Description = getDescription.IsSuccess
+                ? getDescription.Entity
+                : "The server doesn't have a description set."
+        };
 
-            var server = getServerResult.Entity;
+        var sendResult = await _channelAPI.CreateMessageAsync
+        (
+            _context.ChannelID,
+            embeds: new[] { embed },
+            ct: this.CancellationToken
+        );
 
-            var getJoinMessageResult = _servers.GetJoinMessage(server);
-            if (!getJoinMessageResult.IsSuccess)
-            {
-                return getJoinMessageResult;
-            }
+        return sendResult.IsSuccess
+            ? Result.FromSuccess()
+            : Result.FromError(sendResult);
+    }
 
-            var embed = new Embed
-            {
-                Colour = _feedback.Theme.Secondary,
-                Title = "Welcome!",
-                Description = getJoinMessageResult.Entity
-            };
+    /// <summary>
+    /// Shows the server's join message.
+    /// </summary>
+    [UsedImplicitly]
+    [Command("join-message")]
+    [Description("Shows the server's join message.")]
+    [RequireContext(ChannelContext.Guild)]
+    [RequirePermission(typeof(ShowServerInfo), PermissionTarget.Self)]
+    public async Task<IResult> ShowJoinMessageAsync()
+    {
+        var getServerResult = await _servers.GetOrRegisterServerAsync(_context.GuildID.Value);
+        if (!getServerResult.IsSuccess)
+        {
+            return getServerResult;
+        }
 
-            var sendResult = await _channelAPI.CreateMessageAsync
-            (
-                _context.ChannelID,
-                embeds: new[] { embed },
-                ct: this.CancellationToken
-            );
+        var server = getServerResult.Entity;
 
-            return sendResult.IsSuccess
-                ? Result.FromSuccess()
-                : Result.FromError(sendResult);
+        var getJoinMessageResult = _servers.GetJoinMessage(server);
+        if (!getJoinMessageResult.IsSuccess)
+        {
+            return getJoinMessageResult;
+        }
+
+        var embed = new Embed
+        {
+            Colour = _feedback.Theme.Secondary,
+            Title = "Welcome!",
+            Description = getJoinMessageResult.Entity
+        };
+
+        var sendResult = await _channelAPI.CreateMessageAsync
+        (
+            _context.ChannelID,
+            embeds: new[] { embed },
+            ct: this.CancellationToken
+        );
+
+        return sendResult.IsSuccess
+            ? Result.FromSuccess()
+            : Result.FromError(sendResult);
+    }
+
+    /// <summary>
+    /// Clears the join message.
+    /// </summary>
+    [UsedImplicitly]
+    [Command("clear-join-message")]
+    [Description("Clears the join message.")]
+    [RequireContext(ChannelContext.Guild)]
+    [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
+    public async Task<Result<FeedbackMessage>> ClearJoinMessageAsync()
+    {
+        var getServerResult = await _servers.GetOrRegisterServerAsync(_context.GuildID.Value);
+        if (!getServerResult.IsSuccess)
+        {
+            return Result<FeedbackMessage>.FromError(getServerResult);
+        }
+
+        var server = getServerResult.Entity;
+
+        var result = await _servers.ClearJoinMessageAsync(server);
+        if (!result.IsSuccess)
+        {
+            return Result<FeedbackMessage>.FromError(result);
+        }
+
+        return new FeedbackMessage("Join message cleared.", _feedback.Theme.Secondary);
+    }
+
+    /// <summary>
+    /// Server info setter commands.
+    /// </summary>
+    [UsedImplicitly]
+    [Group("set")]
+    public class SetCommands : CommandGroup
+    {
+        private readonly ServerService _servers;
+        private readonly ICommandContext _context;
+        private readonly FeedbackService _feedback;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SetCommands"/> class.
+        /// </summary>
+        /// <param name="servers">The servers service.</param>
+        /// <param name="context">The command context.</param>
+        /// <param name="feedback">The feedback service.</param>
+        public SetCommands(ServerService servers, ICommandContext context, FeedbackService feedback)
+        {
+            _servers = servers;
+            _context = context;
+            _feedback = feedback;
         }
 
         /// <summary>
-        /// Clears the join message.
+        /// Sets the server's description.
         /// </summary>
-        [UsedImplicitly]
-        [Command("clear-join-message")]
-        [Description("Clears the join message.")]
+        /// <param name="newDescription">The new description.</param>
+        [Command("description")]
+        [Description("Sets the server's description.")]
         [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
-        public async Task<Result<FeedbackMessage>> ClearJoinMessageAsync()
+        public async Task<Result<FeedbackMessage>> SetDescriptionAsync(string newDescription)
         {
             var getServerResult = await _servers.GetOrRegisterServerAsync(_context.GuildID.Value);
             if (!getServerResult.IsSuccess)
@@ -220,154 +271,102 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
 
             var server = getServerResult.Entity;
 
-            var result = await _servers.ClearJoinMessageAsync(server);
+            var result = await _servers.SetDescriptionAsync(server, newDescription);
             if (!result.IsSuccess)
             {
                 return Result<FeedbackMessage>.FromError(result);
             }
 
-            return new FeedbackMessage("Join message cleared.", _feedback.Theme.Secondary);
+            return new FeedbackMessage("Server description set.", _feedback.Theme.Secondary);
         }
 
         /// <summary>
-        /// Server info setter commands.
+        /// Sets the server's first-join message.
         /// </summary>
-        [UsedImplicitly]
-        [Group("set")]
-        public class SetCommands : CommandGroup
+        /// <param name="newJoinMessage">The new join message.</param>
+        [Command("join-message")]
+        [Description("Sets the server's first-join message.")]
+        [RequireContext(ChannelContext.Guild)]
+        [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
+        public async Task<Result<FeedbackMessage>> SetJoinMessageAsync(string newJoinMessage)
         {
-            private readonly ServerService _servers;
-            private readonly ICommandContext _context;
-            private readonly FeedbackService _feedback;
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="SetCommands"/> class.
-            /// </summary>
-            /// <param name="servers">The servers service.</param>
-            /// <param name="context">The command context.</param>
-            /// <param name="feedback">The feedback service.</param>
-            public SetCommands(ServerService servers, ICommandContext context, FeedbackService feedback)
+            var getServerResult = await _servers.GetOrRegisterServerAsync(_context.GuildID.Value);
+            if (!getServerResult.IsSuccess)
             {
-                _servers = servers;
-                _context = context;
-                _feedback = feedback;
+                return Result<FeedbackMessage>.FromError(getServerResult);
             }
 
-            /// <summary>
-            /// Sets the server's description.
-            /// </summary>
-            /// <param name="newDescription">The new description.</param>
-            [Command("description")]
-            [Description("Sets the server's description.")]
-            [RequireContext(ChannelContext.Guild)]
-            [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
-            public async Task<Result<FeedbackMessage>> SetDescriptionAsync(string newDescription)
+            var server = getServerResult.Entity;
+
+            var result = await _servers.SetJoinMessageAsync(server, newJoinMessage);
+            if (!result.IsSuccess)
             {
-                var getServerResult = await _servers.GetOrRegisterServerAsync(_context.GuildID.Value);
-                if (!getServerResult.IsSuccess)
-                {
-                    return Result<FeedbackMessage>.FromError(getServerResult);
-                }
-
-                var server = getServerResult.Entity;
-
-                var result = await _servers.SetDescriptionAsync(server, newDescription);
-                if (!result.IsSuccess)
-                {
-                    return Result<FeedbackMessage>.FromError(result);
-                }
-
-                return new FeedbackMessage("Server description set.", _feedback.Theme.Secondary);
+                return Result<FeedbackMessage>.FromError(result);
             }
 
-            /// <summary>
-            /// Sets the server's first-join message.
-            /// </summary>
-            /// <param name="newJoinMessage">The new join message.</param>
-            [Command("join-message")]
-            [Description("Sets the server's first-join message.")]
-            [RequireContext(ChannelContext.Guild)]
-            [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
-            public async Task<Result<FeedbackMessage>> SetJoinMessageAsync(string newJoinMessage)
+            return new FeedbackMessage("Server first-join message set.", _feedback.Theme.Secondary);
+        }
+
+        /// <summary>
+        /// Sets whether the server is NSFW.
+        /// </summary>
+        /// <param name="isNsfw">Whether the server is NSFW.</param>
+        [Command("is-nsfw")]
+        [Description("Sets whether the server is NSFW.")]
+        [RequireContext(ChannelContext.Guild)]
+        [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
+        public async Task<Result<FeedbackMessage>> SetIsNSFWAsync(bool isNsfw)
+        {
+            var getServerResult = await _servers.GetOrRegisterServerAsync(_context.GuildID.Value);
+            if (!getServerResult.IsSuccess)
             {
-                var getServerResult = await _servers.GetOrRegisterServerAsync(_context.GuildID.Value);
-                if (!getServerResult.IsSuccess)
-                {
-                    return Result<FeedbackMessage>.FromError(getServerResult);
-                }
-
-                var server = getServerResult.Entity;
-
-                var result = await _servers.SetJoinMessageAsync(server, newJoinMessage);
-                if (!result.IsSuccess)
-                {
-                    return Result<FeedbackMessage>.FromError(result);
-                }
-
-                return new FeedbackMessage("Server first-join message set.", _feedback.Theme.Secondary);
+                return Result<FeedbackMessage>.FromError(getServerResult);
             }
 
-            /// <summary>
-            /// Sets whether the server is NSFW.
-            /// </summary>
-            /// <param name="isNsfw">Whether the server is NSFW.</param>
-            [Command("is-nsfw")]
-            [Description("Sets whether the server is NSFW.")]
-            [RequireContext(ChannelContext.Guild)]
-            [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
-            public async Task<Result<FeedbackMessage>> SetIsNSFWAsync(bool isNsfw)
+            var server = getServerResult.Entity;
+
+            var result = await _servers.SetIsNSFWAsync(server, isNsfw);
+            if (!result.IsSuccess)
             {
-                var getServerResult = await _servers.GetOrRegisterServerAsync(_context.GuildID.Value);
-                if (!getServerResult.IsSuccess)
-                {
-                    return Result<FeedbackMessage>.FromError(getServerResult);
-                }
-
-                var server = getServerResult.Entity;
-
-                var result = await _servers.SetIsNSFWAsync(server, isNsfw);
-                if (!result.IsSuccess)
-                {
-                    return Result<FeedbackMessage>.FromError(result);
-                }
-
-                return new FeedbackMessage
-                (
-                    $"The server is {(isNsfw ? "now set as NSFW" : "no longer NSFW")}.",
-                    _feedback.Theme.Secondary
-                );
+                return Result<FeedbackMessage>.FromError(result);
             }
 
-            /// <summary>
-            /// Sets whether the bot sends join messages to new users.
-            /// </summary>
-            /// <param name="sendJoinMessage">Whether the bot sends join messages to new users.</param>
-            [Command("send-join-messages")]
-            [Description("Sets whether the bot sends join messages to new users.")]
-            [RequireContext(ChannelContext.Guild)]
-            [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
-            public async Task<Result<FeedbackMessage>> SetSendJoinMessagesAsync(bool sendJoinMessage)
+            return new FeedbackMessage
+            (
+                $"The server is {(isNsfw ? "now set as NSFW" : "no longer NSFW")}.",
+                _feedback.Theme.Secondary
+            );
+        }
+
+        /// <summary>
+        /// Sets whether the bot sends join messages to new users.
+        /// </summary>
+        /// <param name="sendJoinMessage">Whether the bot sends join messages to new users.</param>
+        [Command("send-join-messages")]
+        [Description("Sets whether the bot sends join messages to new users.")]
+        [RequireContext(ChannelContext.Guild)]
+        [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
+        public async Task<Result<FeedbackMessage>> SetSendJoinMessagesAsync(bool sendJoinMessage)
+        {
+            var getServerResult = await _servers.GetOrRegisterServerAsync(_context.GuildID.Value);
+            if (!getServerResult.IsSuccess)
             {
-                var getServerResult = await _servers.GetOrRegisterServerAsync(_context.GuildID.Value);
-                if (!getServerResult.IsSuccess)
-                {
-                    return Result<FeedbackMessage>.FromError(getServerResult);
-                }
-
-                var server = getServerResult.Entity;
-
-                var result = await _servers.SetSendJoinMessageAsync(server, sendJoinMessage);
-                if (!result.IsSuccess)
-                {
-                    return Result<FeedbackMessage>.FromError(result);
-                }
-
-                var willDo = sendJoinMessage
-                    ? "will now send first-join messages to new users"
-                    : "no longer sends first-join messages";
-
-                return new FeedbackMessage($"The server {willDo}.", _feedback.Theme.Secondary);
+                return Result<FeedbackMessage>.FromError(getServerResult);
             }
+
+            var server = getServerResult.Entity;
+
+            var result = await _servers.SetSendJoinMessageAsync(server, sendJoinMessage);
+            if (!result.IsSuccess)
+            {
+                return Result<FeedbackMessage>.FromError(result);
+            }
+
+            var willDo = sendJoinMessage
+                ? "will now send first-join messages to new users"
+                : "no longer sends first-join messages";
+
+            return new FeedbackMessage($"The server {willDo}.", _feedback.Theme.Secondary);
         }
     }
 }

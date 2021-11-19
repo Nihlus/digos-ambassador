@@ -23,26 +23,25 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Permissions
+namespace DIGOS.Ambassador.Plugins.Autorole.Permissions;
+
+/// <summary>
+/// Represents a permission that allows a user to view autoroles.
+/// </summary>
+public class ViewAutorole : Permission
 {
-    /// <summary>
-    /// Represents a permission that allows a user to view autoroles.
-    /// </summary>
-    public class ViewAutorole : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("72420BA5-6928-411A-AC07-2613EE0F38DF");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("72420BA5-6928-411A-AC07-2613EE0F38DF");
 
-        /// <inheritdoc/>
-        public override string FriendlyName { get; } = nameof(ViewAutorole);
+    /// <inheritdoc/>
+    public override string FriendlyName { get; } = nameof(ViewAutorole);
 
-        /// <inheritdoc/>
-        public override string Description { get; } = "Allows you to view autoroles.";
+    /// <inheritdoc/>
+    public override string Description { get; } = "Allows you to view autoroles.";
 
-        /// <inheritdoc />
-        public override bool IsGrantedByDefaultToSelf => true;
+    /// <inheritdoc />
+    public override bool IsGrantedByDefaultToSelf => true;
 
-        /// <inheritdoc />
-        public override bool IsGrantedByDefaultToOthers => true;
-    }
+    /// <inheritdoc />
+    public override bool IsGrantedByDefaultToOthers => true;
 }

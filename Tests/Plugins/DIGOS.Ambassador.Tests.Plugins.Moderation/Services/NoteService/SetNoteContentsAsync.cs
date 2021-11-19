@@ -33,67 +33,66 @@ using DIGOS.Ambassador.Tests.Plugins.Moderation.Bases;
 using Remora.Discord.Core;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.NoteService
+namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.NoteService;
+
+public partial class NoteService
 {
-    public partial class NoteService
+    public class SetNoteContentsAsync : NoteServiceTestBase
     {
-        public class SetNoteContentsAsync : NoteServiceTestBase
+        private readonly UserNote _note = new(new Server(new Snowflake(0)), new User(new Snowflake(0)), new User(new Snowflake(1)), string.Empty);
+
+        [Fact]
+        public async Task ReturnsUnsuccessfulIfNewContentsAreEmpty()
         {
-            private readonly UserNote _note = new(new Server(new Snowflake(0)), new User(new Snowflake(0)), new User(new Snowflake(1)), string.Empty);
+            var result = await this.Notes.SetNoteContentsAsync(_note, string.Empty);
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulIfNewContentsAreEmpty()
-            {
-                var result = await this.Notes.SetNoteContentsAsync(_note, string.Empty);
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsUnsuccessfulIfNewContentIsTooLong()
+        {
+            var result = await this.Notes.SetNoteContentsAsync(_note, new string('a', 1025));
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulIfNewContentIsTooLong()
-            {
-                var result = await this.Notes.SetNoteContentsAsync(_note, new string('a', 1025));
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsUnsuccessfulIfNewContentsAreIdentical()
+        {
+            await this.Notes.SetNoteContentsAsync(_note, "Dummy thicc");
+            var result = await this.Notes.SetNoteContentsAsync(_note, "Dummy thicc");
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulIfNewContentsAreIdentical()
-            {
-                await this.Notes.SetNoteContentsAsync(_note, "Dummy thicc");
-                var result = await this.Notes.SetNoteContentsAsync(_note, "Dummy thicc");
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsSuccessfulIfNewContentsAreWellFormed()
+        {
+            await this.Notes.SetNoteContentsAsync(_note, "Dummy thicc");
+            var result = await this.Notes.SetNoteContentsAsync(_note, "Not dummy thicc");
 
-            [Fact]
-            public async Task ReturnsSuccessfulIfNewContentsAreWellFormed()
-            {
-                await this.Notes.SetNoteContentsAsync(_note, "Dummy thicc");
-                var result = await this.Notes.SetNoteContentsAsync(_note, "Not dummy thicc");
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ActuallySetsContents()
+        {
+            await this.Notes.SetNoteContentsAsync(_note, "Dummy thicc");
 
-            [Fact]
-            public async Task ActuallySetsContents()
-            {
-                await this.Notes.SetNoteContentsAsync(_note, "Dummy thicc");
+            Assert.Equal("Dummy thicc", _note.Content);
+        }
 
-                Assert.Equal("Dummy thicc", _note.Content);
-            }
+        [Fact]
+        public async Task SetterUpdatesTimestamp()
+        {
+            var before = _note.UpdatedAt;
 
-            [Fact]
-            public async Task SetterUpdatesTimestamp()
-            {
-                var before = _note.UpdatedAt;
+            await this.Notes.SetNoteContentsAsync(_note, "Dummy thicc");
 
-                await this.Notes.SetNoteContentsAsync(_note, "Dummy thicc");
+            var after = _note.UpdatedAt;
 
-                var after = _note.UpdatedAt;
-
-                Assert.True(before < after);
-            }
+            Assert.True(before < after);
         }
     }
 }

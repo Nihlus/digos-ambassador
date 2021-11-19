@@ -46,71 +46,70 @@ using AutoroleCommands = DIGOS.Ambassador.Plugins.Autorole.CommandModules.Autoro
 [assembly: InternalsVisibleTo("DIGOS.Ambassador.Tests.Plugins.Autorole")]
 [assembly: RemoraPlugin(typeof(AutorolePlugin))]
 
-namespace DIGOS.Ambassador.Plugins.Autorole
+namespace DIGOS.Ambassador.Plugins.Autorole;
+
+/// <summary>
+/// Describes the character plugin.
+/// </summary>
+public sealed class AutorolePlugin : PluginDescriptor, IMigratablePlugin
 {
-    /// <summary>
-    /// Describes the character plugin.
-    /// </summary>
-    public sealed class AutorolePlugin : PluginDescriptor, IMigratablePlugin
+    /// <inheritdoc />
+    public override string Name => "Autorole";
+
+    /// <inheritdoc />
+    public override string Description => "Allows administrators to create automated role assignments.";
+
+    /// <inheritdoc />
+    public override void ConfigureServices(IServiceCollection serviceCollection)
     {
-        /// <inheritdoc />
-        public override string Name => "Autorole";
+        serviceCollection.TryAddInteractivityResponder<PaginatedMessageResponder>();
+        serviceCollection.TryAddScoped<AutoroleService>();
+        serviceCollection.TryAddScoped<AutoroleUpdateService>();
+        serviceCollection.TryAddScoped<UserStatisticsService>();
 
-        /// <inheritdoc />
-        public override string Description => "Allows administrators to create automated role assignments.";
+        serviceCollection.AddParser<AutoroleConfigurationParser>();
+        serviceCollection.AddParser<EmojiTypeReader>();
+        serviceCollection.AddCommandGroup<AutoroleCommands>();
 
-        /// <inheritdoc />
-        public override void ConfigureServices(IServiceCollection serviceCollection)
-        {
-            serviceCollection.TryAddInteractivityResponder<PaginatedMessageResponder>();
-            serviceCollection.TryAddScoped<AutoroleService>();
-            serviceCollection.TryAddScoped<AutoroleUpdateService>();
-            serviceCollection.TryAddScoped<UserStatisticsService>();
+        serviceCollection.AddConfiguredSchemaAwareDbContextPool<AutoroleDatabaseContext>();
 
-            serviceCollection.AddParser<AutoroleConfigurationParser>();
-            serviceCollection.AddParser<EmojiTypeReader>();
-            serviceCollection.AddCommandGroup<AutoroleCommands>();
+        /*
+        serviceCollection.AddResponder<MessageCountConditionResponder>();
+        serviceCollection.AddResponder<ReactionConditionResponder>();
+        serviceCollection.AddResponder<UserActivityResponder>();
+        serviceCollection.AddResponder<RoleConditionResponder>();
 
-            serviceCollection.AddConfiguredSchemaAwareDbContextPool<AutoroleDatabaseContext>();
+        serviceCollection.Configure<DiscordGatewayClientOptions>(o => o.Intents |= GatewayIntents.GuildPresences);
+        */
+    }
 
-            /*
-            serviceCollection.AddResponder<MessageCountConditionResponder>();
-            serviceCollection.AddResponder<ReactionConditionResponder>();
-            serviceCollection.AddResponder<UserActivityResponder>();
-            serviceCollection.AddResponder<RoleConditionResponder>();
+    /// <inheritdoc />
+    public override ValueTask<Result> InitializeAsync(IServiceProvider serviceProvider)
+    {
+        var permissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
+        return new ValueTask<Result>(permissionRegistry.RegisterPermissions
+        (
+            Assembly.GetExecutingAssembly(),
+            serviceProvider
+        ));
+    }
 
-            serviceCollection.Configure<DiscordGatewayClientOptions>(o => o.Intents |= GatewayIntents.GuildPresences);
-            */
-        }
+    /// <inheritdoc />
+    public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
+    {
+        var context = serviceProvider.GetRequiredService<AutoroleDatabaseContext>();
 
-        /// <inheritdoc />
-        public override ValueTask<Result> InitializeAsync(IServiceProvider serviceProvider)
-        {
-            var permissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
-            return new ValueTask<Result>(permissionRegistry.RegisterPermissions
-            (
-                Assembly.GetExecutingAssembly(),
-                serviceProvider
-            ));
-        }
+        await context.Database.MigrateAsync();
 
-        /// <inheritdoc />
-        public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
-        {
-            var context = serviceProvider.GetRequiredService<AutoroleDatabaseContext>();
+        return Result.FromSuccess();
+    }
 
-            await context.Database.MigrateAsync();
+    /// <inheritdoc />
+    public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
+    {
+        var context = serviceProvider.GetRequiredService<AutoroleDatabaseContext>();
+        var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
 
-            return Result.FromSuccess();
-        }
-
-        /// <inheritdoc />
-        public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
-        {
-            var context = serviceProvider.GetRequiredService<AutoroleDatabaseContext>();
-            var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
-
-            return appliedMigrations.Any();
-        }
+        return appliedMigrations.Any();
     }
 }

@@ -23,30 +23,29 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages;
+
+public sealed partial class TransformationText
 {
-    public sealed partial class TransformationText
+    /// <summary>
+    /// Holds description messages.
+    /// </summary>
+    public sealed partial class DescriptionMessages
     {
         /// <summary>
-        /// Holds description messages.
+        /// Gets a list of sex and species descriptions. These are used in the beginning of appearance descriptions.
         /// </summary>
-        public sealed partial class DescriptionMessages
-        {
-            /// <summary>
-            /// Gets a list of sex and species descriptions. These are used in the beginning of appearance descriptions.
-            /// </summary>
-            [JsonPropertyName("sexSpecies")]
-            public IReadOnlyList<string> SexSpecies { get; init; } = new List<string>();
+        [JsonPropertyName("sexSpecies")]
+        public IReadOnlyList<string> SexSpecies { get; init; } = new List<string>();
 
-            /// <summary>
-            /// Gets a set of singular descriptions.
-            /// </summary>
-            public SingleDescriptions Single { get; init; } = new();
+        /// <summary>
+        /// Gets a set of singular descriptions.
+        /// </summary>
+        public SingleDescriptions Single { get; init; } = new();
 
-            /// <summary>
-            /// Gets a set of uniform descriptions.
-            /// </summary>
-            public UniformDescriptions Uniform { get; init; } = new();
-        }
+        /// <summary>
+        /// Gets a set of uniform descriptions.
+        /// </summary>
+        public UniformDescriptions Uniform { get; init; } = new();
     }
 }

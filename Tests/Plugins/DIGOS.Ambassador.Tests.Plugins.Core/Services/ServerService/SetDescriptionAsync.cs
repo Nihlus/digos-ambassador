@@ -31,65 +31,64 @@ using Xunit;
 #pragma warning disable CS8625
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Core
+namespace DIGOS.Ambassador.Tests.Plugins.Core;
+
+public static partial class ServerServiceTests
 {
-    public static partial class ServerServiceTests
+    public class SetDescriptionAsync : ServerServiceTestBase
     {
-        public class SetDescriptionAsync : ServerServiceTestBase
+        private Server _server = null!;
+
+        public override async Task InitializeAsync()
         {
-            private Server _server = null!;
+            var serverMock = new Snowflake(0);
+            _server = (await this.Servers.GetOrRegisterServerAsync(serverMock)).Entity;
+        }
 
-            public override async Task InitializeAsync()
-            {
-                var serverMock = new Snowflake(0);
-                _server = (await this.Servers.GetOrRegisterServerAsync(serverMock)).Entity;
-            }
+        [Fact]
+        public async Task ReturnsErrorIfNewDescriptionIsEmpty()
+        {
+            var result = await this.Servers.SetDescriptionAsync(_server, string.Empty);
 
-            [Fact]
-            public async Task ReturnsErrorIfNewDescriptionIsEmpty()
-            {
-                var result = await this.Servers.SetDescriptionAsync(_server, string.Empty);
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsErrorIfNewDescriptionIsWhitespace()
+        {
+            var result = await this.Servers.SetDescriptionAsync(_server, "     ");
 
-            [Fact]
-            public async Task ReturnsErrorIfNewDescriptionIsWhitespace()
-            {
-                var result = await this.Servers.SetDescriptionAsync(_server, "     ");
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsErrorIfNewDescriptionIsSameAsOldDescription()
+        {
+            const string old = "oogabooga";
+            await this.Servers.SetDescriptionAsync(_server, old);
 
-            [Fact]
-            public async Task ReturnsErrorIfNewDescriptionIsSameAsOldDescription()
-            {
-                const string old = "oogabooga";
-                await this.Servers.SetDescriptionAsync(_server, old);
+            var result = await this.Servers.SetDescriptionAsync(_server, old);
 
-                var result = await this.Servers.SetDescriptionAsync(_server, old);
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsErrorIfNewDescriptionIsTooLong()
+        {
+            var newDescription = new string('a', 801);
+            var result = await this.Servers.SetDescriptionAsync(_server, newDescription);
 
-            [Fact]
-            public async Task ReturnsErrorIfNewDescriptionIsTooLong()
-            {
-                var newDescription = new string('a', 801);
-                var result = await this.Servers.SetDescriptionAsync(_server, newDescription);
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task CanSetDescription()
+        {
+            var newDescription = "oogabooga";
+            var result = await this.Servers.SetDescriptionAsync(_server, newDescription);
 
-            [Fact]
-            public async Task CanSetDescription()
-            {
-                var newDescription = "oogabooga";
-                var result = await this.Servers.SetDescriptionAsync(_server, newDescription);
-
-                Assert.True(result.IsSuccess);
-                Assert.Equal(newDescription, _server.Description);
-            }
+            Assert.True(result.IsSuccess);
+            Assert.Equal(newDescription, _server.Description);
         }
     }
 }

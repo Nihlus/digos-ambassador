@@ -32,26 +32,25 @@ using Remora.Plugins.Abstractions.Attributes;
 
 [assembly: RemoraPlugin(typeof(DronePlugin))]
 
-namespace DIGOS.Ambassador.Plugins.Drone
+namespace DIGOS.Ambassador.Plugins.Drone;
+
+/// <summary>
+/// Describes the Drone plugin.
+/// </summary>
+public sealed class DronePlugin : PluginDescriptor
 {
-    /// <summary>
-    /// Describes the Drone plugin.
-    /// </summary>
-    public sealed class DronePlugin : PluginDescriptor
+    /// <inheritdoc />
+    public override string Name => "Drone";
+
+    /// <inheritdoc />
+    public override string Description => "Provides a single command to drone people.";
+
+    /// <inheritdoc/>
+    public override void ConfigureServices(IServiceCollection serviceCollection)
     {
-        /// <inheritdoc />
-        public override string Name => "Drone";
+        serviceCollection.TryAddScoped<DroneService>();
+        serviceCollection.TryAddSingleton<Random>();
 
-        /// <inheritdoc />
-        public override string Description => "Provides a single command to drone people.";
-
-        /// <inheritdoc/>
-        public override void ConfigureServices(IServiceCollection serviceCollection)
-        {
-            serviceCollection.TryAddScoped<DroneService>();
-            serviceCollection.TryAddSingleton<Random>();
-
-            serviceCollection.AddCommandGroup<DroneCommands>();
-        }
+        serviceCollection.AddCommandGroup<DroneCommands>();
     }
 }

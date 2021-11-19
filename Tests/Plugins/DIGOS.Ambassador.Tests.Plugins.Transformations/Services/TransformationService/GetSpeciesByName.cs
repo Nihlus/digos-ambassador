@@ -26,37 +26,36 @@
 
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Transformations
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
+
+public partial class TransformationServiceTests
 {
-    public partial class TransformationServiceTests
+    public class GetSpeciesByName : TransformationServiceTestBase
     {
-        public class GetSpeciesByName : TransformationServiceTestBase
+        [Fact]
+        public void ReturnsCorrectSpeciesForGivenName()
         {
-            [Fact]
-            public void ReturnsCorrectSpeciesForGivenName()
-            {
-                var result = this.Transformations.GetSpeciesByName("template");
+            var result = this.Transformations.GetSpeciesByName("template");
 
-                Assert.True(result.IsSuccess);
-                Assert.Equal("template", result.Entity.Name);
-            }
+            Assert.True(result.IsSuccess);
+            Assert.Equal("template", result.Entity.Name);
+        }
 
-            [Fact]
-            public void ReturnsUnsuccessfulResultForNonexistentName()
-            {
-                var result = this.Transformations.GetSpeciesByName("aasddduaiii");
+        [Fact]
+        public void ReturnsUnsuccessfulResultForNonexistentName()
+        {
+            var result = this.Transformations.GetSpeciesByName("aasddduaiii");
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public void IsCaseInsensitive()
-            {
-                var result = this.Transformations.GetSpeciesByName("TEMPLATE");
+        [Fact]
+        public void IsCaseInsensitive()
+        {
+            var result = this.Transformations.GetSpeciesByName("TEMPLATE");
 
-                Assert.True(result.IsSuccess);
-                Assert.Equal("template", result.Entity.Name);
-            }
+            Assert.True(result.IsSuccess);
+            Assert.Equal("template", result.Entity.Name);
         }
     }
 }

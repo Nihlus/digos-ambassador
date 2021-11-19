@@ -20,21 +20,20 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
+namespace DIGOS.Ambassador.Plugins.Kinks.Wizards;
+
+/// <summary>
+/// Represents the state that the kink wizard is in.
+/// </summary>
+internal enum KinkWizardState
 {
     /// <summary>
-    /// Represents the state that the kink wizard is in.
+    /// The category selection page.
     /// </summary>
-    internal enum KinkWizardState
-    {
-        /// <summary>
-        /// The category selection page.
-        /// </summary>
-        CategorySelection,
+    CategorySelection,
 
-        /// <summary>
-        /// The kink preference selection page.
-        /// </summary>
-        KinkPreference
-    }
+    /// <summary>
+    /// The kink preference selection page.
+    /// </summary>
+    KinkPreference
 }

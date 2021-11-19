@@ -23,20 +23,19 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Permissions
+namespace DIGOS.Ambassador.Plugins.Autorole.Permissions;
+
+/// <summary>
+/// Represents a permission that allows a user to edit autoroles.
+/// </summary>
+public class EditAutorole : Permission
 {
-    /// <summary>
-    /// Represents a permission that allows a user to edit autoroles.
-    /// </summary>
-    public class EditAutorole : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("7D1B4C74-51CA-4866-824F-A3B1925E8F4D");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("7D1B4C74-51CA-4866-824F-A3B1925E8F4D");
 
-        /// <inheritdoc/>
-        public override string FriendlyName { get; } = nameof(EditAutorole);
+    /// <inheritdoc/>
+    public override string FriendlyName { get; } = nameof(EditAutorole);
 
-        /// <inheritdoc/>
-        public override string Description { get; } = "Allows you to edit autoroles.";
-    }
+    /// <inheritdoc/>
+    public override string Description { get; } = "Allows you to edit autoroles.";
 }

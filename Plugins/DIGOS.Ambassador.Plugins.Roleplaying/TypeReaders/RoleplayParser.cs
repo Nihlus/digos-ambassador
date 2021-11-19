@@ -32,81 +32,80 @@ using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Core;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Roleplaying.TypeReaders
-{
-    /// <summary>
-    /// Reads owned roleplays as command arguments. The name "current" is reserved, and will retrieve the current
-    /// roleplay.
-    /// </summary>
-    public sealed class RoleplayParser : AbstractTypeParser<Roleplay>
-    {
-        private readonly RoleplayDiscordService _roleplays;
-        private readonly ICommandContext _context;
+namespace DIGOS.Ambassador.Plugins.Roleplaying.TypeReaders;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RoleplayParser"/> class.
-        /// </summary>
-        /// <param name="roleplays">The roleplaying service.</param>
-        /// <param name="context">The command context.</param>
-        public RoleplayParser(RoleplayDiscordService roleplays, ICommandContext context)
+/// <summary>
+/// Reads owned roleplays as command arguments. The name "current" is reserved, and will retrieve the current
+/// roleplay.
+/// </summary>
+public sealed class RoleplayParser : AbstractTypeParser<Roleplay>
+{
+    private readonly RoleplayDiscordService _roleplays;
+    private readonly ICommandContext _context;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RoleplayParser"/> class.
+    /// </summary>
+    /// <param name="roleplays">The roleplaying service.</param>
+    /// <param name="context">The command context.</param>
+    public RoleplayParser(RoleplayDiscordService roleplays, ICommandContext context)
+    {
+        _roleplays = roleplays;
+        _context = context;
+    }
+
+    /// <inheritdoc />
+    public override async ValueTask<Result<Roleplay>> TryParseAsync(string value, CancellationToken ct)
+    {
+        value = value.Trim();
+
+        if (!_context.GuildID.HasValue)
         {
-            _roleplays = roleplays;
-            _context = context;
+            throw new InvalidOperationException();
         }
 
-        /// <inheritdoc />
-        public override async ValueTask<Result<Roleplay>> TryParseAsync(string value, CancellationToken ct)
+        if (string.Equals(value, "current", StringComparison.OrdinalIgnoreCase))
         {
-            value = value.Trim();
+            return await _roleplays.GetActiveRoleplayAsync(_context.ChannelID);
+        }
 
-            if (!_context.GuildID.HasValue)
-            {
-                throw new InvalidOperationException();
-            }
-
-            if (string.Equals(value, "current", StringComparison.OrdinalIgnoreCase))
-            {
-                return await _roleplays.GetActiveRoleplayAsync(_context.ChannelID);
-            }
-
-            if (!value.Contains(':'))
-            {
-                return await _roleplays.GetBestMatchingRoleplayAsync
-                (
-                    _context.ChannelID,
-                    _context.GuildID.Value,
-                    _context.User.ID,
-                    value
-                );
-            }
-
-            var parts = value.Split(':');
-            if (parts.Length != 2)
-            {
-                return new UserError
-                (
-                    "When searching a specific user, the name must be in the form \"@someone:name\"."
-                );
-            }
-
-            var rawUser = parts[0];
-            if (!Snowflake.TryParse(rawUser.Unmention(), out var parsedUser))
-            {
-                return new UserError
-                (
-                    "I couldn't parse whatever you gave me as a user-scoped roleplay search. Try again?"
-                );
-            }
-
-            var rawName = parts[1];
-
+        if (!value.Contains(':'))
+        {
             return await _roleplays.GetBestMatchingRoleplayAsync
             (
                 _context.ChannelID,
                 _context.GuildID.Value,
-                parsedUser,
-                rawName
+                _context.User.ID,
+                value
             );
         }
+
+        var parts = value.Split(':');
+        if (parts.Length != 2)
+        {
+            return new UserError
+            (
+                "When searching a specific user, the name must be in the form \"@someone:name\"."
+            );
+        }
+
+        var rawUser = parts[0];
+        if (!Snowflake.TryParse(rawUser.Unmention(), out var parsedUser))
+        {
+            return new UserError
+            (
+                "I couldn't parse whatever you gave me as a user-scoped roleplay search. Try again?"
+            );
+        }
+
+        var rawName = parts[1];
+
+        return await _roleplays.GetBestMatchingRoleplayAsync
+        (
+            _context.ChannelID,
+            _context.GuildID.Value,
+            parsedUser,
+            rawName
+        );
     }
 }

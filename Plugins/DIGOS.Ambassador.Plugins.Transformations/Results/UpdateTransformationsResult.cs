@@ -20,54 +20,53 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Results
+namespace DIGOS.Ambassador.Plugins.Transformations.Results;
+
+/// <summary>
+/// Represents an attempt to shift a part of a character's body.
+/// </summary>
+public class UpdateTransformationsResult
 {
     /// <summary>
-    /// Represents an attempt to shift a part of a character's body.
+    /// Gets the number of added species.
     /// </summary>
-    public class UpdateTransformationsResult
+    public uint SpeciesAdded { get; }
+
+    /// <summary>
+    /// Gets the number of added transformations.
+    /// </summary>
+    public uint TransformationsAdded { get; }
+
+    /// <summary>
+    /// Gets the number of updated species.
+    /// </summary>
+    public uint SpeciesUpdated { get; }
+
+    /// <summary>
+    /// Gets the number of updated transformations.
+    /// </summary>
+    public uint TransformationsUpdated { get; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UpdateTransformationsResult"/> class.
+    /// </summary>
+    /// <param name="speciesAdded">The number of new species added.</param>
+    /// <param name="transformationsAdded">The number of new transformations added.</param>
+    /// <param name="speciesUpdated">The number of existing species that were updated with new information.</param>
+    /// <param name="transformationsUpdated">
+    /// The number of existing transformations that were updated with new information.
+    /// </param>
+    public UpdateTransformationsResult
+    (
+        uint speciesAdded,
+        uint transformationsAdded,
+        uint speciesUpdated,
+        uint transformationsUpdated
+    )
     {
-        /// <summary>
-        /// Gets the number of added species.
-        /// </summary>
-        public uint SpeciesAdded { get; }
-
-        /// <summary>
-        /// Gets the number of added transformations.
-        /// </summary>
-        public uint TransformationsAdded { get; }
-
-        /// <summary>
-        /// Gets the number of updated species.
-        /// </summary>
-        public uint SpeciesUpdated { get; }
-
-        /// <summary>
-        /// Gets the number of updated transformations.
-        /// </summary>
-        public uint TransformationsUpdated { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UpdateTransformationsResult"/> class.
-        /// </summary>
-        /// <param name="speciesAdded">The number of new species added.</param>
-        /// <param name="transformationsAdded">The number of new transformations added.</param>
-        /// <param name="speciesUpdated">The number of existing species that were updated with new information.</param>
-        /// <param name="transformationsUpdated">
-        /// The number of existing transformations that were updated with new information.
-        /// </param>
-        public UpdateTransformationsResult
-        (
-            uint speciesAdded,
-            uint transformationsAdded,
-            uint speciesUpdated,
-            uint transformationsUpdated
-        )
-        {
-            this.SpeciesAdded = speciesAdded;
-            this.TransformationsAdded = transformationsAdded;
-            this.SpeciesUpdated = speciesUpdated;
-            this.TransformationsUpdated = transformationsUpdated;
-        }
+        this.SpeciesAdded = speciesAdded;
+        this.TransformationsAdded = transformationsAdded;
+        this.SpeciesUpdated = speciesUpdated;
+        this.TransformationsUpdated = transformationsUpdated;
     }
 }

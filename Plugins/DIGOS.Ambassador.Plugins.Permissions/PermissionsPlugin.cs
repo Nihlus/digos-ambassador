@@ -43,65 +43,64 @@ using Remora.Results;
 
 [assembly: RemoraPlugin(typeof(PermissionsPlugin))]
 
-namespace DIGOS.Ambassador.Plugins.Permissions
+namespace DIGOS.Ambassador.Plugins.Permissions;
+
+/// <summary>
+/// Describes the permission plugin.
+/// </summary>
+public sealed class PermissionsPlugin : PluginDescriptor, IMigratablePlugin
 {
-    /// <summary>
-    /// Describes the permission plugin.
-    /// </summary>
-    public sealed class PermissionsPlugin : PluginDescriptor, IMigratablePlugin
+    /// <inheritdoc />
+    public override string Name => "Permissions";
+
+    /// <inheritdoc />
+    public override string Description => "Provides granular permissions for commands and functionality.";
+
+    /// <inheritdoc />
+    public override void ConfigureServices(IServiceCollection serviceCollection)
     {
-        /// <inheritdoc />
-        public override string Name => "Permissions";
+        // Dependencies
+        serviceCollection.AddInteractivity();
+        serviceCollection.TryAddInteractivityResponder<PaginatedMessageResponder>();
 
-        /// <inheritdoc />
-        public override string Description => "Provides granular permissions for commands and functionality.";
+        // Our stuff
+        serviceCollection.TryAddSingleton<PermissionRegistryService>();
+        serviceCollection.TryAddScoped<PermissionService>();
 
-        /// <inheritdoc />
-        public override void ConfigureServices(IServiceCollection serviceCollection)
-        {
-            // Dependencies
-            serviceCollection.AddInteractivity();
-            serviceCollection.TryAddInteractivityResponder<PaginatedMessageResponder>();
+        serviceCollection.AddConfiguredSchemaAwareDbContextPool<PermissionsDatabaseContext>();
 
-            // Our stuff
-            serviceCollection.TryAddSingleton<PermissionRegistryService>();
-            serviceCollection.TryAddScoped<PermissionService>();
+        serviceCollection.AddCondition<RequirePermissionCondition>();
+        serviceCollection.AddCommandGroup<PermissionCommands>();
+        serviceCollection.AddParser<HumanizerEnumTypeReader<PermissionTarget>>();
+    }
 
-            serviceCollection.AddConfiguredSchemaAwareDbContextPool<PermissionsDatabaseContext>();
+    /// <inheritdoc />
+    public override ValueTask<Result> InitializeAsync(IServiceProvider serviceProvider)
+    {
+        var permissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
+        return new ValueTask<Result>(permissionRegistry.RegisterPermissions
+        (
+            Assembly.GetExecutingAssembly(),
+            serviceProvider
+        ));
+    }
 
-            serviceCollection.AddCondition<RequirePermissionCondition>();
-            serviceCollection.AddCommandGroup<PermissionCommands>();
-            serviceCollection.AddParser<HumanizerEnumTypeReader<PermissionTarget>>();
-        }
+    /// <inheritdoc />
+    public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
+    {
+        var context = serviceProvider.GetRequiredService<PermissionsDatabaseContext>();
 
-        /// <inheritdoc />
-        public override ValueTask<Result> InitializeAsync(IServiceProvider serviceProvider)
-        {
-            var permissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
-            return new ValueTask<Result>(permissionRegistry.RegisterPermissions
-            (
-                Assembly.GetExecutingAssembly(),
-                serviceProvider
-            ));
-        }
+        await context.Database.MigrateAsync();
 
-        /// <inheritdoc />
-        public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
-        {
-            var context = serviceProvider.GetRequiredService<PermissionsDatabaseContext>();
+        return Result.FromSuccess();
+    }
 
-            await context.Database.MigrateAsync();
+    /// <inheritdoc />
+    public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
+    {
+        var context = serviceProvider.GetRequiredService<PermissionsDatabaseContext>();
+        var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
 
-            return Result.FromSuccess();
-        }
-
-        /// <inheritdoc />
-        public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
-        {
-            var context = serviceProvider.GetRequiredService<PermissionsDatabaseContext>();
-            var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
-
-            return appliedMigrations.Any();
-        }
+        return appliedMigrations.Any();
     }
 }

@@ -29,48 +29,47 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Core
+namespace DIGOS.Ambassador.Tests.Plugins.Core;
+
+public static partial class PrivacyServiceTests
 {
-    public static partial class PrivacyServiceTests
+    public class RevokeUserConsentAsync : PrivacyServiceTestBase
     {
-        public class RevokeUserConsentAsync : PrivacyServiceTestBase
+        private readonly Snowflake _discordUser;
+
+        public RevokeUserConsentAsync()
         {
-            private readonly Snowflake _discordUser;
+            _discordUser = new Snowflake(0);
+        }
 
-            public RevokeUserConsentAsync()
-            {
-                _discordUser = new Snowflake(0);
-            }
+        [Fact]
+        public async Task ReturnsFalseIfUserHasNotConsented()
+        {
+            var result = await this.Privacy.RevokeUserConsentAsync(_discordUser);
 
-            [Fact]
-            public async Task ReturnsFalseIfUserHasNotConsented()
-            {
-                var result = await this.Privacy.RevokeUserConsentAsync(_discordUser);
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsTrueIfUserHasConsented()
+        {
+            await this.Privacy.GrantUserConsentAsync(_discordUser);
 
-            [Fact]
-            public async Task ReturnsTrueIfUserHasConsented()
-            {
-                await this.Privacy.GrantUserConsentAsync(_discordUser);
+            var result = await this.Privacy.RevokeUserConsentAsync(_discordUser);
 
-                var result = await this.Privacy.RevokeUserConsentAsync(_discordUser);
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ActuallyRevokesConsentIfUserHasConsented()
+        {
+            await this.Privacy.GrantUserConsentAsync(_discordUser);
 
-            [Fact]
-            public async Task ActuallyRevokesConsentIfUserHasConsented()
-            {
-                await this.Privacy.GrantUserConsentAsync(_discordUser);
+            await this.Privacy.RevokeUserConsentAsync(_discordUser);
 
-                await this.Privacy.RevokeUserConsentAsync(_discordUser);
+            var consent = this.Database.UserConsents.First();
 
-                var consent = this.Database.UserConsents.First();
-
-                Assert.False(consent.HasConsented);
-            }
+            Assert.False(consent.HasConsented);
         }
     }
 }

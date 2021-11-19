@@ -24,14 +24,13 @@ using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 
-namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
+namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters;
+
+/// <summary>
+/// Base class for roleplay exporters.
+/// </summary>
+internal abstract class RoleplayExporterBase : IRoleplayExporter
 {
-    /// <summary>
-    /// Base class for roleplay exporters.
-    /// </summary>
-    internal abstract class RoleplayExporterBase : IRoleplayExporter
-    {
-        /// <inheritdoc />
-        public abstract Task<ExportedRoleplay> ExportAsync(IServiceProvider services, Roleplay roleplay);
-    }
+    /// <inheritdoc />
+    public abstract Task<ExportedRoleplay> ExportAsync(IServiceProvider services, Roleplay roleplay);
 }

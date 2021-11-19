@@ -27,28 +27,27 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Responders
+namespace DIGOS.Ambassador.Responders;
+
+/// <summary>
+/// Automatically joins created threads, ensuring that bot functionality remains available.
+/// </summary>
+public class ThreadJoinResponder : IResponder<IThreadCreate>
 {
+    private readonly IDiscordRestChannelAPI _channelAPI;
+
     /// <summary>
-    /// Automatically joins created threads, ensuring that bot functionality remains available.
+    /// Initializes a new instance of the <see cref="ThreadJoinResponder"/> class.
     /// </summary>
-    public class ThreadJoinResponder : IResponder<IThreadCreate>
+    /// <param name="channelAPI">The channel API.</param>
+    public ThreadJoinResponder(IDiscordRestChannelAPI channelAPI)
     {
-        private readonly IDiscordRestChannelAPI _channelAPI;
+        _channelAPI = channelAPI;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ThreadJoinResponder"/> class.
-        /// </summary>
-        /// <param name="channelAPI">The channel API.</param>
-        public ThreadJoinResponder(IDiscordRestChannelAPI channelAPI)
-        {
-            _channelAPI = channelAPI;
-        }
-
-        /// <inheritdoc />
-        public Task<Result> RespondAsync(IThreadCreate gatewayEvent, CancellationToken ct = default)
-        {
-            return _channelAPI.JoinThreadAsync(gatewayEvent.ID, ct);
-        }
+    /// <inheritdoc />
+    public Task<Result> RespondAsync(IThreadCreate gatewayEvent, CancellationToken ct = default)
+    {
+        return _channelAPI.JoinThreadAsync(gatewayEvent.ID, ct);
     }
 }

@@ -31,54 +31,53 @@ using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Autocomplete;
 using Remora.Discord.Commands.Contexts;
 
-namespace DIGOS.Ambassador.Plugins.Characters.Autocomplete
+namespace DIGOS.Ambassador.Plugins.Characters.Autocomplete;
+
+/// <summary>
+/// Provides autocomplete suggestions for character names.
+/// </summary>
+public class AnyCharacterAutocompleteProvider : IAutocompleteProvider
 {
+    private readonly InteractionContext _context;
+    private readonly CharactersDatabaseContext _database;
+
+    /// <inheritdoc />
+    public string Identity => "character::any";
+
     /// <summary>
-    /// Provides autocomplete suggestions for character names.
+    /// Initializes a new instance of the <see cref="AnyCharacterAutocompleteProvider"/> class.
     /// </summary>
-    public class AnyCharacterAutocompleteProvider : IAutocompleteProvider
+    /// <param name="context">The interaction context.</param>
+    /// <param name="database">The database context.</param>
+    public AnyCharacterAutocompleteProvider(InteractionContext context, CharactersDatabaseContext database)
     {
-        private readonly InteractionContext _context;
-        private readonly CharactersDatabaseContext _database;
+        _context = context;
+        _database = database;
+    }
 
-        /// <inheritdoc />
-        public string Identity => "character::any";
+    /// <inheritdoc />
+    public async ValueTask<IReadOnlyList<IApplicationCommandOptionChoice>> GetSuggestionsAsync
+    (
+        IReadOnlyList<IApplicationCommandInteractionDataOption> options,
+        string userInput,
+        CancellationToken ct = default
+    )
+    {
+        var scopedCharacters = _context.GuildID.HasValue
+            ? _database.Characters
+                .Where(c => c.Server.DiscordID == _context.GuildID.Value)
+            : _database.Characters;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AnyCharacterAutocompleteProvider"/> class.
-        /// </summary>
-        /// <param name="context">The interaction context.</param>
-        /// <param name="database">The database context.</param>
-        public AnyCharacterAutocompleteProvider(InteractionContext context, CharactersDatabaseContext database)
-        {
-            _context = context;
-            _database = database;
-        }
+        var suggestedCharacters = await scopedCharacters
+            .OrderByDescending(r => r.Owner.DiscordID == _context.User.ID)
+            .ThenBy(c => EF.Functions.FuzzyStringMatchLevenshtein(c.Name, userInput))
+            .Take(25)
+            .Select(c => new { c.Nickname, c.Name })
+            .ToListAsync(ct);
 
-        /// <inheritdoc />
-        public async ValueTask<IReadOnlyList<IApplicationCommandOptionChoice>> GetSuggestionsAsync
+        return suggestedCharacters.Select
         (
-            IReadOnlyList<IApplicationCommandInteractionDataOption> options,
-            string userInput,
-            CancellationToken ct = default
-        )
-        {
-            var scopedCharacters = _context.GuildID.HasValue
-                ? _database.Characters
-                    .Where(c => c.Server.DiscordID == _context.GuildID.Value)
-                : _database.Characters;
-
-            var suggestedCharacters = await scopedCharacters
-                .OrderByDescending(r => r.Owner.DiscordID == _context.User.ID)
-                .ThenBy(c => EF.Functions.FuzzyStringMatchLevenshtein(c.Name, userInput))
-                .Take(25)
-                .Select(c => new { c.Nickname, c.Name })
-                .ToListAsync(ct);
-
-            return suggestedCharacters.Select
-            (
-                n => new ApplicationCommandOptionChoice(n.Nickname ?? n.Name, n.Name)
-            ).ToList();
-        }
+            n => new ApplicationCommandOptionChoice(n.Nickname ?? n.Name, n.Name)
+        ).ToList();
     }
 }

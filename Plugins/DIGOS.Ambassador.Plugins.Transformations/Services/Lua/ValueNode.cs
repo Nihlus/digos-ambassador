@@ -20,28 +20,27 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
+namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua;
+
+/// <summary>
+/// Represents a named node that holds a value.
+/// </summary>
+/// <typeparam name="T">The type of value.</typeparam>
+internal sealed class ValueNode<T> : NamedNode<T> where T : notnull
 {
     /// <summary>
-    /// Represents a named node that holds a value.
+    /// Initializes a new instance of the <see cref="ValueNode{T}"/> class.
     /// </summary>
-    /// <typeparam name="T">The type of value.</typeparam>
-    internal sealed class ValueNode<T> : NamedNode<T> where T : notnull
+    /// <param name="name">The node's name.</param>
+    /// <param name="originalValue">The original value of the node.</param>
+    public ValueNode(string name, T originalValue)
+        : base(name, originalValue)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ValueNode{T}"/> class.
-        /// </summary>
-        /// <param name="name">The node's name.</param>
-        /// <param name="originalValue">The original value of the node.</param>
-        public ValueNode(string name, T originalValue)
-            : base(name, originalValue)
-        {
-        }
+    }
 
-        /// <inheritdoc />
-        public override string Format(bool pretty = false)
-        {
-            return $"{this.Name} = {this.Value.ToString() ?? "None"}";
-        }
+    /// <inheritdoc />
+    public override string Format(bool pretty = false)
+    {
+        return $"{this.Name} = {this.Value.ToString() ?? "None"}";
     }
 }

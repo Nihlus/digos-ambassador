@@ -27,34 +27,33 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Characters
+namespace DIGOS.Ambassador.Tests.Plugins.Characters;
+
+public partial class CharacterServiceTests
 {
-    public partial class CharacterServiceTests
+    public class IsNameUniqueForUserAsync : CharacterServiceTestBase
     {
-        public class IsNameUniqueForUserAsync : CharacterServiceTestBase
+        private const string CharacterName = "Test";
+
+        public IsNameUniqueForUserAsync()
         {
-            private const string CharacterName = "Test";
+            CreateCharacter(name: CharacterName);
+        }
 
-            public IsNameUniqueForUserAsync()
-            {
-                CreateCharacter(name: CharacterName);
-            }
+        [Fact]
+        public async Task ReturnsFalseIfUserHasACharacterWithThatName()
+        {
+            var result = await this.Characters.IsNameUniqueForUserAsync(this.DefaultOwner, this.DefaultServer, CharacterName);
 
-            [Fact]
-            public async Task ReturnsFalseIfUserHasACharacterWithThatName()
-            {
-                var result = await this.Characters.IsNameUniqueForUserAsync(this.DefaultOwner, this.DefaultServer, CharacterName);
+            Assert.False(result);
+        }
 
-                Assert.False(result);
-            }
+        [Fact]
+        public async Task ReturnsTrueIfUserDoesNotHaveACharacterWithThatName()
+        {
+            var result = await this.Characters.IsNameUniqueForUserAsync(this.DefaultOwner, this.DefaultServer, "AnotherName");
 
-            [Fact]
-            public async Task ReturnsTrueIfUserDoesNotHaveACharacterWithThatName()
-            {
-                var result = await this.Characters.IsNameUniqueForUserAsync(this.DefaultOwner, this.DefaultServer, "AnotherName");
-
-                Assert.True(result);
-            }
+            Assert.True(result);
         }
     }
 }

@@ -20,29 +20,28 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
+namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
+
+/// <summary>
+/// Provides s/he and hir pronouns.
+/// </summary>
+public class SheHirPronounProvider : PronounProvider
 {
-    /// <summary>
-    /// Provides s/he and hir pronouns.
-    /// </summary>
-    public class SheHirPronounProvider : PronounProvider
-    {
-        /// <inheritdoc />
-        public override string Family => "S/he and hir";
+    /// <inheritdoc />
+    public override string Family => "S/he and hir";
 
-        /// <inheritdoc />
-        public override string GetSubjectForm(bool withVerb = false) => withVerb ? "s/he is" : "s/he";
+    /// <inheritdoc />
+    public override string GetSubjectForm(bool withVerb = false) => withVerb ? "s/he is" : "s/he";
 
-        /// <inheritdoc />
-        public override string GetObjectForm() => "hir";
+    /// <inheritdoc />
+    public override string GetObjectForm() => "hir";
 
-        /// <inheritdoc />
-        public override string GetPossessiveAdjectiveForm() => "hir";
+    /// <inheritdoc />
+    public override string GetPossessiveAdjectiveForm() => "hir";
 
-        /// <inheritdoc />
-        public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "s/he has" : "hirs";
+    /// <inheritdoc />
+    public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "s/he has" : "hirs";
 
-        /// <inheritdoc />
-        public override string GetReflexiveForm() => "hirself";
-    }
+    /// <inheritdoc />
+    public override string GetReflexiveForm() => "hirself";
 }

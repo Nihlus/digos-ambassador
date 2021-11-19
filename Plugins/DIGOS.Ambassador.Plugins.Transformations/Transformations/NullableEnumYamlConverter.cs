@@ -25,53 +25,52 @@ using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations;
+
+/// <summary>
+/// YAML deserialization converter for enum values.
+/// </summary>
+/// <typeparam name="TEnum">The enum type.</typeparam>
+public sealed class NullableEnumYamlConverter<TEnum> : IYamlTypeConverter
+    where TEnum : struct, Enum
 {
-    /// <summary>
-    /// YAML deserialization converter for enum values.
-    /// </summary>
-    /// <typeparam name="TEnum">The enum type.</typeparam>
-    public sealed class NullableEnumYamlConverter<TEnum> : IYamlTypeConverter
-        where TEnum : struct, Enum
+    /// <inheritdoc />
+    public bool Accepts(Type type)
     {
-        /// <inheritdoc />
-        public bool Accepts(Type type)
+        return type == typeof(TEnum?);
+    }
+
+    /// <inheritdoc />
+    public object? ReadYaml(IParser parser, Type type)
+    {
+        if (!parser.TryConsume<Scalar>(out var rawEnum))
         {
-            return type == typeof(TEnum?);
+            return null;
         }
 
-        /// <inheritdoc />
-        public object? ReadYaml(IParser parser, Type type)
+        if (string.IsNullOrWhiteSpace(rawEnum.Value))
         {
-            if (!parser.TryConsume<Scalar>(out var rawEnum))
-            {
-                return null;
-            }
-
-            if (string.IsNullOrWhiteSpace(rawEnum.Value))
-            {
-                return null;
-            }
-
-            if (!Enum.TryParse<TEnum>(rawEnum.Value, true, out var value))
-            {
-                throw new ArgumentException("Failed to parse a valid enum.");
-            }
-
-            return value;
+            return null;
         }
 
-        /// <inheritdoc />
-        public void WriteYaml(IEmitter emitter, object? value, Type type)
+        if (!Enum.TryParse<TEnum>(rawEnum.Value, true, out var value))
         {
-            var valueString = value?.ToString();
-            if (valueString is null)
-            {
-                emitter.Emit(new Scalar(string.Empty));
-                return;
-            }
-
-            emitter.Emit(new Scalar(valueString));
+            throw new ArgumentException("Failed to parse a valid enum.");
         }
+
+        return value;
+    }
+
+    /// <inheritdoc />
+    public void WriteYaml(IEmitter emitter, object? value, Type type)
+    {
+        var valueString = value?.ToString();
+        if (valueString is null)
+        {
+            emitter.Emit(new Scalar(string.Empty));
+            return;
+        }
+
+        emitter.Emit(new Scalar(valueString));
     }
 }

@@ -23,43 +23,42 @@
 using System.Collections.Generic;
 using DIGOS.Ambassador.Plugins.Kinks.Model;
 
-namespace DIGOS.Ambassador.Plugins.Kinks.Services
+namespace DIGOS.Ambassador.Plugins.Kinks.Services;
+
+/// <summary>
+/// Determines overlap equality for two user kinks.
+/// </summary>
+internal sealed class UserKinkOverlapEqualityComparer : IEqualityComparer<UserKink>
 {
-    /// <summary>
-    /// Determines overlap equality for two user kinks.
-    /// </summary>
-    internal sealed class UserKinkOverlapEqualityComparer : IEqualityComparer<UserKink>
+    /// <inheritdoc />
+    public bool Equals(UserKink? x, UserKink? y)
     {
-        /// <inheritdoc />
-        public bool Equals(UserKink? x, UserKink? y)
+        if (x is null && y is null)
         {
-            if (x is null && y is null)
-            {
-                return true;
-            }
-
-            if (x is null || y is null)
-            {
-                return false;
-            }
-
-            return
-                x.Kink.FListID == y.Kink.FListID &&
-                x.Preference == y.Preference;
+            return true;
         }
 
-        /// <inheritdoc />
-        public int GetHashCode(UserKink obj)
+        if (x is null || y is null)
         {
-            unchecked
-            {
-                var hash = 17;
+            return false;
+        }
 
-                hash *= 23 + obj.Kink.FListID.GetHashCode();
-                hash *= 23 + obj.Preference.GetHashCode();
+        return
+            x.Kink.FListID == y.Kink.FListID &&
+            x.Preference == y.Preference;
+    }
 
-                return hash;
-            }
+    /// <inheritdoc />
+    public int GetHashCode(UserKink obj)
+    {
+        unchecked
+        {
+            var hash = 17;
+
+            hash *= 23 + obj.Kink.FListID.GetHashCode();
+            hash *= 23 + obj.Preference.GetHashCode();
+
+            return hash;
         }
     }
 }

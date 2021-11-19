@@ -28,43 +28,42 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Characters
+namespace DIGOS.Ambassador.Tests.Plugins.Characters;
+
+public static partial class CharacterServiceTests
 {
-    public static partial class CharacterServiceTests
+    public class MakeCharacterCurrentAsync : CharacterServiceTestBase
     {
-        public class MakeCharacterCurrentAsync : CharacterServiceTestBase
+        private readonly Character _character;
+
+        public MakeCharacterCurrentAsync()
         {
-            private readonly Character _character;
+            _character = CreateCharacter();
+        }
 
-            public MakeCharacterCurrentAsync()
-            {
-                _character = CreateCharacter();
-            }
+        [Fact]
+        public async Task ReturnsSuccessfulResultIfCharacterIsNotCurrent()
+        {
+            var result = await this.Characters.MakeCharacterCurrentAsync(this.DefaultOwner, this.DefaultServer, _character);
 
-            [Fact]
-            public async Task ReturnsSuccessfulResultIfCharacterIsNotCurrent()
-            {
-                var result = await this.Characters.MakeCharacterCurrentAsync(this.DefaultOwner, this.DefaultServer, _character);
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public async Task MakesCharacterCurrentOnCorrectServer()
+        {
+            await this.Characters.MakeCharacterCurrentAsync(this.DefaultOwner, this.DefaultServer, _character);
 
-            [Fact]
-            public async Task MakesCharacterCurrentOnCorrectServer()
-            {
-                await this.Characters.MakeCharacterCurrentAsync(this.DefaultOwner, this.DefaultServer, _character);
+            Assert.True(_character.IsCurrent);
+        }
 
-                Assert.True(_character.IsCurrent);
-            }
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfCharacterIsAlreadyCurrent()
+        {
+            await this.Characters.MakeCharacterCurrentAsync(this.DefaultOwner, this.DefaultServer, _character);
+            var result = await this.Characters.MakeCharacterCurrentAsync(this.DefaultOwner, this.DefaultServer, _character);
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfCharacterIsAlreadyCurrent()
-            {
-                await this.Characters.MakeCharacterCurrentAsync(this.DefaultOwner, this.DefaultServer, _character);
-                var result = await this.Characters.MakeCharacterCurrentAsync(this.DefaultOwner, this.DefaultServer, _character);
-
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
         }
     }
 }

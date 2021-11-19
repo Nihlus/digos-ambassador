@@ -27,39 +27,38 @@
 using System.Threading.Tasks;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Transformations
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
+
+public partial class TransformationServiceTests
 {
-    public partial class TransformationServiceTests
+    public class IsSpeciesNameUniqueAsync : TransformationServiceTestBase
     {
-        public class IsSpeciesNameUniqueAsync : TransformationServiceTestBase
+        [Theory]
+        [InlineData("asadasdas")]
+        [InlineData("yeee ewwah")]
+        public async Task ReturnsTrueForUniqueName(string name)
         {
-            [Theory]
-            [InlineData("asadasdas")]
-            [InlineData("yeee ewwah")]
-            public async Task ReturnsTrueForUniqueName(string name)
-            {
-                var result = await this.Transformations.IsSpeciesNameUniqueAsync(name);
+            var result = await this.Transformations.IsSpeciesNameUniqueAsync(name);
 
-                Assert.True(result);
-            }
+            Assert.True(result);
+        }
 
-            [Theory]
-            [InlineData("template")]
-            public async Task ReturnsFalseForNonUniqueName(string name)
-            {
-                var result = await this.Transformations.IsSpeciesNameUniqueAsync(name);
+        [Theory]
+        [InlineData("template")]
+        public async Task ReturnsFalseForNonUniqueName(string name)
+        {
+            var result = await this.Transformations.IsSpeciesNameUniqueAsync(name);
 
-                Assert.False(result);
-            }
+            Assert.False(result);
+        }
 
-            [Theory]
-            [InlineData("TEMPLATE")]
-            public async Task IsCaseInsensitive(string name)
-            {
-                var result = await this.Transformations.IsSpeciesNameUniqueAsync(name);
+        [Theory]
+        [InlineData("TEMPLATE")]
+        public async Task IsCaseInsensitive(string name)
+        {
+            var result = await this.Transformations.IsSpeciesNameUniqueAsync(name);
 
-                Assert.False(result);
-            }
+            Assert.False(result);
         }
     }
 }

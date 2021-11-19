@@ -23,23 +23,22 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
 
-namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions
+namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions;
+
+/// <summary>
+/// Represents a permission that allows a user to join roleplays.
+/// </summary>
+public sealed class JoinRoleplay : Permission
 {
-    /// <summary>
-    /// Represents a permission that allows a user to join roleplays.
-    /// </summary>
-    public sealed class JoinRoleplay : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("BD392170-B566-4D34-8A91-4794D374D1A7");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("BD392170-B566-4D34-8A91-4794D374D1A7");
 
-        /// <inheritdoc />
-        public override string FriendlyName => nameof(JoinRoleplay);
+    /// <inheritdoc />
+    public override string FriendlyName => nameof(JoinRoleplay);
 
-        /// <inheritdoc />
-        public override string Description => "Allows you to join roleplays.";
+    /// <inheritdoc />
+    public override string Description => "Allows you to join roleplays.";
 
-        /// <inheritdoc />
-        public override bool IsGrantedByDefaultToSelf => true;
-    }
+    /// <inheritdoc />
+    public override bool IsGrantedByDefaultToSelf => true;
 }

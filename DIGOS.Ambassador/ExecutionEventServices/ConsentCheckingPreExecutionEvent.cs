@@ -42,132 +42,131 @@ using Remora.Discord.Commands.Responders;
 using Remora.Discord.Commands.Services;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.ExecutionEventServices
-{
-    /// <summary>
-    /// Ensures the user has consented to data processing before allowing a command to be executed.
-    /// </summary>
-    public class ConsentCheckingPreExecutionEvent : IPreExecutionEvent
-    {
-        private readonly ICommandResponderOptions _options;
-        private readonly PrivacyService _privacy;
-        private readonly CommandService _commandService;
-        private readonly IDiscordRestInteractionAPI _interactionAPI;
-        private readonly TokenizerOptions _tokenizerOptions;
-        private readonly TreeSearchOptions _treeSearchOptions;
-        private readonly FeedbackService _feedback;
+namespace DIGOS.Ambassador.ExecutionEventServices;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ConsentCheckingPreExecutionEvent"/> class.
-        /// </summary>
-        /// <param name="privacy">The privacy service.</param>
-        /// <param name="commandService">The command service.</param>
-        /// <param name="options">The responder options.</param>
-        /// <param name="interactionAPI">The interaction API.</param>
-        /// <param name="tokenizerOptions">The tokenizer options.</param>
-        /// <param name="treeSearchOptions">The tree search options.</param>
-        /// <param name="feedback">The feedback service.</param>
-        public ConsentCheckingPreExecutionEvent
-        (
-            PrivacyService privacy,
-            CommandService commandService,
-            IOptions<CommandResponderOptions> options,
-            IDiscordRestInteractionAPI interactionAPI,
-            IOptions<TokenizerOptions> tokenizerOptions,
-            IOptions<TreeSearchOptions> treeSearchOptions,
-            FeedbackService feedback
-        )
+/// <summary>
+/// Ensures the user has consented to data processing before allowing a command to be executed.
+/// </summary>
+public class ConsentCheckingPreExecutionEvent : IPreExecutionEvent
+{
+    private readonly ICommandResponderOptions _options;
+    private readonly PrivacyService _privacy;
+    private readonly CommandService _commandService;
+    private readonly IDiscordRestInteractionAPI _interactionAPI;
+    private readonly TokenizerOptions _tokenizerOptions;
+    private readonly TreeSearchOptions _treeSearchOptions;
+    private readonly FeedbackService _feedback;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ConsentCheckingPreExecutionEvent"/> class.
+    /// </summary>
+    /// <param name="privacy">The privacy service.</param>
+    /// <param name="commandService">The command service.</param>
+    /// <param name="options">The responder options.</param>
+    /// <param name="interactionAPI">The interaction API.</param>
+    /// <param name="tokenizerOptions">The tokenizer options.</param>
+    /// <param name="treeSearchOptions">The tree search options.</param>
+    /// <param name="feedback">The feedback service.</param>
+    public ConsentCheckingPreExecutionEvent
+    (
+        PrivacyService privacy,
+        CommandService commandService,
+        IOptions<CommandResponderOptions> options,
+        IDiscordRestInteractionAPI interactionAPI,
+        IOptions<TokenizerOptions> tokenizerOptions,
+        IOptions<TreeSearchOptions> treeSearchOptions,
+        FeedbackService feedback
+    )
+    {
+        _privacy = privacy;
+        _commandService = commandService;
+        _interactionAPI = interactionAPI;
+        _feedback = feedback;
+        _options = options.Value;
+        _tokenizerOptions = tokenizerOptions.Value;
+        _treeSearchOptions = treeSearchOptions.Value;
+    }
+
+    /// <inheritdoc />
+    public async Task<Result> BeforeExecutionAsync(ICommandContext context, CancellationToken ct = default)
+    {
+        var hasConsented = await _privacy.HasUserConsentedAsync(context.User.ID, ct);
+
+        IReadOnlyList<BoundCommandNode> potentialCommands;
+        switch (context)
         {
-            _privacy = privacy;
-            _commandService = commandService;
-            _interactionAPI = interactionAPI;
-            _feedback = feedback;
-            _options = options.Value;
-            _tokenizerOptions = tokenizerOptions.Value;
-            _treeSearchOptions = treeSearchOptions.Value;
+            case MessageContext messageContext:
+            {
+                if (!messageContext.Message.Content.IsDefined(out var content))
+                {
+                    potentialCommands = Array.Empty<BoundCommandNode>();
+                    break;
+                }
+
+                // Strip off the prefix
+                if (_options.Prefix is not null)
+                {
+                    content = content
+                    [
+                        (content.IndexOf(_options.Prefix, StringComparison.Ordinal) + _options.Prefix.Length)..
+                    ];
+                }
+
+                potentialCommands = _commandService.Tree
+                    .Search(content, _tokenizerOptions, _treeSearchOptions)
+                    .ToList();
+
+                break;
+            }
+            case InteractionContext interactionContext:
+            {
+                interactionContext.Data.UnpackInteraction(out var command, out var parameters);
+                potentialCommands = _commandService.Tree
+                    .Search(command, parameters, _treeSearchOptions)
+                    .ToList();
+
+                break;
+            }
+            default:
+            {
+                throw new InvalidOperationException();
+            }
         }
 
-        /// <inheritdoc />
-        public async Task<Result> BeforeExecutionAsync(ICommandContext context, CancellationToken ct = default)
+        var atLeastOneRequiresConsent = potentialCommands.Any
+        (
+            c => c.Node.CommandMethod.GetCustomAttribute<PrivacyExemptAttribute>() is null
+        );
+
+        if (hasConsented || !atLeastOneRequiresConsent)
         {
-            var hasConsented = await _privacy.HasUserConsentedAsync(context.User.ID, ct);
+            return Result.FromSuccess();
+        }
 
-            IReadOnlyList<BoundCommandNode> potentialCommands;
-            switch (context)
-            {
-                case MessageContext messageContext:
-                {
-                    if (!messageContext.Message.Content.IsDefined(out var content))
-                    {
-                        potentialCommands = Array.Empty<BoundCommandNode>();
-                        break;
-                    }
+        var requestConsent = await _privacy.RequestConsentAsync(context.User.ID, ct);
+        if (!requestConsent.IsSuccess)
+        {
+            return requestConsent;
+        }
 
-                    // Strip off the prefix
-                    if (_options.Prefix is not null)
-                    {
-                        content = content
-                        [
-                            (content.IndexOf(_options.Prefix, StringComparison.Ordinal) + _options.Prefix.Length)..
-                        ];
-                    }
-
-                    potentialCommands = _commandService.Tree
-                        .Search(content, _tokenizerOptions, _treeSearchOptions)
-                        .ToList();
-
-                    break;
-                }
-                case InteractionContext interactionContext:
-                {
-                    interactionContext.Data.UnpackInteraction(out var command, out var parameters);
-                    potentialCommands = _commandService.Tree
-                        .Search(command, parameters, _treeSearchOptions)
-                        .ToList();
-
-                    break;
-                }
-                default:
-                {
-                    throw new InvalidOperationException();
-                }
-            }
-
-            var atLeastOneRequiresConsent = potentialCommands.Any
-            (
-                c => c.Node.CommandMethod.GetCustomAttribute<PrivacyExemptAttribute>() is null
-            );
-
-            if (hasConsented || !atLeastOneRequiresConsent)
-            {
-                return Result.FromSuccess();
-            }
-
-            var requestConsent = await _privacy.RequestConsentAsync(context.User.ID, ct);
-            if (!requestConsent.IsSuccess)
-            {
-                return requestConsent;
-            }
-
-            // Delete the original message
-            if (context is not InteractionContext deletionContext || !_feedback.HasEditedOriginalMessage)
-            {
-                return new NoConsentError();
-            }
-
-            var deleteOriginal = await _interactionAPI.DeleteOriginalInteractionResponseAsync
-            (
-                deletionContext.ApplicationID,
-                deletionContext.Token,
-                ct
-            );
-
-            if (!deleteOriginal.IsSuccess)
-            {
-                return deleteOriginal;
-            }
-
+        // Delete the original message
+        if (context is not InteractionContext deletionContext || !_feedback.HasEditedOriginalMessage)
+        {
             return new NoConsentError();
         }
+
+        var deleteOriginal = await _interactionAPI.DeleteOriginalInteractionResponseAsync
+        (
+            deletionContext.ApplicationID,
+            deletionContext.Token,
+            ct
+        );
+
+        if (!deleteOriginal.IsSuccess)
+        {
+            return deleteOriginal;
+        }
+
+        return new NoConsentError();
     }
 }

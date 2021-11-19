@@ -36,65 +36,64 @@ using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
-namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
+namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules;
+
+public partial class NoteCommands
 {
-    public partial class NoteCommands
+    /// <summary>
+    /// Note setter commands.
+    /// </summary>
+    [Group("set")]
+    public class NoteSetCommands : CommandGroup
     {
+        private readonly NoteService _notes;
+        private readonly ICommandContext _context;
+        private readonly FeedbackService _feedback;
+
         /// <summary>
-        /// Note setter commands.
+        /// Initializes a new instance of the <see cref="NoteSetCommands"/> class.
         /// </summary>
-        [Group("set")]
-        public class NoteSetCommands : CommandGroup
+        /// <param name="notes">The moderation service.</param>
+        /// <param name="context">The command context.</param>
+        /// <param name="feedback">The feedback service.</param>
+        public NoteSetCommands
+        (
+            NoteService notes,
+            ICommandContext context,
+            FeedbackService feedback
+        )
         {
-            private readonly NoteService _notes;
-            private readonly ICommandContext _context;
-            private readonly FeedbackService _feedback;
+            _notes = notes;
+            _context = context;
+            _feedback = feedback;
+        }
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="NoteSetCommands"/> class.
-            /// </summary>
-            /// <param name="notes">The moderation service.</param>
-            /// <param name="context">The command context.</param>
-            /// <param name="feedback">The feedback service.</param>
-            public NoteSetCommands
-            (
-                NoteService notes,
-                ICommandContext context,
-                FeedbackService feedback
-            )
+        /// <summary>
+        /// Sets the contents of the note.
+        /// </summary>
+        /// <param name="noteID">The ID of the note to delete.</param>
+        /// <param name="newContents">The new contents of the note.</param>
+        [Command("content")]
+        [Description("Sets the contents of the note.")]
+        [RequirePermission(typeof(ManageNotes), PermissionTarget.All)]
+        [RequireContext(ChannelContext.Guild)]
+        public async Task<Result<FeedbackMessage>> SetNoteContentsAsync(long noteID, string newContents)
+        {
+            var getNote = await _notes.GetNoteAsync(_context.GuildID.Value, noteID);
+            if (!getNote.IsSuccess)
             {
-                _notes = notes;
-                _context = context;
-                _feedback = feedback;
+                return Result<FeedbackMessage>.FromError(getNote);
             }
 
-            /// <summary>
-            /// Sets the contents of the note.
-            /// </summary>
-            /// <param name="noteID">The ID of the note to delete.</param>
-            /// <param name="newContents">The new contents of the note.</param>
-            [Command("content")]
-            [Description("Sets the contents of the note.")]
-            [RequirePermission(typeof(ManageNotes), PermissionTarget.All)]
-            [RequireContext(ChannelContext.Guild)]
-            public async Task<Result<FeedbackMessage>> SetNoteContentsAsync(long noteID, string newContents)
+            var note = getNote.Entity;
+
+            var setContents = await _notes.SetNoteContentsAsync(note, newContents);
+            if (!setContents.IsSuccess)
             {
-                var getNote = await _notes.GetNoteAsync(_context.GuildID.Value, noteID);
-                if (!getNote.IsSuccess)
-                {
-                    return Result<FeedbackMessage>.FromError(getNote);
-                }
-
-                var note = getNote.Entity;
-
-                var setContents = await _notes.SetNoteContentsAsync(note, newContents);
-                if (!setContents.IsSuccess)
-                {
-                    return Result<FeedbackMessage>.FromError(setContents);
-                }
-
-                return new FeedbackMessage("Note contents updated.", _feedback.Theme.Secondary);
+                return Result<FeedbackMessage>.FromError(setContents);
             }
+
+            return new FeedbackMessage("Note contents updated.", _feedback.Theme.Secondary);
         }
     }
 }

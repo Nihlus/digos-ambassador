@@ -26,59 +26,58 @@ using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using Humanizer;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens;
+
+/// <summary>
+/// A token that gets replaced with a bodypart.
+/// </summary>
+[PublicAPI]
+[TokenIdentifier("bodypart", "b")]
+public sealed class BodypartToken : ReplaceableTextToken<BodypartToken>
 {
     /// <summary>
-    /// A token that gets replaced with a bodypart.
+    /// Gets or sets a value indicating whether to pluralize the bodypart.
     /// </summary>
-    [PublicAPI]
-    [TokenIdentifier("bodypart", "b")]
-    public sealed class BodypartToken : ReplaceableTextToken<BodypartToken>
+    private bool Pluralize { get; set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BodypartToken"/> class.
+    /// </summary>
+    [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by convention.")]
+    public BodypartToken()
     {
-        /// <summary>
-        /// Gets or sets a value indicating whether to pluralize the bodypart.
-        /// </summary>
-        private bool Pluralize { get; set; }
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="BodypartToken"/> class.
-        /// </summary>
-        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by convention.")]
-        public BodypartToken()
+    /// <inheritdoc />
+    public override string GetText(Appearance appearance, AppearanceComponent? component)
+    {
+        if (component is null)
         {
+            throw new ArgumentNullException(nameof(component));
         }
 
-        /// <inheritdoc />
-        public override string GetText(Appearance appearance, AppearanceComponent? component)
+        return this.Pluralize
+            ? component.Bodypart.Humanize().Pluralize().Transform(To.LowerCase)
+            : component.Bodypart.Humanize().Transform(To.LowerCase);
+    }
+
+    /// <inheritdoc/>
+    protected override BodypartToken Initialize(string? data)
+    {
+        switch (data)
         {
-            if (component is null)
+            case null:
             {
-                throw new ArgumentNullException(nameof(component));
+                this.Pluralize = false;
+                return this;
             }
-
-            return this.Pluralize
-                ? component.Bodypart.Humanize().Pluralize().Transform(To.LowerCase)
-                : component.Bodypart.Humanize().Transform(To.LowerCase);
-        }
-
-        /// <inheritdoc/>
-        protected override BodypartToken Initialize(string? data)
-        {
-            switch (data)
+            case "pluralize":
             {
-                case null:
-                {
-                    this.Pluralize = false;
-                    return this;
-                }
-                case "pluralize":
-                {
-                    this.Pluralize = true;
-                    break;
-                }
+                this.Pluralize = true;
+                break;
             }
-
-            return this;
         }
+
+        return this;
     }
 }

@@ -27,185 +27,184 @@ using System.Reflection;
 using System.Text;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations;
+
+/// <summary>
+/// Tokenizer for transformation text. This class should be instantiated as a singleton.
+/// </summary>
+public sealed class TransformationTextTokenizer
 {
+    private readonly Dictionary<string, Type> _availableTokens = new Dictionary<string, Type>();
+
+    private readonly IServiceProvider _services;
+
     /// <summary>
-    /// Tokenizer for transformation text. This class should be instantiated as a singleton.
+    /// Initializes a new instance of the <see cref="TransformationTextTokenizer"/> class.
     /// </summary>
-    public sealed class TransformationTextTokenizer
+    /// <param name="services">The services to make available to tokens via dependency injection.</param>
+    public TransformationTextTokenizer(IServiceProvider services)
     {
-        private readonly Dictionary<string, Type> _availableTokens = new Dictionary<string, Type>();
+        _services = services;
+    }
 
-        private readonly IServiceProvider _services;
+    /// <summary>
+    /// Discovers available tokens in the given assembly, adding them to the tokenizer.
+    /// </summary>
+    /// <param name="assembly">The assembly to scan. Defaults to the executing assembly.</param>
+    public void DiscoverAvailableTokens(Assembly? assembly = null)
+    {
+        assembly ??= Assembly.GetExecutingAssembly();
+        var tokenTypes = assembly.DefinedTypes.Where
+        (
+            t =>
+                t.ImplementedInterfaces.Contains(typeof(IReplaceableTextToken))
+                && !t.IsInterface
+                && t.BaseType is not null
+                && t.BaseType.IsGenericType
+                &&
+                (t.BaseType.GetGenericTypeDefinition() == typeof(ReplaceableTextToken<>)
+                 || t.BaseType.GetGenericTypeDefinition().IsSubclassOf(typeof(ReplaceableTextToken<>)))
+        );
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TransformationTextTokenizer"/> class.
-        /// </summary>
-        /// <param name="services">The services to make available to tokens via dependency injection.</param>
-        public TransformationTextTokenizer(IServiceProvider services)
+        foreach (var tokenType in tokenTypes)
         {
-            _services = services;
+            AddAvailableTokenType(tokenType);
+        }
+    }
+
+    private void AddAvailableTokenType<T>() where T : ReplaceableTextToken<T>
+    {
+        AddAvailableTokenType(typeof(T));
+    }
+
+    private void AddAvailableTokenType(Type tokenType)
+    {
+        var tokenIdentifier = tokenType.GetCustomAttribute<TokenIdentifierAttribute>();
+        if (tokenIdentifier is null)
+        {
+            throw new ArgumentException($"The token type \"{tokenType.Name}\" does not have an identifier attribute.");
         }
 
-        /// <summary>
-        /// Discovers available tokens in the given assembly, adding them to the tokenizer.
-        /// </summary>
-        /// <param name="assembly">The assembly to scan. Defaults to the executing assembly.</param>
-        public void DiscoverAvailableTokens(Assembly? assembly = null)
+        foreach (var identifier in tokenIdentifier.Identifiers)
         {
-            assembly ??= Assembly.GetExecutingAssembly();
-            var tokenTypes = assembly.DefinedTypes.Where
-            (
-                t =>
-                    t.ImplementedInterfaces.Contains(typeof(IReplaceableTextToken))
-                    && !t.IsInterface
-                    && t.BaseType is not null
-                    && t.BaseType.IsGenericType
-                    &&
-                        (t.BaseType.GetGenericTypeDefinition() == typeof(ReplaceableTextToken<>)
-                        || t.BaseType.GetGenericTypeDefinition().IsSubclassOf(typeof(ReplaceableTextToken<>)))
-            );
-
-            foreach (var tokenType in tokenTypes)
+            if (_availableTokens.ContainsKey(identifier))
             {
-                AddAvailableTokenType(tokenType);
+                throw new ArgumentException($"A token with the identifier \"{identifier}\"has already been registered.");
             }
+
+            _availableTokens.Add(identifier, tokenType);
+        }
+    }
+
+    /// <summary>
+    /// Adds an available token type to the tokenizer.
+    /// </summary>
+    /// <typeparam name="T">A valid token type.</typeparam>
+    /// <returns>The tokenizer.</returns>
+    public TransformationTextTokenizer WithTokenType<T>() where T : ReplaceableTextToken<T>
+    {
+        AddAvailableTokenType<T>();
+        return this;
+    }
+
+    /// <summary>
+    /// Gets a list of the recognized tokens in a piece of text.
+    /// </summary>
+    /// <param name="text">The text to tokenize.</param>
+    /// <returns>A list of recognized tokens in the text.</returns>
+    public IReadOnlyList<IReplaceableTextToken> GetTokens(string text)
+    {
+        var tokens = new List<IReplaceableTextToken>();
+        var position = 0;
+        while (position < text.Length - 1)
+        {
+            // Scan ahead to the next token
+            while (position < text.Length - 1 && text[position] != '{')
+            {
+                position++;
+            }
+
+            var sb = new StringBuilder();
+
+            var start = position;
+
+            // Read the token text
+            while (position + 1 < text.Length - 1 && text[position + 1] != '}')
+            {
+                position++;
+                sb.Append(text[position]);
+            }
+
+            // Try to create a matching token
+            var tokenText = sb.ToString();
+            var token = ParseToken(start, tokenText);
+            if (token is null)
+            {
+                continue;
+            }
+
+            tokens.Add(token);
         }
 
-        private void AddAvailableTokenType<T>() where T : ReplaceableTextToken<T>
+        return tokens;
+    }
+
+    /// <summary>
+    /// Parses a token from the given text and starting position.
+    /// </summary>
+    /// <param name="start">The start index of the token.</param>
+    /// <param name="tokenText">The raw text of the token.</param>
+    /// <returns>A token object.</returns>
+    public IReplaceableTextToken? ParseToken(int start, string tokenText)
+    {
+        // Tokens are of the format @<tag>|<data>
+        if (tokenText.Length <= 1)
         {
-            AddAvailableTokenType(typeof(T));
+            return null;
         }
 
-        private void AddAvailableTokenType(Type tokenType)
+        if (tokenText[0] != '@')
         {
-            var tokenIdentifier = tokenType.GetCustomAttribute<TokenIdentifierAttribute>();
-            if (tokenIdentifier is null)
-            {
-                throw new ArgumentException($"The token type \"{tokenType.Name}\" does not have an identifier attribute.");
-            }
-
-            foreach (var identifier in tokenIdentifier.Identifiers)
-            {
-                if (_availableTokens.ContainsKey(identifier))
-                {
-                    throw new ArgumentException($"A token with the identifier \"{identifier}\"has already been registered.");
-                }
-
-                _availableTokens.Add(identifier, tokenType);
-            }
+            return null;
         }
 
-        /// <summary>
-        /// Adds an available token type to the tokenizer.
-        /// </summary>
-        /// <typeparam name="T">A valid token type.</typeparam>
-        /// <returns>The tokenizer.</returns>
-        public TransformationTextTokenizer WithTokenType<T>() where T : ReplaceableTextToken<T>
+        tokenText = new string(tokenText.Skip(1).ToArray());
+
+        string identifier;
+        string? data = null;
+        if (tokenText.Contains('|'))
         {
-            AddAvailableTokenType<T>();
-            return this;
+            var splitter = tokenText.LastIndexOf('|');
+            identifier = tokenText.Substring(0, splitter);
+            data = tokenText.Substring(splitter + 1);
+        }
+        else
+        {
+            identifier = tokenText;
         }
 
-        /// <summary>
-        /// Gets a list of the recognized tokens in a piece of text.
-        /// </summary>
-        /// <param name="text">The text to tokenize.</param>
-        /// <returns>A list of recognized tokens in the text.</returns>
-        public IReadOnlyList<IReplaceableTextToken> GetTokens(string text)
+        // Look up the token type
+        if (!_availableTokens.ContainsKey(identifier))
         {
-            var tokens = new List<IReplaceableTextToken>();
-            var position = 0;
-            while (position < text.Length - 1)
-            {
-                // Scan ahead to the next token
-                while (position < text.Length - 1 && text[position] != '{')
-                {
-                    position++;
-                }
-
-                var sb = new StringBuilder();
-
-                var start = position;
-
-                // Read the token text
-                while (position + 1 < text.Length - 1 && text[position + 1] != '}')
-                {
-                    position++;
-                    sb.Append(text[position]);
-                }
-
-                // Try to create a matching token
-                var tokenText = sb.ToString();
-                var token = ParseToken(start, tokenText);
-                if (token is null)
-                {
-                    continue;
-                }
-
-                tokens.Add(token);
-            }
-
-            return tokens;
+            return null;
         }
 
-        /// <summary>
-        /// Parses a token from the given text and starting position.
-        /// </summary>
-        /// <param name="start">The start index of the token.</param>
-        /// <param name="tokenText">The raw text of the token.</param>
-        /// <returns>A token object.</returns>
-        public IReplaceableTextToken? ParseToken(int start, string tokenText)
-        {
-            // Tokens are of the format @<tag>|<data>
-            if (tokenText.Length <= 1)
-            {
-                return null;
-            }
+        var tokenType = _availableTokens[identifier];
 
-            if (tokenText[0] != '@')
-            {
-                return null;
-            }
+        // TargetToken is only used here for compile-time resolution of the CreateFrom method name.
+        var creationMethod = tokenType.GetMethod
+        (
+            nameof(ReplaceableTextToken<TargetToken>.CreateFrom),
+            BindingFlags.Static | BindingFlags.FlattenHierarchy | BindingFlags.Public
+        );
 
-            tokenText = new string(tokenText.Skip(1).ToArray());
+        // The +3 here includes the surrounding braces and the @
+        var tokenObject = creationMethod?.Invoke
+        (
+            null,
+            new object?[] { start, tokenText.Length + 3, data, _services }
+        );
 
-            string identifier;
-            string? data = null;
-            if (tokenText.Contains('|'))
-            {
-                var splitter = tokenText.LastIndexOf('|');
-                identifier = tokenText.Substring(0, splitter);
-                data = tokenText.Substring(splitter + 1);
-            }
-            else
-            {
-                identifier = tokenText;
-            }
-
-            // Look up the token type
-            if (!_availableTokens.ContainsKey(identifier))
-            {
-                return null;
-            }
-
-            var tokenType = _availableTokens[identifier];
-
-            // TargetToken is only used here for compile-time resolution of the CreateFrom method name.
-            var creationMethod = tokenType.GetMethod
-            (
-                nameof(ReplaceableTextToken<TargetToken>.CreateFrom),
-                BindingFlags.Static | BindingFlags.FlattenHierarchy | BindingFlags.Public
-            );
-
-            // The +3 here includes the surrounding braces and the @
-            var tokenObject = creationMethod?.Invoke
-            (
-                null,
-                new object?[] { start, tokenText.Length + 3, data, _services }
-            );
-
-            return tokenObject as IReplaceableTextToken;
-        }
+        return tokenObject as IReplaceableTextToken;
     }
 }

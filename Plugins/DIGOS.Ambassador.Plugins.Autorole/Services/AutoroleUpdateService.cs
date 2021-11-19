@@ -30,155 +30,125 @@ using Remora.Discord.Core;
 using Remora.Results;
 using static DIGOS.Ambassador.Plugins.Autorole.Results.AutoroleUpdateStatus;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Services
-{
-    /// <summary>
-    /// Handles business logic for updating of autoroles.
-    /// </summary>
-    public class AutoroleUpdateService
-    {
-        private readonly AutoroleService _autoroles;
-        private readonly IDiscordRestGuildAPI _guildAPI;
+namespace DIGOS.Ambassador.Plugins.Autorole.Services;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AutoroleUpdateService"/> class.
-        /// </summary>
-        /// <param name="autoroles">The autorole service.</param>
-        /// <param name="guildAPI">The guild API.</param>
-        public AutoroleUpdateService
-        (
-            AutoroleService autoroles,
-            IDiscordRestGuildAPI guildAPI
-        )
+/// <summary>
+/// Handles business logic for updating of autoroles.
+/// </summary>
+public class AutoroleUpdateService
+{
+    private readonly AutoroleService _autoroles;
+    private readonly IDiscordRestGuildAPI _guildAPI;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AutoroleUpdateService"/> class.
+    /// </summary>
+    /// <param name="autoroles">The autorole service.</param>
+    /// <param name="guildAPI">The guild API.</param>
+    public AutoroleUpdateService
+    (
+        AutoroleService autoroles,
+        IDiscordRestGuildAPI guildAPI
+    )
+    {
+        _autoroles = autoroles;
+        _guildAPI = guildAPI;
+    }
+
+    /// <summary>
+    /// Applies the given autorole to the given user, if it is applicable. If the user no longer qualifies,
+    /// the autorole is removed.
+    /// </summary>
+    /// <param name="autorole">The autorole.</param>
+    /// <param name="guildID">The ID of the guild the user is on.</param>
+    /// <param name="userID">The ID of the user.</param>
+    /// <param name="ct">The cancellation token in use.</param>
+    /// <returns>A modification result which may or may not have succeeded.</returns>
+    public async Task<Result<AutoroleUpdateStatus>> UpdateAutoroleForUserAsync
+    (
+        AutoroleConfiguration autorole,
+        Snowflake guildID,
+        Snowflake userID,
+        CancellationToken ct = default
+    )
+    {
+        if (!autorole.IsEnabled)
         {
-            _autoroles = autoroles;
-            _guildAPI = guildAPI;
+            return Disabled;
         }
 
-        /// <summary>
-        /// Applies the given autorole to the given user, if it is applicable. If the user no longer qualifies,
-        /// the autorole is removed.
-        /// </summary>
-        /// <param name="autorole">The autorole.</param>
-        /// <param name="guildID">The ID of the guild the user is on.</param>
-        /// <param name="userID">The ID of the user.</param>
-        /// <param name="ct">The cancellation token in use.</param>
-        /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<Result<AutoroleUpdateStatus>> UpdateAutoroleForUserAsync
-        (
-            AutoroleConfiguration autorole,
-            Snowflake guildID,
-            Snowflake userID,
-            CancellationToken ct = default
-        )
+        if (!autorole.Conditions.Any())
         {
-            if (!autorole.IsEnabled)
+            return Unconditional;
+        }
+
+        var getRoles = await _guildAPI.GetGuildRolesAsync(guildID, ct);
+        if (!getRoles.IsSuccess)
+        {
+            return Result<AutoroleUpdateStatus>.FromError(getRoles);
+        }
+
+        var roles = getRoles.Entity;
+
+        if (roles.All(r => r.ID != autorole.DiscordRoleID))
+        {
+            // If the role can't be found any longer, we disable it
+            var disableAutoroleAsync = await _autoroles.DisableAutoroleAsync(autorole, ct);
+
+            return !disableAutoroleAsync.IsSuccess
+                ? Result<AutoroleUpdateStatus>.FromError(disableAutoroleAsync)
+                : Disabled;
+        }
+
+        var getIsUserQualified = await _autoroles.IsUserQualifiedForAutoroleAsync(autorole, userID, ct);
+        if (!getIsUserQualified.IsSuccess)
+        {
+            return Result<AutoroleUpdateStatus>.FromError(getIsUserQualified);
+        }
+
+        var isUserQualified = getIsUserQualified.Entity;
+
+        var getMember = await _guildAPI.GetGuildMemberAsync(guildID, userID, ct);
+        if (!getMember.IsSuccess)
+        {
+            return Result<AutoroleUpdateStatus>.FromError(getMember);
+        }
+
+        var member = getMember.Entity;
+
+        if (!member.User.IsDefined(out var user))
+        {
+            return Unqualified;
+        }
+
+        if (user.IsBot.IsDefined(out var isBot) && isBot)
+        {
+            return Unqualified;
+        }
+
+        var userHasRole = member.Roles.Contains(autorole.DiscordRoleID);
+
+        switch (isUserQualified)
+        {
+            case true when userHasRole:
             {
-                return Disabled;
+                return Unchanged;
             }
-
-            if (!autorole.Conditions.Any())
+            case false when userHasRole:
             {
-                return Unconditional;
-            }
+                var removeRole = await _guildAPI.RemoveGuildMemberRoleAsync
+                (
+                    guildID,
+                    userID,
+                    autorole.DiscordRoleID,
+                    ct: ct
+                );
 
-            var getRoles = await _guildAPI.GetGuildRolesAsync(guildID, ct);
-            if (!getRoles.IsSuccess)
-            {
-                return Result<AutoroleUpdateStatus>.FromError(getRoles);
-            }
-
-            var roles = getRoles.Entity;
-
-            if (roles.All(r => r.ID != autorole.DiscordRoleID))
-            {
-                // If the role can't be found any longer, we disable it
-                var disableAutoroleAsync = await _autoroles.DisableAutoroleAsync(autorole, ct);
-
-                return !disableAutoroleAsync.IsSuccess
-                    ? Result<AutoroleUpdateStatus>.FromError(disableAutoroleAsync)
-                    : Disabled;
-            }
-
-            var getIsUserQualified = await _autoroles.IsUserQualifiedForAutoroleAsync(autorole, userID, ct);
-            if (!getIsUserQualified.IsSuccess)
-            {
-                return Result<AutoroleUpdateStatus>.FromError(getIsUserQualified);
-            }
-
-            var isUserQualified = getIsUserQualified.Entity;
-
-            var getMember = await _guildAPI.GetGuildMemberAsync(guildID, userID, ct);
-            if (!getMember.IsSuccess)
-            {
-                return Result<AutoroleUpdateStatus>.FromError(getMember);
-            }
-
-            var member = getMember.Entity;
-
-            if (!member.User.IsDefined(out var user))
-            {
-                return Unqualified;
-            }
-
-            if (user.IsBot.IsDefined(out var isBot) && isBot)
-            {
-                return Unqualified;
-            }
-
-            var userHasRole = member.Roles.Contains(autorole.DiscordRoleID);
-
-            switch (isUserQualified)
-            {
-                case true when userHasRole:
+                if (!removeRole.IsSuccess)
                 {
-                    return Unchanged;
+                    return Result<AutoroleUpdateStatus>.FromError(removeRole);
                 }
-                case false when userHasRole:
-                {
-                    var removeRole = await _guildAPI.RemoveGuildMemberRoleAsync
-                    (
-                        guildID,
-                        userID,
-                        autorole.DiscordRoleID,
-                        ct: ct
-                    );
 
-                    if (!removeRole.IsSuccess)
-                    {
-                        return Result<AutoroleUpdateStatus>.FromError(removeRole);
-                    }
-
-                    var getConfirmation = await _autoroles.GetOrCreateAutoroleConfirmationAsync
-                    (
-                        autorole,
-                        userID,
-                        ct
-                    );
-
-                    if (!getConfirmation.IsSuccess)
-                    {
-                        return Removed;
-                    }
-
-                    // Remove any existing affirmation
-                    var confirmation = getConfirmation.Entity;
-                    var removeConfirmation = await _autoroles.RemoveAutoroleConfirmationAsync(confirmation, ct);
-
-                    return !removeConfirmation.IsSuccess
-                        ? Result<AutoroleUpdateStatus>.FromError(removeConfirmation)
-                        : Removed;
-                }
-                case false:
-                {
-                    // At this point, the user doesn't have the role, and either is or is not qualified.
-                    // We consider a no-op for an unqualified user a success.
-                    return Unqualified;
-                }
-            }
-
-            if (autorole.RequiresConfirmation)
-            {
                 var getConfirmation = await _autoroles.GetOrCreateAutoroleConfirmationAsync
                 (
                     autorole,
@@ -188,22 +158,51 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
 
                 if (!getConfirmation.IsSuccess)
                 {
-                    return Result<AutoroleUpdateStatus>.FromError(getConfirmation);
+                    return Removed;
                 }
 
+                // Remove any existing affirmation
                 var confirmation = getConfirmation.Entity;
-                if (!confirmation.IsConfirmed)
-                {
-                    // We consider a no-op for an qualified but not affirmed user a success.
-                    return RequiresAffirmation;
-                }
+                var removeConfirmation = await _autoroles.RemoveAutoroleConfirmationAsync(confirmation, ct);
+
+                return !removeConfirmation.IsSuccess
+                    ? Result<AutoroleUpdateStatus>.FromError(removeConfirmation)
+                    : Removed;
+            }
+            case false:
+            {
+                // At this point, the user doesn't have the role, and either is or is not qualified.
+                // We consider a no-op for an unqualified user a success.
+                return Unqualified;
+            }
+        }
+
+        if (autorole.RequiresConfirmation)
+        {
+            var getConfirmation = await _autoroles.GetOrCreateAutoroleConfirmationAsync
+            (
+                autorole,
+                userID,
+                ct
+            );
+
+            if (!getConfirmation.IsSuccess)
+            {
+                return Result<AutoroleUpdateStatus>.FromError(getConfirmation);
             }
 
-            var addRole = await _guildAPI.AddGuildMemberRoleAsync(guildID, userID, autorole.DiscordRoleID, ct: ct);
-
-            return !addRole.IsSuccess
-                ? Result<AutoroleUpdateStatus>.FromError(addRole)
-                : Applied;
+            var confirmation = getConfirmation.Entity;
+            if (!confirmation.IsConfirmed)
+            {
+                // We consider a no-op for an qualified but not affirmed user a success.
+                return RequiresAffirmation;
+            }
         }
+
+        var addRole = await _guildAPI.AddGuildMemberRoleAsync(guildID, userID, autorole.DiscordRoleID, ct: ct);
+
+        return !addRole.IsSuccess
+            ? Result<AutoroleUpdateStatus>.FromError(addRole)
+            : Applied;
     }
 }

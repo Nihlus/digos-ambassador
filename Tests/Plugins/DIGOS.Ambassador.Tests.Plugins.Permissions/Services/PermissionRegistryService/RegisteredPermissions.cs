@@ -27,25 +27,24 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Permissions
+namespace DIGOS.Ambassador.Tests.Plugins.Permissions;
+
+public static partial class PermissionRegistryServiceTests
 {
-    public static partial class PermissionRegistryServiceTests
+    public class RegisteredPermissions : PermissionRegistryServiceTestBase
     {
-        public class RegisteredPermissions : PermissionRegistryServiceTestBase
+        [Fact]
+        public void ContainsNothingBeforeRegisteringAPermission()
         {
-            [Fact]
-            public void ContainsNothingBeforeRegisteringAPermission()
-            {
-                Assert.Empty(this.PermissionRegistry.RegisteredPermissions);
-            }
+            Assert.Empty(this.PermissionRegistry.RegisteredPermissions);
+        }
 
-            [Fact]
-            public void ContainsSomethingAfterRegisteredAPermission()
-            {
-                this.PermissionRegistry.RegisterPermission<TestPermission>(this.Services);
+        [Fact]
+        public void ContainsSomethingAfterRegisteredAPermission()
+        {
+            this.PermissionRegistry.RegisterPermission<TestPermission>(this.Services);
 
-                Assert.NotEmpty(this.PermissionRegistry.RegisteredPermissions);
-            }
+            Assert.NotEmpty(this.PermissionRegistry.RegisteredPermissions);
         }
     }
 }

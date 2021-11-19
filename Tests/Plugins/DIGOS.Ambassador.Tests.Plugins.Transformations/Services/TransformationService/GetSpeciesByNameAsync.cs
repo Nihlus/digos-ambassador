@@ -27,37 +27,36 @@
 using System.Threading.Tasks;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Transformations
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
+
+public partial class TransformationServiceTests
 {
-    public partial class TransformationServiceTests
+    public class GetSpeciesByNameAsync : TransformationServiceTestBase
     {
-        public class GetSpeciesByNameAsync : TransformationServiceTestBase
+        [Fact]
+        public async Task ReturnsCorrectSpeciesForGivenName()
         {
-            [Fact]
-            public async Task ReturnsCorrectSpeciesForGivenName()
-            {
-                var result = await this.Transformations.GetSpeciesByNameAsync("template");
+            var result = await this.Transformations.GetSpeciesByNameAsync("template");
 
-                Assert.True(result.IsSuccess);
-                Assert.Equal("template", result.Entity.Name);
-            }
+            Assert.True(result.IsSuccess);
+            Assert.Equal("template", result.Entity.Name);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultForNonexistentName()
-            {
-                var result = await this.Transformations.GetSpeciesByNameAsync("aasddduaiii");
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultForNonexistentName()
+        {
+            var result = await this.Transformations.GetSpeciesByNameAsync("aasddduaiii");
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task IsCaseInsensitive()
-            {
-                var result = await this.Transformations.GetSpeciesByNameAsync("TEMPLATE");
+        [Fact]
+        public async Task IsCaseInsensitive()
+        {
+            var result = await this.Transformations.GetSpeciesByNameAsync("TEMPLATE");
 
-                Assert.True(result.IsSuccess);
-                Assert.Equal("template", result.Entity.Name);
-            }
+            Assert.True(result.IsSuccess);
+            Assert.Equal("template", result.Entity.Name);
         }
     }
 }

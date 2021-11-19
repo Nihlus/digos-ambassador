@@ -24,35 +24,34 @@ using System.Linq;
 using DIGOS.Ambassador.Core.Database.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace DIGOS.Ambassador.Core.Database.Extensions
+namespace DIGOS.Ambassador.Core.Database.Extensions;
+
+/// <summary>
+/// Extensions for database contexts.
+/// </summary>
+public static class DbContextExtensions
 {
     /// <summary>
-    /// Extensions for database contexts.
+    /// Normalizes an entity reference, replacing it with an already-tracked instance if one exists.
     /// </summary>
-    public static class DbContextExtensions
+    /// <param name="context">The context to normalize from.</param>
+    /// <param name="entity">The potentially foreign entity.</param>
+    /// <typeparam name="TEntity">The entity type.</typeparam>
+    /// <returns>The entity, or another entity from the context with the same ID.</returns>
+    public static TEntity NormalizeReference<TEntity>(this DbContext context, TEntity entity)
+        where TEntity : class, IEFEntity
     {
-        /// <summary>
-        /// Normalizes an entity reference, replacing it with an already-tracked instance if one exists.
-        /// </summary>
-        /// <param name="context">The context to normalize from.</param>
-        /// <param name="entity">The potentially foreign entity.</param>
-        /// <typeparam name="TEntity">The entity type.</typeparam>
-        /// <returns>The entity, or another entity from the context with the same ID.</returns>
-        public static TEntity NormalizeReference<TEntity>(this DbContext context, TEntity entity)
-            where TEntity : class, IEFEntity
+        var existingEntityEntry = context.ChangeTracker.Entries<TEntity>().FirstOrDefault
+        (
+            e => e.Entity.ID == entity.ID
+        );
+
+        if (existingEntityEntry is not null)
         {
-            var existingEntityEntry = context.ChangeTracker.Entries<TEntity>().FirstOrDefault
-            (
-                e => e.Entity.ID == entity.ID
-            );
-
-            if (existingEntityEntry is not null)
-            {
-                return existingEntityEntry.Entity;
-            }
-
-            context.Attach(entity);
-            return entity;
+            return existingEntityEntry.Entity;
         }
+
+        context.Attach(entity);
+        return entity;
     }
 }

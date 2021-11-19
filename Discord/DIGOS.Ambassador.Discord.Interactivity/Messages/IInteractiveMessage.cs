@@ -22,24 +22,23 @@
 
 using Remora.Discord.Core;
 
-namespace DIGOS.Ambassador.Discord.Interactivity.Messages
+namespace DIGOS.Ambassador.Discord.Interactivity.Messages;
+
+/// <summary>
+/// Represents the public interface of an interactive message.
+/// </summary>
+public interface IInteractiveMessage : IInteractiveEntity
 {
+    /// <inheritdoc/>
+    string IInteractiveEntity.Nonce => this.MessageID.ToString();
+
     /// <summary>
-    /// Represents the public interface of an interactive message.
+    /// Gets the ID of the channel the message is in.
     /// </summary>
-    public interface IInteractiveMessage : IInteractiveEntity
-    {
-        /// <inheritdoc/>
-        string IInteractiveEntity.Nonce => this.MessageID.ToString();
+    Snowflake ChannelID { get; }
 
-        /// <summary>
-        /// Gets the ID of the channel the message is in.
-        /// </summary>
-        Snowflake ChannelID { get; }
-
-        /// <summary>
-        /// Gets the ID of the message.
-        /// </summary>
-        Snowflake MessageID { get; }
-    }
+    /// <summary>
+    /// Gets the ID of the message.
+    /// </summary>
+    Snowflake MessageID { get; }
 }

@@ -25,47 +25,46 @@ using System.ComponentModel.DataAnnotations;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations;
+
+/// <summary>
+/// A node deserializer which validates its input as it goes.
+/// </summary>
+public sealed class ValidatingNodeDeserializer : INodeDeserializer
 {
+    private readonly INodeDeserializer _nodeDeserializer;
+
     /// <summary>
-    /// A node deserializer which validates its input as it goes.
+    /// Initializes a new instance of the <see cref="ValidatingNodeDeserializer"/> class.
     /// </summary>
-    public sealed class ValidatingNodeDeserializer : INodeDeserializer
+    /// <param name="nodeDeserializer">The node deserializer.</param>
+    public ValidatingNodeDeserializer(INodeDeserializer nodeDeserializer)
     {
-        private readonly INodeDeserializer _nodeDeserializer;
+        _nodeDeserializer = nodeDeserializer;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ValidatingNodeDeserializer"/> class.
-        /// </summary>
-        /// <param name="nodeDeserializer">The node deserializer.</param>
-        public ValidatingNodeDeserializer(INodeDeserializer nodeDeserializer)
+    /// <inheritdoc />
+    public bool Deserialize
+    (
+        IParser parser,
+        Type expectedType,
+        Func<IParser, Type, object?> nestedObjectDeserializer,
+        out object? value
+    )
+    {
+        if (!_nodeDeserializer.Deserialize(parser, expectedType, nestedObjectDeserializer, out value))
         {
-            _nodeDeserializer = nodeDeserializer;
+            return false;
         }
 
-        /// <inheritdoc />
-        public bool Deserialize
-        (
-            IParser parser,
-            Type expectedType,
-            Func<IParser, Type, object?> nestedObjectDeserializer,
-            out object? value
-        )
+        // TODO: Probably redundant, but YamlDotNet doesn't have nullability turned on yet
+        if (value is null)
         {
-            if (!_nodeDeserializer.Deserialize(parser, expectedType, nestedObjectDeserializer, out value))
-            {
-                return false;
-            }
-
-            // TODO: Probably redundant, but YamlDotNet doesn't have nullability turned on yet
-            if (value is null)
-            {
-                return false;
-            }
-
-            var context = new ValidationContext(value, null, null);
-            Validator.ValidateObject(value, context, true);
-            return true;
+            return false;
         }
+
+        var context = new ValidationContext(value, null, null);
+        Validator.ValidateObject(value, context, true);
+        return true;
     }
 }

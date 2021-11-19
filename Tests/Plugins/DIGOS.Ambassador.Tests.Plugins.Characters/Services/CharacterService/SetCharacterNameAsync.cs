@@ -30,65 +30,64 @@ using Xunit;
 #pragma warning disable SA1649
 #pragma warning disable CS8625
 
-namespace DIGOS.Ambassador.Tests.Plugins.Characters
+namespace DIGOS.Ambassador.Tests.Plugins.Characters;
+
+public partial class CharacterServiceTests
 {
-    public partial class CharacterServiceTests
+    public class SetCharacterNameAsync : CharacterServiceTestBase
     {
-        public class SetCharacterNameAsync : CharacterServiceTestBase
+        private const string CharacterName = "Test";
+        private const string AnotherCharacterName = "Test2";
+
+        private readonly Character _character;
+
+        public SetCharacterNameAsync()
         {
-            private const string CharacterName = "Test";
-            private const string AnotherCharacterName = "Test2";
+            _character = CreateCharacter(name: CharacterName);
+            CreateCharacter(name: AnotherCharacterName);
+        }
 
-            private readonly Character _character;
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfNameIsEmpty()
+        {
+            var result = await this.CharacterEditor.SetCharacterNameAsync(_character, string.Empty);
 
-            public SetCharacterNameAsync()
-            {
-                _character = CreateCharacter(name: CharacterName);
-                CreateCharacter(name: AnotherCharacterName);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfNameIsEmpty()
-            {
-                var result = await this.CharacterEditor.SetCharacterNameAsync(_character, string.Empty);
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfCharacterAlreadyHasThatName()
+        {
+            var result = await this.CharacterEditor.SetCharacterNameAsync(_character, CharacterName);
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfCharacterAlreadyHasThatName()
-            {
-                var result = await this.CharacterEditor.SetCharacterNameAsync(_character, CharacterName);
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfNameIsNotUnique()
+        {
+            var result = await this.CharacterEditor.SetCharacterNameAsync(_character, AnotherCharacterName);
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfNameIsNotUnique()
-            {
-                var result = await this.CharacterEditor.SetCharacterNameAsync(_character, AnotherCharacterName);
+        [Fact]
+        public async Task ReturnsSuccessfulResultIfNameIsAccepted()
+        {
+            var result = await this.CharacterEditor.SetCharacterNameAsync(_character, "Jeff");
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.True(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsSuccessfulResultIfNameIsAccepted()
-            {
-                var result = await this.CharacterEditor.SetCharacterNameAsync(_character, "Jeff");
+        [Fact]
+        public async Task SetsName()
+        {
+            const string validName = "Jeff";
 
-                Assert.True(result.IsSuccess);
-            }
+            await this.CharacterEditor.SetCharacterNameAsync(_character, validName);
 
-            [Fact]
-            public async Task SetsName()
-            {
-                const string validName = "Jeff";
-
-                await this.CharacterEditor.SetCharacterNameAsync(_character, validName);
-
-                var character = this.Database.Characters.First();
-                Assert.Equal(validName, character.Name);
-            }
+            var character = this.Database.Characters.First();
+            Assert.Equal(validName, character.Name);
         }
     }
 }

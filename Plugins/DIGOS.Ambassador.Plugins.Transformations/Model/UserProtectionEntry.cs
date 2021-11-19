@@ -27,47 +27,46 @@ using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using JetBrains.Annotations;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Plugins.Transformations.Model
+namespace DIGOS.Ambassador.Plugins.Transformations.Model;
+
+/// <summary>
+/// Represents a protection entry, that is, a user that has been whitelisted or blacklisted by another user in the
+/// TF module.
+/// </summary>
+[PublicAPI]
+[Table("UserProtectionEntries", Schema = "TransformationModule")]
+public class UserProtectionEntry : EFEntity
 {
     /// <summary>
-    /// Represents a protection entry, that is, a user that has been whitelisted or blacklisted by another user in the
-    /// TF module.
+    /// Gets the global protection entry that the user has been listed in.
     /// </summary>
-    [PublicAPI]
-    [Table("UserProtectionEntries", Schema = "TransformationModule")]
-    public class UserProtectionEntry : EFEntity
+    public virtual GlobalUserProtection GlobalProtection { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the user that's listed in the global protection entry.
+    /// </summary>
+    public virtual User User { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the type of listing.
+    /// </summary>
+    public ListingType Type { get; internal set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserProtectionEntry"/> class.
+    /// </summary>
+    protected UserProtectionEntry()
     {
-        /// <summary>
-        /// Gets the global protection entry that the user has been listed in.
-        /// </summary>
-        public virtual GlobalUserProtection GlobalProtection { get; private set; } = null!;
+    }
 
-        /// <summary>
-        /// Gets the user that's listed in the global protection entry.
-        /// </summary>
-        public virtual User User { get; private set; } = null!;
-
-        /// <summary>
-        /// Gets the type of listing.
-        /// </summary>
-        public ListingType Type { get; internal set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserProtectionEntry"/> class.
-        /// </summary>
-        protected UserProtectionEntry()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserProtectionEntry"/> class.
-        /// </summary>
-        /// <param name="globalProtection">The global protection entry.</param>
-        /// <param name="user">The target user.</param>
-        public UserProtectionEntry(GlobalUserProtection globalProtection, User user)
-        {
-            this.GlobalProtection = globalProtection;
-            this.User = user;
-        }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserProtectionEntry"/> class.
+    /// </summary>
+    /// <param name="globalProtection">The global protection entry.</param>
+    /// <param name="user">The target user.</param>
+    public UserProtectionEntry(GlobalUserProtection globalProtection, User user)
+    {
+        this.GlobalProtection = globalProtection;
+        this.User = user;
     }
 }

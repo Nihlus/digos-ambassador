@@ -31,217 +31,216 @@ using Microsoft.EntityFrameworkCore;
 using Remora.Discord.Core;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Moderation.Services
+namespace DIGOS.Ambassador.Plugins.Moderation.Services;
+
+/// <summary>
+/// Acts as an interface for accessing and modifying moderation settings.
+/// </summary>
+public sealed class ModerationService
 {
+    private readonly ModerationDatabaseContext _database;
+    private readonly ServerService _servers;
+
     /// <summary>
-    /// Acts as an interface for accessing and modifying moderation settings.
+    /// Initializes a new instance of the <see cref="ModerationService"/> class.
     /// </summary>
-    public sealed class ModerationService
+    /// <param name="database">The database context.</param>
+    /// <param name="servers">The server service.</param>
+    public ModerationService
+    (
+        ModerationDatabaseContext database,
+        ServerService servers
+    )
     {
-        private readonly ModerationDatabaseContext _database;
-        private readonly ServerService _servers;
+        _database = database;
+        _servers = servers;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ModerationService"/> class.
-        /// </summary>
-        /// <param name="database">The database context.</param>
-        /// <param name="servers">The server service.</param>
-        public ModerationService
-        (
-            ModerationDatabaseContext database,
-            ServerService servers
-        )
+    /// <summary>
+    /// Gets or creates the settings entity for the given Discord guild.
+    /// </summary>
+    /// <param name="guildID">The ID of the guild.</param>
+    /// <param name="ct">The cancellation token in use.</param>
+    /// <returns>A retrieval result which may or may not have succeeded.</returns>
+    public async Task<Result<ServerModerationSettings>> GetOrCreateServerSettingsAsync
+    (
+        Snowflake guildID,
+        CancellationToken ct = default
+    )
+    {
+        var getExistingEntry = await GetServerSettingsAsync(guildID, ct);
+        if (getExistingEntry.IsSuccess)
         {
-            _database = database;
-            _servers = servers;
+            return getExistingEntry.Entity;
         }
 
-        /// <summary>
-        /// Gets or creates the settings entity for the given Discord guild.
-        /// </summary>
-        /// <param name="guildID">The ID of the guild.</param>
-        /// <param name="ct">The cancellation token in use.</param>
-        /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<Result<ServerModerationSettings>> GetOrCreateServerSettingsAsync
+        var createSettings = await CreateServerSettingsAsync(guildID, ct);
+
+        return !createSettings.IsSuccess
+            ? Result<ServerModerationSettings>.FromError(createSettings)
+            : createSettings.Entity;
+    }
+
+    /// <summary>
+    /// Gets the settings for the given Discord guild.
+    /// </summary>
+    /// <param name="guildID">The ID of the guild.</param>
+    /// <param name="ct">The cancellation token in use.</param>
+    /// <returns>A retrieval result which may or may not have succeeded.</returns>
+    public async Task<Result<ServerModerationSettings>> GetServerSettingsAsync
+    (
+        Snowflake guildID,
+        CancellationToken ct = default
+    )
+    {
+        var settings = await _database.ServerSettings.ServersideQueryAsync
         (
-            Snowflake guildID,
-            CancellationToken ct = default
-        )
+            q => q
+                .Where(s => s.Server.DiscordID == guildID)
+                .SingleOrDefaultAsync(ct)
+        );
+
+        if (settings is not null)
         {
-            var getExistingEntry = await GetServerSettingsAsync(guildID, ct);
-            if (getExistingEntry.IsSuccess)
-            {
-                return getExistingEntry.Entity;
-            }
-
-            var createSettings = await CreateServerSettingsAsync(guildID, ct);
-
-            return !createSettings.IsSuccess
-                ? Result<ServerModerationSettings>.FromError(createSettings)
-                : createSettings.Entity;
-        }
-
-        /// <summary>
-        /// Gets the settings for the given Discord guild.
-        /// </summary>
-        /// <param name="guildID">The ID of the guild.</param>
-        /// <param name="ct">The cancellation token in use.</param>
-        /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<Result<ServerModerationSettings>> GetServerSettingsAsync
-        (
-            Snowflake guildID,
-            CancellationToken ct = default
-        )
-        {
-            var settings = await _database.ServerSettings.ServersideQueryAsync
-            (
-                q => q
-                    .Where(s => s.Server.DiscordID == guildID)
-                    .SingleOrDefaultAsync(ct)
-            );
-
-            if (settings is not null)
-            {
-                return settings;
-            }
-
-            return new UserError
-            (
-                "The server doesn't have any settings."
-            );
-        }
-
-        /// <summary>
-        /// Creates the settings for the given Discord guild.
-        /// </summary>
-        /// <param name="guildID">The ID of the guild.</param>
-        /// <param name="ct">The cancellation token in use.</param>
-        /// <returns>A creation result which may or may not have succeeded.</returns>
-        public async Task<Result<ServerModerationSettings>> CreateServerSettingsAsync
-        (
-            Snowflake guildID,
-            CancellationToken ct = default
-        )
-        {
-            var existingEntity = await GetServerSettingsAsync(guildID, ct);
-            if (existingEntity.IsSuccess)
-            {
-                return new UserError("That server already has settings.");
-            }
-
-            var getServer = await _servers.GetOrRegisterServerAsync(guildID, ct);
-            if (!getServer.IsSuccess)
-            {
-                return Result<ServerModerationSettings>.FromError(getServer);
-            }
-
-            var server = getServer.Entity;
-
-            var settings = _database.CreateProxy<ServerModerationSettings>(server);
-            _database.ServerSettings.Update(settings);
-
-            await _database.SaveChangesAsync(ct);
-
             return settings;
         }
 
-        /// <summary>
-        /// Sets the moderation log channel for the given server.
-        /// </summary>
-        /// <param name="guildID">The ID of the guild.</param>
-        /// <param name="channelID">The ID of the moderation log channel.</param>
-        /// <param name="ct">The cancellation token in use.</param>
-        /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<Result> SetModerationLogChannelAsync
+        return new UserError
         (
-            Snowflake guildID,
-            Snowflake channelID,
-            CancellationToken ct = default
-        )
+            "The server doesn't have any settings."
+        );
+    }
+
+    /// <summary>
+    /// Creates the settings for the given Discord guild.
+    /// </summary>
+    /// <param name="guildID">The ID of the guild.</param>
+    /// <param name="ct">The cancellation token in use.</param>
+    /// <returns>A creation result which may or may not have succeeded.</returns>
+    public async Task<Result<ServerModerationSettings>> CreateServerSettingsAsync
+    (
+        Snowflake guildID,
+        CancellationToken ct = default
+    )
+    {
+        var existingEntity = await GetServerSettingsAsync(guildID, ct);
+        if (existingEntity.IsSuccess)
         {
-            var getSettings = await GetOrCreateServerSettingsAsync(guildID, ct);
-            if (!getSettings.IsSuccess)
-            {
-                return Result.FromError(getSettings);
-            }
-
-            var settings = getSettings.Entity;
-
-            if (settings.ModerationLogChannel == channelID)
-            {
-                return new UserError("That's already the moderation log channel.");
-            }
-
-            settings.ModerationLogChannel = channelID;
-            await _database.SaveChangesAsync(ct);
-
-            return Result.FromSuccess();
+            return new UserError("That server already has settings.");
         }
 
-        /// <summary>
-        /// Sets the monitoring channel for the given server.
-        /// </summary>
-        /// <param name="guildID">The ID of the guild.</param>
-        /// <param name="channelID">The ID of the monitoring channel.</param>
-        /// <param name="ct">The cancellation token in use.</param>
-        /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<Result> SetMonitoringChannelAsync
-        (
-            Snowflake guildID,
-            Snowflake channelID,
-            CancellationToken ct = default
-        )
+        var getServer = await _servers.GetOrRegisterServerAsync(guildID, ct);
+        if (!getServer.IsSuccess)
         {
-            var getSettings = await GetOrCreateServerSettingsAsync(guildID, ct);
-            if (!getSettings.IsSuccess)
-            {
-                return Result.FromError(getSettings);
-            }
-
-            var settings = getSettings.Entity;
-
-            if (settings.MonitoringChannel == channelID)
-            {
-                return new UserError("That's already the monitoring channel.");
-            }
-
-            settings.MonitoringChannel = channelID;
-            await _database.SaveChangesAsync(ct);
-
-            return Result.FromSuccess();
+            return Result<ServerModerationSettings>.FromError(getServer);
         }
 
-        /// <summary>
-        /// Sets the warning threshold for the given server.
-        /// </summary>
-        /// <param name="guildID">The ID of the guild.</param>
-        /// <param name="warningThreshold">The warning threshold.</param>
-        /// <param name="ct">The cancellation token in use.</param>
-        /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<Result> SetWarningThresholdAsync
-        (
-            Snowflake guildID,
-            int warningThreshold,
-            CancellationToken ct = default
-        )
+        var server = getServer.Entity;
+
+        var settings = _database.CreateProxy<ServerModerationSettings>(server);
+        _database.ServerSettings.Update(settings);
+
+        await _database.SaveChangesAsync(ct);
+
+        return settings;
+    }
+
+    /// <summary>
+    /// Sets the moderation log channel for the given server.
+    /// </summary>
+    /// <param name="guildID">The ID of the guild.</param>
+    /// <param name="channelID">The ID of the moderation log channel.</param>
+    /// <param name="ct">The cancellation token in use.</param>
+    /// <returns>A modification result which may or may not have succeeded.</returns>
+    public async Task<Result> SetModerationLogChannelAsync
+    (
+        Snowflake guildID,
+        Snowflake channelID,
+        CancellationToken ct = default
+    )
+    {
+        var getSettings = await GetOrCreateServerSettingsAsync(guildID, ct);
+        if (!getSettings.IsSuccess)
         {
-            var getSettings = await GetOrCreateServerSettingsAsync(guildID, ct);
-            if (!getSettings.IsSuccess)
-            {
-                return Result.FromError(getSettings);
-            }
-
-            var settings = getSettings.Entity;
-
-            if (settings.WarningThreshold == warningThreshold)
-            {
-                return new UserError($"The warning threshold is already {warningThreshold}.");
-            }
-
-            settings.WarningThreshold = warningThreshold;
-            await _database.SaveChangesAsync(ct);
-
-            return Result.FromSuccess();
+            return Result.FromError(getSettings);
         }
+
+        var settings = getSettings.Entity;
+
+        if (settings.ModerationLogChannel == channelID)
+        {
+            return new UserError("That's already the moderation log channel.");
+        }
+
+        settings.ModerationLogChannel = channelID;
+        await _database.SaveChangesAsync(ct);
+
+        return Result.FromSuccess();
+    }
+
+    /// <summary>
+    /// Sets the monitoring channel for the given server.
+    /// </summary>
+    /// <param name="guildID">The ID of the guild.</param>
+    /// <param name="channelID">The ID of the monitoring channel.</param>
+    /// <param name="ct">The cancellation token in use.</param>
+    /// <returns>A modification result which may or may not have succeeded.</returns>
+    public async Task<Result> SetMonitoringChannelAsync
+    (
+        Snowflake guildID,
+        Snowflake channelID,
+        CancellationToken ct = default
+    )
+    {
+        var getSettings = await GetOrCreateServerSettingsAsync(guildID, ct);
+        if (!getSettings.IsSuccess)
+        {
+            return Result.FromError(getSettings);
+        }
+
+        var settings = getSettings.Entity;
+
+        if (settings.MonitoringChannel == channelID)
+        {
+            return new UserError("That's already the monitoring channel.");
+        }
+
+        settings.MonitoringChannel = channelID;
+        await _database.SaveChangesAsync(ct);
+
+        return Result.FromSuccess();
+    }
+
+    /// <summary>
+    /// Sets the warning threshold for the given server.
+    /// </summary>
+    /// <param name="guildID">The ID of the guild.</param>
+    /// <param name="warningThreshold">The warning threshold.</param>
+    /// <param name="ct">The cancellation token in use.</param>
+    /// <returns>A modification result which may or may not have succeeded.</returns>
+    public async Task<Result> SetWarningThresholdAsync
+    (
+        Snowflake guildID,
+        int warningThreshold,
+        CancellationToken ct = default
+    )
+    {
+        var getSettings = await GetOrCreateServerSettingsAsync(guildID, ct);
+        if (!getSettings.IsSuccess)
+        {
+            return Result.FromError(getSettings);
+        }
+
+        var settings = getSettings.Entity;
+
+        if (settings.WarningThreshold == warningThreshold)
+        {
+            return new UserError($"The warning threshold is already {warningThreshold}.");
+        }
+
+        settings.WarningThreshold = warningThreshold;
+        await _database.SaveChangesAsync(ct);
+
+        return Result.FromSuccess();
     }
 }

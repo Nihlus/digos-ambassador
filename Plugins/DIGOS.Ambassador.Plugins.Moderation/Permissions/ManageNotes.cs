@@ -23,20 +23,19 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
 
-namespace DIGOS.Ambassador.Plugins.Moderation.Permissions
+namespace DIGOS.Ambassador.Plugins.Moderation.Permissions;
+
+/// <summary>
+/// Represents a permission that allows a user to manage notes in the bot.
+/// </summary>
+public sealed class ManageNotes : Permission
 {
-    /// <summary>
-    /// Represents a permission that allows a user to manage notes in the bot.
-    /// </summary>
-    public sealed class ManageNotes : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("8FB711F2-336E-44C8-9E94-FBA4BAF1255D");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("8FB711F2-336E-44C8-9E94-FBA4BAF1255D");
 
-        /// <inheritdoc />
-        public override string FriendlyName => nameof(ManageNotes);
+    /// <inheritdoc />
+    public override string FriendlyName => nameof(ManageNotes);
 
-        /// <inheritdoc />
-        public override string Description => "Allows you to manage notes in the bot.";
-    }
+    /// <inheritdoc />
+    public override string Description => "Allows you to manage notes in the bot.";
 }

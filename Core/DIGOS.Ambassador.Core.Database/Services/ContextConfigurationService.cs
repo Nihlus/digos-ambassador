@@ -29,78 +29,77 @@ using DIGOS.Ambassador.Core.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace DIGOS.Ambassador.Core.Database.Services
+namespace DIGOS.Ambassador.Core.Database.Services;
+
+/// <summary>
+/// Serves functionality for schema-aware database contexts.
+/// </summary>
+public class ContextConfigurationService
 {
+    private readonly ContentService _content;
+    private readonly Dictionary<Type, string> _knownSchemas;
+
     /// <summary>
-    /// Serves functionality for schema-aware database contexts.
+    /// Initializes a new instance of the <see cref="ContextConfigurationService"/> class.
     /// </summary>
-    public class ContextConfigurationService
+    /// <param name="content">The content service.</param>
+    public ContextConfigurationService(ContentService content)
     {
-        private readonly ContentService _content;
-        private readonly Dictionary<Type, string> _knownSchemas;
+        _content = content;
+        _knownSchemas = new Dictionary<Type, string>();
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ContextConfigurationService"/> class.
-        /// </summary>
-        /// <param name="content">The content service.</param>
-        public ContextConfigurationService(ContentService content)
+    private void EnsureSchemaIsCached<TContext>() where TContext : AmbassadorDbContext
+    {
+        if (_knownSchemas.ContainsKey(typeof(TContext)))
         {
-            _content = content;
-            _knownSchemas = new Dictionary<Type, string>();
+            return;
         }
 
-        private void EnsureSchemaIsCached<TContext>() where TContext : AmbassadorDbContext
+        var dummyOptions = new DbContextOptionsBuilder<TContext>().Options;
+        if (Activator.CreateInstance(typeof(TContext), dummyOptions) is not TContext dummyContext)
         {
-            if (_knownSchemas.ContainsKey(typeof(TContext)))
-            {
-                return;
-            }
-
-            var dummyOptions = new DbContextOptionsBuilder<TContext>().Options;
-            if (Activator.CreateInstance(typeof(TContext), dummyOptions) is not TContext dummyContext)
-            {
-                return;
-            }
-
-            var schema = dummyContext.Schema;
-            _knownSchemas.Add(typeof(TContext), schema);
+            return;
         }
 
-        /// <summary>
-        /// Configures the options of a schema-aware database context.
-        /// </summary>
-        /// <param name="optionsBuilder">The unconfigured options builder.</param>
-        /// <typeparam name="TContext">The context type.</typeparam>
-        public void ConfigureSchemaAwareContext<TContext>(DbContextOptionsBuilder optionsBuilder)
-            where TContext : AmbassadorDbContext
+        var schema = dummyContext.Schema;
+        _knownSchemas.Add(typeof(TContext), schema);
+    }
+
+    /// <summary>
+    /// Configures the options of a schema-aware database context.
+    /// </summary>
+    /// <param name="optionsBuilder">The unconfigured options builder.</param>
+    /// <typeparam name="TContext">The context type.</typeparam>
+    public void ConfigureSchemaAwareContext<TContext>(DbContextOptionsBuilder optionsBuilder)
+        where TContext : AmbassadorDbContext
+    {
+        EnsureSchemaIsCached<TContext>();
+        var schema = _knownSchemas[typeof(TContext)];
+
+        var getCredentialStream = _content.GetDatabaseCredentialStream();
+        if (!getCredentialStream.IsSuccess)
         {
-            EnsureSchemaIsCached<TContext>();
-            var schema = _knownSchemas[typeof(TContext)];
-
-            var getCredentialStream = _content.GetDatabaseCredentialStream();
-            if (!getCredentialStream.IsSuccess)
-            {
-                throw new InvalidOperationException("Failed to get the database credential stream.");
-            }
-
-            DatabaseCredentials? credentials;
-            using (var credentialStream = new StreamReader(getCredentialStream.Entity))
-            {
-                var content = credentialStream.ReadToEnd();
-                if (!DatabaseCredentials.TryParse(content, out credentials))
-                {
-                    throw new InvalidOperationException("Failed to parse the database credentials.");
-                }
-            }
-
-            optionsBuilder
-                .UseLazyLoadingProxies()
-                .UseNpgsql
-                (
-                    credentials.GetConnectionString(),
-                    b => b.MigrationsHistoryTable(HistoryRepository.DefaultTableName + schema)
-                )
-                .UseSnakeCaseNamingConvention();
+            throw new InvalidOperationException("Failed to get the database credential stream.");
         }
+
+        DatabaseCredentials? credentials;
+        using (var credentialStream = new StreamReader(getCredentialStream.Entity))
+        {
+            var content = credentialStream.ReadToEnd();
+            if (!DatabaseCredentials.TryParse(content, out credentials))
+            {
+                throw new InvalidOperationException("Failed to parse the database credentials.");
+            }
+        }
+
+        optionsBuilder
+            .UseLazyLoadingProxies()
+            .UseNpgsql
+            (
+                credentials.GetConnectionString(),
+                b => b.MigrationsHistoryTable(HistoryRepository.DefaultTableName + schema)
+            )
+            .UseSnakeCaseNamingConvention();
     }
 }

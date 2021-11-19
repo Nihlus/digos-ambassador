@@ -27,21 +27,20 @@
 using System.Threading.Tasks;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Transformations
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
+
+public partial class TransformationServiceTests
 {
-    public partial class TransformationServiceTests
+    public class GetAvailableSpeciesAsync : TransformationServiceTestBase
     {
-        public class GetAvailableSpeciesAsync : TransformationServiceTestBase
+        [Fact]
+        public async Task ReturnsNonEmptySetForUpdatedDatabase()
         {
-            [Fact]
-            public async Task ReturnsNonEmptySetForUpdatedDatabase()
-            {
-                await this.Transformations.UpdateTransformationDatabaseAsync();
+            await this.Transformations.UpdateTransformationDatabaseAsync();
 
-                var result = await this.Transformations.GetAvailableSpeciesAsync();
+            var result = await this.Transformations.GetAvailableSpeciesAsync();
 
-                Assert.NotEmpty(result);
-            }
+            Assert.NotEmpty(result);
         }
     }
 }

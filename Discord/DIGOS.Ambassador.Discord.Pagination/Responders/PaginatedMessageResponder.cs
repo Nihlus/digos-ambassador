@@ -36,231 +36,230 @@ using Remora.Discord.Core;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Discord.Pagination.Responders
-{
-    /// <summary>
-    /// Responds to events required for interactivity.
-    /// </summary>
-    public class PaginatedMessageResponder :
-        InteractivityResponder,
-        IResponder<IInteractionCreate>
-    {
-        private readonly IDiscordRestChannelAPI _channelAPI;
-        private readonly IDiscordRestInteractionAPI _interactionAPI;
+namespace DIGOS.Ambassador.Discord.Pagination.Responders;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PaginatedMessageResponder"/> class.
-        /// </summary>
-        /// <param name="interactivity">The interactivity service.</param>
-        /// <param name="channelAPI">The channel API.</param>
-        /// <param name="interactionAPI">The interaction API.</param>
-        public PaginatedMessageResponder
-        (
-            InteractivityService interactivity,
-            IDiscordRestChannelAPI channelAPI,
-            IDiscordRestInteractionAPI interactionAPI
-        )
-            : base(interactivity)
+/// <summary>
+/// Responds to events required for interactivity.
+/// </summary>
+public class PaginatedMessageResponder :
+    InteractivityResponder,
+    IResponder<IInteractionCreate>
+{
+    private readonly IDiscordRestChannelAPI _channelAPI;
+    private readonly IDiscordRestInteractionAPI _interactionAPI;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PaginatedMessageResponder"/> class.
+    /// </summary>
+    /// <param name="interactivity">The interactivity service.</param>
+    /// <param name="channelAPI">The channel API.</param>
+    /// <param name="interactionAPI">The interaction API.</param>
+    public PaginatedMessageResponder
+    (
+        InteractivityService interactivity,
+        IDiscordRestChannelAPI channelAPI,
+        IDiscordRestInteractionAPI interactionAPI
+    )
+        : base(interactivity)
+    {
+        _channelAPI = channelAPI;
+        _interactionAPI = interactionAPI;
+    }
+
+    /// <inheritdoc />
+    public async Task<Result> RespondAsync(IInteractionCreate gatewayEvent, CancellationToken ct = default)
+    {
+        if (gatewayEvent.Type != InteractionType.MessageComponent)
         {
-            _channelAPI = channelAPI;
-            _interactionAPI = interactionAPI;
+            return Result.FromSuccess();
         }
 
-        /// <inheritdoc />
-        public async Task<Result> RespondAsync(IInteractionCreate gatewayEvent, CancellationToken ct = default)
+        var data = gatewayEvent.Data.Value ?? throw new InvalidOperationException();
+        var type = data.ComponentType.Value;
+
+        if (type != ComponentType.Button)
         {
-            if (gatewayEvent.Type != InteractionType.MessageComponent)
+            return Result.FromSuccess();
+        }
+
+        var interactedMessage = gatewayEvent.Message.Value ?? throw new InvalidOperationException();
+        var messageID = interactedMessage.ID.ToString();
+
+        if (!this.Interactivity.Tracker.TryGetInteractiveEntity<PaginatedMessage>(messageID, out var message))
+        {
+            return Result.FromSuccess();
+        }
+
+        // This is something we're supposed to handle
+        var respondDeferred = await _interactionAPI.CreateInteractionResponseAsync
+        (
+            gatewayEvent.ID,
+            gatewayEvent.Token,
+            new InteractionResponse(InteractionCallbackType.DeferredUpdateMessage),
+            ct: ct
+        );
+
+        if (!respondDeferred.IsSuccess)
+        {
+            return respondDeferred;
+        }
+
+        var user = gatewayEvent.User.HasValue
+            ? gatewayEvent.User.Value
+            : gatewayEvent.Member.HasValue
+                ? gatewayEvent.Member.Value.User.HasValue
+                    ? gatewayEvent.Member.Value.User.Value
+                    : null
+                : null;
+
+        if (user is null)
+        {
+            return Result.FromSuccess();
+        }
+
+        var userID = user.ID;
+
+        var buttonNonce = data.CustomID.Value ?? throw new InvalidOperationException();
+
+        try
+        {
+            await message.Semaphore.WaitAsync(ct);
+
+            if (userID != message.SourceUserID)
             {
+                // We handled it, but we won't respond
                 return Result.FromSuccess();
             }
 
-            var data = gatewayEvent.Data.Value ?? throw new InvalidOperationException();
-            var type = data.ComponentType.Value;
-
-            if (type != ComponentType.Button)
-            {
-                return Result.FromSuccess();
-            }
-
-            var interactedMessage = gatewayEvent.Message.Value ?? throw new InvalidOperationException();
-            var messageID = interactedMessage.ID.ToString();
-
-            if (!this.Interactivity.Tracker.TryGetInteractiveEntity<PaginatedMessage>(messageID, out var message))
-            {
-                return Result.FromSuccess();
-            }
-
-            // This is something we're supposed to handle
-            var respondDeferred = await _interactionAPI.CreateInteractionResponseAsync
+            var button = message.Buttons.FirstOrDefault
             (
-                gatewayEvent.ID,
-                gatewayEvent.Token,
-                new InteractionResponse(InteractionCallbackType.DeferredUpdateMessage),
-                ct: ct
+                b => b.CustomID.IsDefined(out var customID) && customID == buttonNonce
             );
 
-            if (!respondDeferred.IsSuccess)
+            if (button is null)
             {
-                return respondDeferred;
-            }
-
-            var user = gatewayEvent.User.HasValue
-                ? gatewayEvent.User.Value
-                : gatewayEvent.Member.HasValue
-                    ? gatewayEvent.Member.Value.User.HasValue
-                        ? gatewayEvent.Member.Value.User.Value
-                        : null
-                    : null;
-
-            if (user is null)
-            {
+                // This isn't a button we react to
                 return Result.FromSuccess();
             }
 
-            var userID = user.ID;
-
-            var buttonNonce = data.CustomID.Value ?? throw new InvalidOperationException();
-
-            try
+            // Special actions
+            if (button == message.Appearance.Close)
             {
-                await message.Semaphore.WaitAsync(ct);
+                return await _channelAPI.DeleteMessageAsync(message.ChannelID, message.MessageID, ct: ct);
+            }
 
-                if (userID != message.SourceUserID)
-                {
-                    // We handled it, but we won't respond
-                    return Result.FromSuccess();
-                }
-
-                var button = message.Buttons.FirstOrDefault
+            if (button == message.Appearance.Help)
+            {
+                var embed = new Embed { Colour = Color.Cyan, Description = message.Appearance.HelpText };
+                var sendHelp = await _channelAPI.CreateMessageAsync
                 (
-                    b => b.CustomID.IsDefined(out var customID) && customID == buttonNonce
+                    message.ChannelID,
+                    embeds: new[] { embed },
+                    ct: ct
                 );
 
-                if (button is null)
-                {
-                    // This isn't a button we react to
-                    return Result.FromSuccess();
-                }
-
-                // Special actions
-                if (button == message.Appearance.Close)
-                {
-                    return await _channelAPI.DeleteMessageAsync(message.ChannelID, message.MessageID, ct: ct);
-                }
-
-                if (button == message.Appearance.Help)
-                {
-                    var embed = new Embed { Colour = Color.Cyan, Description = message.Appearance.HelpText };
-                    var sendHelp = await _channelAPI.CreateMessageAsync
-                    (
-                        message.ChannelID,
-                        embeds: new[] { embed },
-                        ct: ct
-                    );
-
-                    return !sendHelp.IsSuccess
-                        ? Result.FromError(sendHelp)
-                        : Result.FromSuccess();
-                }
-
-                // Page movement actions
-                var didPageUpdate = false;
-                if (button == message.Appearance.First)
-                {
-                    didPageUpdate = message.MoveFirst();
-                }
-
-                if (button == message.Appearance.Back)
-                {
-                    didPageUpdate = message.MovePrevious();
-                }
-
-                if (button == message.Appearance.Next)
-                {
-                    didPageUpdate = message.MoveNext();
-                }
-
-                if (button == message.Appearance.Last)
-                {
-                    didPageUpdate = message.MoveLast();
-                }
-
-                return didPageUpdate
-                    ? await UpdateAsync(message, ct)
+                return !sendHelp.IsSuccess
+                    ? Result.FromError(sendHelp)
                     : Result.FromSuccess();
             }
-            finally
+
+            // Page movement actions
+            var didPageUpdate = false;
+            if (button == message.Appearance.First)
             {
-                message.Semaphore.Release();
+                didPageUpdate = message.MoveFirst();
             }
+
+            if (button == message.Appearance.Back)
+            {
+                didPageUpdate = message.MovePrevious();
+            }
+
+            if (button == message.Appearance.Next)
+            {
+                didPageUpdate = message.MoveNext();
+            }
+
+            if (button == message.Appearance.Last)
+            {
+                didPageUpdate = message.MoveLast();
+            }
+
+            return didPageUpdate
+                ? await UpdateAsync(message, ct)
+                : Result.FromSuccess();
+        }
+        finally
+        {
+            message.Semaphore.Release();
+        }
+    }
+
+    /// <inheritdoc />
+    public override async Task<Result> OnCreateAsync(string nonce, CancellationToken ct = default)
+    {
+        if (!this.Interactivity.Tracker.TryGetInteractiveEntity<PaginatedMessage>(nonce, out var message))
+        {
+            return Result.FromSuccess();
         }
 
-        /// <inheritdoc />
-        public override async Task<Result> OnCreateAsync(string nonce, CancellationToken ct = default)
+        try
         {
-            if (!this.Interactivity.Tracker.TryGetInteractiveEntity<PaginatedMessage>(nonce, out var message))
-            {
-                return Result.FromSuccess();
-            }
-
-            try
-            {
-                await message.Semaphore.WaitAsync(ct);
-                return await UpdateAsync(message, ct);
-            }
-            finally
-            {
-                message.Semaphore.Release();
-            }
+            await message.Semaphore.WaitAsync(ct);
+            return await UpdateAsync(message, ct);
         }
-
-        private IReadOnlyList<IMessageComponent> GetCurrentPageComponents(PaginatedMessage message)
+        finally
         {
-            return new List<IMessageComponent>
-            {
-                new ActionRowComponent
-                (
-                    new[]
-                    {
-                        message.Appearance.First,
-                        message.Appearance.Back,
-                        message.Appearance.Next,
-                        message.Appearance.Last,
-                    }
-                ),
-                new ActionRowComponent
-                (
-                    new[]
-                    {
-                        message.Appearance.Close,
-                        message.Appearance.Help
-                    }
-                )
-            };
+            message.Semaphore.Release();
         }
+    }
 
-        /// <summary>
-        /// Updates the contents of the interactive message.
-        /// </summary>
-        /// <param name="message">The message.</param>
-        /// <param name="ct">The cancellation token for this operation.</param>
-        /// <returns>A result which may or may not have succeeded.</returns>
-        private async Task<Result> UpdateAsync(PaginatedMessage message, CancellationToken ct = default)
+    private IReadOnlyList<IMessageComponent> GetCurrentPageComponents(PaginatedMessage message)
+    {
+        return new List<IMessageComponent>
         {
-            var page = message.GetCurrentPage();
-
-            var modifyMessage = await _channelAPI.EditMessageAsync
+            new ActionRowComponent
             (
-                message.ChannelID,
-                message.MessageID,
-                embeds: new[] { page },
-                components: new Optional<IReadOnlyList<IMessageComponent>>(GetCurrentPageComponents(message)),
-                ct: ct
-            );
+                new[]
+                {
+                    message.Appearance.First,
+                    message.Appearance.Back,
+                    message.Appearance.Next,
+                    message.Appearance.Last,
+                }
+            ),
+            new ActionRowComponent
+            (
+                new[]
+                {
+                    message.Appearance.Close,
+                    message.Appearance.Help
+                }
+            )
+        };
+    }
 
-            return modifyMessage.IsSuccess
-                ? Result.FromSuccess()
-                : Result.FromError(modifyMessage);
-        }
+    /// <summary>
+    /// Updates the contents of the interactive message.
+    /// </summary>
+    /// <param name="message">The message.</param>
+    /// <param name="ct">The cancellation token for this operation.</param>
+    /// <returns>A result which may or may not have succeeded.</returns>
+    private async Task<Result> UpdateAsync(PaginatedMessage message, CancellationToken ct = default)
+    {
+        var page = message.GetCurrentPage();
+
+        var modifyMessage = await _channelAPI.EditMessageAsync
+        (
+            message.ChannelID,
+            message.MessageID,
+            embeds: new[] { page },
+            components: new Optional<IReadOnlyList<IMessageComponent>>(GetCurrentPageComponents(message)),
+            ct: ct
+        );
+
+        return modifyMessage.IsSuccess
+            ? Result.FromSuccess()
+            : Result.FromError(modifyMessage);
     }
 }

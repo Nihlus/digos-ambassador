@@ -20,32 +20,31 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Results
+namespace DIGOS.Ambassador.Plugins.Transformations.Results;
+
+/// <summary>
+/// Represents an attempt to shift a part of a character's body.
+/// </summary>
+public class ShiftBodypartResult
 {
     /// <summary>
-    /// Represents an attempt to shift a part of a character's body.
+    /// Gets the shifting message.
     /// </summary>
-    public class ShiftBodypartResult
+    public string ShiftMessage { get; }
+
+    /// <summary>
+    /// Gets the action that was performed on the bodypart.
+    /// </summary>
+    public ShiftBodypartAction Action { get; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ShiftBodypartResult"/> class.
+    /// </summary>
+    /// <param name="shiftMessage">The message to display to the user when shifting.</param>
+    /// <param name="action">The action that was performed on the bodypart.</param>
+    public ShiftBodypartResult(string shiftMessage, ShiftBodypartAction action)
     {
-        /// <summary>
-        /// Gets the shifting message.
-        /// </summary>
-        public string ShiftMessage { get; }
-
-        /// <summary>
-        /// Gets the action that was performed on the bodypart.
-        /// </summary>
-        public ShiftBodypartAction Action { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ShiftBodypartResult"/> class.
-        /// </summary>
-        /// <param name="shiftMessage">The message to display to the user when shifting.</param>
-        /// <param name="action">The action that was performed on the bodypart.</param>
-        public ShiftBodypartResult(string shiftMessage, ShiftBodypartAction action)
-        {
-            this.ShiftMessage = shiftMessage;
-            this.Action = action;
-        }
+        this.ShiftMessage = shiftMessage;
+        this.Action = action;
     }
 }

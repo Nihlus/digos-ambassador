@@ -27,69 +27,68 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Core
+namespace DIGOS.Ambassador.Tests.Plugins.Core;
+
+public partial class OwnedEntityServiceTests
 {
-    public partial class OwnedEntityServiceTests
+    public class IsEntityNameValid : OwnedEntityServiceTestBase
     {
-        public class IsEntityNameValid : OwnedEntityServiceTestBase
+        private readonly IReadOnlyCollection<string> _commandNames;
+
+        public IsEntityNameValid()
         {
-            private readonly IReadOnlyCollection<string> _commandNames;
+            _commandNames = new[] { "create", "set name", "show" };
+        }
 
-            public IsEntityNameValid()
-            {
-                _commandNames = new[] { "create", "set name", "show" };
-            }
+        [Fact]
+        public void ReturnsFailureForNullNames()
+        {
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            var result = this.Entities.IsEntityNameValid(_commandNames, null);
 
-            [Fact]
-            public void ReturnsFailureForNullNames()
-            {
-                // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-                var result = this.Entities.IsEntityNameValid(_commandNames, null);
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Theory]
+        [InlineData(':')]
+        public void ReturnsFailureIfNameContainsInvalidCharacters(char invalidCharacter)
+        {
+            var result = this.Entities.IsEntityNameValid(_commandNames, $"Test{invalidCharacter}");
 
-            [Theory]
-            [InlineData(':')]
-            public void ReturnsFailureIfNameContainsInvalidCharacters(char invalidCharacter)
-            {
-                var result = this.Entities.IsEntityNameValid(_commandNames, $"Test{invalidCharacter}");
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Theory]
+        [InlineData("current")]
+        public void ReturnsFailureIfNameIsAReservedName(string reservedName)
+        {
+            var result = this.Entities.IsEntityNameValid(_commandNames, reservedName);
 
-            [Theory]
-            [InlineData("current")]
-            public void ReturnsFailureIfNameIsAReservedName(string reservedName)
-            {
-                var result = this.Entities.IsEntityNameValid(_commandNames, reservedName);
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Theory]
+        [InlineData("create")]
+        [InlineData("show")]
+        [InlineData("character show")]
+        [InlineData("create Test Testsson")]
+        [InlineData("set name Amby")]
+        public void ReturnsFailureIfNameContainsACommandName(string commandName)
+        {
+            var result = this.Entities.IsEntityNameValid(_commandNames, commandName);
 
-            [Theory]
-            [InlineData("create")]
-            [InlineData("show")]
-            [InlineData("character show")]
-            [InlineData("create Test Testsson")]
-            [InlineData("set name Amby")]
-            public void ReturnsFailureIfNameContainsACommandName(string commandName)
-            {
-                var result = this.Entities.IsEntityNameValid(_commandNames, commandName);
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Theory]
+        [InlineData("Norm")]
+        [InlineData("Tali'Zorah")]
+        [InlineData("August Strindberg")]
+        public void ReturnsSuccessForNormalNames(string name)
+        {
+            var result = this.Entities.IsEntityNameValid(_commandNames, name);
 
-            [Theory]
-            [InlineData("Norm")]
-            [InlineData("Tali'Zorah")]
-            [InlineData("August Strindberg")]
-            public void ReturnsSuccessForNormalNames(string name)
-            {
-                var result = this.Entities.IsEntityNameValid(_commandNames, name);
-
-                Assert.True(result.IsSuccess);
-            }
+            Assert.True(result.IsSuccess);
         }
     }
 }

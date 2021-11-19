@@ -29,55 +29,54 @@ using DIGOS.Ambassador.Tests.Plugins.Moderation.Bases;
 using Remora.Discord.Core;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
+namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService;
+
+public partial class BanService
 {
-    public partial class BanService
+    public class GetBanAsync : BanServiceTestBase
     {
-        public class GetBanAsync : BanServiceTestBase
+        private readonly Snowflake _guild = new(1);
+        private readonly Snowflake _otherGuild = new(2);
+        private readonly Snowflake _user = new(3);
+
+        private readonly Snowflake _author = new(4);
+
+        [Fact]
+        public async Task ReturnsSuccessfulIfBanExists()
         {
-            private readonly Snowflake _guild = new(1);
-            private readonly Snowflake _otherGuild = new(2);
-            private readonly Snowflake _user = new(3);
+            var ban = (await this.Bans.CreateBanAsync(_author, _user, _guild, "Dummy thicc")).Entity;
 
-            private readonly Snowflake _author = new(4);
+            var result = await this.Bans.GetBanAsync(_guild, ban.ID);
 
-            [Fact]
-            public async Task ReturnsSuccessfulIfBanExists()
-            {
-                var ban = (await this.Bans.CreateBanAsync(_author, _user, _guild, "Dummy thicc")).Entity;
+            Assert.True(result.IsSuccess);
+        }
 
-                var result = await this.Bans.GetBanAsync(_guild, ban.ID);
+        [Fact]
+        public async Task ReturnsUnsuccessfulIfNoBanExists()
+        {
+            var result = await this.Bans.GetBanAsync(_guild, 1);
 
-                Assert.True(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulIfNoBanExists()
-            {
-                var result = await this.Bans.GetBanAsync(_guild, 1);
+        [Fact]
+        public async Task ReturnsUnsuccessfulIfBanExistsButServerIsWrong()
+        {
+            var ban = (await this.Bans.CreateBanAsync(_author, _user, _guild, "Dummy thicc")).Entity;
 
-                Assert.False(result.IsSuccess);
-            }
+            var result = await this.Bans.GetBanAsync(_otherGuild, ban.ID);
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulIfBanExistsButServerIsWrong()
-            {
-                var ban = (await this.Bans.CreateBanAsync(_author, _user, _guild, "Dummy thicc")).Entity;
+            Assert.False(result.IsSuccess);
+        }
 
-                var result = await this.Bans.GetBanAsync(_otherGuild, ban.ID);
+        [Fact]
+        public async Task ActuallyReturnsBan()
+        {
+            var ban = (await this.Bans.CreateBanAsync(_author, _user, _guild, "Dummy thicc")).Entity;
 
-                Assert.False(result.IsSuccess);
-            }
+            var result = await this.Bans.GetBanAsync(_guild, ban.ID);
 
-            [Fact]
-            public async Task ActuallyReturnsBan()
-            {
-                var ban = (await this.Bans.CreateBanAsync(_author, _user, _guild, "Dummy thicc")).Entity;
-
-                var result = await this.Bans.GetBanAsync(_guild, ban.ID);
-
-                Assert.Same(ban, result.Entity);
-            }
+            Assert.Same(ban, result.Entity);
         }
     }
 }

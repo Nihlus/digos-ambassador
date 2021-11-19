@@ -27,70 +27,69 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Permissions
+namespace DIGOS.Ambassador.Tests.Plugins.Permissions;
+
+public static partial class PermissionRegistryServiceTests
 {
-    public static partial class PermissionRegistryServiceTests
+    public class RegisterPermission : PermissionRegistryServiceTestBase
     {
-        public class RegisterPermission : PermissionRegistryServiceTestBase
+        [Fact]
+        public void RegisteringPermissionByTypeReturnsTrue()
         {
-            [Fact]
-            public void RegisteringPermissionByTypeReturnsTrue()
-            {
-                var result = this.PermissionRegistry.RegisterPermission(typeof(TestPermission), this.Services);
+            var result = this.PermissionRegistry.RegisterPermission(typeof(TestPermission), this.Services);
 
-                Assert.True(result.IsSuccess);
-            }
+            Assert.True(result.IsSuccess);
+        }
 
-            [Fact]
-            public void RegisteringPermissionByGenericArgumentReturnsTrue()
-            {
-                var result = this.PermissionRegistry.RegisterPermission<TestPermission>(this.Services);
+        [Fact]
+        public void RegisteringPermissionByGenericArgumentReturnsTrue()
+        {
+            var result = this.PermissionRegistry.RegisterPermission<TestPermission>(this.Services);
 
-                Assert.True(result.IsSuccess);
-            }
+            Assert.True(result.IsSuccess);
+        }
 
-            [Fact]
-            public void RegisteringSamePermissionTwiceReturnsFalse()
-            {
-                this.PermissionRegistry.RegisterPermission(typeof(TestPermission), this.Services);
-                var result = this.PermissionRegistry.RegisterPermission(typeof(TestPermission), this.Services);
+        [Fact]
+        public void RegisteringSamePermissionTwiceReturnsFalse()
+        {
+            this.PermissionRegistry.RegisterPermission(typeof(TestPermission), this.Services);
+            var result = this.PermissionRegistry.RegisterPermission(typeof(TestPermission), this.Services);
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public void RegisteringBadlyBehavedPermissionThatThrowsDuringCreationReturnsFalse()
-            {
-                var result = this.PermissionRegistry.RegisterPermission
-                (
-                    typeof(BadlyBehavedPermissionThatThrowsInConstructor),
-                    this.Services
-                );
+        [Fact]
+        public void RegisteringBadlyBehavedPermissionThatThrowsDuringCreationReturnsFalse()
+        {
+            var result = this.PermissionRegistry.RegisterPermission
+            (
+                typeof(BadlyBehavedPermissionThatThrowsInConstructor),
+                this.Services
+            );
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public void RegisteringBadlyBehavedPermissionWithSameGUIDAsAnotherPermissionReturnsFalse()
-            {
-                this.PermissionRegistry.RegisterPermission(typeof(TestPermission), this.Services);
-                var result = this.PermissionRegistry.RegisterPermission
-                (
-                    typeof(BadlyBehavedPermissionWithSameGUIDAsAnotherPermission),
-                    this.Services
-                );
+        [Fact]
+        public void RegisteringBadlyBehavedPermissionWithSameGUIDAsAnotherPermissionReturnsFalse()
+        {
+            this.PermissionRegistry.RegisterPermission(typeof(TestPermission), this.Services);
+            var result = this.PermissionRegistry.RegisterPermission
+            (
+                typeof(BadlyBehavedPermissionWithSameGUIDAsAnotherPermission),
+                this.Services
+            );
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public void RegisteringFailingCaseUsingGenericParameterReturnsFalse()
-            {
-                this.PermissionRegistry.RegisterPermission<TestPermission>(this.Services);
-                var result = this.PermissionRegistry.RegisterPermission<TestPermission>(this.Services);
+        [Fact]
+        public void RegisteringFailingCaseUsingGenericParameterReturnsFalse()
+        {
+            this.PermissionRegistry.RegisterPermission<TestPermission>(this.Services);
+            var result = this.PermissionRegistry.RegisterPermission<TestPermission>(this.Services);
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
         }
     }
 }

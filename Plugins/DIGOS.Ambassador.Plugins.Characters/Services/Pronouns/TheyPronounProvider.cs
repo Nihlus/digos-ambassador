@@ -20,29 +20,28 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
+namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
+
+/// <summary>
+/// Provides singular they pronouns.
+/// </summary>
+public class TheyPronounProvider : PronounProvider
 {
-    /// <summary>
-    /// Provides singular they pronouns.
-    /// </summary>
-    public class TheyPronounProvider : PronounProvider
-    {
-        /// <inheritdoc />
-        public override string Family => "They";
+    /// <inheritdoc />
+    public override string Family => "They";
 
-        /// <inheritdoc />
-        public override string GetSubjectForm(bool withVerb = false) => withVerb ? "they are" : "they";
+    /// <inheritdoc />
+    public override string GetSubjectForm(bool withVerb = false) => withVerb ? "they are" : "they";
 
-        /// <inheritdoc />
-        public override string GetObjectForm() => "them";
+    /// <inheritdoc />
+    public override string GetObjectForm() => "them";
 
-        /// <inheritdoc />
-        public override string GetPossessiveAdjectiveForm() => "their";
+    /// <inheritdoc />
+    public override string GetPossessiveAdjectiveForm() => "their";
 
-        /// <inheritdoc />
-        public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "they have" : "theirs";
+    /// <inheritdoc />
+    public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "they have" : "theirs";
 
-        /// <inheritdoc />
-        public override string GetReflexiveForm() => "themselves";
-    }
+    /// <inheritdoc />
+    public override string GetReflexiveForm() => "themselves";
 }

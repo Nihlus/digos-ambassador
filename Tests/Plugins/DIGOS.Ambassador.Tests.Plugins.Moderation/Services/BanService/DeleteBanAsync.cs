@@ -32,45 +32,44 @@ using DIGOS.Ambassador.Tests.Plugins.Moderation.Bases;
 using Remora.Discord.Core;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
+namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService;
+
+public partial class BanService
 {
-    public partial class BanService
+    public class DeleteBanAsync : BanServiceTestBase
     {
-        public class DeleteBanAsync : BanServiceTestBase
+        private readonly Snowflake _user = new(0);
+        private readonly Snowflake _guild = new(1);
+
+        private readonly Snowflake _author = new(1);
+
+        [Fact]
+        private async Task ReturnsUnsuccessfulIfBanDoesNotExist()
         {
-            private readonly Snowflake _user = new(0);
-            private readonly Snowflake _guild = new(1);
+            var ban = new UserBan(new Server(new Snowflake(0)), new User(new Snowflake(0)), new User(new Snowflake(1)), "Dummy thicc");
 
-            private readonly Snowflake _author = new(1);
+            var result = await this.Bans.DeleteBanAsync(ban);
 
-            [Fact]
-            private async Task ReturnsUnsuccessfulIfBanDoesNotExist()
-            {
-                var ban = new UserBan(new Server(new Snowflake(0)), new User(new Snowflake(0)), new User(new Snowflake(1)), "Dummy thicc");
+            Assert.False(result.IsSuccess);
+        }
 
-                var result = await this.Bans.DeleteBanAsync(ban);
+        [Fact]
+        private async Task ReturnsSuccessfulIfBanExists()
+        {
+            var ban = (await this.Bans.CreateBanAsync(_author, _user, _guild, "Dummy thicc")).Entity;
 
-                Assert.False(result.IsSuccess);
-            }
+            var result = await this.Bans.DeleteBanAsync(ban);
+            Assert.True(result.IsSuccess);
+        }
 
-            [Fact]
-            private async Task ReturnsSuccessfulIfBanExists()
-            {
-                var ban = (await this.Bans.CreateBanAsync(_author, _user, _guild, "Dummy thicc")).Entity;
+        [Fact]
+        private async Task ActuallyDeletesBan()
+        {
+            var ban = (await this.Bans.CreateBanAsync(_author, _user, _guild, "Dummy thicc")).Entity;
 
-                var result = await this.Bans.DeleteBanAsync(ban);
-                Assert.True(result.IsSuccess);
-            }
+            await this.Bans.DeleteBanAsync(ban);
 
-            [Fact]
-            private async Task ActuallyDeletesBan()
-            {
-                var ban = (await this.Bans.CreateBanAsync(_author, _user, _guild, "Dummy thicc")).Entity;
-
-                await this.Bans.DeleteBanAsync(ban);
-
-                Assert.Empty(this.Database.UserBans);
-            }
+            Assert.Empty(this.Database.UserBans);
         }
     }
 }

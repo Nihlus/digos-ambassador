@@ -20,26 +20,25 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Plugins.Permissions.Model
+namespace DIGOS.Ambassador.Plugins.Permissions.Model;
+
+/// <summary>
+/// Defines the state a recorded permission can be in.
+/// </summary>
+public enum PermissionState
 {
     /// <summary>
-    /// Defines the state a recorded permission can be in.
+    /// The permission has been explicitly granted.
     /// </summary>
-    public enum PermissionState
-    {
-        /// <summary>
-        /// The permission has been explicitly granted.
-        /// </summary>
-        Granted,
+    Granted,
 
-        /// <summary>
-        /// The permission has been explicitly denied.
-        /// </summary>
-        Denied,
+    /// <summary>
+    /// The permission has been explicitly denied.
+    /// </summary>
+    Denied,
 
-        /// <summary>
-        /// The permission inherits superseding values, or uses the permission's default.
-        /// </summary>
-        InheritOrDefault
-    }
+    /// <summary>
+    /// The permission inherits superseding values, or uses the permission's default.
+    /// </summary>
+    InheritOrDefault
 }

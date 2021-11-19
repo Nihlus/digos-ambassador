@@ -27,38 +27,37 @@ using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Core.Database.Interfaces
+namespace DIGOS.Ambassador.Core.Database.Interfaces;
+
+/// <summary>
+/// Represents the public interface of a service that can perform single- and multi-entity queries against a
+/// specialized portion of the database.
+/// </summary>
+/// <typeparam name="TEntity">The entity type.</typeparam>
+public interface IQueryService<TEntity>
 {
     /// <summary>
-    /// Represents the public interface of a service that can perform single- and multi-entity queries against a
-    /// specialized portion of the database.
+    /// Performs a multi-entity query against the database.
     /// </summary>
-    /// <typeparam name="TEntity">The entity type.</typeparam>
-    public interface IQueryService<TEntity>
-    {
-        /// <summary>
-        /// Performs a multi-entity query against the database.
-        /// </summary>
-        /// <param name="query">Additional query statements.</param>
-        /// <param name="ct">The cancellation token in use.</param>
-        /// <returns>A list of materialized results.</returns>
-        [Pure]
-        public Task<IReadOnlyList<TEntity>> QueryDatabaseAsync
-        (
-            Func<IQueryable<TEntity>, IQueryable<TEntity>>? query = default,
-            CancellationToken ct = default
-        );
+    /// <param name="query">Additional query statements.</param>
+    /// <param name="ct">The cancellation token in use.</param>
+    /// <returns>A list of materialized results.</returns>
+    [Pure]
+    public Task<IReadOnlyList<TEntity>> QueryDatabaseAsync
+    (
+        Func<IQueryable<TEntity>, IQueryable<TEntity>>? query = default,
+        CancellationToken ct = default
+    );
 
-        /// <summary>
-        /// Performs a single-entity query against the database.
-        /// </summary>
-        /// <typeparam name="TOut">The output type.</typeparam>
-        /// <param name="query">Additional query statements.</param>
-        /// <returns>A single result from the query.</returns>
-        [Pure]
-        public Task<TOut> QueryDatabaseAsync<TOut>
-        (
-            Func<IQueryable<TEntity>, Task<TOut>> query
-        );
-    }
+    /// <summary>
+    /// Performs a single-entity query against the database.
+    /// </summary>
+    /// <typeparam name="TOut">The output type.</typeparam>
+    /// <param name="query">Additional query statements.</param>
+    /// <returns>A single result from the query.</returns>
+    [Pure]
+    public Task<TOut> QueryDatabaseAsync<TOut>
+    (
+        Func<IQueryable<TEntity>, Task<TOut>> query
+    );
 }

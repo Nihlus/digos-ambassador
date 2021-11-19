@@ -25,53 +25,52 @@ using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Model
+namespace DIGOS.Ambassador.Plugins.Autorole.Model;
+
+/// <summary>
+/// Represents an externally initiated confirmation of a user's qualification for an autorole.
+/// </summary>
+[Table("AutoroleConfirmations", Schema = "AutoroleModule")]
+public class AutoroleConfirmation : EFEntity
 {
     /// <summary>
-    /// Represents an externally initiated confirmation of a user's qualification for an autorole.
+    /// Gets the autorole that the confirmation is for.
     /// </summary>
-    [Table("AutoroleConfirmations", Schema = "AutoroleModule")]
-    public class AutoroleConfirmation : EFEntity
+    public virtual AutoroleConfiguration Autorole { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the user that the confirmation is for.
+    /// </summary>
+    public virtual User User { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets a value indicating whether the user's qualification has been affirmed.
+    /// </summary>
+    public bool IsConfirmed { get; internal set; }
+
+    /// <summary>
+    /// Gets a value indicating whether a notification has been sent that the user is qualified but not affirmed.
+    /// </summary>
+    public bool HasNotificationBeenSent { get; internal set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AutoroleConfirmation"/> class.
+    /// </summary>
+    [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
+    protected AutoroleConfirmation()
     {
-        /// <summary>
-        /// Gets the autorole that the confirmation is for.
-        /// </summary>
-        public virtual AutoroleConfiguration Autorole { get; private set; } = null!;
+    }
 
-        /// <summary>
-        /// Gets the user that the confirmation is for.
-        /// </summary>
-        public virtual User User { get; private set; } = null!;
-
-        /// <summary>
-        /// Gets a value indicating whether the user's qualification has been affirmed.
-        /// </summary>
-        public bool IsConfirmed { get; internal set; }
-
-        /// <summary>
-        /// Gets a value indicating whether a notification has been sent that the user is qualified but not affirmed.
-        /// </summary>
-        public bool HasNotificationBeenSent { get; internal set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AutoroleConfirmation"/> class.
-        /// </summary>
-        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
-        protected AutoroleConfirmation()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AutoroleConfirmation"/> class.
-        /// </summary>
-        /// <param name="autorole">The autorole.</param>
-        /// <param name="user">The user.</param>
-        /// <param name="isConfirmed">Whether the user is conformed or not.</param>
-        public AutoroleConfirmation(AutoroleConfiguration autorole, User user, bool isConfirmed = false)
-        {
-            this.Autorole = autorole;
-            this.User = user;
-            this.IsConfirmed = isConfirmed;
-        }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AutoroleConfirmation"/> class.
+    /// </summary>
+    /// <param name="autorole">The autorole.</param>
+    /// <param name="user">The user.</param>
+    /// <param name="isConfirmed">Whether the user is conformed or not.</param>
+    public AutoroleConfirmation(AutoroleConfiguration autorole, User user, bool isConfirmed = false)
+    {
+        this.Autorole = autorole;
+        this.User = user;
+        this.IsConfirmed = isConfirmed;
     }
 }

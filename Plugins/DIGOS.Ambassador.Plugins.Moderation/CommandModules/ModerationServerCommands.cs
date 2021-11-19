@@ -38,96 +38,95 @@ using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
-namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
+namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules;
+
+public partial class ModerationCommands
 {
-    public partial class ModerationCommands
+    /// <summary>
+    /// Server-related commands, such as viewing or editing info about a specific server.
+    /// </summary>
+    [Group("server")]
+    [Description("Server-related commands, such as viewing or editing info about a specific server.")]
+    public class ModerationServerCommands : CommandGroup
     {
+        private readonly ModerationService _moderation;
+        private readonly FeedbackService _feedback;
+        private readonly ICommandContext _context;
+        private readonly IDiscordRestGuildAPI _guildAPI;
+
         /// <summary>
-        /// Server-related commands, such as viewing or editing info about a specific server.
+        /// Initializes a new instance of the <see cref="ModerationServerCommands"/> class.
         /// </summary>
-        [Group("server")]
-        [Description("Server-related commands, such as viewing or editing info about a specific server.")]
-        public class ModerationServerCommands : CommandGroup
+        /// <param name="moderation">The moderation service.</param>
+        /// <param name="feedback">The feedback service.</param>
+        /// <param name="context">The command context.</param>
+        /// <param name="guildAPI">The guild API.</param>
+        public ModerationServerCommands
+        (
+            ModerationService moderation,
+            FeedbackService feedback,
+            ICommandContext context,
+            IDiscordRestGuildAPI guildAPI
+        )
         {
-            private readonly ModerationService _moderation;
-            private readonly FeedbackService _feedback;
-            private readonly ICommandContext _context;
-            private readonly IDiscordRestGuildAPI _guildAPI;
+            _moderation = moderation;
+            _feedback = feedback;
+            _context = context;
+            _guildAPI = guildAPI;
+        }
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="ModerationServerCommands"/> class.
-            /// </summary>
-            /// <param name="moderation">The moderation service.</param>
-            /// <param name="feedback">The feedback service.</param>
-            /// <param name="context">The command context.</param>
-            /// <param name="guildAPI">The guild API.</param>
-            public ModerationServerCommands
-            (
-                ModerationService moderation,
-                FeedbackService feedback,
-                ICommandContext context,
-                IDiscordRestGuildAPI guildAPI
-            )
+        /// <summary>
+        /// Shows the server's moderation settings.
+        /// </summary>
+        [Command("settings")]
+        [Description("Shows the server's moderation settings.")]
+        [RequireContext(ChannelContext.Guild)]
+        public async Task<IResult> ShowServerSettingsAsync()
+        {
+            var getGuild = await _guildAPI.GetGuildAsync(_context.GuildID.Value);
+            if (!getGuild.IsSuccess)
             {
-                _moderation = moderation;
-                _feedback = feedback;
-                _context = context;
-                _guildAPI = guildAPI;
+                return getGuild;
             }
 
-            /// <summary>
-            /// Shows the server's moderation settings.
-            /// </summary>
-            [Command("settings")]
-            [Description("Shows the server's moderation settings.")]
-            [RequireContext(ChannelContext.Guild)]
-            public async Task<IResult> ShowServerSettingsAsync()
+            var guild = getGuild.Entity;
+
+            var getSettings = await _moderation.GetOrCreateServerSettingsAsync(guild.ID);
+            if (!getSettings.IsSuccess)
             {
-                var getGuild = await _guildAPI.GetGuildAsync(_context.GuildID.Value);
-                if (!getGuild.IsSuccess)
-                {
-                    return getGuild;
-                }
-
-                var guild = getGuild.Entity;
-
-                var getSettings = await _moderation.GetOrCreateServerSettingsAsync(guild.ID);
-                if (!getSettings.IsSuccess)
-                {
-                    return getSettings;
-                }
-
-                var settings = getSettings.Entity;
-
-                var getGuildIcon = CDN.GetGuildIconUrl(guild);
-
-                var embedFields = new List<EmbedField>();
-                var eb = new Embed
-                {
-                    Colour = _feedback.Theme.Secondary,
-                    Title = guild.Name,
-                    Thumbnail = getGuildIcon.IsSuccess
-                        ? new EmbedThumbnail(getGuildIcon.Entity.ToString())
-                        : default(Optional<IEmbedThumbnail>),
-                    Fields = embedFields
-                };
-
-                var moderationLogChannelName = settings.ModerationLogChannel.HasValue
-                    ? $"<#{settings.ModerationLogChannel}>"
-                    : "None";
-
-                embedFields.Add(new EmbedField("Moderation Log Channel", moderationLogChannelName));
-
-                var monitoringChannelName = settings.MonitoringChannel.HasValue
-                    ? $"<#{settings.MonitoringChannel}>"
-                    : "None";
-
-                embedFields.Add(new EmbedField("Event Monitor Channel", monitoringChannelName));
-
-                embedFields.Add(new EmbedField("Warning Threshold", settings.WarningThreshold.ToString()));
-
-                return await _feedback.SendContextualEmbedAsync(eb);
+                return getSettings;
             }
+
+            var settings = getSettings.Entity;
+
+            var getGuildIcon = CDN.GetGuildIconUrl(guild);
+
+            var embedFields = new List<EmbedField>();
+            var eb = new Embed
+            {
+                Colour = _feedback.Theme.Secondary,
+                Title = guild.Name,
+                Thumbnail = getGuildIcon.IsSuccess
+                    ? new EmbedThumbnail(getGuildIcon.Entity.ToString())
+                    : default(Optional<IEmbedThumbnail>),
+                Fields = embedFields
+            };
+
+            var moderationLogChannelName = settings.ModerationLogChannel.HasValue
+                ? $"<#{settings.ModerationLogChannel}>"
+                : "None";
+
+            embedFields.Add(new EmbedField("Moderation Log Channel", moderationLogChannelName));
+
+            var monitoringChannelName = settings.MonitoringChannel.HasValue
+                ? $"<#{settings.MonitoringChannel}>"
+                : "None";
+
+            embedFields.Add(new EmbedField("Event Monitor Channel", monitoringChannelName));
+
+            embedFields.Add(new EmbedField("Warning Threshold", settings.WarningThreshold.ToString()));
+
+            return await _feedback.SendContextualEmbedAsync(eb);
         }
     }
 }

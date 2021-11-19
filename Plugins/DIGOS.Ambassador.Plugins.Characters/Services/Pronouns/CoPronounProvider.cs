@@ -20,29 +20,28 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
+namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
+
+/// <summary>
+/// Provides co pronouns.
+/// </summary>
+public class CoPronounProvider : PronounProvider
 {
-    /// <summary>
-    /// Provides co pronouns.
-    /// </summary>
-    public class CoPronounProvider : PronounProvider
-    {
-        /// <inheritdoc />
-        public override string Family => "Co";
+    /// <inheritdoc />
+    public override string Family => "Co";
 
-        /// <inheritdoc />
-        public override string GetSubjectForm(bool withVerb = false) => withVerb ? "co is" : "co";
+    /// <inheritdoc />
+    public override string GetSubjectForm(bool withVerb = false) => withVerb ? "co is" : "co";
 
-        /// <inheritdoc />
-        public override string GetObjectForm() => "co";
+    /// <inheritdoc />
+    public override string GetObjectForm() => "co";
 
-        /// <inheritdoc />
-        public override string GetPossessiveAdjectiveForm() => "co's";
+    /// <inheritdoc />
+    public override string GetPossessiveAdjectiveForm() => "co's";
 
-        /// <inheritdoc />
-        public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "co has" : "co's";
+    /// <inheritdoc />
+    public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "co has" : "co's";
 
-        /// <inheritdoc />
-        public override string GetReflexiveForm() => "coself";
-    }
+    /// <inheritdoc />
+    public override string GetReflexiveForm() => "coself";
 }

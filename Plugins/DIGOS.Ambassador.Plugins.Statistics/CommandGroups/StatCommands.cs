@@ -40,199 +40,198 @@ using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Core;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Statistics.CommandGroups
-{
-    /// <summary>
-    /// Various statistics-related commands.
-    /// </summary>
-    [Group("stats")]
-    [Description("Various statistics-related commands.")]
-    public class StatCommands : CommandGroup
-    {
-        private readonly FeedbackService _feedback;
-        private readonly InteractivityService _interactivity;
-        private readonly ICommandContext _context;
-        private readonly IDiscordRestGuildAPI _guildAPI;
-        private readonly IDiscordRestUserAPI _userAPI;
+namespace DIGOS.Ambassador.Plugins.Statistics.CommandGroups;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StatCommands"/> class.
-        /// </summary>
-        /// <param name="feedback">The feedback service.</param>
-        /// <param name="interactivity">The interactivity service.</param>
-        /// <param name="context">The command context.</param>
-        /// <param name="guildAPI">The guild API.</param>
-        /// <param name="userAPI">The user API.</param>
-        public StatCommands
-        (
-            FeedbackService feedback,
-            InteractivityService interactivity,
-            ICommandContext context,
-            IDiscordRestGuildAPI guildAPI,
-            IDiscordRestUserAPI userAPI
-        )
+/// <summary>
+/// Various statistics-related commands.
+/// </summary>
+[Group("stats")]
+[Description("Various statistics-related commands.")]
+public class StatCommands : CommandGroup
+{
+    private readonly FeedbackService _feedback;
+    private readonly InteractivityService _interactivity;
+    private readonly ICommandContext _context;
+    private readonly IDiscordRestGuildAPI _guildAPI;
+    private readonly IDiscordRestUserAPI _userAPI;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StatCommands"/> class.
+    /// </summary>
+    /// <param name="feedback">The feedback service.</param>
+    /// <param name="interactivity">The interactivity service.</param>
+    /// <param name="context">The command context.</param>
+    /// <param name="guildAPI">The guild API.</param>
+    /// <param name="userAPI">The user API.</param>
+    public StatCommands
+    (
+        FeedbackService feedback,
+        InteractivityService interactivity,
+        ICommandContext context,
+        IDiscordRestGuildAPI guildAPI,
+        IDiscordRestUserAPI userAPI
+    )
+    {
+        _feedback = feedback;
+        _interactivity = interactivity;
+        _context = context;
+        _guildAPI = guildAPI;
+        _userAPI = userAPI;
+    }
+
+    /// <summary>
+    /// Displays statistics about the current guild.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    [UsedImplicitly]
+    [Command("guild")]
+    [Description("Displays statistics about the current guild.")]
+    [RequireContext(ChannelContext.Guild)]
+    public async Task<IResult> ShowServerStatsAsync()
+    {
+        var getGuild = await _guildAPI.GetGuildAsync(_context.GuildID.Value, ct: this.CancellationToken);
+        if (!getGuild.IsSuccess)
         {
-            _feedback = feedback;
-            _interactivity = interactivity;
-            _context = context;
-            _guildAPI = guildAPI;
-            _userAPI = userAPI;
+            return getGuild;
         }
 
-        /// <summary>
-        /// Displays statistics about the current guild.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [UsedImplicitly]
-        [Command("guild")]
-        [Description("Displays statistics about the current guild.")]
-        [RequireContext(ChannelContext.Guild)]
-        public async Task<IResult> ShowServerStatsAsync()
+        var guild = getGuild.Entity;
+
+        var eb = CreateGuildInfoEmbed(guild);
+        return await _feedback.SendContextualEmbedAsync(eb, ct: this.CancellationToken);
+    }
+
+    /// <summary>
+    /// Displays statistics about all guilds the bot has joined.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    [UsedImplicitly]
+    [Command("guilds")]
+    [Description("Displays statistics about all guilds the bot has joined.")]
+    [RequireContext(ChannelContext.DM)]
+    [RequireOwner]
+    public async Task<IResult> ShowServersStatsAsync()
+    {
+        var pages = new List<Embed>();
+        await foreach (var getGuild in GetGuildsAsync(this.CancellationToken))
         {
-            var getGuild = await _guildAPI.GetGuildAsync(_context.GuildID.Value, ct: this.CancellationToken);
             if (!getGuild.IsSuccess)
             {
                 return getGuild;
             }
 
-            var guild = getGuild.Entity;
-
-            var eb = CreateGuildInfoEmbed(guild);
-            return await _feedback.SendContextualEmbedAsync(eb, ct: this.CancellationToken);
+            pages.Add(CreateGuildInfoEmbed(getGuild.Entity));
         }
 
-        /// <summary>
-        /// Displays statistics about all guilds the bot has joined.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [UsedImplicitly]
-        [Command("guilds")]
-        [Description("Displays statistics about all guilds the bot has joined.")]
-        [RequireContext(ChannelContext.DM)]
-        [RequireOwner]
-        public async Task<IResult> ShowServersStatsAsync()
-        {
-            var pages = new List<Embed>();
-            await foreach (var getGuild in GetGuildsAsync(this.CancellationToken))
-            {
-                if (!getGuild.IsSuccess)
-                {
-                    return getGuild;
-                }
-
-                pages.Add(CreateGuildInfoEmbed(getGuild.Entity));
-            }
-
-            return await _interactivity.SendContextualInteractiveMessageAsync
-            (
-                _context.User.ID,
-                pages,
-                ct: this.CancellationToken
-            );
-        }
-
-        private async IAsyncEnumerable<Result<IGuild>> GetGuildsAsync
+        return await _interactivity.SendContextualInteractiveMessageAsync
         (
-            [EnumeratorCancellation] CancellationToken ct = default
-        )
+            _context.User.ID,
+            pages,
+            ct: this.CancellationToken
+        );
+    }
+
+    private async IAsyncEnumerable<Result<IGuild>> GetGuildsAsync
+    (
+        [EnumeratorCancellation] CancellationToken ct = default
+    )
+    {
+        Optional<Snowflake> after = default;
+        while (true)
         {
-            Optional<Snowflake> after = default;
-            while (true)
+            if (ct.IsCancellationRequested)
             {
-                if (ct.IsCancellationRequested)
-                {
-                    yield break;
-                }
-
-                var getGuilds = await _userAPI.GetCurrentUserGuildsAsync(after: after, ct: ct);
-                if (!getGuilds.IsSuccess)
-                {
-                    yield break;
-                }
-
-                var retrievedGuilds = getGuilds.Entity;
-                if (retrievedGuilds.Count == 0)
-                {
-                    break;
-                }
-
-                foreach (var retrievedGuild in retrievedGuilds)
-                {
-                    if (!retrievedGuild.ID.HasValue)
-                    {
-                        continue;
-                    }
-
-                    yield return await _guildAPI.GetGuildAsync(retrievedGuild.ID.Value, ct: ct);
-                }
-
-                after = getGuilds.Entity[^1].ID;
+                yield break;
             }
+
+            var getGuilds = await _userAPI.GetCurrentUserGuildsAsync(after: after, ct: ct);
+            if (!getGuilds.IsSuccess)
+            {
+                yield break;
+            }
+
+            var retrievedGuilds = getGuilds.Entity;
+            if (retrievedGuilds.Count == 0)
+            {
+                break;
+            }
+
+            foreach (var retrievedGuild in retrievedGuilds)
+            {
+                if (!retrievedGuild.ID.HasValue)
+                {
+                    continue;
+                }
+
+                yield return await _guildAPI.GetGuildAsync(retrievedGuild.ID.Value, ct: ct);
+            }
+
+            after = getGuilds.Entity[^1].ID;
         }
+    }
 
-        /// <summary>
-        /// Creates an embed with information about a guild.
-        /// </summary>
-        /// <param name="guild">The guild.</param>
-        /// <returns>The embed.</returns>
-        private Embed CreateGuildInfoEmbed(IGuild guild)
+    /// <summary>
+    /// Creates an embed with information about a guild.
+    /// </summary>
+    /// <param name="guild">The guild.</param>
+    /// <returns>The embed.</returns>
+    private Embed CreateGuildInfoEmbed(IGuild guild)
+    {
+        var eb = new Embed();
+
+        var getGuildSplash = CDN.GetGuildSplashUrl(guild);
+        if (getGuildSplash.IsSuccess)
         {
-            var eb = new Embed();
-
-            var getGuildSplash = CDN.GetGuildSplashUrl(guild);
-            if (getGuildSplash.IsSuccess)
+            eb = eb with
+            {
+                Thumbnail = new EmbedThumbnail(getGuildSplash.Entity.ToString())
+            };
+        }
+        else
+        {
+            var getGuildIcon = CDN.GetGuildIconUrl(guild);
+            if (getGuildIcon.IsSuccess)
             {
                 eb = eb with
                 {
-                    Thumbnail = new EmbedThumbnail(getGuildSplash.Entity.ToString())
+                    Thumbnail = new EmbedThumbnail(getGuildIcon.Entity.ToString())
                 };
             }
-            else
-            {
-                var getGuildIcon = CDN.GetGuildIconUrl(guild);
-                if (getGuildIcon.IsSuccess)
-                {
-                    eb = eb with
-                    {
-                        Thumbnail = new EmbedThumbnail(getGuildIcon.Entity.ToString())
-                    };
-                }
-            }
-
-            var getGuildAuthorIcon = CDN.GetGuildIconUrl(guild);
-            var author = new EmbedAuthor(guild.Name)
-            {
-                IconUrl = getGuildAuthorIcon.IsSuccess
-                    ? getGuildAuthorIcon.Entity.ToString()
-                    : default(Optional<string>)
-            };
-
-            eb = eb with
-            {
-                Author = author
-            };
-
-            var fields = new List<EmbedField>
-            {
-                new("Owner", $"<@{guild.OwnerID}>"),
-            };
-
-            if (guild.MemberCount.HasValue)
-            {
-                fields.Add(new EmbedField("Members", guild.MemberCount.Value.ToString()));
-            }
-            else if (guild.Members.HasValue)
-            {
-                fields.Add(new EmbedField("Members", guild.Members.Value.Count.ToString()));
-            }
-            else if (guild.ApproximateMemberCount.HasValue)
-            {
-                fields.Add(new EmbedField("Members", $"~{guild.ApproximateMemberCount.Value}"));
-            }
-
-            fields.Add(new EmbedField("Created at", guild.ID.Timestamp.ToString()));
-
-            return eb with { Fields = fields };
         }
+
+        var getGuildAuthorIcon = CDN.GetGuildIconUrl(guild);
+        var author = new EmbedAuthor(guild.Name)
+        {
+            IconUrl = getGuildAuthorIcon.IsSuccess
+                ? getGuildAuthorIcon.Entity.ToString()
+                : default(Optional<string>)
+        };
+
+        eb = eb with
+        {
+            Author = author
+        };
+
+        var fields = new List<EmbedField>
+        {
+            new("Owner", $"<@{guild.OwnerID}>"),
+        };
+
+        if (guild.MemberCount.HasValue)
+        {
+            fields.Add(new EmbedField("Members", guild.MemberCount.Value.ToString()));
+        }
+        else if (guild.Members.HasValue)
+        {
+            fields.Add(new EmbedField("Members", guild.Members.Value.Count.ToString()));
+        }
+        else if (guild.ApproximateMemberCount.HasValue)
+        {
+            fields.Add(new EmbedField("Members", $"~{guild.ApproximateMemberCount.Value}"));
+        }
+
+        fields.Add(new EmbedField("Created at", guild.ID.Timestamp.ToString()));
+
+        return eb with { Fields = fields };
     }
 }

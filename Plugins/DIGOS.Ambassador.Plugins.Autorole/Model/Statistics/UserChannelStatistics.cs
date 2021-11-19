@@ -25,32 +25,31 @@ using DIGOS.Ambassador.Core.Database.Entities;
 using JetBrains.Annotations;
 using Remora.Discord.Core;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Model.Statistics
+namespace DIGOS.Ambassador.Plugins.Autorole.Model.Statistics;
+
+/// <summary>
+/// Represents a set of per-channel statistics for a user in a server.
+/// </summary>
+[Table("UserChannelStatistics", Schema = "AutoroleModule")]
+public class UserChannelStatistics : EFEntity
 {
     /// <summary>
-    /// Represents a set of per-channel statistics for a user in a server.
+    /// Gets the Discord channel ID of the relevant channel.
     /// </summary>
-    [Table("UserChannelStatistics", Schema = "AutoroleModule")]
-    public class UserChannelStatistics : EFEntity
+    public Snowflake ChannelID { get; private set; }
+
+    /// <summary>
+    /// Gets the message count in this channel.
+    /// </summary>
+    public long? MessageCount { get; internal set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserChannelStatistics"/> class.
+    /// </summary>
+    /// <param name="channelID">The channel ID.</param>
+    [UsedImplicitly]
+    protected UserChannelStatistics(Snowflake channelID)
     {
-        /// <summary>
-        /// Gets the Discord channel ID of the relevant channel.
-        /// </summary>
-        public Snowflake ChannelID { get; private set; }
-
-        /// <summary>
-        /// Gets the message count in this channel.
-        /// </summary>
-        public long? MessageCount { get; internal set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserChannelStatistics"/> class.
-        /// </summary>
-        /// <param name="channelID">The channel ID.</param>
-        [UsedImplicitly]
-        protected UserChannelStatistics(Snowflake channelID)
-        {
-            this.ChannelID = channelID;
-        }
+        this.ChannelID = channelID;
     }
 }

@@ -29,53 +29,52 @@ using DIGOS.Ambassador.Tests.Plugins.Moderation.Bases;
 using Remora.Discord.Core;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.ModerationService
+namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.ModerationService;
+
+public partial class ModerationServiceTests
 {
-    public partial class ModerationServiceTests
+    public class SetModerationLogChannelAsync : ModerationServiceTestBase
     {
-        public class SetModerationLogChannelAsync : ModerationServiceTestBase
+        private readonly Snowflake _guild = new(0);
+        private readonly Snowflake _channel = new(0);
+        private readonly Snowflake _anotherChannel = new(1);
+
+        [Fact]
+        public async Task ReturnsSuccessfulIfNoChannelIsSet()
         {
-            private readonly Snowflake _guild = new(0);
-            private readonly Snowflake _channel = new(0);
-            private readonly Snowflake _anotherChannel = new(1);
+            var result = await this.Moderation.SetModerationLogChannelAsync(_guild, _channel);
 
-            [Fact]
-            public async Task ReturnsSuccessfulIfNoChannelIsSet()
-            {
-                var result = await this.Moderation.SetModerationLogChannelAsync(_guild, _channel);
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsSuccessfulIfAnotherChannelIsSet()
+        {
+            await this.Moderation.SetModerationLogChannelAsync(_guild, _anotherChannel);
 
-            [Fact]
-            public async Task ReturnsSuccessfulIfAnotherChannelIsSet()
-            {
-                await this.Moderation.SetModerationLogChannelAsync(_guild, _anotherChannel);
+            var result = await this.Moderation.SetModerationLogChannelAsync(_guild, _channel);
 
-                var result = await this.Moderation.SetModerationLogChannelAsync(_guild, _channel);
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsUnsuccessfulIfSameChannelIsSet()
+        {
+            await this.Moderation.SetModerationLogChannelAsync(_guild, _channel);
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulIfSameChannelIsSet()
-            {
-                await this.Moderation.SetModerationLogChannelAsync(_guild, _channel);
+            var result = await this.Moderation.SetModerationLogChannelAsync(_guild, _channel);
 
-                var result = await this.Moderation.SetModerationLogChannelAsync(_guild, _channel);
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ActuallySetsChannel()
+        {
+            await this.Moderation.SetModerationLogChannelAsync(_guild, _channel);
 
-            [Fact]
-            public async Task ActuallySetsChannel()
-            {
-                await this.Moderation.SetModerationLogChannelAsync(_guild, _channel);
+            var settings = (await this.Moderation.GetServerSettingsAsync(_guild)).Entity;
 
-                var settings = (await this.Moderation.GetServerSettingsAsync(_guild)).Entity;
-
-                Assert.Equal(_channel, settings.ModerationLogChannel);
-            }
+            Assert.Equal(_channel, settings.ModerationLogChannel);
         }
     }
 }

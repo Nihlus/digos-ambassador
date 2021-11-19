@@ -25,37 +25,36 @@ using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Core.Database.Entities;
 using Remora.Discord.Core;
 
-namespace DIGOS.Ambassador.Plugins.Core.Model.Users
+namespace DIGOS.Ambassador.Plugins.Core.Model.Users;
+
+/// <summary>
+/// Represents globally accessible information about a user.
+/// </summary>
+[Table("Users", Schema = "Core")]
+public class User : EFEntity
 {
     /// <summary>
-    /// Represents globally accessible information about a user.
+    /// Gets the Discord ID of the user.
     /// </summary>
-    [Table("Users", Schema = "Core")]
-    public class User : EFEntity
+    public Snowflake DiscordID { get; private set; }
+
+    /// <summary>
+    /// Gets the biography of the user. This contains useful information that the users provide themselves.
+    /// </summary>
+    public string Bio { get; internal set; }
+
+    /// <summary>
+    /// Gets the current timezone of the user. This is an hour offset ( + or - ) to UTC/GMT.
+    /// </summary>
+    public int? Timezone { get; internal set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="User"/> class.
+    /// </summary>
+    /// <param name="discordID">The Discord ID of the user.</param>
+    public User(Snowflake discordID)
     {
-        /// <summary>
-        /// Gets the Discord ID of the user.
-        /// </summary>
-        public Snowflake DiscordID { get; private set; }
-
-        /// <summary>
-        /// Gets the biography of the user. This contains useful information that the users provide themselves.
-        /// </summary>
-        public string Bio { get; internal set; }
-
-        /// <summary>
-        /// Gets the current timezone of the user. This is an hour offset ( + or - ) to UTC/GMT.
-        /// </summary>
-        public int? Timezone { get; internal set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="User"/> class.
-        /// </summary>
-        /// <param name="discordID">The Discord ID of the user.</param>
-        public User(Snowflake discordID)
-        {
-            this.DiscordID = discordID;
-            this.Bio = string.Empty;
-        }
+        this.DiscordID = discordID;
+        this.Bio = string.Empty;
     }
 }

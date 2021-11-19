@@ -23,23 +23,22 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
 
-namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions
+namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions;
+
+/// <summary>
+/// Represents a permission that allows a user to delete roleplays.
+/// </summary>
+public sealed class DeleteRoleplay : Permission
 {
-    /// <summary>
-    /// Represents a permission that allows a user to delete roleplays.
-    /// </summary>
-    public sealed class DeleteRoleplay : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("CDB2DF83-4149-4C2F-9F10-654A1ABDAF48");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("CDB2DF83-4149-4C2F-9F10-654A1ABDAF48");
 
-        /// <inheritdoc />
-        public override string FriendlyName => nameof(DeleteRoleplay);
+    /// <inheritdoc />
+    public override string FriendlyName => nameof(DeleteRoleplay);
 
-        /// <inheritdoc />
-        public override string Description => "Allows you to delete roleplays.";
+    /// <inheritdoc />
+    public override string Description => "Allows you to delete roleplays.";
 
-        /// <inheritdoc />
-        public override bool IsGrantedByDefaultToSelf => true;
-    }
+    /// <inheritdoc />
+    public override bool IsGrantedByDefaultToSelf => true;
 }

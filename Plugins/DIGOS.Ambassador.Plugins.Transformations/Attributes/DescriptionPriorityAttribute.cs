@@ -22,26 +22,25 @@
 
 using System;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Attributes
+namespace DIGOS.Ambassador.Plugins.Transformations.Attributes;
+
+/// <summary>
+/// An attribute which marks a bodypart as chiral.
+/// </summary>
+[AttributeUsage(AttributeTargets.Field)]
+internal sealed class DescriptionPriorityAttribute : Attribute
 {
     /// <summary>
-    /// An attribute which marks a bodypart as chiral.
+    /// Gets the priority of the description.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field)]
-    internal sealed class DescriptionPriorityAttribute : Attribute
-    {
-        /// <summary>
-        /// Gets the priority of the description.
-        /// </summary>
-        public uint Priority { get; }
+    public uint Priority { get; }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DescriptionPriorityAttribute"/> class.
-        /// </summary>
-        /// <param name="priority">The priority of the description. The higher the value, the higher the priority.</param>
-        public DescriptionPriorityAttribute(uint priority)
-        {
-            this.Priority = priority;
-        }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DescriptionPriorityAttribute"/> class.
+    /// </summary>
+    /// <param name="priority">The priority of the description. The higher the value, the higher the priority.</param>
+    public DescriptionPriorityAttribute(uint priority)
+    {
+        this.Priority = priority;
     }
 }

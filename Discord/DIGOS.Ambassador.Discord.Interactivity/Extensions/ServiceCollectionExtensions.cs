@@ -29,54 +29,53 @@ using Remora.Discord.Gateway;
 using Remora.Discord.Gateway.Extensions;
 using Remora.Discord.Gateway.Responders;
 
-namespace DIGOS.Ambassador.Discord.Interactivity.Extensions
+namespace DIGOS.Ambassador.Discord.Interactivity.Extensions;
+
+/// <summary>
+/// Provides extension methods for the <see cref="IServiceCollection"/> interface.
+/// </summary>
+public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Provides extension methods for the <see cref="IServiceCollection"/> interface.
+    /// Adds the services required for interactivity.
     /// </summary>
-    public static class ServiceCollectionExtensions
+    /// <param name="serviceCollection">The service collection.</param>
+    /// <returns>The collection, with the added services.</returns>
+    public static IServiceCollection AddInteractivity(this IServiceCollection serviceCollection)
     {
-        /// <summary>
-        /// Adds the services required for interactivity.
-        /// </summary>
-        /// <param name="serviceCollection">The service collection.</param>
-        /// <returns>The collection, with the added services.</returns>
-        public static IServiceCollection AddInteractivity(this IServiceCollection serviceCollection)
+        serviceCollection.Configure<DiscordGatewayClientOptions>(o =>
         {
-            serviceCollection.Configure<DiscordGatewayClientOptions>(o =>
-            {
-                o.Intents |= GatewayIntents.DirectMessageReactions;
-                o.Intents |= GatewayIntents.GuildMessageReactions;
-            });
+            o.Intents |= GatewayIntents.DirectMessageReactions;
+            o.Intents |= GatewayIntents.GuildMessageReactions;
+        });
 
-            serviceCollection.TryAddSingleton<InteractiveMessageTracker>();
-            serviceCollection.TryAddScoped<InteractivityService>();
-            serviceCollection.AddResponder<MessageDeletionResponder>();
+        serviceCollection.TryAddSingleton<InteractiveMessageTracker>();
+        serviceCollection.TryAddScoped<InteractivityService>();
+        serviceCollection.AddResponder<MessageDeletionResponder>();
 
+        return serviceCollection;
+    }
+
+    /// <summary>
+    /// Adds a responder as an interactivity responder, if it is not already registered.
+    /// </summary>
+    /// <param name="serviceCollection">The service collection.</param>
+    /// <typeparam name="TResponder">The responder type.</typeparam>
+    /// <returns>The collection, with the added services.</returns>
+    public static IServiceCollection TryAddInteractivityResponder<TResponder>
+    (
+        this IServiceCollection serviceCollection
+    )
+        where TResponder : InteractivityResponder, IResponder
+    {
+        if (serviceCollection.Any(s => s.ImplementationType == typeof(TResponder)))
+        {
             return serviceCollection;
         }
 
-        /// <summary>
-        /// Adds a responder as an interactivity responder, if it is not already registered.
-        /// </summary>
-        /// <param name="serviceCollection">The service collection.</param>
-        /// <typeparam name="TResponder">The responder type.</typeparam>
-        /// <returns>The collection, with the added services.</returns>
-        public static IServiceCollection TryAddInteractivityResponder<TResponder>
-        (
-            this IServiceCollection serviceCollection
-        )
-            where TResponder : InteractivityResponder, IResponder
-        {
-            if (serviceCollection.Any(s => s.ImplementationType == typeof(TResponder)))
-            {
-                return serviceCollection;
-            }
+        serviceCollection.AddResponder<TResponder>();
+        serviceCollection.AddScoped<InteractivityResponder, TResponder>();
 
-            serviceCollection.AddResponder<TResponder>();
-            serviceCollection.AddScoped<InteractivityResponder, TResponder>();
-
-            return serviceCollection;
-        }
+        return serviceCollection;
     }
 }

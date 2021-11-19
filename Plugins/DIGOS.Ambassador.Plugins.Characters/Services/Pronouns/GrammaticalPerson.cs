@@ -20,26 +20,25 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
+namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
+
+/// <summary>
+/// The grammatical person of a form.
+/// </summary>
+public enum GrammaticalPerson
 {
     /// <summary>
-    /// The grammatical person of a form.
+    /// First-person.
     /// </summary>
-    public enum GrammaticalPerson
-    {
-        /// <summary>
-        /// First-person.
-        /// </summary>
-        First,
+    First,
 
-        /// <summary>
-        /// Second-person.
-        /// </summary>
-        Second,
+    /// <summary>
+    /// Second-person.
+    /// </summary>
+    Second,
 
-        /// <summary>
-        /// Third-person.
-        /// </summary>
-        Third
-    }
+    /// <summary>
+    /// Third-person.
+    /// </summary>
+    Third
 }

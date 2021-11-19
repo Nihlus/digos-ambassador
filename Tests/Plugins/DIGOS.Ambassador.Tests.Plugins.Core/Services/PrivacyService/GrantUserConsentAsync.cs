@@ -29,57 +29,56 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Core
+namespace DIGOS.Ambassador.Tests.Plugins.Core;
+
+public static partial class PrivacyServiceTests
 {
-    public static partial class PrivacyServiceTests
+    public class GrantUserConsentAsync : PrivacyServiceTestBase
     {
-        public class GrantUserConsentAsync : PrivacyServiceTestBase
+        private readonly Snowflake _discordUser;
+
+        public GrantUserConsentAsync()
         {
-            private readonly Snowflake _discordUser;
+            _discordUser = new Snowflake(0);
+        }
 
-            public GrantUserConsentAsync()
-            {
-                _discordUser = new Snowflake(0);
-            }
+        [Fact]
+        public async Task AddsNewRecordIfUserHasNotConsentedBefore()
+        {
+            await this.Privacy.GrantUserConsentAsync(_discordUser);
 
-            [Fact]
-            public async Task AddsNewRecordIfUserHasNotConsentedBefore()
-            {
-                await this.Privacy.GrantUserConsentAsync(_discordUser);
+            Assert.NotEmpty(this.Database.UserConsents);
+        }
 
-                Assert.NotEmpty(this.Database.UserConsents);
-            }
+        [Fact]
+        public async Task CorrectlySetsConsentIfUserHasNotConsentedBefore()
+        {
+            await this.Privacy.GrantUserConsentAsync(_discordUser);
 
-            [Fact]
-            public async Task CorrectlySetsConsentIfUserHasNotConsentedBefore()
-            {
-                await this.Privacy.GrantUserConsentAsync(_discordUser);
+            var consent = this.Database.UserConsents.First();
 
-                var consent = this.Database.UserConsents.First();
+            Assert.NotNull(consent);
+            Assert.Equal(_discordUser, consent.DiscordID);
+            Assert.True(consent.HasConsented);
+        }
 
-                Assert.NotNull(consent);
-                Assert.Equal(_discordUser, consent.DiscordID);
-                Assert.True(consent.HasConsented);
-            }
+        [Fact]
+        public async Task ReusesRecordIfUserHasConsentedBefore()
+        {
+            await this.Privacy.GrantUserConsentAsync(_discordUser);
 
-            [Fact]
-            public async Task ReusesRecordIfUserHasConsentedBefore()
-            {
-                await this.Privacy.GrantUserConsentAsync(_discordUser);
+            var firstConsent = this.Database.UserConsents.First();
 
-                var firstConsent = this.Database.UserConsents.First();
+            await this.Privacy.RevokeUserConsentAsync(_discordUser);
 
-                await this.Privacy.RevokeUserConsentAsync(_discordUser);
+            await this.Privacy.GrantUserConsentAsync(_discordUser);
 
-                await this.Privacy.GrantUserConsentAsync(_discordUser);
+            var secondConsent = this.Database.UserConsents.First();
 
-                var secondConsent = this.Database.UserConsents.First();
+            Assert.Same(firstConsent, secondConsent);
 
-                Assert.Same(firstConsent, secondConsent);
-
-                Assert.Equal(_discordUser, secondConsent.DiscordID);
-                Assert.True(secondConsent.HasConsented);
-            }
+            Assert.Equal(_discordUser, secondConsent.DiscordID);
+            Assert.True(secondConsent.HasConsented);
         }
     }
 }

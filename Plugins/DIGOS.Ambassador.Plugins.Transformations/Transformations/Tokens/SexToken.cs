@@ -26,42 +26,41 @@ using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using JetBrains.Annotations;
 using static DIGOS.Ambassador.Plugins.Transformations.Transformations.Bodypart;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens;
+
+/// <summary>
+/// A token that gets replaced with a character's physical sex.
+/// </summary>
+[PublicAPI]
+[TokenIdentifier("sex")]
+public sealed class SexToken : ReplaceableTextToken<SexToken>
 {
-    /// <summary>
-    /// A token that gets replaced with a character's physical sex.
-    /// </summary>
-    [PublicAPI]
-    [TokenIdentifier("sex")]
-    public sealed class SexToken : ReplaceableTextToken<SexToken>
+    /// <inheritdoc />
+    public override string GetText(Appearance appearance, AppearanceComponent? component)
     {
-        /// <inheritdoc />
-        public override string GetText(Appearance appearance, AppearanceComponent? component)
+        var genderedParts = appearance.Components
+            .Where(c => !c.Bodypart.IsGenderNeutral())
+            .Select(c => c.Bodypart)
+            .ToList();
+
+        if (!genderedParts.Any())
         {
-            var genderedParts = appearance.Components
-                .Where(c => !c.Bodypart.IsGenderNeutral())
-                .Select(c => c.Bodypart)
-                .ToList();
-
-            if (!genderedParts.Any())
-            {
-                return "sexless";
-            }
-
-            if (genderedParts.Contains(Penis) && genderedParts.Contains(Vagina))
-            {
-                return "herm";
-            }
-
-            return genderedParts.Contains(Penis)
-                ? "male"
-                : "female";
+            return "sexless";
         }
 
-        /// <inheritdoc />
-        protected override SexToken Initialize(string? data)
+        if (genderedParts.Contains(Penis) && genderedParts.Contains(Vagina))
         {
-            return this;
+            return "herm";
         }
+
+        return genderedParts.Contains(Penis)
+            ? "male"
+            : "female";
+    }
+
+    /// <inheritdoc />
+    protected override SexToken Initialize(string? data)
+    {
+        return this;
     }
 }

@@ -30,126 +30,125 @@ using Xunit;
 #pragma warning disable SA1600
 #pragma warning disable CS1591
 
-namespace DIGOS.Ambassador.Tests.Plugins.Transformations
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
+
+public class TransformationValidityTests : TransformationValidityTestBase
 {
-    public class TransformationValidityTests : TransformationValidityTestBase
+    [Theory]
+    [ClassData(typeof(TransformationDataProvider))]
+    public void TransformationFileIsValid(string transformationFile)
     {
-        [Theory]
-        [ClassData(typeof(TransformationDataProvider))]
-        public void TransformationFileIsValid(string transformationFile)
-        {
-            var result = this.Verifier.VerifyFile<Transformation>(transformationFile);
+        var result = this.Verifier.VerifyFile<Transformation>(transformationFile);
 
-            Assert.True(result.IsSuccess, result.IsSuccess ? string.Empty : result.Error.Message);
+        Assert.True(result.IsSuccess, result.IsSuccess ? string.Empty : result.Error.Message);
+    }
+
+    [Theory]
+    [ClassData(typeof(TransformationDataProvider))]
+    public void TransformationFileIsInCorrectFolder(string transformationFile)
+    {
+        var folderName = Directory.GetParent(transformationFile)?.Name;
+        var transformation = Deserialize<Transformation>(transformationFile);
+
+        Assert.Equal(transformation.Species.Name, folderName);
+    }
+
+    [Theory]
+    [ClassData(typeof(TransformationDataProvider))]
+    public void TransformationFileIsCorrectlyNamed(string transformationFile)
+    {
+        var bodypartName = Path.GetFileNameWithoutExtension(transformationFile);
+        Assert.True(Enum.TryParse<Bodypart>(bodypartName, out var bodypart), "The file name must be a valid body part.");
+
+        var transformation = Deserialize<Transformation>(transformationFile);
+        Assert.Equal(bodypart, transformation.Part);
+    }
+
+    [Theory]
+    [ClassData(typeof(TransformationDataProvider))]
+    public void TransformationTransformsNonChiralBodypart(string transformationFile)
+    {
+        var transformation = Deserialize<Transformation>(transformationFile);
+        Assert.False(transformation.Part.IsComposite());
+    }
+
+    [Theory]
+    [ClassData(typeof(TransformationDataProvider))]
+    public void TransformationHasRequiredConditionalFields(string transformationFile)
+    {
+        var transformation = Deserialize<Transformation>(transformationFile);
+
+        if (transformation.DefaultPattern is not null)
+        {
+            Assert.NotNull(transformation.DefaultPatternColour);
         }
 
-        [Theory]
-        [ClassData(typeof(TransformationDataProvider))]
-        public void TransformationFileIsInCorrectFolder(string transformationFile)
+        if (transformation.Part.IsChiral())
         {
-            var folderName = Directory.GetParent(transformationFile)?.Name;
-            var transformation = Deserialize<Transformation>(transformationFile);
-
-            Assert.Equal(transformation.Species.Name, folderName);
+            Assert.NotNull(transformation.UniformShiftMessage);
+            Assert.NotNull(transformation.UniformGrowMessage);
+            Assert.NotNull(transformation.UniformDescription);
         }
-
-        [Theory]
-        [ClassData(typeof(TransformationDataProvider))]
-        public void TransformationFileIsCorrectlyNamed(string transformationFile)
+        else
         {
-            var bodypartName = Path.GetFileNameWithoutExtension(transformationFile);
-            Assert.True(Enum.TryParse<Bodypart>(bodypartName, out var bodypart), "The file name must be a valid body part.");
-
-            var transformation = Deserialize<Transformation>(transformationFile);
-            Assert.Equal(bodypart, transformation.Part);
+            Assert.Null(transformation.UniformShiftMessage);
+            Assert.Null(transformation.UniformGrowMessage);
+            Assert.Null(transformation.UniformDescription);
         }
+    }
 
-        [Theory]
-        [ClassData(typeof(TransformationDataProvider))]
-        public void TransformationTransformsNonChiralBodypart(string transformationFile)
+    [Theory]
+    [ClassData(typeof(TransformationDataProvider))]
+    public void TransformationHasCorrectlyMarkedAdultStatus(string transformationFile)
+    {
+        var transformation = Deserialize<Transformation>(transformationFile);
+        if (transformation.Part == Bodypart.Penis || transformation.Part == Bodypart.Vagina)
         {
-            var transformation = Deserialize<Transformation>(transformationFile);
-            Assert.False(transformation.Part.IsComposite());
+            Assert.True(transformation.IsNSFW);
         }
+    }
 
-        [Theory]
-        [ClassData(typeof(TransformationDataProvider))]
-        public void TransformationHasRequiredConditionalFields(string transformationFile)
+    [Theory]
+    [ClassData(typeof(TransformationDataProvider))]
+    public void TransformationMessagesAreCorrectlyFormatted(string transformationFile)
+    {
+        var transformation = Deserialize<Transformation>(transformationFile);
+
+        Assert.True(transformation.Description.EndsWith("."), "Text fields must end with a dot.");
+        Assert.EndsWith(".", transformation.SingleDescription);
+
+        if (transformation.Part.IsChiral())
         {
-            var transformation = Deserialize<Transformation>(transformationFile);
-
-            if (transformation.DefaultPattern is not null)
-            {
-                Assert.NotNull(transformation.DefaultPatternColour);
-            }
-
-            if (transformation.Part.IsChiral())
-            {
-                Assert.NotNull(transformation.UniformShiftMessage);
-                Assert.NotNull(transformation.UniformGrowMessage);
-                Assert.NotNull(transformation.UniformDescription);
-            }
-            else
-            {
-                Assert.Null(transformation.UniformShiftMessage);
-                Assert.Null(transformation.UniformGrowMessage);
-                Assert.Null(transformation.UniformDescription);
-            }
+            Assert.True(transformation.UniformShiftMessage?.EndsWith("."), "Text fields must end with a dot.");
+            Assert.True(transformation.UniformGrowMessage?.EndsWith("."), "Text fields must end with a dot.");
+            Assert.True(transformation.UniformDescription?.EndsWith("."), "Text fields must end with a dot.");
         }
-
-        [Theory]
-        [ClassData(typeof(TransformationDataProvider))]
-        public void TransformationHasCorrectlyMarkedAdultStatus(string transformationFile)
+        else
         {
-            var transformation = Deserialize<Transformation>(transformationFile);
-            if (transformation.Part == Bodypart.Penis || transformation.Part == Bodypart.Vagina)
-            {
-                Assert.True(transformation.IsNSFW);
-            }
+            Assert.True(transformation.ShiftMessage.EndsWith("."), "Text fields must end with a dot.");
+            Assert.True(transformation.GrowMessage.EndsWith("."), "Text fields must end with a dot.");
         }
+    }
 
-        [Theory]
-        [ClassData(typeof(TransformationDataProvider))]
-        public void TransformationMessagesAreCorrectlyFormatted(string transformationFile)
+    [Theory]
+    [ClassData(typeof(TransformationDataProvider))]
+    public void TransformationMessagesAreShortEnough(string transformationFile)
+    {
+        var transformation = Deserialize<Transformation>(transformationFile);
+
+        Assert.True(transformation.Description.Length < 1800, "Messages must be less than 1800 characters.");
+        Assert.True(transformation.SingleDescription.Length < 1800);
+
+        if (transformation.Part.IsChiral())
         {
-            var transformation = Deserialize<Transformation>(transformationFile);
-
-            Assert.True(transformation.Description.EndsWith("."), "Text fields must end with a dot.");
-            Assert.EndsWith(".", transformation.SingleDescription);
-
-            if (transformation.Part.IsChiral())
-            {
-                Assert.True(transformation.UniformShiftMessage?.EndsWith("."), "Text fields must end with a dot.");
-                Assert.True(transformation.UniformGrowMessage?.EndsWith("."), "Text fields must end with a dot.");
-                Assert.True(transformation.UniformDescription?.EndsWith("."), "Text fields must end with a dot.");
-            }
-            else
-            {
-                Assert.True(transformation.ShiftMessage.EndsWith("."), "Text fields must end with a dot.");
-                Assert.True(transformation.GrowMessage.EndsWith("."), "Text fields must end with a dot.");
-            }
+            Assert.True(transformation.UniformShiftMessage?.Length < 1800, "Messages must be less than 1800 characters.");
+            Assert.True(transformation.UniformGrowMessage?.Length < 1800, "Messages must be less than 1800 characters.");
+            Assert.True(transformation.UniformDescription?.Length < 1800, "Messages must be less than 1800 characters.");
         }
-
-        [Theory]
-        [ClassData(typeof(TransformationDataProvider))]
-        public void TransformationMessagesAreShortEnough(string transformationFile)
+        else
         {
-            var transformation = Deserialize<Transformation>(transformationFile);
-
-            Assert.True(transformation.Description.Length < 1800, "Messages must be less than 1800 characters.");
-            Assert.True(transformation.SingleDescription.Length < 1800);
-
-            if (transformation.Part.IsChiral())
-            {
-                Assert.True(transformation.UniformShiftMessage?.Length < 1800, "Messages must be less than 1800 characters.");
-                Assert.True(transformation.UniformGrowMessage?.Length < 1800, "Messages must be less than 1800 characters.");
-                Assert.True(transformation.UniformDescription?.Length < 1800, "Messages must be less than 1800 characters.");
-            }
-            else
-            {
-                Assert.True(transformation.ShiftMessage.Length < 1800, "Messages must be less than 1800 characters.");
-                Assert.True(transformation.GrowMessage.Length < 1800, "Messages must be less than 1800 characters.");
-            }
+            Assert.True(transformation.ShiftMessage.Length < 1800, "Messages must be less than 1800 characters.");
+            Assert.True(transformation.GrowMessage.Length < 1800, "Messages must be less than 1800 characters.");
         }
     }
 }

@@ -29,32 +29,31 @@ using DIGOS.Ambassador.Tests.Plugins.Moderation.Bases;
 using Remora.Discord.Core;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.NoteService
+namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.NoteService;
+
+public partial class NoteService
 {
-    public partial class NoteService
+    public class CreateNoteAsync : NoteServiceTestBase
     {
-        public class CreateNoteAsync : NoteServiceTestBase
+        private readonly Snowflake _user = new(0);
+        private readonly Snowflake _guild = new(1);
+
+        private readonly Snowflake _author = new(1);
+
+        [Fact]
+        private async Task ReturnsSuccessful()
         {
-            private readonly Snowflake _user = new(0);
-            private readonly Snowflake _guild = new(1);
+            var result = await this.Notes.CreateNoteAsync(_author, _user, _guild, "Dummy thicc");
 
-            private readonly Snowflake _author = new(1);
+            Assert.True(result.IsSuccess);
+        }
 
-            [Fact]
-            private async Task ReturnsSuccessful()
-            {
-                var result = await this.Notes.CreateNoteAsync(_author, _user, _guild, "Dummy thicc");
+        [Fact]
+        private async Task ActuallyCreatesNote()
+        {
+            await this.Notes.CreateNoteAsync(_author, _user, _guild, "Dummy thicc");
 
-                Assert.True(result.IsSuccess);
-            }
-
-            [Fact]
-            private async Task ActuallyCreatesNote()
-            {
-                await this.Notes.CreateNoteAsync(_author, _user, _guild, "Dummy thicc");
-
-                Assert.NotEmpty(this.Database.UserNotes);
-            }
+            Assert.NotEmpty(this.Database.UserNotes);
         }
     }
 }

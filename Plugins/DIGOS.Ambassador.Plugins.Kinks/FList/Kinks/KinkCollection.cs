@@ -23,22 +23,21 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace DIGOS.Ambassador.Plugins.Kinks.FList.Kinks
+namespace DIGOS.Ambassador.Plugins.Kinks.FList.Kinks;
+
+/// <summary>
+/// Represents a JSON kink collection from the F-list API, organized into categories.
+/// </summary>
+internal class KinkCollection
 {
     /// <summary>
-    /// Represents a JSON kink collection from the F-list API, organized into categories.
+    /// Gets or sets the error that the API returned, if any.
     /// </summary>
-    internal class KinkCollection
-    {
-        /// <summary>
-        /// Gets or sets the error that the API returned, if any.
-        /// </summary>
-        public string? Error { get; set; }
+    public string? Error { get; set; }
 
-        /// <summary>
-        /// Gets or sets the kink categories.
-        /// </summary>
-        [JsonPropertyName("kinks")]
-        public Dictionary<string, FListKinkCategory>? KinkCategories { get; set; }
-    }
+    /// <summary>
+    /// Gets or sets the kink categories.
+    /// </summary>
+    [JsonPropertyName("kinks")]
+    public Dictionary<string, FListKinkCategory>? KinkCategories { get; set; }
 }

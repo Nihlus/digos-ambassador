@@ -24,32 +24,31 @@ using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using Humanizer;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens;
+
+/// <summary>
+/// A token that gets replaced with the transformation's chirality.
+/// </summary>
+[PublicAPI]
+[TokenIdentifier("side", "chirality")]
+public sealed class SideToken : ReplaceableTextToken<SideToken>
 {
-    /// <summary>
-    /// A token that gets replaced with the transformation's chirality.
-    /// </summary>
-    [PublicAPI]
-    [TokenIdentifier("side", "chirality")]
-    public sealed class SideToken : ReplaceableTextToken<SideToken>
+    /// <inheritdoc />
+    public override string GetText(Appearance appearance, AppearanceComponent? component)
     {
-        /// <inheritdoc />
-        public override string GetText(Appearance appearance, AppearanceComponent? component)
+        if (component is null)
         {
-            if (component is null)
-            {
-                return string.Empty;
-            }
-
-            return component.Chirality == Chirality.Center
-                ? string.Empty
-                : component.Chirality.Humanize().Transform(To.LowerCase);
+            return string.Empty;
         }
 
-        /// <inheritdoc />
-        protected override SideToken Initialize(string? data)
-        {
-            return this;
-        }
+        return component.Chirality == Chirality.Center
+            ? string.Empty
+            : component.Chirality.Humanize().Transform(To.LowerCase);
+    }
+
+    /// <inheritdoc />
+    protected override SideToken Initialize(string? data)
+    {
+        return this;
     }
 }

@@ -23,26 +23,25 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace DIGOS.Ambassador.Core.Database.Extensions
+namespace DIGOS.Ambassador.Core.Database.Extensions;
+
+/// <summary>
+/// Defines extension methods for the <see cref="ModelBuilder"/> class.
+/// </summary>
+public static class ModelBuilderExtensions
 {
     /// <summary>
-    /// Defines extension methods for the <see cref="ModelBuilder"/> class.
+    /// Excludes the given entity type from migrations.
     /// </summary>
-    public static class ModelBuilderExtensions
+    /// <param name="modelBuilder">The model builder.</param>
+    /// <typeparam name="TEntity">The entity type.</typeparam>
+    /// <returns>The model builder, with the type excluded.</returns>
+    public static ModelBuilder ExcludeEntityFromMigrations<TEntity>(this ModelBuilder modelBuilder)
+        where TEntity : class
     {
-        /// <summary>
-        /// Excludes the given entity type from migrations.
-        /// </summary>
-        /// <param name="modelBuilder">The model builder.</param>
-        /// <typeparam name="TEntity">The entity type.</typeparam>
-        /// <returns>The model builder, with the type excluded.</returns>
-        public static ModelBuilder ExcludeEntityFromMigrations<TEntity>(this ModelBuilder modelBuilder)
-            where TEntity : class
-        {
-            modelBuilder.Entity<TEntity>().ToTable("placeholder", t => t.ExcludeFromMigrations());
-            modelBuilder.Entity<TEntity>().Metadata.RemoveAnnotation(RelationalAnnotationNames.TableName);
+        modelBuilder.Entity<TEntity>().ToTable("placeholder", t => t.ExcludeFromMigrations());
+        modelBuilder.Entity<TEntity>().Metadata.RemoveAnnotation(RelationalAnnotationNames.TableName);
 
-            return modelBuilder;
-        }
+        return modelBuilder;
     }
 }

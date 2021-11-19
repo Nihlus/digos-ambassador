@@ -25,43 +25,42 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Plugins.Kinks.Model
+namespace DIGOS.Ambassador.Plugins.Kinks.Model;
+
+/// <summary>
+/// Represents the database model of the dossier plugin.
+/// </summary>
+[PublicAPI]
+public class KinksDatabaseContext : AmbassadorDbContext
 {
+    private const string SchemaName = "KinkModule";
+
     /// <summary>
-    /// Represents the database model of the dossier plugin.
+    /// Gets or sets the table where kinks are stored.
     /// </summary>
-    [PublicAPI]
-    public class KinksDatabaseContext : AmbassadorDbContext
+    public DbSet<Kink> Kinks { get; [UsedImplicitly] set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the table where user kinks are stored.
+    /// </summary>
+    public DbSet<UserKink> UserKinks { get; [UsedImplicitly] set; } = null!;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="KinksDatabaseContext"/> class.
+    /// </summary>
+    /// <param name="contextOptions">The context options.</param>
+    public KinksDatabaseContext(DbContextOptions<KinksDatabaseContext> contextOptions)
+        : base(SchemaName, contextOptions)
     {
-        private const string SchemaName = "KinkModule";
+    }
 
-        /// <summary>
-        /// Gets or sets the table where kinks are stored.
-        /// </summary>
-        public DbSet<Kink> Kinks { get; [UsedImplicitly] set; } = null!;
+    /// <inheritdoc />
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
 
-        /// <summary>
-        /// Gets or sets the table where user kinks are stored.
-        /// </summary>
-        public DbSet<UserKink> UserKinks { get; [UsedImplicitly] set; } = null!;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="KinksDatabaseContext"/> class.
-        /// </summary>
-        /// <param name="contextOptions">The context options.</param>
-        public KinksDatabaseContext(DbContextOptions<KinksDatabaseContext> contextOptions)
-            : base(SchemaName, contextOptions)
-        {
-        }
-
-        /// <inheritdoc />
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Entity<Kink>()
-                .HasIndex(u => u.FListID)
-                .IsUnique();
-        }
+        modelBuilder.Entity<Kink>()
+            .HasIndex(u => u.FListID)
+            .IsUnique();
     }
 }

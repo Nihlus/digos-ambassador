@@ -20,29 +20,28 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
+namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
+
+/// <summary>
+/// Provides ze and zir pronouns.
+/// </summary>
+public class ZeZirPronounProvider : PronounProvider
 {
-    /// <summary>
-    /// Provides ze and zir pronouns.
-    /// </summary>
-    public class ZeZirPronounProvider : PronounProvider
-    {
-        /// <inheritdoc />
-        public override string Family => "Ze and zir";
+    /// <inheritdoc />
+    public override string Family => "Ze and zir";
 
-        /// <inheritdoc />
-        public override string GetSubjectForm(bool withVerb = false) => withVerb ? "ze is" : "ze";
+    /// <inheritdoc />
+    public override string GetSubjectForm(bool withVerb = false) => withVerb ? "ze is" : "ze";
 
-        /// <inheritdoc />
-        public override string GetObjectForm() => "zir";
+    /// <inheritdoc />
+    public override string GetObjectForm() => "zir";
 
-        /// <inheritdoc />
-        public override string GetPossessiveAdjectiveForm() => "zir";
+    /// <inheritdoc />
+    public override string GetPossessiveAdjectiveForm() => "zir";
 
-        /// <inheritdoc />
-        public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "ze has" : "zirs";
+    /// <inheritdoc />
+    public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "ze has" : "zirs";
 
-        /// <inheritdoc />
-        public override string GetReflexiveForm() => "zirself";
-    }
+    /// <inheritdoc />
+    public override string GetReflexiveForm() => "zirself";
 }

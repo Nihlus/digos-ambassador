@@ -23,26 +23,25 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
 
-namespace DIGOS.Ambassador.Plugins.Core.Permissions
+namespace DIGOS.Ambassador.Plugins.Core.Permissions;
+
+/// <summary>
+/// Represents a permission that allows a user to edit server information.
+/// </summary>
+public sealed class EditServerInfo : Permission
 {
-    /// <summary>
-    /// Represents a permission that allows a user to edit server information.
-    /// </summary>
-    public sealed class EditServerInfo : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("A6357073-AD32-4225-A103-2A4358527A18");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("A6357073-AD32-4225-A103-2A4358527A18");
 
-        /// <inheritdoc />
-        public override string FriendlyName => nameof(EditServerInfo);
+    /// <inheritdoc />
+    public override string FriendlyName => nameof(EditServerInfo);
 
-        /// <inheritdoc />
-        public override string Description => "Allows you to edit server information.";
+    /// <inheritdoc />
+    public override string Description => "Allows you to edit server information.";
 
-        /// <inheritdoc />
-        public override bool IsGrantedByDefaultToSelf => true;
+    /// <inheritdoc />
+    public override bool IsGrantedByDefaultToSelf => true;
 
-        /// <inheritdoc />
-        public override bool IsGrantedByDefaultToOthers => true;
-    }
+    /// <inheritdoc />
+    public override bool IsGrantedByDefaultToOthers => true;
 }

@@ -23,20 +23,19 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Permissions
+namespace DIGOS.Ambassador.Plugins.Autorole.Permissions;
+
+/// <summary>
+/// Represents a permission that allows a user to create autoroles.
+/// </summary>
+public class CreateAutorole : Permission
 {
-    /// <summary>
-    /// Represents a permission that allows a user to create autoroles.
-    /// </summary>
-    public class CreateAutorole : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("BEB104CD-8FD7-4502-841D-4FE66948371D");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("BEB104CD-8FD7-4502-841D-4FE66948371D");
 
-        /// <inheritdoc/>
-        public override string FriendlyName { get; } = nameof(CreateAutorole);
+    /// <inheritdoc/>
+    public override string FriendlyName { get; } = nameof(CreateAutorole);
 
-        /// <inheritdoc/>
-        public override string Description { get; } = "Allows you to create autoroles.";
-    }
+    /// <inheritdoc/>
+    public override string Description { get; } = "Allows you to create autoroles.";
 }

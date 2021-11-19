@@ -29,46 +29,45 @@ using System.Threading.Tasks;
 using Remora.Discord.Core;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Transformations
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
+
+public partial class TransformationServiceTests
 {
-    public partial class TransformationServiceTests
+    public class BlacklistUserAsync : TransformationServiceTestBase
     {
-        public class BlacklistUserAsync : TransformationServiceTestBase
+        private readonly Snowflake _user = new Snowflake(0);
+        private readonly Snowflake _blacklistedUser = new Snowflake(1);
+
+        [Fact]
+        public async Task CanBlacklistUser()
         {
-            private readonly Snowflake _user = new Snowflake(0);
-            private readonly Snowflake _blacklistedUser = new Snowflake(1);
+            var result = await this.Transformations.BlacklistUserAsync(_user, _blacklistedUser);
 
-            [Fact]
-            public async Task CanBlacklistUser()
-            {
-                var result = await this.Transformations.BlacklistUserAsync(_user, _blacklistedUser);
+            Assert.True(result.IsSuccess);
 
-                Assert.True(result.IsSuccess);
+            Assert.NotEmpty(this.Database.GlobalUserProtections.First().Blacklist);
 
-                Assert.NotEmpty(this.Database.GlobalUserProtections.First().Blacklist);
+            Assert.Equal(_blacklistedUser, this.Database.GlobalUserProtections.First().Blacklist.First().DiscordID);
+        }
 
-                Assert.Equal(_blacklistedUser, this.Database.GlobalUserProtections.First().Blacklist.First().DiscordID);
-            }
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfUserIsAlreadyBlacklisted()
+        {
+            // Blacklist the user
+            await this.Transformations.BlacklistUserAsync(_user, _blacklistedUser);
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfUserIsAlreadyBlacklisted()
-            {
-                // Blacklist the user
-                await this.Transformations.BlacklistUserAsync(_user, _blacklistedUser);
+            // Then blacklist them again
+            var result = await this.Transformations.BlacklistUserAsync(_user, _blacklistedUser);
 
-                // Then blacklist them again
-                var result = await this.Transformations.BlacklistUserAsync(_user, _blacklistedUser);
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfTargetUserIsInvokingUser()
+        {
+            var result = await this.Transformations.BlacklistUserAsync(_user, _user);
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfTargetUserIsInvokingUser()
-            {
-                var result = await this.Transformations.BlacklistUserAsync(_user, _user);
-
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
         }
     }
 }

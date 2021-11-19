@@ -20,47 +20,46 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Results
+namespace DIGOS.Ambassador.Plugins.Autorole.Results;
+
+/// <summary>
+/// Enumerates various types of status returns from an autorole update.
+/// </summary>
+public enum AutoroleUpdateStatus
 {
     /// <summary>
-    /// Enumerates various types of status returns from an autorole update.
+    /// The autorole is disabled.
     /// </summary>
-    public enum AutoroleUpdateStatus
-    {
-        /// <summary>
-        /// The autorole is disabled.
-        /// </summary>
-        Disabled,
+    Disabled,
 
-        /// <summary>
-        /// The autorole is unconditional (i.e, it has no configured conditions). This is not allowed for safety
-        /// reasons.
-        /// </summary>
-        Unconditional,
+    /// <summary>
+    /// The autorole is unconditional (i.e, it has no configured conditions). This is not allowed for safety
+    /// reasons.
+    /// </summary>
+    Unconditional,
 
-        /// <summary>
-        /// The user did not qualify for the autorole.
-        /// </summary>
-        Unqualified,
+    /// <summary>
+    /// The user did not qualify for the autorole.
+    /// </summary>
+    Unqualified,
 
-        /// <summary>
-        /// The user qualified for the autorole, but already had it.
-        /// </summary>
-        Unchanged,
+    /// <summary>
+    /// The user qualified for the autorole, but already had it.
+    /// </summary>
+    Unchanged,
 
-        /// <summary>
-        /// The user qualified for the autorole, and it was assigned to them.
-        /// </summary>
-        Applied,
+    /// <summary>
+    /// The user qualified for the autorole, and it was assigned to them.
+    /// </summary>
+    Applied,
 
-        /// <summary>
-        /// The user had the autorole, but no longer qualified, and it was removed.
-        /// </summary>
-        Removed,
+    /// <summary>
+    /// The user had the autorole, but no longer qualified, and it was removed.
+    /// </summary>
+    Removed,
 
-        /// <summary>
-        /// The user qualified for the autorole, but it requires manual affirmation before it can be assigned.
-        /// </summary>
-        RequiresAffirmation
-    }
+    /// <summary>
+    /// The user qualified for the autorole, but it requires manual affirmation before it can be assigned.
+    /// </summary>
+    RequiresAffirmation
 }

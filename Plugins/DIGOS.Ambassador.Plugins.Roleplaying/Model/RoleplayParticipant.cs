@@ -28,53 +28,52 @@ using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using JetBrains.Annotations;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
+namespace DIGOS.Ambassador.Plugins.Roleplaying.Model;
+
+/// <summary>
+/// Represents a join entry for a user that has participated in a roleplay in any way.
+/// </summary>
+[Table("RoleplayParticipants", Schema = "RoleplayModule")]
+public class RoleplayParticipant : EFEntity
 {
     /// <summary>
-    /// Represents a join entry for a user that has participated in a roleplay in any way.
+    /// Gets the roleplay that the user is a part of.
     /// </summary>
-    [Table("RoleplayParticipants", Schema = "RoleplayModule")]
-    public class RoleplayParticipant : EFEntity
+    public virtual Roleplay Roleplay { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the user that is part of the roleplay.
+    /// </summary>
+    public virtual User User { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the current status of the user in the roleplay.
+    /// </summary>
+    public ParticipantStatus Status { get; internal set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RoleplayParticipant"/> class.
+    /// </summary>
+    [UsedImplicitly]
+    public RoleplayParticipant()
     {
-        /// <summary>
-        /// Gets the roleplay that the user is a part of.
-        /// </summary>
-        public virtual Roleplay Roleplay { get; private set; } = null!;
+    }
 
-        /// <summary>
-        /// Gets the user that is part of the roleplay.
-        /// </summary>
-        public virtual User User { get; private set; } = null!;
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RoleplayParticipant"/> class.
+    /// </summary>
+    /// <param name="roleplay">The roleplay that the user is participating in.</param>
+    /// <param name="user">The user that is participating in the roleplay.</param>
+    [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Used by EF Core proxies.")]
+    public RoleplayParticipant
+    (
+        Roleplay roleplay,
+        User user
+    )
+    {
+        this.Roleplay = roleplay;
+        this.User = user;
 
-        /// <summary>
-        /// Gets the current status of the user in the roleplay.
-        /// </summary>
-        public ParticipantStatus Status { get; internal set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RoleplayParticipant"/> class.
-        /// </summary>
-        [UsedImplicitly]
-        public RoleplayParticipant()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RoleplayParticipant"/> class.
-        /// </summary>
-        /// <param name="roleplay">The roleplay that the user is participating in.</param>
-        /// <param name="user">The user that is participating in the roleplay.</param>
-        [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Used by EF Core proxies.")]
-        public RoleplayParticipant
-        (
-            Roleplay roleplay,
-            User user
-        )
-        {
-            this.Roleplay = roleplay;
-            this.User = user;
-
-            this.Status = ParticipantStatus.None;
-        }
+        this.Status = ParticipantStatus.None;
     }
 }

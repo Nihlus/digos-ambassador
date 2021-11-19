@@ -32,56 +32,55 @@ using DIGOS.Ambassador.Tests.Plugins.Moderation.Bases;
 using Remora.Discord.Core;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
+namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService;
+
+public partial class WarningService
 {
-    public partial class WarningService
+    public class SetWarningContextMessageAsync : WarningServiceTestBase
     {
-        public class SetWarningContextMessageAsync : WarningServiceTestBase
+        private readonly UserWarning _warning = new(
+            new Server(new Snowflake(0)),
+            new User(new Snowflake(0)),
+            new User(new Snowflake(1)),
+            string.Empty
+        );
+
+        [Fact]
+        public async Task ReturnsUnsuccessfulIfNewMessageIsSameMessage()
         {
-            private readonly UserWarning _warning = new(
-                new Server(new Snowflake(0)),
-                new User(new Snowflake(0)),
-                new User(new Snowflake(1)),
-                string.Empty
-            );
+            await this.Warnings.SetWarningContextMessageAsync(_warning, new Snowflake(1));
+            var result = await this.Warnings.SetWarningContextMessageAsync(_warning, new Snowflake(1));
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulIfNewMessageIsSameMessage()
-            {
-                await this.Warnings.SetWarningContextMessageAsync(_warning, new Snowflake(1));
-                var result = await this.Warnings.SetWarningContextMessageAsync(_warning, new Snowflake(1));
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsSuccessfulIfNewMessageIsAnotherMessage()
+        {
+            await this.Warnings.SetWarningContextMessageAsync(_warning, new Snowflake(1));
+            var result = await this.Warnings.SetWarningContextMessageAsync(_warning, new Snowflake(2));
 
-            [Fact]
-            public async Task ReturnsSuccessfulIfNewMessageIsAnotherMessage()
-            {
-                await this.Warnings.SetWarningContextMessageAsync(_warning, new Snowflake(1));
-                var result = await this.Warnings.SetWarningContextMessageAsync(_warning, new Snowflake(2));
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ActuallySetsMessage()
+        {
+            await this.Warnings.SetWarningContextMessageAsync(_warning, new Snowflake(1));
 
-            [Fact]
-            public async Task ActuallySetsMessage()
-            {
-                await this.Warnings.SetWarningContextMessageAsync(_warning, new Snowflake(1));
+            Assert.Equal(new Snowflake(1), _warning.MessageID);
+        }
 
-                Assert.Equal(new Snowflake(1), _warning.MessageID);
-            }
+        [Fact]
+        public async Task SetterUpdatesTimestamp()
+        {
+            var before = _warning.UpdatedAt;
 
-            [Fact]
-            public async Task SetterUpdatesTimestamp()
-            {
-                var before = _warning.UpdatedAt;
+            await this.Warnings.SetWarningContextMessageAsync(_warning, new Snowflake(1));
 
-                await this.Warnings.SetWarningContextMessageAsync(_warning, new Snowflake(1));
+            var after = _warning.UpdatedAt;
 
-                var after = _warning.UpdatedAt;
-
-                Assert.True(before < after);
-            }
+            Assert.True(before < after);
         }
     }
 }

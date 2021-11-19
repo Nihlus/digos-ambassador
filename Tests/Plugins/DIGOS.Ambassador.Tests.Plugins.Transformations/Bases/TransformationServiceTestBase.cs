@@ -40,109 +40,108 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Transformations
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
+
+/// <summary>
+/// Serves as a test base for transformation service tests.
+/// </summary>
+public abstract class TransformationServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
 {
     /// <summary>
-    /// Serves as a test base for transformation service tests.
+    /// Gets the database.
     /// </summary>
-    public abstract class TransformationServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
+    protected TransformationsDatabaseContext Database { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the character database.
+    /// </summary>
+    protected CharactersDatabaseContext CharacterDatabase { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the core database.
+    /// </summary>
+    protected CoreDatabaseContext CoreDatabase { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the transformation service object.
+    /// </summary>
+    protected TransformationService Transformations { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the user service.
+    /// </summary>
+    protected UserService Users { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the server service.
+    /// </summary>
+    protected ServerService Servers { get; private set; } = null!;
+
+    /// <inheritdoc />
+    protected override void RegisterServices(IServiceCollection serviceCollection)
     {
-        /// <summary>
-        /// Gets the database.
-        /// </summary>
-        protected TransformationsDatabaseContext Database { get; private set; } = null!;
+        serviceCollection
+            .AddDbContext<CoreDatabaseContext>(o => ConfigureOptions(o, "Core"))
+            .AddDbContext<TransformationsDatabaseContext>(o => ConfigureOptions(o, "Transformations"))
+            .AddDbContext<CharactersDatabaseContext>(o => ConfigureOptions(o, "Characters"));
 
-        /// <summary>
-        /// Gets the character database.
-        /// </summary>
-        protected CharactersDatabaseContext CharacterDatabase { get; private set; } = null!;
+        serviceCollection
+            .AddSingleton(s =>
+            {
+                var content = s.GetRequiredService<ContentService>();
+                return content.GetTransformationMessages().Entity;
+            })
+            .AddSingleton(FileSystemFactory.CreateContentFileSystem())
+            .AddSingleton<PronounService>()
+            .AddSingleton<TransformationDescriptionBuilder>()
+            .AddScoped<TransformationService>()
+            .AddScoped<ContentService>()
+            .AddScoped<UserService>()
+            .AddScoped<ServerService>()
+            .AddScoped<UserService>()
+            .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
+    }
 
-        /// <summary>
-        /// Gets the core database.
-        /// </summary>
-        protected CoreDatabaseContext CoreDatabase { get; private set; } = null!;
+    /// <inheritdoc />
+    protected override void ConfigureServices(IServiceProvider serviceProvider)
+    {
+        this.CoreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
+        this.CoreDatabase.Database.Create();
 
-        /// <summary>
-        /// Gets the transformation service object.
-        /// </summary>
-        protected TransformationService Transformations { get; private set; } = null!;
+        this.CharacterDatabase = serviceProvider.GetRequiredService<CharactersDatabaseContext>();
+        this.CharacterDatabase.Database.Create();
 
-        /// <summary>
-        /// Gets the user service.
-        /// </summary>
-        protected UserService Users { get; private set; } = null!;
+        this.Database = serviceProvider.GetRequiredService<TransformationsDatabaseContext>();
+        this.Database.Database.Create();
 
-        /// <summary>
-        /// Gets the server service.
-        /// </summary>
-        protected ServerService Servers { get; private set; } = null!;
+        this.Transformations = serviceProvider.GetRequiredService<TransformationService>();
+        this.Users = serviceProvider.GetRequiredService<UserService>();
+        this.Servers = serviceProvider.GetRequiredService<ServerService>();
 
-        /// <inheritdoc />
-        protected override void RegisterServices(IServiceCollection serviceCollection)
-        {
-            serviceCollection
-                .AddDbContext<CoreDatabaseContext>(o => ConfigureOptions(o, "Core"))
-                .AddDbContext<TransformationsDatabaseContext>(o => ConfigureOptions(o, "Transformations"))
-                .AddDbContext<CharactersDatabaseContext>(o => ConfigureOptions(o, "Characters"));
+        var pronouns = serviceProvider.GetRequiredService<PronounService>();
+        pronouns.WithPronounProvider(new TheyPronounProvider());
+    }
 
-            serviceCollection
-                .AddSingleton(s =>
-                {
-                    var content = s.GetRequiredService<ContentService>();
-                    return content.GetTransformationMessages().Entity;
-                })
-                .AddSingleton(FileSystemFactory.CreateContentFileSystem())
-                .AddSingleton<PronounService>()
-                .AddSingleton<TransformationDescriptionBuilder>()
-                .AddScoped<TransformationService>()
-                .AddScoped<ContentService>()
-                .AddScoped<UserService>()
-                .AddScoped<ServerService>()
-                .AddScoped<UserService>()
-                .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
-        }
+    /// <inheritdoc />
+    public async Task InitializeAsync()
+    {
+        await this.Transformations.UpdateTransformationDatabaseAsync();
 
-        /// <inheritdoc />
-        protected override void ConfigureServices(IServiceProvider serviceProvider)
-        {
-            this.CoreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            this.CoreDatabase.Database.Create();
+        await InitializeTestAsync();
+    }
 
-            this.CharacterDatabase = serviceProvider.GetRequiredService<CharactersDatabaseContext>();
-            this.CharacterDatabase.Database.Create();
+    /// <summary>
+    /// Initializes the test data.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    protected virtual Task InitializeTestAsync()
+    {
+        return Task.CompletedTask;
+    }
 
-            this.Database = serviceProvider.GetRequiredService<TransformationsDatabaseContext>();
-            this.Database.Database.Create();
-
-            this.Transformations = serviceProvider.GetRequiredService<TransformationService>();
-            this.Users = serviceProvider.GetRequiredService<UserService>();
-            this.Servers = serviceProvider.GetRequiredService<ServerService>();
-
-            var pronouns = serviceProvider.GetRequiredService<PronounService>();
-            pronouns.WithPronounProvider(new TheyPronounProvider());
-        }
-
-        /// <inheritdoc />
-        public async Task InitializeAsync()
-        {
-            await this.Transformations.UpdateTransformationDatabaseAsync();
-
-            await InitializeTestAsync();
-        }
-
-        /// <summary>
-        /// Initializes the test data.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        protected virtual Task InitializeTestAsync()
-        {
-            return Task.CompletedTask;
-        }
-
-        /// <inheritdoc />
-        public Task DisposeAsync()
-        {
-            return Task.CompletedTask;
-        }
+    /// <inheritdoc />
+    public Task DisposeAsync()
+    {
+        return Task.CompletedTask;
     }
 }

@@ -23,23 +23,22 @@
 using System;
 using DIGOS.Ambassador.Core.Services;
 
-namespace DIGOS.Ambassador.Plugins.Characters.Extensions
-{
-    /// <summary>
-    /// Extension methods for the <see cref="ContentService"/> class.
-    /// </summary>
-    public static class ContentServiceExtensions
-    {
-        private static string DefaultAvatar { get; } = "avatars/Discord_DIGOS.png";
+namespace DIGOS.Ambassador.Plugins.Characters.Extensions;
 
-        /// <summary>
-        /// Gets the default avatar URI for characters.
-        /// </summary>
-        /// <param name="this">The content service.</param>
-        /// <returns>The default avatar URI.</returns>
-        public static Uri GetDefaultAvatarUri(this ContentService @this)
-        {
-            return new Uri(@this.BaseCDNUri, $"plugins/characters/{DefaultAvatar}");
-        }
+/// <summary>
+/// Extension methods for the <see cref="ContentService"/> class.
+/// </summary>
+public static class ContentServiceExtensions
+{
+    private static string DefaultAvatar { get; } = "avatars/Discord_DIGOS.png";
+
+    /// <summary>
+    /// Gets the default avatar URI for characters.
+    /// </summary>
+    /// <param name="this">The content service.</param>
+    /// <returns>The default avatar URI.</returns>
+    public static Uri GetDefaultAvatarUri(this ContentService @this)
+    {
+        return new Uri(@this.BaseCDNUri, $"plugins/characters/{DefaultAvatar}");
     }
 }

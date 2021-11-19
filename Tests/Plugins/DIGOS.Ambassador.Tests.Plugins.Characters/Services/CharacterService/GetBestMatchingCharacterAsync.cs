@@ -28,154 +28,153 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Characters
+namespace DIGOS.Ambassador.Tests.Plugins.Characters;
+
+public static partial class CharacterServiceTests
 {
-    public static partial class CharacterServiceTests
+    public class GetBestMatchingCharacterAsync : CharacterServiceTestBase
     {
-        public class GetBestMatchingCharacterAsync : CharacterServiceTestBase
+        private const string CharacterName = "Test";
+
+        private readonly Character _character;
+
+        public GetBestMatchingCharacterAsync()
         {
-            private const string CharacterName = "Test";
+            _character = CreateCharacter
+            (
+                this.DefaultOwner,
+                this.DefaultServer,
+                CharacterName,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty
+            );
+        }
 
-            private readonly Character _character;
+        /*
+         * Unsuccessful assertions
+         */
 
-            public GetBestMatchingCharacterAsync()
-            {
-                _character = CreateCharacter
-                (
-                    this.DefaultOwner,
-                    this.DefaultServer,
-                    CharacterName,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty
-                );
-            }
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfOwnerIsNullAndNameIsNullAndNoCharacterIsCurrent()
+        {
+            var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, null, null);
 
-            /*
-             * Unsuccessful assertions
-             */
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfOwnerIsNullAndNameIsNullAndNoCharacterIsCurrent()
-            {
-                var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, null, null);
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfOwnerIsNullAndNoACharacterWithThatNameExists()
+        {
+            var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, null, "NonExistant");
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfOwnerIsNullAndNoACharacterWithThatNameExists()
-            {
-                var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, null, "NonExistant");
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfNameIsNullAndOwnerDoesNotHaveACurrentCharacter()
+        {
+            var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, null);
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfNameIsNullAndOwnerDoesNotHaveACurrentCharacter()
-            {
-                var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, null);
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfNameIsEmptyAndOwnerDoesNotHaveACurrentCharacter()
+        {
+            var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, string.Empty);
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfNameIsEmptyAndOwnerDoesNotHaveACurrentCharacter()
-            {
-                var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, string.Empty);
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfOwnerIsNotNullAndNameIsNotNullAndUserDoesNotHaveACharacterWithThatName()
+        {
+            var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, "NonExistant");
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfOwnerIsNotNullAndNameIsNotNullAndUserDoesNotHaveACharacterWithThatName()
-            {
-                var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, "NonExistant");
+        /*
+         * Successful assertions
+         */
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsSuccessfulResultIfOwnerIsNullAndASingleCharacterWithThatNameExists()
+        {
+            var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, null, CharacterName);
 
-            /*
-             * Successful assertions
-             */
+            Assert.True(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsSuccessfulResultIfOwnerIsNullAndASingleCharacterWithThatNameExists()
-            {
-                var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, null, CharacterName);
+        [Fact]
+        public async Task ReturnsSuccessfulResultIfNameIsNullAndOwnerHasACurrentCharacter()
+        {
+            await this.Characters.MakeCharacterCurrentAsync(this.DefaultOwner, this.DefaultServer, _character);
 
-                Assert.True(result.IsSuccess);
-            }
+            var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, null);
 
-            [Fact]
-            public async Task ReturnsSuccessfulResultIfNameIsNullAndOwnerHasACurrentCharacter()
-            {
-                await this.Characters.MakeCharacterCurrentAsync(this.DefaultOwner, this.DefaultServer, _character);
+            Assert.True(result.IsSuccess);
+        }
 
-                var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, null);
+        [Fact]
+        public async Task ReturnsSuccessfulResultIfNameIsEmptyAndOwnerHasACurrentCharacter()
+        {
+            await this.Characters.MakeCharacterCurrentAsync(this.DefaultOwner, this.DefaultServer, _character);
 
-                Assert.True(result.IsSuccess);
-            }
+            var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, string.Empty);
 
-            [Fact]
-            public async Task ReturnsSuccessfulResultIfNameIsEmptyAndOwnerHasACurrentCharacter()
-            {
-                await this.Characters.MakeCharacterCurrentAsync(this.DefaultOwner, this.DefaultServer, _character);
+            Assert.True(result.IsSuccess);
+        }
 
-                var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, string.Empty);
+        [Fact]
+        public async Task ReturnsSuccessfulResultIfOwnerIsNotNullAndNameIsNotNullAndOwnerHasACharacterWithThatName()
+        {
+            var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, CharacterName);
 
-                Assert.True(result.IsSuccess);
-            }
+            Assert.True(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsSuccessfulResultIfOwnerIsNotNullAndNameIsNotNullAndOwnerHasACharacterWithThatName()
-            {
-                var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, CharacterName);
+        /*
+         * Correctness assertions
+         */
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsCorrectCharacterIfOwnerIsNullAndASingleCharacterWithThatNameExists()
+        {
+            var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, null, CharacterName);
 
-            /*
-             * Correctness assertions
-             */
+            Assert.Same(_character, result.Entity);
+        }
 
-            [Fact]
-            public async Task ReturnsCorrectCharacterIfOwnerIsNullAndASingleCharacterWithThatNameExists()
-            {
-                var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, null, CharacterName);
+        [Fact]
+        public async Task ReturnsCurrentCharacterIfNameIsNullAndOwnerHasACurrentCharacter()
+        {
+            await this.Characters.MakeCharacterCurrentAsync(this.DefaultOwner, this.DefaultServer, _character);
 
-                Assert.Same(_character, result.Entity);
-            }
+            var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, null);
 
-            [Fact]
-            public async Task ReturnsCurrentCharacterIfNameIsNullAndOwnerHasACurrentCharacter()
-            {
-                await this.Characters.MakeCharacterCurrentAsync(this.DefaultOwner, this.DefaultServer, _character);
+            Assert.Same(_character, result.Entity);
+        }
 
-                var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, null);
+        [Fact]
+        public async Task ReturnsCurrentCharacterIfNameIsEmptyAndOwnerHasACurrentCharacter()
+        {
+            await this.Characters.MakeCharacterCurrentAsync(this.DefaultOwner, this.DefaultServer, _character);
 
-                Assert.Same(_character, result.Entity);
-            }
+            var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, string.Empty);
 
-            [Fact]
-            public async Task ReturnsCurrentCharacterIfNameIsEmptyAndOwnerHasACurrentCharacter()
-            {
-                await this.Characters.MakeCharacterCurrentAsync(this.DefaultOwner, this.DefaultServer, _character);
+            Assert.Same(_character, result.Entity);
+        }
 
-                var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, string.Empty);
+        [Fact]
+        public async Task ReturnsCorrectCharacterIfOwnerIsNotNullAndNameIsNotNullAndOwnerHasACharacterWithThatName()
+        {
+            var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, CharacterName);
 
-                Assert.Same(_character, result.Entity);
-            }
-
-            [Fact]
-            public async Task ReturnsCorrectCharacterIfOwnerIsNotNullAndNameIsNotNullAndOwnerHasACharacterWithThatName()
-            {
-                var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, CharacterName);
-
-                Assert.Same(_character, result.Entity);
-            }
+            Assert.Same(_character, result.Entity);
         }
     }
 }

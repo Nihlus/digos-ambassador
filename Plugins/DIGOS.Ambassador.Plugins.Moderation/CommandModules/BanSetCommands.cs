@@ -38,123 +38,122 @@ using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
-namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
+namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules;
+
+public partial class BanCommands
 {
-    public partial class BanCommands
+    /// <summary>
+    /// Ban setter commands.
+    /// </summary>
+    [Group("set")]
+    public class BanSetCommands : CommandGroup
     {
+        private readonly BanService _bans;
+        private readonly ICommandContext _context;
+        private readonly FeedbackService _feedback;
+
         /// <summary>
-        /// Ban setter commands.
+        /// Initializes a new instance of the <see cref="BanSetCommands"/> class.
         /// </summary>
-        [Group("set")]
-        public class BanSetCommands : CommandGroup
+        /// <param name="bans">The moderation service.</param>
+        /// <param name="context">The command context.</param>
+        /// <param name="feedback">The feedback service.</param>
+        public BanSetCommands
+        (
+            BanService bans,
+            ICommandContext context,
+            FeedbackService feedback
+        )
         {
-            private readonly BanService _bans;
-            private readonly ICommandContext _context;
-            private readonly FeedbackService _feedback;
+            _bans = bans;
+            _context = context;
+            _feedback = feedback;
+        }
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="BanSetCommands"/> class.
-            /// </summary>
-            /// <param name="bans">The moderation service.</param>
-            /// <param name="context">The command context.</param>
-            /// <param name="feedback">The feedback service.</param>
-            public BanSetCommands
-            (
-                BanService bans,
-                ICommandContext context,
-                FeedbackService feedback
-            )
+        /// <summary>
+        /// Sets the reason for the ban.
+        /// </summary>
+        /// <param name="banID">The ID of the ban to edit.</param>
+        /// <param name="newReason">The new reason for the ban.</param>
+        [Command("reason")]
+        [Description("Sets the reason for the ban.")]
+        [RequirePermission(typeof(ManageBans), PermissionTarget.All)]
+        [RequireContext(ChannelContext.Guild)]
+        public async Task<Result<FeedbackMessage>> SetBanReasonAsync(long banID, string newReason)
+        {
+            var getBan = await _bans.GetBanAsync(_context.GuildID.Value, banID);
+            if (!getBan.IsSuccess)
             {
-                _bans = bans;
-                _context = context;
-                _feedback = feedback;
+                return Result<FeedbackMessage>.FromError(getBan);
             }
 
-            /// <summary>
-            /// Sets the reason for the ban.
-            /// </summary>
-            /// <param name="banID">The ID of the ban to edit.</param>
-            /// <param name="newReason">The new reason for the ban.</param>
-            [Command("reason")]
-            [Description("Sets the reason for the ban.")]
-            [RequirePermission(typeof(ManageBans), PermissionTarget.All)]
-            [RequireContext(ChannelContext.Guild)]
-            public async Task<Result<FeedbackMessage>> SetBanReasonAsync(long banID, string newReason)
+            var ban = getBan.Entity;
+
+            var setContents = await _bans.SetBanReasonAsync(ban, newReason);
+            if (!setContents.IsSuccess)
             {
-                var getBan = await _bans.GetBanAsync(_context.GuildID.Value, banID);
-                if (!getBan.IsSuccess)
-                {
-                    return Result<FeedbackMessage>.FromError(getBan);
-                }
-
-                var ban = getBan.Entity;
-
-                var setContents = await _bans.SetBanReasonAsync(ban, newReason);
-                if (!setContents.IsSuccess)
-                {
-                    return Result<FeedbackMessage>.FromError(setContents);
-                }
-
-                return new FeedbackMessage("Ban reason updated.", _feedback.Theme.Secondary);
+                return Result<FeedbackMessage>.FromError(setContents);
             }
 
-            /// <summary>
-            /// Sets the contextually relevant message for the ban.
-            /// </summary>
-            /// <param name="banID">The ID of the ban to edit.</param>
-            /// <param name="newMessage">The new reason for the ban.</param>
-            [Command("context-message")]
-            [Description("Sets the contextually relevant message for the ban.")]
-            [RequirePermission(typeof(ManageBans), PermissionTarget.All)]
-            [RequireContext(ChannelContext.Guild)]
-            public async Task<Result<FeedbackMessage>> SetBanContextMessageAsync(long banID, IMessage newMessage)
+            return new FeedbackMessage("Ban reason updated.", _feedback.Theme.Secondary);
+        }
+
+        /// <summary>
+        /// Sets the contextually relevant message for the ban.
+        /// </summary>
+        /// <param name="banID">The ID of the ban to edit.</param>
+        /// <param name="newMessage">The new reason for the ban.</param>
+        [Command("context-message")]
+        [Description("Sets the contextually relevant message for the ban.")]
+        [RequirePermission(typeof(ManageBans), PermissionTarget.All)]
+        [RequireContext(ChannelContext.Guild)]
+        public async Task<Result<FeedbackMessage>> SetBanContextMessageAsync(long banID, IMessage newMessage)
+        {
+            var getBan = await _bans.GetBanAsync(_context.GuildID.Value, banID);
+            if (!getBan.IsSuccess)
             {
-                var getBan = await _bans.GetBanAsync(_context.GuildID.Value, banID);
-                if (!getBan.IsSuccess)
-                {
-                    return Result<FeedbackMessage>.FromError(getBan);
-                }
-
-                var ban = getBan.Entity;
-
-                var setMessage = await _bans.SetBanContextMessageAsync(ban, newMessage.ID);
-                if (!setMessage.IsSuccess)
-                {
-                    return Result<FeedbackMessage>.FromError(setMessage);
-                }
-
-                return new FeedbackMessage("Ban context message updated.", _feedback.Theme.Secondary);
+                return Result<FeedbackMessage>.FromError(getBan);
             }
 
-            /// <summary>
-            /// Sets the duration of the ban.
-            /// </summary>
-            /// <param name="banID">The ID of the ban to edit.</param>
-            /// <param name="newDuration">The new duration of the ban.</param>
-            [Command("duration")]
-            [Description("Sets the duration of the ban.")]
-            [RequirePermission(typeof(ManageBans), PermissionTarget.All)]
-            [RequireContext(ChannelContext.Guild)]
-            public async Task<Result<FeedbackMessage>> SetBanDurationAsync(long banID, TimeSpan newDuration)
+            var ban = getBan.Entity;
+
+            var setMessage = await _bans.SetBanContextMessageAsync(ban, newMessage.ID);
+            if (!setMessage.IsSuccess)
             {
-                var getBan = await _bans.GetBanAsync(_context.GuildID.Value, banID);
-                if (!getBan.IsSuccess)
-                {
-                    return Result<FeedbackMessage>.FromError(getBan);
-                }
-
-                var ban = getBan.Entity;
-
-                var newExpiration = ban.CreatedAt.Add(newDuration);
-
-                var setExpiration = await _bans.SetBanExpiryDateAsync(ban, newExpiration);
-                if (!setExpiration.IsSuccess)
-                {
-                    return Result<FeedbackMessage>.FromError(setExpiration);
-                }
-
-                return new FeedbackMessage("Ban duration updated.", _feedback.Theme.Secondary);
+                return Result<FeedbackMessage>.FromError(setMessage);
             }
+
+            return new FeedbackMessage("Ban context message updated.", _feedback.Theme.Secondary);
+        }
+
+        /// <summary>
+        /// Sets the duration of the ban.
+        /// </summary>
+        /// <param name="banID">The ID of the ban to edit.</param>
+        /// <param name="newDuration">The new duration of the ban.</param>
+        [Command("duration")]
+        [Description("Sets the duration of the ban.")]
+        [RequirePermission(typeof(ManageBans), PermissionTarget.All)]
+        [RequireContext(ChannelContext.Guild)]
+        public async Task<Result<FeedbackMessage>> SetBanDurationAsync(long banID, TimeSpan newDuration)
+        {
+            var getBan = await _bans.GetBanAsync(_context.GuildID.Value, banID);
+            if (!getBan.IsSuccess)
+            {
+                return Result<FeedbackMessage>.FromError(getBan);
+            }
+
+            var ban = getBan.Entity;
+
+            var newExpiration = ban.CreatedAt.Add(newDuration);
+
+            var setExpiration = await _bans.SetBanExpiryDateAsync(ban, newExpiration);
+            if (!setExpiration.IsSuccess)
+            {
+                return Result<FeedbackMessage>.FromError(setExpiration);
+            }
+
+            return new FeedbackMessage("Ban duration updated.", _feedback.Theme.Secondary);
         }
     }
 }

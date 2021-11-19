@@ -25,52 +25,51 @@ using System.Linq;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens;
+
+/// <summary>
+/// A token that gets replaced with a species.
+/// </summary>
+[PublicAPI]
+[TokenIdentifier("species", "s")]
+public sealed class SpeciesToken : ReplaceableTextToken<SpeciesToken>
 {
-    /// <summary>
-    /// A token that gets replaced with a species.
-    /// </summary>
-    [PublicAPI]
-    [TokenIdentifier("species", "s")]
-    public sealed class SpeciesToken : ReplaceableTextToken<SpeciesToken>
+    /// <inheritdoc />
+    public override string GetText(Appearance appearance, AppearanceComponent? component)
     {
-        /// <inheritdoc />
-        public override string GetText(Appearance appearance, AppearanceComponent? component)
+        var speciesShares = new Dictionary<string, int>();
+
+        foreach (var characterComponent in appearance.Components)
         {
-            var speciesShares = new Dictionary<string, int>();
+            var speciesName = characterComponent.Transformation.Species.Name;
 
-            foreach (var characterComponent in appearance.Components)
+            if (speciesShares.ContainsKey(speciesName))
             {
-                var speciesName = characterComponent.Transformation.Species.Name;
-
-                if (speciesShares.ContainsKey(speciesName))
-                {
-                    speciesShares[speciesName]++;
-                }
-                else
-                {
-                    speciesShares.Add(speciesName, 1);
-                }
+                speciesShares[speciesName]++;
             }
-
-            if (!speciesShares.Any())
+            else
             {
-                return "person";
+                speciesShares.Add(speciesName, 1);
             }
-
-            var totalPoints = speciesShares.Values.Sum();
-
-            // pick the species with the largest share
-            var (species, componentCount) = speciesShares.OrderByDescending(kvp => kvp.Value).FirstOrDefault();
-            var shareByPercentage = componentCount / (double)totalPoints;
-
-            return $"{species}{(shareByPercentage <= 0.50 ? "-morph" : string.Empty)}";
         }
 
-        /// <inheritdoc />
-        protected override SpeciesToken Initialize(string? data)
+        if (!speciesShares.Any())
         {
-            return this;
+            return "person";
         }
+
+        var totalPoints = speciesShares.Values.Sum();
+
+        // pick the species with the largest share
+        var (species, componentCount) = speciesShares.OrderByDescending(kvp => kvp.Value).FirstOrDefault();
+        var shareByPercentage = componentCount / (double)totalPoints;
+
+        return $"{species}{(shareByPercentage <= 0.50 ? "-morph" : string.Empty)}";
+    }
+
+    /// <inheritdoc />
+    protected override SpeciesToken Initialize(string? data)
+    {
+        return this;
     }
 }

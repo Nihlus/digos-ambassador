@@ -23,21 +23,20 @@
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Commands.Extensions;
 
-namespace DIGOS.Ambassador.Discord.TypeReaders.Extensions
+namespace DIGOS.Ambassador.Discord.TypeReaders.Extensions;
+
+/// <summary>
+/// Extensions to the <see cref="IServiceCollection"/> class.
+/// </summary>
+public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Extensions to the <see cref="IServiceCollection"/> class.
+    /// Adds a type reader to the command service based on a <see cref="HumanizerEnumTypeReader{T}"/>.
     /// </summary>
-    public static class ServiceCollectionExtensions
+    /// <param name="this">The command service.</param>
+    /// <typeparam name="TEnum">The enum type to add.</typeparam>
+    public static void AddEnumReader<TEnum>(this IServiceCollection @this) where TEnum : struct, System.Enum
     {
-        /// <summary>
-        /// Adds a type reader to the command service based on a <see cref="HumanizerEnumTypeReader{T}"/>.
-        /// </summary>
-        /// <param name="this">The command service.</param>
-        /// <typeparam name="TEnum">The enum type to add.</typeparam>
-        public static void AddEnumReader<TEnum>(this IServiceCollection @this) where TEnum : struct, System.Enum
-        {
-            @this.AddParser<HumanizerEnumTypeReader<TEnum>>();
-        }
+        @this.AddParser<HumanizerEnumTypeReader<TEnum>>();
     }
 }

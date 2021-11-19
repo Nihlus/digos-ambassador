@@ -27,40 +27,39 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Characters
+namespace DIGOS.Ambassador.Tests.Plugins.Characters;
+
+public static partial class CharacterServiceTests
 {
-    public static partial class CharacterServiceTests
+    public class HasCurrentCharacterAsync : CharacterServiceTestBase
     {
-        public class HasCurrentCharacterAsync : CharacterServiceTestBase
+        [Fact]
+        public async Task ReturnsFalseIfUserHasNoCharacters()
         {
-            [Fact]
-            public async Task ReturnsFalseIfUserHasNoCharacters()
-            {
-                var result = await this.Characters.HasCurrentCharacterAsync(this.DefaultOwner, this.DefaultServer);
+            var result = await this.Characters.HasCurrentCharacterAsync(this.DefaultOwner, this.DefaultServer);
 
-                Assert.False(result);
-            }
+            Assert.False(result);
+        }
 
-            [Fact]
-            public async Task ReturnsFalseIfUserHasNoActiveCharacter()
-            {
-                var result = await this.Characters.HasCurrentCharacterAsync(this.DefaultOwner, this.DefaultServer);
+        [Fact]
+        public async Task ReturnsFalseIfUserHasNoActiveCharacter()
+        {
+            var result = await this.Characters.HasCurrentCharacterAsync(this.DefaultOwner, this.DefaultServer);
 
-                Assert.False(result);
-            }
+            Assert.False(result);
+        }
 
-            [Fact]
-            public async Task ReturnsTrueIfUserHasAnActiveCharacter()
-            {
-                var character = CreateCharacter();
+        [Fact]
+        public async Task ReturnsTrueIfUserHasAnActiveCharacter()
+        {
+            var character = CreateCharacter();
 
-                character.IsCurrent = true;
-                await this.Database.SaveChangesAsync();
+            character.IsCurrent = true;
+            await this.Database.SaveChangesAsync();
 
-                var result = await this.Characters.HasCurrentCharacterAsync(this.DefaultOwner, this.DefaultServer);
+            var result = await this.Characters.HasCurrentCharacterAsync(this.DefaultOwner, this.DefaultServer);
 
-                Assert.True(result);
-            }
+            Assert.True(result);
         }
     }
 }

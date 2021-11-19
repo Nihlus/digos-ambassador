@@ -20,28 +20,27 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages;
+
+public sealed partial class TransformationText
 {
-    public sealed partial class TransformationText
+    public sealed partial class TransformationMessages
     {
-        public sealed partial class TransformationMessages
+        /// <summary>
+        /// Holds shifting messages.
+        /// </summary>
+        public sealed partial class ShiftingMessages
         {
             /// <summary>
-            /// Holds shifting messages.
+            /// Gets a set of singular shifting messages. These are used when single parts are transformed.
             /// </summary>
-            public sealed partial class ShiftingMessages
-            {
-                /// <summary>
-                /// Gets a set of singular shifting messages. These are used when single parts are transformed.
-                /// </summary>
-                public SingleMessages Single { get; init; } = new();
+            public SingleMessages Single { get; init; } = new();
 
-                /// <summary>
-                /// Gets a set of uniform shifting messages. These are used when two or more matching parts are
-                /// transformed.
-                /// </summary>
-                public UniformMessages Uniform { get; init; } = new();
-            }
+            /// <summary>
+            /// Gets a set of uniform shifting messages. These are used when two or more matching parts are
+            /// transformed.
+            /// </summary>
+            public UniformMessages Uniform { get; init; } = new();
         }
     }
 }

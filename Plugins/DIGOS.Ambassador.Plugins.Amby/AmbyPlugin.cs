@@ -30,27 +30,26 @@ using Remora.Plugins.Abstractions.Attributes;
 
 [assembly: RemoraPlugin(typeof(AmbyPlugin))]
 
-namespace DIGOS.Ambassador.Plugins.Amby
+namespace DIGOS.Ambassador.Plugins.Amby;
+
+/// <summary>
+/// Describes the Amby plugin.
+/// </summary>
+public sealed class AmbyPlugin : PluginDescriptor
 {
-    /// <summary>
-    /// Describes the Amby plugin.
-    /// </summary>
-    public sealed class AmbyPlugin : PluginDescriptor
+    /// <inheritdoc />
+    public override string Name => "Amby";
+
+    /// <inheritdoc />
+    public override string Description => "Contains various Amby-specific commands.";
+
+    /// <inheritdoc/>
+    public override void ConfigureServices(IServiceCollection serviceCollection)
     {
-        /// <inheritdoc />
-        public override string Name => "Amby";
+        serviceCollection
+            .AddSingleton<PortraitService>()
+            .AddSingleton<SassService>();
 
-        /// <inheritdoc />
-        public override string Description => "Contains various Amby-specific commands.";
-
-        /// <inheritdoc/>
-        public override void ConfigureServices(IServiceCollection serviceCollection)
-        {
-            serviceCollection
-                .AddSingleton<PortraitService>()
-                .AddSingleton<SassService>();
-
-            serviceCollection.AddCommandGroup<AmbyCommands>();
-        }
+        serviceCollection.AddCommandGroup<AmbyCommands>();
     }
 }

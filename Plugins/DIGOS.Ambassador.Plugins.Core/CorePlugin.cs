@@ -44,62 +44,61 @@ using Remora.Results;
 [assembly: InternalsVisibleTo("DIGOS.Ambassador.Tests.Plugins.Core")]
 [assembly: RemoraPlugin(typeof(CorePlugin))]
 
-namespace DIGOS.Ambassador.Plugins.Core
+namespace DIGOS.Ambassador.Plugins.Core;
+
+/// <summary>
+/// Describes the plugin containing core functionality.
+/// </summary>
+public sealed class CorePlugin : PluginDescriptor, IMigratablePlugin
 {
-    /// <summary>
-    /// Describes the plugin containing core functionality.
-    /// </summary>
-    public sealed class CorePlugin : PluginDescriptor, IMigratablePlugin
+    /// <inheritdoc />
+    public override string Name => "Core";
+
+    /// <inheritdoc />
+    public override string Description => "Provides core functionality related to users and servers.";
+
+    /// <inheritdoc/>
+    public override void ConfigureServices(IServiceCollection serviceCollection)
     {
-        /// <inheritdoc />
-        public override string Name => "Core";
+        serviceCollection.TryAddScoped<ServerService>();
+        serviceCollection.TryAddScoped<UserService>();
+        serviceCollection.TryAddScoped<PrivacyService>();
+        serviceCollection.TryAddScoped<OwnedEntityService>();
+        serviceCollection.AddConfiguredSchemaAwareDbContextPool<CoreDatabaseContext>();
 
-        /// <inheritdoc />
-        public override string Description => "Provides core functionality related to users and servers.";
+        serviceCollection
+            .AddCommandGroup<PrivacyCommands>()
+            .AddCommandGroup<UserCommands>()
+            .AddCommandGroup<ServerCommands>();
+    }
 
-        /// <inheritdoc/>
-        public override void ConfigureServices(IServiceCollection serviceCollection)
-        {
-            serviceCollection.TryAddScoped<ServerService>();
-            serviceCollection.TryAddScoped<UserService>();
-            serviceCollection.TryAddScoped<PrivacyService>();
-            serviceCollection.TryAddScoped<OwnedEntityService>();
-            serviceCollection.AddConfiguredSchemaAwareDbContextPool<CoreDatabaseContext>();
+    /// <inheritdoc />
+    public override ValueTask<Result> InitializeAsync(IServiceProvider serviceProvider)
+    {
+        var permissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
+        return new ValueTask<Result>(permissionRegistry.RegisterPermissions
+        (
+            Assembly.GetExecutingAssembly(),
+            serviceProvider
+        ));
+    }
 
-            serviceCollection
-                .AddCommandGroup<PrivacyCommands>()
-                .AddCommandGroup<UserCommands>()
-                .AddCommandGroup<ServerCommands>();
-        }
+    /// <inheritdoc />
+    public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
+    {
+        var context = serviceProvider.GetRequiredService<CoreDatabaseContext>();
 
-        /// <inheritdoc />
-        public override ValueTask<Result> InitializeAsync(IServiceProvider serviceProvider)
-        {
-            var permissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
-            return new ValueTask<Result>(permissionRegistry.RegisterPermissions
-            (
-                Assembly.GetExecutingAssembly(),
-                serviceProvider
-            ));
-        }
+        await context.Database.MigrateAsync();
 
-        /// <inheritdoc />
-        public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
-        {
-            var context = serviceProvider.GetRequiredService<CoreDatabaseContext>();
+        return Result.FromSuccess();
+    }
 
-            await context.Database.MigrateAsync();
+    /// <inheritdoc />
+    public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
+    {
+        var context = serviceProvider.GetRequiredService<CoreDatabaseContext>();
+        var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
 
-            return Result.FromSuccess();
-        }
-
-        /// <inheritdoc />
-        public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
-        {
-            var context = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
-
-            return appliedMigrations.Any();
-        }
+        return appliedMigrations.Any();
     }
 }

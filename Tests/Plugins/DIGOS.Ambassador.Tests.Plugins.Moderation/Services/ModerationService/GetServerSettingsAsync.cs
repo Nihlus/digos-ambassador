@@ -29,41 +29,40 @@ using DIGOS.Ambassador.Tests.Plugins.Moderation.Bases;
 using Remora.Discord.Core;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.ModerationService
+namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.ModerationService;
+
+public partial class ModerationServiceTests
 {
-    public partial class ModerationServiceTests
+    public class GetServerSettingsAsync : ModerationServiceTestBase
     {
-        public class GetServerSettingsAsync : ModerationServiceTestBase
+        private readonly Snowflake _guild = new(0);
+
+        [Fact]
+        public async Task ReturnsSuccessfulIfSettingsExist()
         {
-            private readonly Snowflake _guild = new(0);
+            await this.Moderation.CreateServerSettingsAsync(_guild);
 
-            [Fact]
-            public async Task ReturnsSuccessfulIfSettingsExist()
-            {
-                await this.Moderation.CreateServerSettingsAsync(_guild);
+            var result = await this.Moderation.GetServerSettingsAsync(_guild);
 
-                var result = await this.Moderation.GetServerSettingsAsync(_guild);
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsCorrectSettings()
+        {
+            var expected = (await this.Moderation.CreateServerSettingsAsync(_guild)).Entity;
 
-            [Fact]
-            public async Task ReturnsCorrectSettings()
-            {
-                var expected = (await this.Moderation.CreateServerSettingsAsync(_guild)).Entity;
+            var actual = (await this.Moderation.GetServerSettingsAsync(_guild)).Entity;
 
-                var actual = (await this.Moderation.GetServerSettingsAsync(_guild)).Entity;
+            Assert.Same(expected, actual);
+        }
 
-                Assert.Same(expected, actual);
-            }
+        [Fact]
+        public async Task ReturnsUnsuccessfulIfSettingsDoNotExist()
+        {
+            var result = await this.Moderation.GetServerSettingsAsync(_guild);
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulIfSettingsDoNotExist()
-            {
-                var result = await this.Moderation.GetServerSettingsAsync(_guild);
-
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
         }
     }
 }

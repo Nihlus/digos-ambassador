@@ -30,75 +30,74 @@ using Zio;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Amby.Services.SassService
+namespace DIGOS.Ambassador.Tests.Plugins.Amby.Services.SassService;
+
+public static class SassServiceTests
 {
-    public static class SassServiceTests
+    public class GetSassAsync : SassServiceTestBase
     {
-        public class GetSassAsync : SassServiceTestBase
+        protected override async Task ConfigureFileSystemAsync(IFileSystem fileSystem)
         {
-            protected override async Task ConfigureFileSystemAsync(IFileSystem fileSystem)
+            var sassDirectory = UPath.Combine(UPath.Root, "Sass");
+            var sfwSass = UPath.Combine(sassDirectory, "sass.txt");
+            var nsfwSass = UPath.Combine(sassDirectory, "sass-nsfw.txt");
+
+            fileSystem.CreateDirectory(sassDirectory);
+
+            await using (var sassFile = fileSystem.OpenFile(sfwSass, FileMode.Create, FileAccess.Write))
             {
-                var sassDirectory = UPath.Combine(UPath.Root, "Sass");
-                var sfwSass = UPath.Combine(sassDirectory, "sass.txt");
-                var nsfwSass = UPath.Combine(sassDirectory, "sass-nsfw.txt");
-
-                fileSystem.CreateDirectory(sassDirectory);
-
-                await using (var sassFile = fileSystem.OpenFile(sfwSass, FileMode.Create, FileAccess.Write))
-                {
-                    await using var sw = new StreamWriter(sassFile);
-                    await sw.WriteLineAsync("SFW Sass");
-                }
-
-                await using (var sassFile = fileSystem.OpenFile(nsfwSass, FileMode.Create, FileAccess.Write))
-                {
-                    await using var sw = new StreamWriter(sassFile);
-                    await sw.WriteLineAsync("NSFW Sass");
-                }
+                await using var sw = new StreamWriter(sassFile);
+                await sw.WriteLineAsync("SFW Sass");
             }
 
-            [Fact]
-            public async Task ReturnsTrueWhenSassIsAvailable()
+            await using (var sassFile = fileSystem.OpenFile(nsfwSass, FileMode.Create, FileAccess.Write))
             {
-                var result = await this.SassService.GetSassAsync();
-
-                Assert.True(result.IsSuccess);
-            }
-
-            [Fact]
-            public async Task ReturnsTrueWhenSassIsAvailableIncludingNSFWSass()
-            {
-                var result = await this.SassService.GetSassAsync(true);
-
-                Assert.True(result.IsSuccess);
-            }
-
-            [Fact]
-            public async Task ActuallyReturnsSomeSass()
-            {
-                var result = await this.SassService.GetSassAsync();
-
-                Assert.NotEmpty(result.Entity);
+                await using var sw = new StreamWriter(sassFile);
+                await sw.WriteLineAsync("NSFW Sass");
             }
         }
 
-        public class GetSassWithoutContent : SassServiceTestBase
+        [Fact]
+        public async Task ReturnsTrueWhenSassIsAvailable()
         {
-            [Fact]
-            public async Task ReturnsFalseIfNoSassIsAvailable()
-            {
-                var result = await this.SassService.GetSassAsync();
+            var result = await this.SassService.GetSassAsync();
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.True(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsFalseIfNoSassIsAvailableIncludingNSFWSass()
-            {
-                var result = await this.SassService.GetSassAsync();
+        [Fact]
+        public async Task ReturnsTrueWhenSassIsAvailableIncludingNSFWSass()
+        {
+            var result = await this.SassService.GetSassAsync(true);
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.True(result.IsSuccess);
+        }
+
+        [Fact]
+        public async Task ActuallyReturnsSomeSass()
+        {
+            var result = await this.SassService.GetSassAsync();
+
+            Assert.NotEmpty(result.Entity);
+        }
+    }
+
+    public class GetSassWithoutContent : SassServiceTestBase
+    {
+        [Fact]
+        public async Task ReturnsFalseIfNoSassIsAvailable()
+        {
+            var result = await this.SassService.GetSassAsync();
+
+            Assert.False(result.IsSuccess);
+        }
+
+        [Fact]
+        public async Task ReturnsFalseIfNoSassIsAvailableIncludingNSFWSass()
+        {
+            var result = await this.SassService.GetSassAsync();
+
+            Assert.False(result.IsSuccess);
         }
     }
 }

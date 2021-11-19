@@ -29,55 +29,54 @@ using DIGOS.Ambassador.Tests.Plugins.Moderation.Bases;
 using Remora.Discord.Core;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
+namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService;
+
+public partial class WarningService
 {
-    public partial class WarningService
+    public class GetWarningAsync : WarningServiceTestBase
     {
-        public class GetWarningAsync : WarningServiceTestBase
+        private readonly Snowflake _guild = new(0);
+        private readonly Snowflake _otherGuild = new(1);
+        private readonly Snowflake _user = new(2);
+
+        private readonly Snowflake _author = new(3);
+
+        [Fact]
+        public async Task ReturnsSuccessfulIfWarningExists()
         {
-            private readonly Snowflake _guild = new(0);
-            private readonly Snowflake _otherGuild = new(1);
-            private readonly Snowflake _user = new(2);
+            var warning = (await this.Warnings.CreateWarningAsync(_author, _user, _guild, "Dummy thicc")).Entity;
 
-            private readonly Snowflake _author = new(3);
+            var result = await this.Warnings.GetWarningAsync(_guild, warning.ID);
 
-            [Fact]
-            public async Task ReturnsSuccessfulIfWarningExists()
-            {
-                var warning = (await this.Warnings.CreateWarningAsync(_author, _user, _guild, "Dummy thicc")).Entity;
+            Assert.True(result.IsSuccess);
+        }
 
-                var result = await this.Warnings.GetWarningAsync(_guild, warning.ID);
+        [Fact]
+        public async Task ReturnsUnsuccessfulIfNoWarningExists()
+        {
+            var result = await this.Warnings.GetWarningAsync(_guild, 1);
 
-                Assert.True(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulIfNoWarningExists()
-            {
-                var result = await this.Warnings.GetWarningAsync(_guild, 1);
+        [Fact]
+        public async Task ReturnsUnsuccessfulIfWarningExistsButServerIsWrong()
+        {
+            var warning = (await this.Warnings.CreateWarningAsync(_author, _user, _guild, "Dummy thicc")).Entity;
 
-                Assert.False(result.IsSuccess);
-            }
+            var result = await this.Warnings.GetWarningAsync(_otherGuild, warning.ID);
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulIfWarningExistsButServerIsWrong()
-            {
-                var warning = (await this.Warnings.CreateWarningAsync(_author, _user, _guild, "Dummy thicc")).Entity;
+            Assert.False(result.IsSuccess);
+        }
 
-                var result = await this.Warnings.GetWarningAsync(_otherGuild, warning.ID);
+        [Fact]
+        public async Task ActuallyReturnsWarning()
+        {
+            var warning = (await this.Warnings.CreateWarningAsync(_author, _user, _guild, "Dummy thicc")).Entity;
 
-                Assert.False(result.IsSuccess);
-            }
+            var result = await this.Warnings.GetWarningAsync(_guild, warning.ID);
 
-            [Fact]
-            public async Task ActuallyReturnsWarning()
-            {
-                var warning = (await this.Warnings.CreateWarningAsync(_author, _user, _guild, "Dummy thicc")).Entity;
-
-                var result = await this.Warnings.GetWarningAsync(_guild, warning.ID);
-
-                Assert.Same(warning, result.Entity);
-            }
+            Assert.Same(warning, result.Entity);
         }
     }
 }

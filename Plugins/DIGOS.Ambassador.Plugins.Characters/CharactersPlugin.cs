@@ -49,82 +49,81 @@ using Remora.Results;
 [assembly: InternalsVisibleTo("DIGOS.Ambassador.Tests.Plugins.Characters")]
 [assembly: RemoraPlugin(typeof(CharactersPlugin))]
 
-namespace DIGOS.Ambassador.Plugins.Characters
+namespace DIGOS.Ambassador.Plugins.Characters;
+
+/// <summary>
+/// Describes the character plugin.
+/// </summary>
+public sealed class CharactersPlugin : PluginDescriptor, IMigratablePlugin
 {
-    /// <summary>
-    /// Describes the character plugin.
-    /// </summary>
-    public sealed class CharactersPlugin : PluginDescriptor, IMigratablePlugin
+    /// <inheritdoc />
+    public override string Name => "Characters";
+
+    /// <inheritdoc />
+    public override string Description => "Provides user-managed character libraries.";
+
+    /// <inheritdoc />
+    public override void ConfigureServices(IServiceCollection serviceCollection)
     {
-        /// <inheritdoc />
-        public override string Name => "Characters";
+        // Dependencies
+        serviceCollection.AddInteractivity();
 
-        /// <inheritdoc />
-        public override string Description => "Provides user-managed character libraries.";
+        // Our stuff
+        serviceCollection.TryAddSingleton<PronounService>();
+        serviceCollection.TryAddScoped<CharacterService>();
+        serviceCollection.TryAddScoped<ICharacterService>(s => s.GetRequiredService<CharacterService>());
+        serviceCollection.TryAddScoped<ICharacterEditor>(s => s.GetRequiredService<CharacterService>());
+        serviceCollection.TryAddScoped<CharacterDiscordService>();
+        serviceCollection.TryAddScoped<CharacterRoleService>();
 
-        /// <inheritdoc />
-        public override void ConfigureServices(IServiceCollection serviceCollection)
+        serviceCollection.AddConfiguredSchemaAwareDbContextPool<CharactersDatabaseContext>();
+
+        serviceCollection.AddParser<CharacterParser>();
+        serviceCollection.AddCommandGroup<CharacterCommands>();
+
+        serviceCollection.AddCondition<RequireEntityOwnerCondition<Character>>();
+
+        serviceCollection.AddAutocompleteProvider<AnyCharacterAutocompleteProvider>();
+        serviceCollection.AddAutocompleteProvider<OwnedCharacterAutocompleteProvider>();
+    }
+
+    /// <inheritdoc />
+    public override ValueTask<Result> InitializeAsync(IServiceProvider serviceProvider)
+    {
+        var permissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
+        var registrationResult = permissionRegistry.RegisterPermissions
+        (
+            Assembly.GetExecutingAssembly(),
+            serviceProvider
+        );
+
+        if (!registrationResult.IsSuccess)
         {
-            // Dependencies
-            serviceCollection.AddInteractivity();
-
-            // Our stuff
-            serviceCollection.TryAddSingleton<PronounService>();
-            serviceCollection.TryAddScoped<CharacterService>();
-            serviceCollection.TryAddScoped<ICharacterService>(s => s.GetRequiredService<CharacterService>());
-            serviceCollection.TryAddScoped<ICharacterEditor>(s => s.GetRequiredService<CharacterService>());
-            serviceCollection.TryAddScoped<CharacterDiscordService>();
-            serviceCollection.TryAddScoped<CharacterRoleService>();
-
-            serviceCollection.AddConfiguredSchemaAwareDbContextPool<CharactersDatabaseContext>();
-
-            serviceCollection.AddParser<CharacterParser>();
-            serviceCollection.AddCommandGroup<CharacterCommands>();
-
-            serviceCollection.AddCondition<RequireEntityOwnerCondition<Character>>();
-
-            serviceCollection.AddAutocompleteProvider<AnyCharacterAutocompleteProvider>();
-            serviceCollection.AddAutocompleteProvider<OwnedCharacterAutocompleteProvider>();
+            return new ValueTask<Result>(registrationResult);
         }
 
-        /// <inheritdoc />
-        public override ValueTask<Result> InitializeAsync(IServiceProvider serviceProvider)
-        {
-            var permissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
-            var registrationResult = permissionRegistry.RegisterPermissions
-            (
-                Assembly.GetExecutingAssembly(),
-                serviceProvider
-            );
+        var pronounService = serviceProvider.GetRequiredService<PronounService>();
+        pronounService.DiscoverPronounProviders();
 
-            if (!registrationResult.IsSuccess)
-            {
-                return new ValueTask<Result>(registrationResult);
-            }
+        return new ValueTask<Result>(Result.FromSuccess());
+    }
 
-            var pronounService = serviceProvider.GetRequiredService<PronounService>();
-            pronounService.DiscoverPronounProviders();
+    /// <inheritdoc />
+    public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
+    {
+        var context = serviceProvider.GetRequiredService<CharactersDatabaseContext>();
 
-            return new ValueTask<Result>(Result.FromSuccess());
-        }
+        await context.Database.MigrateAsync();
 
-        /// <inheritdoc />
-        public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
-        {
-            var context = serviceProvider.GetRequiredService<CharactersDatabaseContext>();
+        return Result.FromSuccess();
+    }
 
-            await context.Database.MigrateAsync();
+    /// <inheritdoc />
+    public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
+    {
+        var context = serviceProvider.GetRequiredService<CharactersDatabaseContext>();
+        var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
 
-            return Result.FromSuccess();
-        }
-
-        /// <inheritdoc />
-        public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
-        {
-            var context = serviceProvider.GetRequiredService<CharactersDatabaseContext>();
-            var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
-
-            return appliedMigrations.Any();
-        }
+        return appliedMigrations.Any();
     }
 }

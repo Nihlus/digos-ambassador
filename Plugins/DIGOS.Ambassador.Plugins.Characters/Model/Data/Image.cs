@@ -24,45 +24,44 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Core.Database.Entities;
 
-namespace DIGOS.Ambassador.Plugins.Characters.Model.Data
+namespace DIGOS.Ambassador.Plugins.Characters.Model.Data;
+
+/// <summary>
+/// Represents an image.
+/// </summary>
+[Table("Images", Schema = "CharacterModule")]
+public class Image : EFEntity
 {
     /// <summary>
-    /// Represents an image.
+    /// Gets the name of the image.
     /// </summary>
-    [Table("Images", Schema = "CharacterModule")]
-    public class Image : EFEntity
+    public string Name { get; internal set; }
+
+    /// <summary>
+    /// Gets the caption of the image.
+    /// </summary>
+    public string Caption { get; internal set; }
+
+    /// <summary>
+    /// Gets a value indicating whether or not the image is NSFW.
+    /// </summary>
+    public bool IsNSFW { get; internal set; }
+
+    /// <summary>
+    /// Gets the online URL of the image.
+    /// </summary>
+    public string Url { get; internal set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Image"/> class.
+    /// </summary>
+    /// <param name="name">The name of the image.</param>
+    /// <param name="url">The URL to the image.</param>
+    /// <param name="caption">The caption of the image.</param>
+    public Image(string name, string url, string caption = "No caption set.")
     {
-        /// <summary>
-        /// Gets the name of the image.
-        /// </summary>
-        public string Name { get; internal set; }
-
-        /// <summary>
-        /// Gets the caption of the image.
-        /// </summary>
-        public string Caption { get; internal set; }
-
-        /// <summary>
-        /// Gets a value indicating whether or not the image is NSFW.
-        /// </summary>
-        public bool IsNSFW { get; internal set; }
-
-        /// <summary>
-        /// Gets the online URL of the image.
-        /// </summary>
-        public string Url { get; internal set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Image"/> class.
-        /// </summary>
-        /// <param name="name">The name of the image.</param>
-        /// <param name="url">The URL to the image.</param>
-        /// <param name="caption">The caption of the image.</param>
-        public Image(string name, string url, string caption = "No caption set.")
-        {
-            this.Name = name;
-            this.Url = url;
-            this.Caption = caption;
-        }
+        this.Name = name;
+        this.Url = url;
+        this.Caption = caption;
     }
 }

@@ -23,26 +23,25 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Permissions
+namespace DIGOS.Ambassador.Plugins.Autorole.Permissions;
+
+/// <summary>
+/// Represents a permission that allows a user to view autoroles.
+/// </summary>
+public class ShowAutoroleServerSettings : Permission
 {
-    /// <summary>
-    /// Represents a permission that allows a user to view autoroles.
-    /// </summary>
-    public class ShowAutoroleServerSettings : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("5407D2B9-2F36-46A4-AD2F-6E6DF152F5F4");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("5407D2B9-2F36-46A4-AD2F-6E6DF152F5F4");
 
-        /// <inheritdoc/>
-        public override string FriendlyName { get; } = nameof(ShowAutoroleServerSettings);
+    /// <inheritdoc/>
+    public override string FriendlyName { get; } = nameof(ShowAutoroleServerSettings);
 
-        /// <inheritdoc/>
-        public override string Description { get; } = "Allows you to view autoroles.";
+    /// <inheritdoc/>
+    public override string Description { get; } = "Allows you to view autoroles.";
 
-        /// <inheritdoc />
-        public override bool IsGrantedByDefaultToSelf => true;
+    /// <inheritdoc />
+    public override bool IsGrantedByDefaultToSelf => true;
 
-        /// <inheritdoc />
-        public override bool IsGrantedByDefaultToOthers => true;
-    }
+    /// <inheritdoc />
+    public override bool IsGrantedByDefaultToOthers => true;
 }

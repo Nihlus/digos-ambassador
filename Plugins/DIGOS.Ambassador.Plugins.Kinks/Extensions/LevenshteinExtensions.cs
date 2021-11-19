@@ -31,106 +31,105 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Kinks.Extensions
+namespace DIGOS.Ambassador.Plugins.Kinks.Extensions;
+
+/// <summary>
+/// Extensions for levenshtein distances.
+/// </summary>
+[PublicAPI]
+public static class LevenshteinExtensions
 {
     /// <summary>
-    /// Extensions for levenshtein distances.
+    /// Selects an object from the queryable by the best Levenshtein match.
     /// </summary>
-    [PublicAPI]
-    public static class LevenshteinExtensions
+    /// <param name="this">The sequence.</param>
+    /// <param name="selector">A function which selects the object to return.</param>
+    /// <param name="stringSelector">A function which selects the string field to search.</param>
+    /// <param name="search">The pattern to search for.</param>
+    /// <param name="tolerance">
+    /// The percentile distance tolerance for results. The distance must be below this value.
+    /// </param>
+    /// <param name="ct">The cancellation token in use.</param>
+    /// <typeparam name="TSource">The source type of the enumerable.</typeparam>
+    /// <typeparam name="TResult">The resulting type.</typeparam>
+    /// <returns>A retrieval result which may or may not have succeeded.</returns>
+    [Pure]
+    public static async Task<Result<TResult>> SelectFromBestLevenshteinMatchAsync<TSource, TResult>
+    (
+        this IQueryable<TSource> @this,
+        Func<TSource, TResult> selector,
+        Expression<Func<TSource, string>> stringSelector,
+        string search,
+        double tolerance = 0.25,
+        CancellationToken ct = default
+    )
+        where TResult : class
+        where TSource : class
     {
-        /// <summary>
-        /// Selects an object from the queryable by the best Levenshtein match.
-        /// </summary>
-        /// <param name="this">The sequence.</param>
-        /// <param name="selector">A function which selects the object to return.</param>
-        /// <param name="stringSelector">A function which selects the string field to search.</param>
-        /// <param name="search">The pattern to search for.</param>
-        /// <param name="tolerance">
-        /// The percentile distance tolerance for results. The distance must be below this value.
-        /// </param>
-        /// <param name="ct">The cancellation token in use.</param>
-        /// <typeparam name="TSource">The source type of the enumerable.</typeparam>
-        /// <typeparam name="TResult">The resulting type.</typeparam>
-        /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure]
-        public static async Task<Result<TResult>> SelectFromBestLevenshteinMatchAsync<TSource, TResult>
-        (
-            this IQueryable<TSource> @this,
-            Func<TSource, TResult> selector,
-            Expression<Func<TSource, string>> stringSelector,
-            string search,
-            double tolerance = 0.25,
-            CancellationToken ct = default
-        )
-            where TResult : class
-            where TSource : class
+        var matchResult = (await @this.Select(stringSelector).ToListAsync(ct))
+            .BestLevenshteinMatch(search, tolerance);
+
+        if (!matchResult.IsSuccess)
         {
-            var matchResult = (await @this.Select(stringSelector).ToListAsync(ct))
-                .BestLevenshteinMatch(search, tolerance);
-
-            if (!matchResult.IsSuccess)
-            {
-                return Result<TResult>.FromError(matchResult);
-            }
-
-            var selectedString = matchResult.Entity;
-
-            var selectorFunc = stringSelector.Compile();
-
-            var selectedObject = await @this.FirstOrDefaultAsync(i => selectorFunc(i) == selectedString, ct);
-            if (selectedObject is null)
-            {
-                return new NotFoundError("No matching object for the selector found.");
-            }
-
-            var result = selector(selectedObject);
-
-            return Result<TResult>.FromSuccess(result);
+            return Result<TResult>.FromError(matchResult);
         }
 
-        /// <summary>
-        /// Selects an object from the enumerable by the best Levenshtein match.
-        /// </summary>
-        /// <param name="this">The sequence.</param>
-        /// <param name="selector">A function which selects the object to return.</param>
-        /// <param name="stringSelector">A function which selects the string field to search.</param>
-        /// <param name="search">The pattern to search for.</param>
-        /// <param name="tolerance">The percentile distance tolerance for results. The distance must be below this value.</param>
-        /// <typeparam name="TSource">The source type of the enumerable.</typeparam>
-        /// <typeparam name="TResult">The resulting type.</typeparam>
-        /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure]
-        public static Result<TResult> SelectFromBestLevenshteinMatch<TSource, TResult>
-        (
-            this IEnumerable<TSource> @this,
-            Func<TSource, TResult> selector,
-            Func<TSource, string> stringSelector,
-            string search,
-            double tolerance = 0.25
-        )
-            where TResult : class
-            where TSource : class
+        var selectedString = matchResult.Entity;
+
+        var selectorFunc = stringSelector.Compile();
+
+        var selectedObject = await @this.FirstOrDefaultAsync(i => selectorFunc(i) == selectedString, ct);
+        if (selectedObject is null)
         {
-            var enumerable = @this as IList<TSource> ?? @this.ToList();
-
-            var matchResult = enumerable.Select(stringSelector).BestLevenshteinMatch(search, tolerance);
-            if (!matchResult.IsSuccess)
-            {
-                return Result<TResult>.FromError(matchResult);
-            }
-
-            var selectedString = matchResult.Entity;
-
-            var selectedObject = enumerable.FirstOrDefault(i => stringSelector(i) == selectedString);
-            if (selectedObject is null)
-            {
-                return new NotFoundError("No matching object for the selector found.");
-            }
-
-            var result = selector(selectedObject);
-
-            return Result<TResult>.FromSuccess(result);
+            return new NotFoundError("No matching object for the selector found.");
         }
+
+        var result = selector(selectedObject);
+
+        return Result<TResult>.FromSuccess(result);
+    }
+
+    /// <summary>
+    /// Selects an object from the enumerable by the best Levenshtein match.
+    /// </summary>
+    /// <param name="this">The sequence.</param>
+    /// <param name="selector">A function which selects the object to return.</param>
+    /// <param name="stringSelector">A function which selects the string field to search.</param>
+    /// <param name="search">The pattern to search for.</param>
+    /// <param name="tolerance">The percentile distance tolerance for results. The distance must be below this value.</param>
+    /// <typeparam name="TSource">The source type of the enumerable.</typeparam>
+    /// <typeparam name="TResult">The resulting type.</typeparam>
+    /// <returns>A retrieval result which may or may not have succeeded.</returns>
+    [Pure]
+    public static Result<TResult> SelectFromBestLevenshteinMatch<TSource, TResult>
+    (
+        this IEnumerable<TSource> @this,
+        Func<TSource, TResult> selector,
+        Func<TSource, string> stringSelector,
+        string search,
+        double tolerance = 0.25
+    )
+        where TResult : class
+        where TSource : class
+    {
+        var enumerable = @this as IList<TSource> ?? @this.ToList();
+
+        var matchResult = enumerable.Select(stringSelector).BestLevenshteinMatch(search, tolerance);
+        if (!matchResult.IsSuccess)
+        {
+            return Result<TResult>.FromError(matchResult);
+        }
+
+        var selectedString = matchResult.Entity;
+
+        var selectedObject = enumerable.FirstOrDefault(i => stringSelector(i) == selectedString);
+        if (selectedObject is null)
+        {
+            return new NotFoundError("No matching object for the selector found.");
+        }
+
+        var result = selector(selectedObject);
+
+        return Result<TResult>.FromSuccess(result);
     }
 }

@@ -29,115 +29,114 @@ using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using Remora.Discord.Core;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Transformations
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
+
+public partial class TransformationServiceTests
 {
-    public partial class TransformationServiceTests
+    public class CanUserTransformUserAsync : TransformationServiceTestBase
     {
-        public class CanUserTransformUserAsync : TransformationServiceTestBase
+        private readonly Snowflake _user = new Snowflake(0);
+        private readonly Snowflake _targetUser = new Snowflake(1);
+
+        private readonly Snowflake _guild = new Snowflake(0);
+
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfTargetUserHasNotOptedIn()
         {
-            private readonly Snowflake _user = new Snowflake(0);
-            private readonly Snowflake _targetUser = new Snowflake(1);
+            var result = await this.Transformations.CanUserTransformUserAsync
+            (
+                _guild,
+                _user,
+                _targetUser
+            );
 
-            private readonly Snowflake _guild = new Snowflake(0);
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfTargetUserHasNotOptedIn()
-            {
-                var result = await this.Transformations.CanUserTransformUserAsync
-                (
-                    _guild,
-                    _user,
-                    _targetUser
-                );
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfUserIsOnTargetUsersBlacklist()
+        {
+            await EnsureOptedInAsync(_targetUser);
+            await this.Transformations.BlacklistUserAsync(_targetUser, _user);
 
-                Assert.False(result.IsSuccess);
-            }
+            var result = await this.Transformations.CanUserTransformUserAsync
+            (
+                _guild,
+                _user,
+                _targetUser
+            );
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfUserIsOnTargetUsersBlacklist()
-            {
-                await EnsureOptedInAsync(_targetUser);
-                await this.Transformations.BlacklistUserAsync(_targetUser, _user);
+            Assert.False(result.IsSuccess);
+        }
 
-                var result = await this.Transformations.CanUserTransformUserAsync
-                (
-                    _guild,
-                    _user,
-                    _targetUser
-                );
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfTargetUserUsesWhitelistingAndUserIsNotOnWhitelist()
+        {
+            await EnsureOptedInAsync(_targetUser);
+            await this.Transformations.SetServerProtectionTypeAsync
+            (
+                _targetUser,
+                _guild,
+                ProtectionType.Whitelist
+            );
 
-                Assert.False(result.IsSuccess);
-            }
+            var result = await this.Transformations.CanUserTransformUserAsync
+            (
+                _guild,
+                _user,
+                _targetUser
+            );
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfTargetUserUsesWhitelistingAndUserIsNotOnWhitelist()
-            {
-                await EnsureOptedInAsync(_targetUser);
-                await this.Transformations.SetServerProtectionTypeAsync
-                (
-                    _targetUser,
-                    _guild,
-                    ProtectionType.Whitelist
-                );
+            Assert.False(result.IsSuccess);
+        }
 
-                var result = await this.Transformations.CanUserTransformUserAsync
-                (
-                    _guild,
-                    _user,
-                    _targetUser
-                );
+        [Fact]
+        public async Task ReturnsSuccessfulResultIfTargetUserUsesWhitelistingAndUserIsOnWhitelist()
+        {
+            await EnsureOptedInAsync(_targetUser);
+            await this.Transformations.SetServerProtectionTypeAsync
+            (
+                _targetUser,
+                _guild,
+                ProtectionType.Whitelist
+            );
 
-                Assert.False(result.IsSuccess);
-            }
+            await this.Transformations.WhitelistUserAsync(_targetUser, _user);
 
-            [Fact]
-            public async Task ReturnsSuccessfulResultIfTargetUserUsesWhitelistingAndUserIsOnWhitelist()
-            {
-                await EnsureOptedInAsync(_targetUser);
-                await this.Transformations.SetServerProtectionTypeAsync
-                (
-                    _targetUser,
-                    _guild,
-                    ProtectionType.Whitelist
-                );
+            var result = await this.Transformations.CanUserTransformUserAsync
+            (
+                _guild,
+                _user,
+                _targetUser
+            );
 
-                await this.Transformations.WhitelistUserAsync(_targetUser, _user);
+            Assert.True(result.IsSuccess);
+        }
 
-                var result = await this.Transformations.CanUserTransformUserAsync
-                (
-                    _guild,
-                    _user,
-                    _targetUser
-                );
+        [Fact]
+        public async Task ReturnsSuccessfulResultIfUserIsNotOnTargetUsersBlacklist()
+        {
+            await EnsureOptedInAsync(_targetUser);
 
-                Assert.True(result.IsSuccess);
-            }
+            var result = await this.Transformations.CanUserTransformUserAsync
+            (
+                _guild,
+                _user,
+                _targetUser
+            );
 
-            [Fact]
-            public async Task ReturnsSuccessfulResultIfUserIsNotOnTargetUsersBlacklist()
-            {
-                await EnsureOptedInAsync(_targetUser);
+            Assert.True(result.IsSuccess);
+        }
 
-                var result = await this.Transformations.CanUserTransformUserAsync
-                (
-                    _guild,
-                    _user,
-                    _targetUser
-                );
+        private async Task EnsureOptedInAsync(Snowflake user)
+        {
+            var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
+            (
+                user,
+                _guild
+            );
 
-                Assert.True(result.IsSuccess);
-            }
-
-            private async Task EnsureOptedInAsync(Snowflake user)
-            {
-                var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
-                (
-                    user,
-                    _guild
-                );
-
-                protection.Entity.HasOptedIn = true;
-            }
+            protection.Entity.HasOptedIn = true;
         }
     }
 }

@@ -22,49 +22,48 @@
 
 using System.Collections.Generic;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages;
+
+public sealed partial class TransformationText
 {
-    public sealed partial class TransformationText
+    public sealed partial class TransformationMessages
     {
-        public sealed partial class TransformationMessages
+        public sealed partial class RemovalMessages
         {
-            public sealed partial class RemovalMessages
+            /// <summary>
+            /// Holds uniform messages.
+            /// </summary>
+            public sealed class UniformMessages
             {
                 /// <summary>
-                /// Holds uniform messages.
+                /// Gets a list of uniform ear removal messages.
                 /// </summary>
-                public sealed class UniformMessages
-                {
-                    /// <summary>
-                    /// Gets a list of uniform ear removal messages.
-                    /// </summary>
-                    public IReadOnlyList<string> Ears { get; init; } = new List<string>();
+                public IReadOnlyList<string> Ears { get; init; } = new List<string>();
 
-                    /// <summary>
-                    /// Gets a list of uniform eye removal messages.
-                    /// </summary>
-                    public IReadOnlyList<string> Eyes { get; init; } = new List<string>();
+                /// <summary>
+                /// Gets a list of uniform eye removal messages.
+                /// </summary>
+                public IReadOnlyList<string> Eyes { get; init; } = new List<string>();
 
-                    /// <summary>
-                    /// Gets a list of uniform leg removal messages.
-                    /// </summary>
-                    public IReadOnlyList<string> Legs { get; init; } = new List<string>();
+                /// <summary>
+                /// Gets a list of uniform leg removal messages.
+                /// </summary>
+                public IReadOnlyList<string> Legs { get; init; } = new List<string>();
 
-                    /// <summary>
-                    /// Gets a list of uniform arm removal messages.
-                    /// </summary>
-                    public IReadOnlyList<string> Arms { get; init; } = new List<string>();
+                /// <summary>
+                /// Gets a list of uniform arm removal messages.
+                /// </summary>
+                public IReadOnlyList<string> Arms { get; init; } = new List<string>();
 
-                    /// <summary>
-                    /// Gets a list of uniform wing removal messages.
-                    /// </summary>
-                    public IReadOnlyList<string> Wings { get; init; } = new List<string>();
+                /// <summary>
+                /// Gets a list of uniform wing removal messages.
+                /// </summary>
+                public IReadOnlyList<string> Wings { get; init; } = new List<string>();
 
-                    /// <summary>
-                    /// Gets a list of uniform pattern removal messages.
-                    /// </summary>
-                    public IReadOnlyList<string> Pattern { get; init; } = new List<string>();
-                }
+                /// <summary>
+                /// Gets a list of uniform pattern removal messages.
+                /// </summary>
+                public IReadOnlyList<string> Pattern { get; init; } = new List<string>();
             }
         }
     }

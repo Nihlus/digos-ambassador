@@ -41,271 +41,270 @@ using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
-namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
+namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules;
+
+public partial class TransformationCommands
 {
-    public partial class TransformationCommands
+    /// <summary>
+    /// Contains listing commands for content.
+    /// </summary>
+    [Group("list")]
+    [Description("Various listing commands for content.")]
+    public class TransformationListCommands : CommandGroup
     {
+        private readonly TransformationService _transformation;
+        private readonly InteractivityService _interactivity;
+        private readonly ICommandContext _context;
+
         /// <summary>
-        /// Contains listing commands for content.
+        /// Initializes a new instance of the <see cref="TransformationListCommands"/> class.
         /// </summary>
-        [Group("list")]
-        [Description("Various listing commands for content.")]
-        public class TransformationListCommands : CommandGroup
+        /// <param name="transformation">The transformation service.</param>
+        /// <param name="interactivity">The interactivity service.</param>
+        /// <param name="context">The command context.</param>
+        public TransformationListCommands
+        (
+            TransformationService transformation,
+            InteractivityService interactivity,
+            ICommandContext context
+        )
         {
-            private readonly TransformationService _transformation;
-            private readonly InteractivityService _interactivity;
-            private readonly ICommandContext _context;
+            _transformation = transformation;
+            _interactivity = interactivity;
+            _context = context;
+        }
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="TransformationListCommands"/> class.
-            /// </summary>
-            /// <param name="transformation">The transformation service.</param>
-            /// <param name="interactivity">The interactivity service.</param>
-            /// <param name="context">The command context.</param>
-            public TransformationListCommands
+        /// <summary>
+        /// Lists the available transformation species.
+        /// </summary>
+        [UsedImplicitly]
+        [Command("species")]
+        [Description("Lists the available transformation species.")]
+        public async Task<Result> ListAvailableTransformationsAsync()
+        {
+            var availableSpecies = await _transformation.GetAvailableSpeciesAsync();
+
+            var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
-                TransformationService transformation,
-                InteractivityService interactivity,
-                ICommandContext context
-            )
-            {
-                _transformation = transformation;
-                _interactivity = interactivity;
-                _context = context;
-            }
+                availableSpecies,
+                s => $"{s.Name.Humanize(LetterCasing.Title)} ({s.Name})",
+                s => $"{s.Description}\nWritten by {s.Author}.",
+                "There are no species available."
+            );
 
-            /// <summary>
-            /// Lists the available transformation species.
-            /// </summary>
-            [UsedImplicitly]
-            [Command("species")]
-            [Description("Lists the available transformation species.")]
-            public async Task<Result> ListAvailableTransformationsAsync()
-            {
-                var availableSpecies = await _transformation.GetAvailableSpeciesAsync();
-
-                var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            pages = pages.Select
                 (
-                    availableSpecies,
-                    s => $"{s.Name.Humanize(LetterCasing.Title)} ({s.Name})",
-                    s => $"{s.Description}\nWritten by {s.Author}.",
-                    "There are no species available."
-                );
+                    p =>
+                        p with
+                        {
+                            Title = "Available species",
+                            Colour = Color.MediumPurple
+                        }
+                )
+                .ToList();
 
+            if (availableSpecies.Any())
+            {
                 pages = pages.Select
                     (
                         p =>
                             p with
                             {
-                                Title = "Available species",
-                                Colour = Color.MediumPurple
+                                Description = "Use the name inside the parens when transforming body parts."
                             }
                     )
                     .ToList();
+            }
 
-                if (availableSpecies.Any())
+            return await _interactivity.SendContextualInteractiveMessageAsync
+            (
+                _context.User.ID,
+                pages
+            );
+        }
+
+        /// <summary>
+        /// Lists the available bodyparts.
+        /// </summary>
+        [UsedImplicitly]
+        [Command("bodyparts")]
+        [Description("Lists the available bodyparts.")]
+        public async Task<Result> ListAvailableBodypartsAsync()
+        {
+            var parts = Enum.GetValues(typeof(Bodypart))
+                .Cast<Bodypart>()
+                .OrderBy(b => b)
+                .ToList();
+
+            var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            (
+                parts,
+                b => b.Humanize(),
+                b =>
                 {
-                    pages = pages.Select
-                        (
-                            p =>
-                                p with
-                                {
-                                    Description = "Use the name inside the parens when transforming body parts."
-                                }
-                        )
-                        .ToList();
-                }
-
-                return await _interactivity.SendContextualInteractiveMessageAsync
-                (
-                    _context.User.ID,
-                    pages
-                );
-            }
-
-            /// <summary>
-            /// Lists the available bodyparts.
-            /// </summary>
-            [UsedImplicitly]
-            [Command("bodyparts")]
-            [Description("Lists the available bodyparts.")]
-            public async Task<Result> ListAvailableBodypartsAsync()
-            {
-                var parts = Enum.GetValues(typeof(Bodypart))
-                    .Cast<Bodypart>()
-                    .OrderBy(b => b)
-                    .ToList();
-
-                var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
-                (
-                    parts,
-                    b => b.Humanize(),
-                    b =>
+                    if (b.IsChiral())
                     {
-                        if (b.IsChiral())
-                        {
-                            return "This part is available in both left and right versions.";
-                        }
-
-                        if (!b.IsGenderNeutral())
-                        {
-                            return "This part is considered NSFW.";
-                        }
-
-                        return b.IsComposite()
-                            ? "This part is composed of smaller parts."
-                            : "This is a normal bodypart.";
+                        return "This part is available in both left and right versions.";
                     }
-                );
 
-                pages = pages.Select
-                    (
-                        p =>
-                            p with
-                            {
-                                Title = "Available bodyparts",
-                                Colour = Color.MediumPurple
-                            }
-                    )
-                    .ToList();
+                    if (!b.IsGenderNeutral())
+                    {
+                        return "This part is considered NSFW.";
+                    }
 
-                return await _interactivity.SendContextualInteractiveMessageAsync(_context.User.ID, pages);
-            }
+                    return b.IsComposite()
+                        ? "This part is composed of smaller parts."
+                        : "This is a normal bodypart.";
+                }
+            );
 
-            /// <summary>
-            /// Lists the available shades.
-            /// </summary>
-            [UsedImplicitly]
-            [Command("colours")]
-            [Description("Lists the available colours.")]
-            public async Task<Result> ListAvailableShadesAsync()
-            {
-                var parts = Enum.GetValues(typeof(Shade))
-                    .Cast<Shade>()
-                    .OrderBy(s => s)
-                    .ToList();
-
-                var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            pages = pages.Select
                 (
-                    parts,
-                    b => b.Humanize(),
-                    _ => "\u200B"
-                );
+                    p =>
+                        p with
+                        {
+                            Title = "Available bodyparts",
+                            Colour = Color.MediumPurple
+                        }
+                )
+                .ToList();
 
-                pages = pages.Select
-                    (
-                        p =>
-                            p with
-                            {
-                                Title = "Available colours",
-                                Colour = Color.MediumPurple
-                            }
-                    )
-                    .ToList();
+            return await _interactivity.SendContextualInteractiveMessageAsync(_context.User.ID, pages);
+        }
 
-                return await _interactivity.SendContextualInteractiveMessageAsync(_context.User.ID, pages);
-            }
+        /// <summary>
+        /// Lists the available shades.
+        /// </summary>
+        [UsedImplicitly]
+        [Command("colours")]
+        [Description("Lists the available colours.")]
+        public async Task<Result> ListAvailableShadesAsync()
+        {
+            var parts = Enum.GetValues(typeof(Shade))
+                .Cast<Shade>()
+                .OrderBy(s => s)
+                .ToList();
 
-            /// <summary>
-            /// Lists the available shade modifiers.
-            /// </summary>
-            [UsedImplicitly]
-            [Command("colour-modifiers")]
-            [Description("Lists the available colour modifiers.")]
-            public async Task<Result> ListAvailableShadeModifiersAsync()
-            {
-                var parts = Enum.GetValues(typeof(ShadeModifier))
-                    .Cast<ShadeModifier>()
-                    .OrderBy(sm => sm)
-                    .ToList();
+            var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            (
+                parts,
+                b => b.Humanize(),
+                _ => "\u200B"
+            );
 
-                var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            pages = pages.Select
                 (
-                    parts,
-                    b => b.Humanize(),
-                    _ => "\u200B"
-                );
+                    p =>
+                        p with
+                        {
+                            Title = "Available colours",
+                            Colour = Color.MediumPurple
+                        }
+                )
+                .ToList();
 
-                pages = pages.Select
-                    (
-                        p =>
-                            p with
-                            {
-                                Title = "Available colour modifiers",
-                                Colour = Color.MediumPurple
-                            }
-                    )
-                    .ToList();
+            return await _interactivity.SendContextualInteractiveMessageAsync(_context.User.ID, pages);
+        }
 
-                return await _interactivity.SendContextualInteractiveMessageAsync(_context.User.ID, pages);
-            }
+        /// <summary>
+        /// Lists the available shade modifiers.
+        /// </summary>
+        [UsedImplicitly]
+        [Command("colour-modifiers")]
+        [Description("Lists the available colour modifiers.")]
+        public async Task<Result> ListAvailableShadeModifiersAsync()
+        {
+            var parts = Enum.GetValues(typeof(ShadeModifier))
+                .Cast<ShadeModifier>()
+                .OrderBy(sm => sm)
+                .ToList();
 
-            /// <summary>
-            /// Lists the available patterns.
-            /// </summary>
-            [UsedImplicitly]
-            [Command("patterns")]
-            [Description("Lists the available patterns.")]
-            public async Task<Result> ListAvailablePatternsAsync()
-            {
-                var parts = Enum.GetValues(typeof(Pattern))
-                    .Cast<Pattern>()
-                    .OrderBy(c => c)
-                    .ToList();
+            var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            (
+                parts,
+                b => b.Humanize(),
+                _ => "\u200B"
+            );
 
-                var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            pages = pages.Select
                 (
-                    parts,
-                    b => b.Humanize(),
-                    _ => "\u200B"
-                );
+                    p =>
+                        p with
+                        {
+                            Title = "Available colour modifiers",
+                            Colour = Color.MediumPurple
+                        }
+                )
+                .ToList();
 
-                pages = pages.Select
-                    (
-                        p =>
-                            p with
-                            {
-                                Title = "Available patterns",
-                                Colour = Color.MediumPurple
-                            }
-                    )
-                    .ToList();
+            return await _interactivity.SendContextualInteractiveMessageAsync(_context.User.ID, pages);
+        }
 
-                return await _interactivity.SendContextualInteractiveMessageAsync(_context.User.ID, pages);
-            }
+        /// <summary>
+        /// Lists the available patterns.
+        /// </summary>
+        [UsedImplicitly]
+        [Command("patterns")]
+        [Description("Lists the available patterns.")]
+        public async Task<Result> ListAvailablePatternsAsync()
+        {
+            var parts = Enum.GetValues(typeof(Pattern))
+                .Cast<Pattern>()
+                .OrderBy(c => c)
+                .ToList();
 
-            /// <summary>
-            /// Lists the available transformations for a given bodypart.
-            /// </summary>
-            /// <param name="bodyPart">The part to list available transformations for. Optional.</param>
-            [UsedImplicitly]
-            [Command("transformations-for-part")]
-            [Description("Lists the available transformations for a given bodypart.")]
-            public async Task<Result> ListAvailableTransformationsAsync(Bodypart bodyPart)
-            {
-                var transformations = await _transformation.GetAvailableTransformationsAsync(bodyPart);
+            var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            (
+                parts,
+                b => b.Humanize(),
+                _ => "\u200B"
+            );
 
-                var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            pages = pages.Select
                 (
-                    transformations,
-                    tf => $"{tf.Species.Name.Humanize(LetterCasing.Title)} ({tf.Species.Name})",
-                    tf => tf.Description
-                );
+                    p =>
+                        p with
+                        {
+                            Title = "Available patterns",
+                            Colour = Color.MediumPurple
+                        }
+                )
+                .ToList();
 
-                pages = pages.Select
-                    (
-                        p =>
-                            p with
-                            {
-                                Title = "Available transformations",
-                                Description = "Use the name inside the parens when transforming body parts.",
-                                Colour = Color.MediumPurple
-                            }
-                    )
-                    .ToList();
+            return await _interactivity.SendContextualInteractiveMessageAsync(_context.User.ID, pages);
+        }
 
-                return await _interactivity.SendContextualInteractiveMessageAsync(_context.User.ID, pages);
-            }
+        /// <summary>
+        /// Lists the available transformations for a given bodypart.
+        /// </summary>
+        /// <param name="bodyPart">The part to list available transformations for. Optional.</param>
+        [UsedImplicitly]
+        [Command("transformations-for-part")]
+        [Description("Lists the available transformations for a given bodypart.")]
+        public async Task<Result> ListAvailableTransformationsAsync(Bodypart bodyPart)
+        {
+            var transformations = await _transformation.GetAvailableTransformationsAsync(bodyPart);
+
+            var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            (
+                transformations,
+                tf => $"{tf.Species.Name.Humanize(LetterCasing.Title)} ({tf.Species.Name})",
+                tf => tf.Description
+            );
+
+            pages = pages.Select
+                (
+                    p =>
+                        p with
+                        {
+                            Title = "Available transformations",
+                            Description = "Use the name inside the parens when transforming body parts.",
+                            Colour = Color.MediumPurple
+                        }
+                )
+                .ToList();
+
+            return await _interactivity.SendContextualInteractiveMessageAsync(_context.User.ID, pages);
         }
     }
 }

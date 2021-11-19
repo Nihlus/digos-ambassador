@@ -22,22 +22,21 @@
 
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations;
+
+/// <summary>
+/// Represents protection types for interactions between users.
+/// </summary>
+[PublicAPI]
+public enum ProtectionType
 {
     /// <summary>
-    /// Represents protection types for interactions between users.
+    /// Blacklist-based protection.
     /// </summary>
-    [PublicAPI]
-    public enum ProtectionType
-    {
-        /// <summary>
-        /// Blacklist-based protection.
-        /// </summary>
-        Blacklist,
+    Blacklist,
 
-        /// <summary>
-        /// Whitelist-based protection.
-        /// </summary>
-        Whitelist
-    }
+    /// <summary>
+    /// Whitelist-based protection.
+    /// </summary>
+    Whitelist
 }

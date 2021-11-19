@@ -25,42 +25,41 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.ConstrainedExecution;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DIGOS.Ambassador.Tests.TestBases
+namespace DIGOS.Ambassador.Tests.TestBases;
+
+/// <summary>
+/// Represents a test base that can provide services to running tests.
+/// </summary>
+public abstract class ServiceProvidingTestBase
 {
     /// <summary>
-    /// Represents a test base that can provide services to running tests.
+    /// Gets the available services.
     /// </summary>
-    public abstract class ServiceProvidingTestBase
+    protected IServiceProvider Services { get; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ServiceProvidingTestBase"/> class.
+    /// </summary>
+    [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Required.")]
+    protected ServiceProvidingTestBase()
     {
-        /// <summary>
-        /// Gets the available services.
-        /// </summary>
-        protected IServiceProvider Services { get; }
+        var serviceCollection = new ServiceCollection();
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ServiceProvidingTestBase"/> class.
-        /// </summary>
-        [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Required.")]
-        protected ServiceProvidingTestBase()
-        {
-            var serviceCollection = new ServiceCollection();
+        RegisterServices(serviceCollection);
+        this.Services = serviceCollection.BuildServiceProvider();
 
-            RegisterServices(serviceCollection);
-            this.Services = serviceCollection.BuildServiceProvider();
-
-            ConfigureServices(this.Services);
-        }
-
-        /// <summary>
-        /// Registers services provided by the test base in the test base's service provider.
-        /// </summary>
-        /// <param name="serviceCollection">The service collection to register services in.</param>
-        protected abstract void RegisterServices(IServiceCollection serviceCollection);
-
-        /// <summary>
-        /// Configures the test base using the registered services.
-        /// </summary>
-        /// <param name="serviceProvider">The available services.</param>
-        protected abstract void ConfigureServices(IServiceProvider serviceProvider);
+        ConfigureServices(this.Services);
     }
+
+    /// <summary>
+    /// Registers services provided by the test base in the test base's service provider.
+    /// </summary>
+    /// <param name="serviceCollection">The service collection to register services in.</param>
+    protected abstract void RegisterServices(IServiceCollection serviceCollection);
+
+    /// <summary>
+    /// Configures the test base using the registered services.
+    /// </summary>
+    /// <param name="serviceProvider">The available services.</param>
+    protected abstract void ConfigureServices(IServiceProvider serviceProvider);
 }

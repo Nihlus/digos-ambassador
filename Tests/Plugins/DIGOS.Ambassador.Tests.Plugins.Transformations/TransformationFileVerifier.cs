@@ -31,77 +31,76 @@ using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.NodeDeserializers;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Transformations
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
+
+/// <summary>
+/// Verifies transformation content files.
+/// </summary>
+public class TransformationFileVerifier
 {
     /// <summary>
-    /// Verifies transformation content files.
+    /// Verifies the content of the given file, treating it as a transformation file.
     /// </summary>
-    public class TransformationFileVerifier
+    /// <param name="file">The path to the file.</param>
+    /// <typeparam name="T">The class to verify the file as.</typeparam>
+    /// <returns>A condition result, which may or may not have succeeded.</returns>
+    public Result VerifyFile<T>(string file)
     {
-        /// <summary>
-        /// Verifies the content of the given file, treating it as a transformation file.
-        /// </summary>
-        /// <param name="file">The path to the file.</param>
-        /// <typeparam name="T">The class to verify the file as.</typeparam>
-        /// <returns>A condition result, which may or may not have succeeded.</returns>
-        public Result VerifyFile<T>(string file)
+        using var sr = new StreamReader(File.OpenRead(file));
+        var builder = new DeserializerBuilder()
+            .WithTypeConverter(new ColourYamlConverter())
+            .WithTypeConverter(new EnumYamlConverter<Pattern>())
+            .WithTypeConverter(new NullableEnumYamlConverter<Pattern>())
+            .WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
+            .WithNamingConvention(UnderscoredNamingConvention.Instance);
+
+        if (typeof(T) != typeof(Species))
         {
-            using var sr = new StreamReader(File.OpenRead(file));
-            var builder = new DeserializerBuilder()
-                .WithTypeConverter(new ColourYamlConverter())
-                .WithTypeConverter(new EnumYamlConverter<Pattern>())
-                .WithTypeConverter(new NullableEnumYamlConverter<Pattern>())
-                .WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
-                .WithNamingConvention(UnderscoredNamingConvention.Instance);
-
-            if (typeof(T) != typeof(Species))
-            {
-                builder = builder.WithTypeConverter(new RawSpeciesYamlConverter());
-            }
-
-            var deserializer = builder.Build();
-
-            var content = sr.ReadToEnd();
-
-            try
-            {
-                deserializer.Deserialize<T>(content);
-            }
-            catch (YamlException yex)
-            {
-                return yex;
-            }
-
-            return Result.FromSuccess();
+            builder = builder.WithTypeConverter(new RawSpeciesYamlConverter());
         }
 
-        /// <summary>
-        /// Verifies all yaml files in the given directory.
-        /// </summary>
-        /// <param name="directory">The directory to load files from.</param>
-        /// <returns>A condition result, which may or may not have succeeded.</returns>
-        public Result VerifyFilesInDirectory(string directory)
+        var deserializer = builder.Build();
+
+        var content = sr.ReadToEnd();
+
+        try
         {
-            var files = Directory.EnumerateFiles(directory, "*.yml", SearchOption.AllDirectories).Where(p => !p.EndsWith("Species.yml")).ToList();
-
-            if (files.Count <= 0)
-            {
-                return new NotFoundError("No files to verify in input directory.");
-            }
-
-            foreach (var file in files)
-            {
-                var verificationResult = VerifyFile<Transformation>(file);
-                if (!verificationResult.IsSuccess)
-                {
-                    return verificationResult;
-                }
-            }
-
-            var speciesPath = Path.Combine(directory, "Species.yml");
-            return !File.Exists(speciesPath)
-                ? Result.FromSuccess()
-                : VerifyFile<Species>(speciesPath);
+            deserializer.Deserialize<T>(content);
         }
+        catch (YamlException yex)
+        {
+            return yex;
+        }
+
+        return Result.FromSuccess();
+    }
+
+    /// <summary>
+    /// Verifies all yaml files in the given directory.
+    /// </summary>
+    /// <param name="directory">The directory to load files from.</param>
+    /// <returns>A condition result, which may or may not have succeeded.</returns>
+    public Result VerifyFilesInDirectory(string directory)
+    {
+        var files = Directory.EnumerateFiles(directory, "*.yml", SearchOption.AllDirectories).Where(p => !p.EndsWith("Species.yml")).ToList();
+
+        if (files.Count <= 0)
+        {
+            return new NotFoundError("No files to verify in input directory.");
+        }
+
+        foreach (var file in files)
+        {
+            var verificationResult = VerifyFile<Transformation>(file);
+            if (!verificationResult.IsSuccess)
+            {
+                return verificationResult;
+            }
+        }
+
+        var speciesPath = Path.Combine(directory, "Species.yml");
+        return !File.Exists(speciesPath)
+            ? Result.FromSuccess()
+            : VerifyFile<Species>(speciesPath);
     }
 }

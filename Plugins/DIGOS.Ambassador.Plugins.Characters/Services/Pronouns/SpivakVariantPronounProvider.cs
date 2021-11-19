@@ -20,17 +20,16 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
-{
-    /// <summary>
-    /// Provides variant Spivak pronouns.
-    /// </summary>
-    public class SpivakVariantPronounProvider : ElversonPronounProvider
-    {
-        /// <inheritdoc />
-        public override string Family => "SpivakVariant";
+namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
 
-        /// <inheritdoc />
-        public override string GetReflexiveForm() => "eirself";
-    }
+/// <summary>
+/// Provides variant Spivak pronouns.
+/// </summary>
+public class SpivakVariantPronounProvider : ElversonPronounProvider
+{
+    /// <inheritdoc />
+    public override string Family => "SpivakVariant";
+
+    /// <inheritdoc />
+    public override string GetReflexiveForm() => "eirself";
 }

@@ -33,65 +33,64 @@ using Xunit;
 #pragma warning disable CS8625
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Characters
+namespace DIGOS.Ambassador.Tests.Plugins.Characters;
+
+public partial class CharacterServiceTests
 {
-    public partial class CharacterServiceTests
+    public class SetCharacterPronounsAsync : CharacterServiceTestBase
     {
-        public class SetCharacterPronounsAsync : CharacterServiceTestBase
+        private const string PronounFamily = "Feminine";
+
+        private readonly Character _character;
+
+        public SetCharacterPronounsAsync()
         {
-            private const string PronounFamily = "Feminine";
+            this.Services.GetRequiredService<PronounService>().WithPronounProvider(new FemininePronounProvider());
+            this.Services.GetRequiredService<PronounService>().WithPronounProvider(new ZeHirPronounProvider());
 
-            private readonly Character _character;
+            _character = CreateCharacter(pronouns: PronounFamily);
+        }
 
-            public SetCharacterPronounsAsync()
-            {
-                this.Services.GetRequiredService<PronounService>().WithPronounProvider(new FemininePronounProvider());
-                this.Services.GetRequiredService<PronounService>().WithPronounProvider(new ZeHirPronounProvider());
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfPronounIsEmpty()
+        {
+            var result = await this.CharacterEditor.SetCharacterPronounsAsync(_character, string.Empty);
 
-                _character = CreateCharacter(pronouns: PronounFamily);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfPronounIsEmpty()
-            {
-                var result = await this.CharacterEditor.SetCharacterPronounsAsync(_character, string.Empty);
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfPronounIsTheSameAsTheCurrentPronoun()
+        {
+            var result = await this.CharacterEditor.SetCharacterPronounsAsync(_character, PronounFamily);
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfPronounIsTheSameAsTheCurrentPronoun()
-            {
-                var result = await this.CharacterEditor.SetCharacterPronounsAsync(_character, PronounFamily);
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfNoMatchingPronounProviderIsFound()
+        {
+            var result = await this.CharacterEditor.SetCharacterPronounsAsync(_character, "ahwooooga");
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfNoMatchingPronounProviderIsFound()
-            {
-                var result = await this.CharacterEditor.SetCharacterPronounsAsync(_character, "ahwooooga");
+        [Fact]
+        public async Task ReturnsSuccessfulResultIfPronounIsAccepted()
+        {
+            var result = await this.CharacterEditor.SetCharacterPronounsAsync(_character, "Ze and hir");
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.True(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsSuccessfulResultIfPronounIsAccepted()
-            {
-                var result = await this.CharacterEditor.SetCharacterPronounsAsync(_character, "Ze and hir");
+        [Fact]
+        public async Task SetsPronoun()
+        {
+            const string newPronounFamily = "Ze and hir";
+            await this.CharacterEditor.SetCharacterPronounsAsync(_character, newPronounFamily);
 
-                Assert.True(result.IsSuccess);
-            }
-
-            [Fact]
-            public async Task SetsPronoun()
-            {
-                const string newPronounFamily = "Ze and hir";
-                await this.CharacterEditor.SetCharacterPronounsAsync(_character, newPronounFamily);
-
-                var character = this.Database.Characters.First();
-                Assert.Equal(newPronounFamily, character.PronounProviderFamily);
-            }
+            var character = this.Database.Characters.First();
+            Assert.Equal(newPronounFamily, character.PronounProviderFamily);
         }
     }
 }

@@ -30,35 +30,34 @@ using Xunit;
 #pragma warning disable SA1649
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Core
+namespace DIGOS.Ambassador.Tests.Plugins.Core;
+
+public static partial class ServerServiceTests
 {
-    public static partial class ServerServiceTests
+    public class SetIsNSFWAsync : ServerServiceTestBase
     {
-        public class SetIsNSFWAsync : ServerServiceTestBase
+        private Server _server = null!;
+
+        public override async Task InitializeAsync()
         {
-            private Server _server = null!;
+            var serverMock = new Snowflake(0);
+            _server = (await this.Servers.GetOrRegisterServerAsync(serverMock)).Entity;
+        }
 
-            public override async Task InitializeAsync()
-            {
-                var serverMock = new Snowflake(0);
-                _server = (await this.Servers.GetOrRegisterServerAsync(serverMock)).Entity;
-            }
+        [Fact]
+        public async Task ReturnsErrorIfValueIsSameAsCurrent()
+        {
+            var result = await this.Servers.SetIsNSFWAsync(_server, true);
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsErrorIfValueIsSameAsCurrent()
-            {
-                var result = await this.Servers.SetIsNSFWAsync(_server, true);
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task CanSetValue()
+        {
+            var result = await this.Servers.SetIsNSFWAsync(_server, false);
 
-            [Fact]
-            public async Task CanSetValue()
-            {
-                var result = await this.Servers.SetIsNSFWAsync(_server, false);
-
-                Assert.True(result.IsSuccess);
-                Assert.False(_server.IsNSFW);
-            }
+            Assert.True(result.IsSuccess);
+            Assert.False(_server.IsNSFW);
         }
     }
 }

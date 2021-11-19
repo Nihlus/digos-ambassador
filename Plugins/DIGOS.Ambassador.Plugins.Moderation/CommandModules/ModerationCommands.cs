@@ -26,14 +26,13 @@ using Remora.Commands.Groups;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
-namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
+namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules;
+
+/// <summary>
+/// Moderation-related commands for viewing, editing, and performing moderation actions on users.
+/// </summary>
+[Group("moderation")]
+[Description("Moderation-related commands for viewing, editing, and performing moderation actions on users.")]
+public partial class ModerationCommands : CommandGroup
 {
-    /// <summary>
-    /// Moderation-related commands for viewing, editing, and performing moderation actions on users.
-    /// </summary>
-    [Group("moderation")]
-    [Description("Moderation-related commands for viewing, editing, and performing moderation actions on users.")]
-    public partial class ModerationCommands : CommandGroup
-    {
-    }
 }

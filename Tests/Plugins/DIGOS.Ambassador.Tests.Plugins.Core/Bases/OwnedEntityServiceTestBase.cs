@@ -33,60 +33,59 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Core
+namespace DIGOS.Ambassador.Tests.Plugins.Core;
+
+/// <summary>
+/// Serves as a test base for owned entity service tests.
+/// </summary>
+public abstract class OwnedEntityServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
 {
     /// <summary>
-    /// Serves as a test base for owned entity service tests.
+    /// Gets the database.
     /// </summary>
-    public abstract class OwnedEntityServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
+    protected CoreDatabaseContext Database { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the owned entity service object.
+    /// </summary>
+    protected OwnedEntityService Entities { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the user service.
+    /// </summary>
+    protected UserService Users { get; private set; } = null!;
+
+    /// <inheritdoc />
+    protected override void RegisterServices(IServiceCollection serviceCollection)
     {
-        /// <summary>
-        /// Gets the database.
-        /// </summary>
-        protected CoreDatabaseContext Database { get; private set; } = null!;
+        serviceCollection
+            .AddDbContext<CoreDatabaseContext>(o => ConfigureOptions(o, "Core"));
 
-        /// <summary>
-        /// Gets the owned entity service object.
-        /// </summary>
-        protected OwnedEntityService Entities { get; private set; } = null!;
+        serviceCollection
+            .AddScoped<OwnedEntityService>()
+            .AddScoped<UserService>()
+            .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
+    }
 
-        /// <summary>
-        /// Gets the user service.
-        /// </summary>
-        protected UserService Users { get; private set; } = null!;
+    /// <inheritdoc />
+    protected sealed override void ConfigureServices(IServiceProvider serviceProvider)
+    {
+        this.Database = serviceProvider.GetRequiredService<CoreDatabaseContext>();
+        this.Database.Database.Create();
 
-        /// <inheritdoc />
-        protected override void RegisterServices(IServiceCollection serviceCollection)
-        {
-            serviceCollection
-                .AddDbContext<CoreDatabaseContext>(o => ConfigureOptions(o, "Core"));
+        this.Entities = serviceProvider.GetRequiredService<OwnedEntityService>();
+        this.Users = serviceProvider.GetRequiredService<UserService>();
+    }
 
-            serviceCollection
-                .AddScoped<OwnedEntityService>()
-                .AddScoped<UserService>()
-                .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
-        }
+    /// <inheritdoc />
+    public virtual Task InitializeAsync()
+    {
+        return Task.CompletedTask;
+    }
 
-        /// <inheritdoc />
-        protected sealed override void ConfigureServices(IServiceProvider serviceProvider)
-        {
-            this.Database = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            this.Database.Database.Create();
-
-            this.Entities = serviceProvider.GetRequiredService<OwnedEntityService>();
-            this.Users = serviceProvider.GetRequiredService<UserService>();
-        }
-
-        /// <inheritdoc />
-        public virtual Task InitializeAsync()
-        {
-            return Task.CompletedTask;
-        }
-
-        /// <inheritdoc />
-        public Task DisposeAsync()
-        {
-            return Task.CompletedTask;
-        }
+    /// <inheritdoc />
+    public Task DisposeAsync()
+    {
+        return Task.CompletedTask;
     }
 }

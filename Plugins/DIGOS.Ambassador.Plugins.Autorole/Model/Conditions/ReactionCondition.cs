@@ -32,128 +32,127 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Core;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
+namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
+
+/// <summary>
+/// Represents a required reaction to a message.
+/// </summary>
+public class ReactionCondition : AutoroleCondition
 {
     /// <summary>
-    /// Represents a required reaction to a message.
+    /// Gets the ID of the Discord channel that the message is in.
     /// </summary>
-    public class ReactionCondition : AutoroleCondition
+    public Snowflake ChannelID { get; private set; }
+
+    /// <summary>
+    /// Gets the ID of the Discord message.
+    /// </summary>
+    public Snowflake MessageID { get; internal set; }
+
+    /// <summary>
+    /// Gets the name of the required emote.
+    /// </summary>
+    public string EmoteName { get; internal set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ReactionCondition"/> class.
+    /// </summary>
+    [Obsolete("Required by EF Core.")]
+    protected ReactionCondition()
     {
-        /// <summary>
-        /// Gets the ID of the Discord channel that the message is in.
-        /// </summary>
-        public Snowflake ChannelID { get; private set; }
+        this.EmoteName = null!;
+    }
 
-        /// <summary>
-        /// Gets the ID of the Discord message.
-        /// </summary>
-        public Snowflake MessageID { get; internal set; }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ReactionCondition"/> class.
+    /// </summary>
+    /// <param name="channelID">The channel ID.</param>
+    /// <param name="messageID">The message ID.</param>
+    /// <param name="emoteName">The name of the emote.</param>
+    [UsedImplicitly]
+    protected ReactionCondition(Snowflake channelID, Snowflake messageID, string emoteName)
+    {
+        this.ChannelID = channelID;
+        this.MessageID = messageID;
+        this.EmoteName = emoteName;
+    }
 
-        /// <summary>
-        /// Gets the name of the required emote.
-        /// </summary>
-        public string EmoteName { get; internal set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ReactionCondition"/> class.
-        /// </summary>
-        [Obsolete("Required by EF Core.")]
-        protected ReactionCondition()
-        {
-            this.EmoteName = null!;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ReactionCondition"/> class.
-        /// </summary>
-        /// <param name="channelID">The channel ID.</param>
-        /// <param name="messageID">The message ID.</param>
-        /// <param name="emoteName">The name of the emote.</param>
-        [UsedImplicitly]
-        protected ReactionCondition(Snowflake channelID, Snowflake messageID, string emoteName)
-        {
-            this.ChannelID = channelID;
-            this.MessageID = messageID;
-            this.EmoteName = emoteName;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ReactionCondition"/> class.
-        /// </summary>
-        /// <param name="message">The message.</param>
-        /// <param name="emote">The required reaction.</param>
-        public ReactionCondition(IMessage message, IEmoji emote)
-            : this
-            (
-                message.ChannelID,
-                message.ID,
-                emote.Name ?? emote.ID.ToString() ?? throw new InvalidOperationException()
-            )
-        {
-        }
-
-        /// <inheritdoc />
-        public override string GetDescriptiveUIText()
-        {
-            return $"Has reacted to {this.MessageID} in <#{this.ChannelID}> " +
-                   $"with :{this.EmoteName}:";
-        }
-
-        /// <inheritdoc />
-        public override bool HasSameConditionsAs(IAutoroleCondition autoroleCondition)
-        {
-            if (autoroleCondition is not ReactionCondition reactionCondition)
-            {
-                return false;
-            }
-
-            return this.ChannelID == reactionCondition.ChannelID &&
-                   this.MessageID == reactionCondition.MessageID &&
-                   this.EmoteName == reactionCondition.EmoteName;
-        }
-
-        /// <inheritdoc/>
-        public override async Task<Result<bool>> IsConditionFulfilledForUserAsync
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ReactionCondition"/> class.
+    /// </summary>
+    /// <param name="message">The message.</param>
+    /// <param name="emote">The required reaction.</param>
+    public ReactionCondition(IMessage message, IEmoji emote)
+        : this
         (
-            IServiceProvider services,
-            Snowflake guildID,
-            Snowflake userID,
-            CancellationToken ct = default
+            message.ChannelID,
+            message.ID,
+            emote.Name ?? emote.ID.ToString() ?? throw new InvalidOperationException()
         )
+    {
+    }
+
+    /// <inheritdoc />
+    public override string GetDescriptiveUIText()
+    {
+        return $"Has reacted to {this.MessageID} in <#{this.ChannelID}> " +
+               $"with :{this.EmoteName}:";
+    }
+
+    /// <inheritdoc />
+    public override bool HasSameConditionsAs(IAutoroleCondition autoroleCondition)
+    {
+        if (autoroleCondition is not ReactionCondition reactionCondition)
         {
-            var channelAPI = services.GetRequiredService<IDiscordRestChannelAPI>();
-            Optional<Snowflake> lastUser = default;
-            while (true)
-            {
-                var getReactions = await channelAPI.GetReactionsAsync
-                (
-                    this.ChannelID,
-                    this.MessageID,
-                    this.EmoteName,
-                    after: lastUser,
-                    ct: ct
-                );
-
-                if (!getReactions.IsSuccess)
-                {
-                    return Result<bool>.FromError(getReactions);
-                }
-
-                var users = getReactions.Entity;
-                if (users.Count == 0)
-                {
-                    break;
-                }
-
-                if (users.Any(u => u.ID == userID))
-                {
-                    return true;
-                }
-
-                lastUser = users[^1].ID;
-            }
-
             return false;
         }
+
+        return this.ChannelID == reactionCondition.ChannelID &&
+               this.MessageID == reactionCondition.MessageID &&
+               this.EmoteName == reactionCondition.EmoteName;
+    }
+
+    /// <inheritdoc/>
+    public override async Task<Result<bool>> IsConditionFulfilledForUserAsync
+    (
+        IServiceProvider services,
+        Snowflake guildID,
+        Snowflake userID,
+        CancellationToken ct = default
+    )
+    {
+        var channelAPI = services.GetRequiredService<IDiscordRestChannelAPI>();
+        Optional<Snowflake> lastUser = default;
+        while (true)
+        {
+            var getReactions = await channelAPI.GetReactionsAsync
+            (
+                this.ChannelID,
+                this.MessageID,
+                this.EmoteName,
+                after: lastUser,
+                ct: ct
+            );
+
+            if (!getReactions.IsSuccess)
+            {
+                return Result<bool>.FromError(getReactions);
+            }
+
+            var users = getReactions.Entity;
+            if (users.Count == 0)
+            {
+                break;
+            }
+
+            if (users.Any(u => u.ID == userID))
+            {
+                return true;
+            }
+
+            lastUser = users[^1].ID;
+        }
+
+        return false;
     }
 }

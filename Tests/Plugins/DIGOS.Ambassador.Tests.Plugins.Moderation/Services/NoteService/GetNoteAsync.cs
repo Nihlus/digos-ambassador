@@ -29,55 +29,54 @@ using DIGOS.Ambassador.Tests.Plugins.Moderation.Bases;
 using Remora.Discord.Core;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.NoteService
+namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.NoteService;
+
+public partial class NoteService
 {
-    public partial class NoteService
+    public class GetNoteAsync : NoteServiceTestBase
     {
-        public class GetNoteAsync : NoteServiceTestBase
+        private readonly Snowflake _guild = new(0);
+        private readonly Snowflake _otherGuild = new(1);
+        private readonly Snowflake _user = new(2);
+
+        private readonly Snowflake _author = new(3);
+
+        [Fact]
+        public async Task ReturnsSuccessfulIfNoteExists()
         {
-            private readonly Snowflake _guild = new(0);
-            private readonly Snowflake _otherGuild = new(1);
-            private readonly Snowflake _user = new(2);
+            var note = (await this.Notes.CreateNoteAsync(_author, _user, _guild, "Dummy thicc")).Entity;
 
-            private readonly Snowflake _author = new(3);
+            var result = await this.Notes.GetNoteAsync(_guild, note.ID);
 
-            [Fact]
-            public async Task ReturnsSuccessfulIfNoteExists()
-            {
-                var note = (await this.Notes.CreateNoteAsync(_author, _user, _guild, "Dummy thicc")).Entity;
+            Assert.True(result.IsSuccess);
+        }
 
-                var result = await this.Notes.GetNoteAsync(_guild, note.ID);
+        [Fact]
+        public async Task ReturnsUnsuccessfulIfNoNoteExists()
+        {
+            var result = await this.Notes.GetNoteAsync(_guild, 1);
 
-                Assert.True(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulIfNoNoteExists()
-            {
-                var result = await this.Notes.GetNoteAsync(_guild, 1);
+        [Fact]
+        public async Task ReturnsUnsuccessfulIfNoteExistsButServerIsWrong()
+        {
+            var note = (await this.Notes.CreateNoteAsync(_author, _user, _guild, "Dummy thicc")).Entity;
 
-                Assert.False(result.IsSuccess);
-            }
+            var result = await this.Notes.GetNoteAsync(_otherGuild, note.ID);
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulIfNoteExistsButServerIsWrong()
-            {
-                var note = (await this.Notes.CreateNoteAsync(_author, _user, _guild, "Dummy thicc")).Entity;
+            Assert.False(result.IsSuccess);
+        }
 
-                var result = await this.Notes.GetNoteAsync(_otherGuild, note.ID);
+        [Fact]
+        public async Task ActuallyReturnsNote()
+        {
+            var note = (await this.Notes.CreateNoteAsync(_author, _user, _guild, "Dummy thicc")).Entity;
 
-                Assert.False(result.IsSuccess);
-            }
+            var result = await this.Notes.GetNoteAsync(_guild, note.ID);
 
-            [Fact]
-            public async Task ActuallyReturnsNote()
-            {
-                var note = (await this.Notes.CreateNoteAsync(_author, _user, _guild, "Dummy thicc")).Entity;
-
-                var result = await this.Notes.GetNoteAsync(_guild, note.ID);
-
-                Assert.Same(note, result.Entity);
-            }
+            Assert.Same(note, result.Entity);
         }
     }
 }

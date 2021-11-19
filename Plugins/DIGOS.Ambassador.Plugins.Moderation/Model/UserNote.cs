@@ -29,62 +29,61 @@ using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Moderation.Model.Bases;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Plugins.Moderation.Model
+namespace DIGOS.Ambassador.Plugins.Moderation.Model;
+
+/// <summary>
+/// Represents a short note about a user.
+/// </summary>
+[Table("UserNotes", Schema = "ModerationModule")]
+public class UserNote : AuthoredUserEntity
 {
     /// <summary>
-    /// Represents a short note about a user.
+    /// Gets the content of the note.
     /// </summary>
-    [Table("UserNotes", Schema = "ModerationModule")]
-    public class UserNote : AuthoredUserEntity
+    public string Content { get; internal set; } = null!;
+
+    /// <summary>
+    /// Gets the time at which the note was last updated.
+    /// </summary>
+    public DateTimeOffset UpdatedAt { get; internal set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserNote"/> class.
+    /// </summary>
+    /// <remarks>
+    /// Required by EF Core.
+    /// </remarks>
+    [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
+    protected UserNote()
     {
-        /// <summary>
-        /// Gets the content of the note.
-        /// </summary>
-        public string Content { get; internal set; } = null!;
+    }
 
-        /// <summary>
-        /// Gets the time at which the note was last updated.
-        /// </summary>
-        public DateTimeOffset UpdatedAt { get; internal set; }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserNote"/> class.
+    /// </summary>
+    /// <param name="server">The server that the note was created on.</param>
+    /// <param name="user">The user that the note is attached to.</param>
+    /// <param name="author">The user that created the note.</param>
+    /// <param name="content">The content of the note.</param>
+    public UserNote
+    (
+        Server server,
+        User user,
+        User author,
+        string content
+    )
+        : base(server, user, author)
+    {
+        this.Content = content;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserNote"/> class.
-        /// </summary>
-        /// <remarks>
-        /// Required by EF Core.
-        /// </remarks>
-        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
-        protected UserNote()
-        {
-        }
+        this.UpdatedAt = DateTimeOffset.UtcNow;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserNote"/> class.
-        /// </summary>
-        /// <param name="server">The server that the note was created on.</param>
-        /// <param name="user">The user that the note is attached to.</param>
-        /// <param name="author">The user that created the note.</param>
-        /// <param name="content">The content of the note.</param>
-        public UserNote
-        (
-            Server server,
-            User user,
-            User author,
-            string content
-        )
-            : base(server, user, author)
-        {
-            this.Content = content;
-
-            this.UpdatedAt = DateTimeOffset.UtcNow;
-        }
-
-        /// <summary>
-        /// Notifies the entity that it has been updated, updating its timestamp.
-        /// </summary>
-        public void NotifyUpdate()
-        {
-            this.UpdatedAt = DateTimeOffset.UtcNow;
-        }
+    /// <summary>
+    /// Notifies the entity that it has been updated, updating its timestamp.
+    /// </summary>
+    public void NotifyUpdate()
+    {
+        this.UpdatedAt = DateTimeOffset.UtcNow;
     }
 }

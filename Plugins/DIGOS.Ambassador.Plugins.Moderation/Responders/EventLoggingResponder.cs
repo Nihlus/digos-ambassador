@@ -31,94 +31,93 @@ using Remora.Discord.Caching;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Moderation.Responders
+namespace DIGOS.Ambassador.Plugins.Moderation.Responders;
+
+/// <summary>
+/// Logs various client events.
+/// </summary>
+[UsedImplicitly]
+public class EventLoggingResponder :
+    IResponder<IGuildMemberRemove>,
+    IResponder<IGuildMemberUpdate>,
+    IResponder<IMessageDelete>
 {
+    private readonly ChannelLoggingService _channelLogging;
+    private readonly IMemoryCache _cache;
+
     /// <summary>
-    /// Logs various client events.
+    /// Initializes a new instance of the <see cref="EventLoggingResponder"/> class.
     /// </summary>
-    [UsedImplicitly]
-    public class EventLoggingResponder :
-        IResponder<IGuildMemberRemove>,
-        IResponder<IGuildMemberUpdate>,
-        IResponder<IMessageDelete>
+    /// <param name="channelLogging">The channel logging service.</param>
+    /// <param name="cache">The cache.</param>
+    public EventLoggingResponder(ChannelLoggingService channelLogging, IMemoryCache cache)
     {
-        private readonly ChannelLoggingService _channelLogging;
-        private readonly IMemoryCache _cache;
+        _channelLogging = channelLogging;
+        _cache = cache;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EventLoggingResponder"/> class.
-        /// </summary>
-        /// <param name="channelLogging">The channel logging service.</param>
-        /// <param name="cache">The cache.</param>
-        public EventLoggingResponder(ChannelLoggingService channelLogging, IMemoryCache cache)
+    /// <inheritdoc />
+    public Task<Result> RespondAsync(IGuildMemberRemove gatewayEvent, CancellationToken ct = default)
+    {
+        return _channelLogging.NotifyUserLeftAsync(gatewayEvent.GuildID, gatewayEvent.User.ID);
+    }
+
+    /// <inheritdoc />
+    public async Task<Result> RespondAsync(IGuildMemberUpdate gatewayEvent, CancellationToken ct = default)
+    {
+        var oldMemberKey = KeyHelpers.CreateGuildMemberKey(gatewayEvent.GuildID, gatewayEvent.User.ID);
+        if (!_cache.TryGetValue(oldMemberKey, out IGuildMember oldMember))
         {
-            _channelLogging = channelLogging;
-            _cache = cache;
-        }
-
-        /// <inheritdoc />
-        public Task<Result> RespondAsync(IGuildMemberRemove gatewayEvent, CancellationToken ct = default)
-        {
-            return _channelLogging.NotifyUserLeftAsync(gatewayEvent.GuildID, gatewayEvent.User.ID);
-        }
-
-        /// <inheritdoc />
-        public async Task<Result> RespondAsync(IGuildMemberUpdate gatewayEvent, CancellationToken ct = default)
-        {
-            var oldMemberKey = KeyHelpers.CreateGuildMemberKey(gatewayEvent.GuildID, gatewayEvent.User.ID);
-            if (!_cache.TryGetValue(oldMemberKey, out IGuildMember oldMember))
-            {
-                return Result.FromSuccess();
-            }
-
-            var newMember = gatewayEvent;
-
-            if (oldMember.Nickname != newMember.Nickname)
-            {
-                var notifyResult = await _channelLogging.NotifyUserNicknameChangedAsync
-                (
-                    gatewayEvent.GuildID,
-                    gatewayEvent.User.ID,
-                    oldMember.Nickname,
-                    newMember.Nickname
-                );
-
-                if (!notifyResult.IsSuccess)
-                {
-                    return notifyResult;
-                }
-            }
-
-            if (!oldMember.User.IsDefined(out var oldUser))
-            {
-                return Result.FromSuccess();
-            }
-
-            if (oldUser.Discriminator != newMember.User.Discriminator)
-            {
-                return await _channelLogging.NotifyUserDiscriminatorChangedAsync
-                (
-                    gatewayEvent.GuildID,
-                    gatewayEvent.User.ID,
-                    oldUser.Discriminator,
-                    newMember.User.Discriminator,
-                    ct
-                );
-            }
-
             return Result.FromSuccess();
         }
 
-        /// <inheritdoc />
-        public async Task<Result> RespondAsync(IMessageDelete gatewayEvent, CancellationToken ct = default)
-        {
-            var messageKey = KeyHelpers.CreateMessageCacheKey(gatewayEvent.ChannelID, gatewayEvent.ID);
-            if (!_cache.TryGetValue(messageKey, out IMessage message))
-            {
-                return Result.FromSuccess();
-            }
+        var newMember = gatewayEvent;
 
-            return await _channelLogging.NotifyMessageDeletedAsync(message);
+        if (oldMember.Nickname != newMember.Nickname)
+        {
+            var notifyResult = await _channelLogging.NotifyUserNicknameChangedAsync
+            (
+                gatewayEvent.GuildID,
+                gatewayEvent.User.ID,
+                oldMember.Nickname,
+                newMember.Nickname
+            );
+
+            if (!notifyResult.IsSuccess)
+            {
+                return notifyResult;
+            }
         }
+
+        if (!oldMember.User.IsDefined(out var oldUser))
+        {
+            return Result.FromSuccess();
+        }
+
+        if (oldUser.Discriminator != newMember.User.Discriminator)
+        {
+            return await _channelLogging.NotifyUserDiscriminatorChangedAsync
+            (
+                gatewayEvent.GuildID,
+                gatewayEvent.User.ID,
+                oldUser.Discriminator,
+                newMember.User.Discriminator,
+                ct
+            );
+        }
+
+        return Result.FromSuccess();
+    }
+
+    /// <inheritdoc />
+    public async Task<Result> RespondAsync(IMessageDelete gatewayEvent, CancellationToken ct = default)
+    {
+        var messageKey = KeyHelpers.CreateMessageCacheKey(gatewayEvent.ChannelID, gatewayEvent.ID);
+        if (!_cache.TryGetValue(messageKey, out IMessage message))
+        {
+            return Result.FromSuccess();
+        }
+
+        return await _channelLogging.NotifyMessageDeletedAsync(message);
     }
 }

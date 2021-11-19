@@ -36,143 +36,142 @@ using Remora.Discord.Core;
 using Xunit;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Transformations
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
+
+public partial class TransformationServiceTests
 {
-    public partial class TransformationServiceTests
+    public class RemoveBodypartAsync : TransformationServiceTestBase
     {
-        public class RemoveBodypartAsync : TransformationServiceTestBase
+        private readonly Snowflake _guild = new Snowflake(1);
+
+        private readonly Snowflake _owner = new Snowflake(2);
+        private readonly Snowflake _invoker = new Snowflake(3);
+
+        private Character _character = null!;
+        private Appearance _appearance = null!;
+
+        protected override async Task InitializeTestAsync()
         {
-            private readonly Snowflake _guild = new Snowflake(1);
+            // Ensure owner is opted into transformations
+            await this.Transformations.OptInUserAsync
+            (
+                _owner,
+                _guild
+            );
 
-            private readonly Snowflake _owner = new Snowflake(2);
-            private readonly Snowflake _invoker = new Snowflake(3);
+            // Create a test character
+            var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
+            var server = (await this.Servers.GetOrRegisterServerAsync(_guild)).Entity;
 
-            private Character _character = null!;
-            private Appearance _appearance = null!;
+            var character = this.CharacterDatabase.CreateProxy<Character>
+            (
+                owner,
+                server,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty
+            );
 
-            protected override async Task InitializeTestAsync()
-            {
-                // Ensure owner is opted into transformations
-                await this.Transformations.OptInUserAsync
-                (
-                    _owner,
-                    _guild
-                );
+            this.CharacterDatabase.Characters.Update(character);
+            await this.CharacterDatabase.SaveChangesAsync();
 
-                // Create a test character
-                var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
-                var server = (await this.Servers.GetOrRegisterServerAsync(_guild)).Entity;
+            _character = this.CharacterDatabase.Characters.First();
 
-                var character = this.CharacterDatabase.CreateProxy<Character>
-                (
-                    owner,
-                    server,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty
-                );
+            // Set up the default appearance
+            var getAppearanceConfigurationResult = await this.Transformations.GetOrCreateCurrentAppearanceAsync
+            (
+                _character
+            );
 
-                this.CharacterDatabase.Characters.Update(character);
-                await this.CharacterDatabase.SaveChangesAsync();
+            _appearance = getAppearanceConfigurationResult.Entity;
+        }
 
-                _character = this.CharacterDatabase.Characters.First();
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfUserIsNotAllowedToTransformTarget()
+        {
+            await this.Transformations.BlacklistUserAsync(_owner, _invoker);
 
-                // Set up the default appearance
-                var getAppearanceConfigurationResult = await this.Transformations.GetOrCreateCurrentAppearanceAsync
-                (
-                    _character
-                );
+            var result = await this.Transformations.RemoveBodypartAsync
+            (
+                _invoker,
+                _character,
+                Bodypart.Face
+            );
 
-                _appearance = getAppearanceConfigurationResult.Entity;
-            }
+            Assert.False(result.IsSuccess);
+            Assert.True(_appearance.HasComponent(Bodypart.Face, Chirality.Center));
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfUserIsNotAllowedToTransformTarget()
-            {
-                await this.Transformations.BlacklistUserAsync(_owner, _invoker);
+        [Fact]
+        public async Task ReturnsSuccessfulResultIfCharacterDoesNotHaveBodypart()
+        {
+            var result = await this.Transformations.RemoveBodypartAsync
+            (
+                _invoker,
+                _character,
+                Bodypart.Wing,
+                Chirality.Left
+            );
 
-                var result = await this.Transformations.RemoveBodypartAsync
-                (
-                    _invoker,
-                    _character,
-                    Bodypart.Face
-                );
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-                Assert.True(_appearance.HasComponent(Bodypart.Face, Chirality.Center));
-            }
+        [Fact]
+        public async Task ReturnsNoChangeIfCharacterDoesNotHaveBodypart()
+        {
+            var result = await this.Transformations.RemoveBodypartAsync
+            (
+                _invoker,
+                _character,
+                Bodypart.Wing,
+                Chirality.Left
+            );
 
-            [Fact]
-            public async Task ReturnsSuccessfulResultIfCharacterDoesNotHaveBodypart()
-            {
-                var result = await this.Transformations.RemoveBodypartAsync
-                (
-                    _invoker,
-                    _character,
-                    Bodypart.Wing,
-                    Chirality.Left
-                );
+            Assert.Equal(ShiftBodypartAction.Nothing, result.Entity.Action);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsSuccessfulResultIfCharacterHasBodypart()
+        {
+            var result = await this.Transformations.RemoveBodypartAsync
+            (
+                _invoker,
+                _character,
+                Bodypart.Face
+            );
 
-            [Fact]
-            public async Task ReturnsNoChangeIfCharacterDoesNotHaveBodypart()
-            {
-                var result = await this.Transformations.RemoveBodypartAsync
-                (
-                    _invoker,
-                    _character,
-                    Bodypart.Wing,
-                    Chirality.Left
-                );
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.Equal(ShiftBodypartAction.Nothing, result.Entity.Action);
-            }
+        [Fact]
+        public async Task RemovesCorrectBodypart()
+        {
+            Assert.Contains(_appearance.Components, c => c.Bodypart == Bodypart.Face);
 
-            [Fact]
-            public async Task ReturnsSuccessfulResultIfCharacterHasBodypart()
-            {
-                var result = await this.Transformations.RemoveBodypartAsync
-                (
-                    _invoker,
-                    _character,
-                    Bodypart.Face
-                );
+            await this.Transformations.RemoveBodypartAsync
+            (
+                _invoker,
+                _character,
+                Bodypart.Face
+            );
 
-                Assert.True(result.IsSuccess);
-            }
+            Assert.DoesNotContain(_appearance.Components, c => c.Bodypart == Bodypart.Face);
+        }
 
-            [Fact]
-            public async Task RemovesCorrectBodypart()
-            {
-                Assert.Contains(_appearance.Components, c => c.Bodypart == Bodypart.Face);
+        [Fact]
+        public async Task ReturnsShiftMessage()
+        {
+            var result = await this.Transformations.RemoveBodypartAsync
+            (
+                _invoker,
+                _character,
+                Bodypart.Face
+            );
 
-                await this.Transformations.RemoveBodypartAsync
-                (
-                    _invoker,
-                    _character,
-                    Bodypart.Face
-                );
-
-                Assert.DoesNotContain(_appearance.Components, c => c.Bodypart == Bodypart.Face);
-            }
-
-            [Fact]
-            public async Task ReturnsShiftMessage()
-            {
-                var result = await this.Transformations.RemoveBodypartAsync
-                (
-                    _invoker,
-                    _character,
-                    Bodypart.Face
-                );
-
-                Assert.NotNull(result.Entity.ShiftMessage);
-            }
+            Assert.NotNull(result.Entity.ShiftMessage);
         }
     }
 }

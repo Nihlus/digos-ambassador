@@ -20,17 +20,16 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
-{
-    /// <summary>
-    /// Provides ze and hir pronouns.
-    /// </summary>
-    public class ZeHirPronounProvider : SheHirPronounProvider
-    {
-        /// <inheritdoc />
-        public override string Family => "Ze and hir";
+namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
 
-        /// <inheritdoc />
-        public override string GetSubjectForm(bool withVerb = false) => withVerb ? "ze is" : "ze";
-    }
+/// <summary>
+/// Provides ze and hir pronouns.
+/// </summary>
+public class ZeHirPronounProvider : SheHirPronounProvider
+{
+    /// <inheritdoc />
+    public override string Family => "Ze and hir";
+
+    /// <inheritdoc />
+    public override string GetSubjectForm(bool withVerb = false) => withVerb ? "ze is" : "ze";
 }

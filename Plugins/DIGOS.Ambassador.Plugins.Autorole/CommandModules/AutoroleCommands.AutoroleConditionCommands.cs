@@ -38,59 +38,58 @@ using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
-namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
+namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules;
+
+public partial class AutoroleCommands
 {
-    public partial class AutoroleCommands
+    /// <summary>
+    /// Grouping module for condition-specific commands.
+    /// </summary>
+    [Group("condition")]
+    public partial class AutoroleConditionCommands : CommandGroup
     {
+        private readonly AutoroleService _autoroles;
+        private readonly ICommandContext _context;
+        private readonly FeedbackService _feedback;
+
         /// <summary>
-        /// Grouping module for condition-specific commands.
+        /// Initializes a new instance of the <see cref="AutoroleConditionCommands"/> class.
         /// </summary>
-        [Group("condition")]
-        public partial class AutoroleConditionCommands : CommandGroup
+        /// <param name="autoroles">The autorole service.</param>
+        /// <param name="context">The command context.</param>
+        /// <param name="feedback">The feedback service.</param>
+        public AutoroleConditionCommands
+        (
+            AutoroleService autoroles,
+            ICommandContext context,
+            FeedbackService feedback
+        )
         {
-            private readonly AutoroleService _autoroles;
-            private readonly ICommandContext _context;
-            private readonly FeedbackService _feedback;
+            _autoroles = autoroles;
+            _context = context;
+            _feedback = feedback;
+        }
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="AutoroleConditionCommands"/> class.
-            /// </summary>
-            /// <param name="autoroles">The autorole service.</param>
-            /// <param name="context">The command context.</param>
-            /// <param name="feedback">The feedback service.</param>
-            public AutoroleConditionCommands
-            (
-                AutoroleService autoroles,
-                ICommandContext context,
-                FeedbackService feedback
-            )
-            {
-                _autoroles = autoroles;
-                _context = context;
-                _feedback = feedback;
-            }
+        /// <summary>
+        /// Removes a condition from a role.
+        /// </summary>
+        /// <param name="autorole">The autorole.</param>
+        /// <param name="conditionID">The ID of the condition to remove.</param>
+        [UsedImplicitly]
+        [Command("remove")]
+        [Description("Removes the condition from the role.")]
+        [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
+        public async Task<Result<FeedbackMessage>> RemoveConditionAsync
+        (
+            [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole,
+            long conditionID
+        )
+        {
+            var removeCondition = await _autoroles.RemoveConditionAsync(autorole, conditionID);
 
-            /// <summary>
-            /// Removes a condition from a role.
-            /// </summary>
-            /// <param name="autorole">The autorole.</param>
-            /// <param name="conditionID">The ID of the condition to remove.</param>
-            [UsedImplicitly]
-            [Command("remove")]
-            [Description("Removes the condition from the role.")]
-            [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-            public async Task<Result<FeedbackMessage>> RemoveConditionAsync
-            (
-                [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole,
-                long conditionID
-            )
-            {
-                var removeCondition = await _autoroles.RemoveConditionAsync(autorole, conditionID);
-
-                return !removeCondition.IsSuccess
-                    ? Result<FeedbackMessage>.FromError(removeCondition)
-                    : new FeedbackMessage("Condition removed.", _feedback.Theme.Secondary);
-            }
+            return !removeCondition.IsSuccess
+                ? Result<FeedbackMessage>.FromError(removeCondition)
+                : new FeedbackMessage("Condition removed.", _feedback.Theme.Secondary);
         }
     }
 }

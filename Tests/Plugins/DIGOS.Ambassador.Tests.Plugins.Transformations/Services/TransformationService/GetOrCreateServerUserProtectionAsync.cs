@@ -31,98 +31,97 @@ using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using Remora.Discord.Core;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Transformations
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
+
+public partial class TransformationServiceTests
 {
-    public partial class TransformationServiceTests
+    public class GetOrCreateServerUserProtectionAsync : TransformationServiceTestBase
     {
-        public class GetOrCreateServerUserProtectionAsync : TransformationServiceTestBase
+        private readonly Snowflake _user = new Snowflake(0);
+        private readonly Snowflake _guild = new Snowflake(1);
+
+        [Fact]
+        public async Task CreatesObjectIfOneDoesNotExist()
         {
-            private readonly Snowflake _user = new Snowflake(0);
-            private readonly Snowflake _guild = new Snowflake(1);
+            Assert.Empty(this.Database.ServerUserProtections);
 
-            [Fact]
-            public async Task CreatesObjectIfOneDoesNotExist()
+            var result = await this.Transformations.GetOrCreateServerUserProtectionAsync
+            (
+                _user,
+                _guild
+            );
+
+            Assert.NotEmpty(this.Database.ServerUserProtections);
+            Assert.Same(result.Entity, this.Database.ServerUserProtections.First());
+        }
+
+        [Fact]
+        public async Task CreatedObjectIsBoundToTheCorrectServer()
+        {
+            var result = await this.Transformations.GetOrCreateServerUserProtectionAsync
+            (
+                _user,
+                _guild
+            );
+
+            Assert.Equal(_guild, result.Entity.Server.DiscordID);
+        }
+
+        [Fact]
+        public async Task CreatedObjectIsBoundToTheCorrectUser()
+        {
+            var result = await this.Transformations.GetOrCreateServerUserProtectionAsync
+            (
+                _user,
+                _guild
+            );
+
+            Assert.Equal(_user, result.Entity.User.DiscordID);
+        }
+
+        [Fact]
+        public async Task RetrievesCorrectObjectIfOneExists()
+        {
+            // Create an object
+            var created = await this.Transformations.GetOrCreateServerUserProtectionAsync
+            (
+                _user,
+                _guild
+            );
+
+            // Get it from the database
+            var retrieved = await this.Transformations.GetOrCreateServerUserProtectionAsync
+            (
+                _user,
+                _guild
+            );
+
+            Assert.Same(created.Entity, retrieved.Entity);
+        }
+
+        [Fact]
+        public async Task CreatedObjectRespectsGlobalDefaults()
+        {
+            var user = (await this.Users.GetOrRegisterUserAsync(_user)).Entity;
+
+            var globalSetting = new GlobalUserProtection(user)
             {
-                Assert.Empty(this.Database.ServerUserProtections);
+                DefaultOptIn = true,
+                DefaultType = ProtectionType.Whitelist
+            };
 
-                var result = await this.Transformations.GetOrCreateServerUserProtectionAsync
-                (
-                    _user,
-                    _guild
-                );
+            this.Database.GlobalUserProtections.Update(globalSetting);
+            await this.Database.SaveChangesAsync();
 
-                Assert.NotEmpty(this.Database.ServerUserProtections);
-                Assert.Same(result.Entity, this.Database.ServerUserProtections.First());
-            }
+            var localSetting = await this.Transformations.GetOrCreateServerUserProtectionAsync
+            (
+                _user,
+                _guild
+            );
 
-            [Fact]
-            public async Task CreatedObjectIsBoundToTheCorrectServer()
-            {
-                var result = await this.Transformations.GetOrCreateServerUserProtectionAsync
-                (
-                    _user,
-                    _guild
-                );
-
-                Assert.Equal(_guild, result.Entity.Server.DiscordID);
-            }
-
-            [Fact]
-            public async Task CreatedObjectIsBoundToTheCorrectUser()
-            {
-                var result = await this.Transformations.GetOrCreateServerUserProtectionAsync
-                (
-                    _user,
-                    _guild
-                );
-
-                Assert.Equal(_user, result.Entity.User.DiscordID);
-            }
-
-            [Fact]
-            public async Task RetrievesCorrectObjectIfOneExists()
-            {
-                // Create an object
-                var created = await this.Transformations.GetOrCreateServerUserProtectionAsync
-                (
-                    _user,
-                    _guild
-                );
-
-                // Get it from the database
-                var retrieved = await this.Transformations.GetOrCreateServerUserProtectionAsync
-                (
-                    _user,
-                    _guild
-                );
-
-                Assert.Same(created.Entity, retrieved.Entity);
-            }
-
-            [Fact]
-            public async Task CreatedObjectRespectsGlobalDefaults()
-            {
-                var user = (await this.Users.GetOrRegisterUserAsync(_user)).Entity;
-
-                var globalSetting = new GlobalUserProtection(user)
-                {
-                    DefaultOptIn = true,
-                    DefaultType = ProtectionType.Whitelist
-                };
-
-                this.Database.GlobalUserProtections.Update(globalSetting);
-                await this.Database.SaveChangesAsync();
-
-                var localSetting = await this.Transformations.GetOrCreateServerUserProtectionAsync
-                (
-                    _user,
-                    _guild
-                );
-
-                Assert.Equal(globalSetting.DefaultOptIn, localSetting.Entity.HasOptedIn);
-                Assert.Equal(globalSetting.DefaultType, localSetting.Entity.Type);
-                Assert.Same(globalSetting.User, localSetting.Entity.User);
-            }
+            Assert.Equal(globalSetting.DefaultOptIn, localSetting.Entity.HasOptedIn);
+            Assert.Equal(globalSetting.DefaultType, localSetting.Entity.Type);
+            Assert.Same(globalSetting.User, localSetting.Entity.User);
         }
     }
 }

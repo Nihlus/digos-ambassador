@@ -22,24 +22,23 @@
 
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
+namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua;
+
+/// <summary>
+/// Represents a node in a lua table tree structure.
+/// </summary>
+internal interface INode
 {
     /// <summary>
-    /// Represents a node in a lua table tree structure.
+    /// Gets the name of the node.
     /// </summary>
-    internal interface INode
-    {
-        /// <summary>
-        /// Gets the name of the node.
-        /// </summary>
-        string Name { get; }
+    string Name { get; }
 
-        /// <summary>
-        /// Formats the node into a lua string.
-        /// </summary>
-        /// <param name="pretty">Whether or not the format should be in a pretty format.</param>
-        /// <returns>A lua string.</returns>
-        [Pure]
-        string Format(bool pretty = false);
-    }
+    /// <summary>
+    /// Formats the node into a lua string.
+    /// </summary>
+    /// <param name="pretty">Whether or not the format should be in a pretty format.</param>
+    /// <returns>A lua string.</returns>
+    [Pure]
+    string Format(bool pretty = false);
 }

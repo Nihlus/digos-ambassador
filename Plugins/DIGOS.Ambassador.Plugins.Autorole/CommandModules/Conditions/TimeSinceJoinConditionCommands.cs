@@ -37,78 +37,77 @@ using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
-namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
+namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules;
+
+public partial class AutoroleCommands
 {
-    public partial class AutoroleCommands
+    public partial class AutoroleConditionCommands
     {
-        public partial class AutoroleConditionCommands
+        /// <summary>
+        /// Adds an instance of the condition to the role.
+        /// </summary>
+        /// <param name="autorole">The autorole configuration.</param>
+        /// <param name="time">The required time.</param>
+        [UsedImplicitly]
+        [Command("add-time-since-join")]
+        [Description("Adds an instance of the condition to the role.")]
+        [RequireContext(ChannelContext.Guild)]
+        [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
+        public async Task<Result<FeedbackMessage>> AddSinceJoinConditionAsync
+        (
+            [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole,
+            TimeSpan time
+        )
         {
-            /// <summary>
-            /// Adds an instance of the condition to the role.
-            /// </summary>
-            /// <param name="autorole">The autorole configuration.</param>
-            /// <param name="time">The required time.</param>
-            [UsedImplicitly]
-            [Command("add-time-since-join")]
-            [Description("Adds an instance of the condition to the role.")]
-            [RequireContext(ChannelContext.Guild)]
-            [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-            public async Task<Result<FeedbackMessage>> AddSinceJoinConditionAsync
+            var condition = _autoroles.CreateConditionProxy<TimeSinceJoinCondition>(time)
+                            ?? throw new InvalidOperationException();
+
+            var addCondition = await _autoroles.AddConditionAsync(autorole, condition);
+
+            return !addCondition.IsSuccess
+                ? Result<FeedbackMessage>.FromError(addCondition)
+                : new FeedbackMessage("Condition added.", _feedback.Theme.Secondary);
+        }
+
+        /// <summary>
+        /// Modifies an instance of the condition on the role.
+        /// </summary>
+        /// <param name="autorole">The autorole configuration.</param>
+        /// <param name="conditionID">The ID of the condition.</param>
+        /// <param name="time">The required time.</param>
+        [UsedImplicitly]
+        [Command("set-time-since-join")]
+        [Description("Modifies an instance of the condition on the role.")]
+        [RequireContext(ChannelContext.Guild)]
+        [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
+        public async Task<Result<FeedbackMessage>> ModifySinceJoinConditionAsync
+        (
+            [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole,
+            long conditionID,
+            TimeSpan time
+        )
+        {
+            var getCondition = _autoroles.GetCondition<TimeSinceJoinCondition>
             (
-                [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole,
-                TimeSpan time
-            )
+                autorole,
+                conditionID
+            );
+
+            if (!getCondition.IsSuccess)
             {
-                var condition = _autoroles.CreateConditionProxy<TimeSinceJoinCondition>(time)
-                                ?? throw new InvalidOperationException();
-
-                var addCondition = await _autoroles.AddConditionAsync(autorole, condition);
-
-                return !addCondition.IsSuccess
-                    ? Result<FeedbackMessage>.FromError(addCondition)
-                    : new FeedbackMessage("Condition added.", _feedback.Theme.Secondary);
+                return Result<FeedbackMessage>.FromError(getCondition);
             }
 
-            /// <summary>
-            /// Modifies an instance of the condition on the role.
-            /// </summary>
-            /// <param name="autorole">The autorole configuration.</param>
-            /// <param name="conditionID">The ID of the condition.</param>
-            /// <param name="time">The required time.</param>
-            [UsedImplicitly]
-            [Command("set-time-since-join")]
-            [Description("Modifies an instance of the condition on the role.")]
-            [RequireContext(ChannelContext.Guild)]
-            [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-            public async Task<Result<FeedbackMessage>> ModifySinceJoinConditionAsync
+            var condition = getCondition.Entity;
+            var modifyResult = await _autoroles.ModifyConditionAsync
             (
-                [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole,
-                long conditionID,
-                TimeSpan time
-            )
-            {
-                var getCondition = _autoroles.GetCondition<TimeSinceJoinCondition>
-                (
-                    autorole,
-                    conditionID
-                );
+                condition,
+                c => { c.RequiredTime = time; }
+            );
 
-                if (!getCondition.IsSuccess)
-                {
-                    return Result<FeedbackMessage>.FromError(getCondition);
-                }
-
-                var condition = getCondition.Entity;
-                var modifyResult = await _autoroles.ModifyConditionAsync
-                (
-                    condition,
-                    c => { c.RequiredTime = time; }
-                );
-
-                return !modifyResult.IsSuccess
-                    ? Result<FeedbackMessage>.FromError(modifyResult)
-                    : new FeedbackMessage("Condition updated.", _feedback.Theme.Secondary);
-            }
+            return !modifyResult.IsSuccess
+                ? Result<FeedbackMessage>.FromError(modifyResult)
+                : new FeedbackMessage("Condition updated.", _feedback.Theme.Secondary);
         }
     }
 }

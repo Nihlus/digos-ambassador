@@ -27,118 +27,117 @@ using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Plugins.Kinks.Model
+namespace DIGOS.Ambassador.Plugins.Kinks.Model;
+
+/// <summary>
+/// Represents a sexual kink or fetish.
+/// </summary>
+[PublicAPI]
+[Table("Kinks", Schema = "KinkModule")]
+public class Kink : EFEntity, IEquatable<Kink>
 {
     /// <summary>
-    /// Represents a sexual kink or fetish.
+    /// Gets the category the kink belongs to.
     /// </summary>
-    [PublicAPI]
-    [Table("Kinks", Schema = "KinkModule")]
-    public class Kink : EFEntity, IEquatable<Kink>
+    public KinkCategory Category { get; private set; }
+
+    /// <summary>
+    /// Gets the F-List ID of the kink.
+    /// </summary>
+    public long FListID { get; private set; }
+
+    /// <summary>
+    /// Gets the name of the kink.
+    /// </summary>
+    public string Name { get; private set; }
+
+    /// <summary>
+    /// Gets the full description of the kink.
+    /// </summary>
+    public string Description { get; private set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Kink"/> class.
+    /// </summary>
+    /// <param name="name">The name of the kink.</param>
+    /// <param name="description">The kink's description.</param>
+    /// <param name="fListID">The F-List ID of the kink.</param>
+    /// <param name="category">The kink's category.</param>
+    public Kink(string name, string description, long fListID, KinkCategory category)
     {
-        /// <summary>
-        /// Gets the category the kink belongs to.
-        /// </summary>
-        public KinkCategory Category { get; private set; }
+        this.Name = name;
+        this.Description = description;
+        this.FListID = fListID;
+        this.Category = category;
+    }
 
-        /// <summary>
-        /// Gets the F-List ID of the kink.
-        /// </summary>
-        public long FListID { get; private set; }
-
-        /// <summary>
-        /// Gets the name of the kink.
-        /// </summary>
-        public string Name { get; private set; }
-
-        /// <summary>
-        /// Gets the full description of the kink.
-        /// </summary>
-        public string Description { get; private set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Kink"/> class.
-        /// </summary>
-        /// <param name="name">The name of the kink.</param>
-        /// <param name="description">The kink's description.</param>
-        /// <param name="fListID">The F-List ID of the kink.</param>
-        /// <param name="category">The kink's category.</param>
-        public Kink(string name, string description, long fListID, KinkCategory category)
+    /// <inheritdoc />
+    [Pure]
+    public bool Equals(Kink? other)
+    {
+        if (ReferenceEquals(null, other))
         {
-            this.Name = name;
-            this.Description = description;
-            this.FListID = fListID;
-            this.Category = category;
+            return false;
         }
 
-        /// <inheritdoc />
-        [Pure]
-        public bool Equals(Kink? other)
+        if (ReferenceEquals(this, other))
         {
-            if (ReferenceEquals(null, other))
-            {
-                return false;
-            }
-
-            if (ReferenceEquals(this, other))
-            {
-                return true;
-            }
-
-            return this.Category == other.Category && this.FListID == other.FListID && string.Equals(this.Name, other.Name) && string.Equals(this.Description, other.Description);
+            return true;
         }
 
-        /// <inheritdoc />
-        [SuppressMessage("ReSharper", "ArrangeThisQualifier", Justification = "Used for explicit differentiation between compared objects.")]
-        public override bool Equals(object? obj)
+        return this.Category == other.Category && this.FListID == other.FListID && string.Equals(this.Name, other.Name) && string.Equals(this.Description, other.Description);
+    }
+
+    /// <inheritdoc />
+    [SuppressMessage("ReSharper", "ArrangeThisQualifier", Justification = "Used for explicit differentiation between compared objects.")]
+    public override bool Equals(object? obj)
+    {
+        if (ReferenceEquals(null, obj))
         {
-            if (ReferenceEquals(null, obj))
-            {
-                return false;
-            }
-
-            if (ReferenceEquals(this, obj))
-            {
-                return true;
-            }
-
-            return obj.GetType() == this.GetType() && Equals((Kink)obj);
+            return false;
         }
 
-        /// <inheritdoc />
-        [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode", Justification = "Class is an entity.")]
-        public override int GetHashCode()
+        if (ReferenceEquals(this, obj))
         {
-            unchecked
-            {
-                var hashCode = (int)this.Category;
-                hashCode = (hashCode * 397) ^ (int)this.FListID;
-                hashCode = (hashCode * 397) ^ this.Name.GetHashCode();
-                hashCode = (hashCode * 397) ^ this.Description.GetHashCode();
-                return hashCode;
-            }
+            return true;
         }
 
-        /// <summary>
-        /// Compares the equality of two <see cref="Kink"/> objects.
-        /// </summary>
-        /// <param name="left">The first object.</param>
-        /// <param name="right">The second object.</param>
-        /// <returns>true if the objects are equal; otherwise, false.</returns>
-        public static bool operator ==(Kink? left, Kink? right)
-        {
-            return Equals(left, right);
-        }
+        return obj.GetType() == this.GetType() && Equals((Kink)obj);
+    }
 
-        /// <summary>
-        /// Compares the inequality of two <see cref="Kink"/> objects.
-        /// </summary>
-        /// <param name="left">The first object.</param>
-        /// <param name="right">The second object.</param>
-        /// <returns>true if the objects are equal; otherwise, false.</returns>
-        public static bool operator !=(Kink? left, Kink? right)
+    /// <inheritdoc />
+    [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode", Justification = "Class is an entity.")]
+    public override int GetHashCode()
+    {
+        unchecked
         {
-            return !Equals(left, right);
+            var hashCode = (int)this.Category;
+            hashCode = (hashCode * 397) ^ (int)this.FListID;
+            hashCode = (hashCode * 397) ^ this.Name.GetHashCode();
+            hashCode = (hashCode * 397) ^ this.Description.GetHashCode();
+            return hashCode;
         }
+    }
+
+    /// <summary>
+    /// Compares the equality of two <see cref="Kink"/> objects.
+    /// </summary>
+    /// <param name="left">The first object.</param>
+    /// <param name="right">The second object.</param>
+    /// <returns>true if the objects are equal; otherwise, false.</returns>
+    public static bool operator ==(Kink? left, Kink? right)
+    {
+        return Equals(left, right);
+    }
+
+    /// <summary>
+    /// Compares the inequality of two <see cref="Kink"/> objects.
+    /// </summary>
+    /// <param name="left">The first object.</param>
+    /// <param name="right">The second object.</param>
+    /// <returns>true if the objects are equal; otherwise, false.</returns>
+    public static bool operator !=(Kink? left, Kink? right)
+    {
+        return !Equals(left, right);
     }
 }

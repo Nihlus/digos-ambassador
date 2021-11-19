@@ -30,90 +30,89 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Permissions
+namespace DIGOS.Ambassador.Tests.Plugins.Permissions;
+
+public static partial class PermissionRegistryServiceTests
 {
-    public static partial class PermissionRegistryServiceTests
+    public class RegisterPermissions : PermissionRegistryServiceTestBase
     {
-        public class RegisterPermissions : PermissionRegistryServiceTestBase
+        [Fact]
+        public void ScanningAnAssemblyWithoutPermissionsReturnsTrue()
         {
-            [Fact]
-            public void ScanningAnAssemblyWithoutPermissionsReturnsTrue()
+            var assemblyMock = new Mock<Assembly>();
+            var assembly = assemblyMock.Object;
+
+            var result = this.PermissionRegistry.RegisterPermissions(assembly, this.Services);
+
+            Assert.True(result.IsSuccess);
+        }
+
+        [Fact]
+        public void ScanningAnAssemblyWithoutPermissionsAddsNothingToTheRegistry()
+        {
+            var assemblyMock = new Mock<Assembly>();
+            var assembly = assemblyMock.Object;
+
+            this.PermissionRegistry.RegisterPermissions(assembly, this.Services);
+
+            Assert.Empty(this.PermissionRegistry.RegisteredPermissions);
+        }
+
+        [Fact]
+        public void ScanningAnAssemblyWithPermissionsReturnsTrue()
+        {
+            Assembly assembly;
             {
+                var availablePermissions = new List<TypeInfo> { typeof(TestPermission).GetTypeInfo() };
+
                 var assemblyMock = new Mock<Assembly>();
-                var assembly = assemblyMock.Object;
+                assemblyMock.SetupGet(a => a.DefinedTypes).Returns(availablePermissions);
 
-                var result = this.PermissionRegistry.RegisterPermissions(assembly, this.Services);
-
-                Assert.True(result.IsSuccess);
+                assembly = assemblyMock.Object;
             }
 
-            [Fact]
-            public void ScanningAnAssemblyWithoutPermissionsAddsNothingToTheRegistry()
+            var result = this.PermissionRegistry.RegisterPermissions(assembly, this.Services);
+
+            Assert.True(result.IsSuccess);
+        }
+
+        [Fact]
+        public void ScanningAnAssemblyWithPermissionsAddsSomethingToTheRegistry()
+        {
+            Assembly assembly;
             {
+                var availablePermissions = new List<TypeInfo> { typeof(TestPermission).GetTypeInfo() };
+
                 var assemblyMock = new Mock<Assembly>();
-                var assembly = assemblyMock.Object;
+                assemblyMock.SetupGet(a => a.DefinedTypes).Returns(availablePermissions);
 
-                this.PermissionRegistry.RegisterPermissions(assembly, this.Services);
-
-                Assert.Empty(this.PermissionRegistry.RegisteredPermissions);
+                assembly = assemblyMock.Object;
             }
 
-            [Fact]
-            public void ScanningAnAssemblyWithPermissionsReturnsTrue()
+            this.PermissionRegistry.RegisterPermissions(assembly, this.Services);
+
+            Assert.NotEmpty(this.PermissionRegistry.RegisteredPermissions);
+        }
+
+        [Fact]
+        public void ScanningAnAssemblyWithBadlyBehavedPermissionsReturnsFalse()
+        {
+            Assembly assembly;
             {
-                Assembly assembly;
+                var availablePermissions = new List<TypeInfo>
                 {
-                    var availablePermissions = new List<TypeInfo> { typeof(TestPermission).GetTypeInfo() };
+                    typeof(BadlyBehavedPermissionThatThrowsInConstructor).GetTypeInfo()
+                };
 
-                    var assemblyMock = new Mock<Assembly>();
-                    assemblyMock.SetupGet(a => a.DefinedTypes).Returns(availablePermissions);
+                var assemblyMock = new Mock<Assembly>();
+                assemblyMock.SetupGet(a => a.DefinedTypes).Returns(availablePermissions);
 
-                    assembly = assemblyMock.Object;
-                }
-
-                var result = this.PermissionRegistry.RegisterPermissions(assembly, this.Services);
-
-                Assert.True(result.IsSuccess);
+                assembly = assemblyMock.Object;
             }
 
-            [Fact]
-            public void ScanningAnAssemblyWithPermissionsAddsSomethingToTheRegistry()
-            {
-                Assembly assembly;
-                {
-                    var availablePermissions = new List<TypeInfo> { typeof(TestPermission).GetTypeInfo() };
+            var result = this.PermissionRegistry.RegisterPermissions(assembly, this.Services);
 
-                    var assemblyMock = new Mock<Assembly>();
-                    assemblyMock.SetupGet(a => a.DefinedTypes).Returns(availablePermissions);
-
-                    assembly = assemblyMock.Object;
-                }
-
-                this.PermissionRegistry.RegisterPermissions(assembly, this.Services);
-
-                Assert.NotEmpty(this.PermissionRegistry.RegisteredPermissions);
-            }
-
-            [Fact]
-            public void ScanningAnAssemblyWithBadlyBehavedPermissionsReturnsFalse()
-            {
-                Assembly assembly;
-                {
-                    var availablePermissions = new List<TypeInfo>
-                    {
-                        typeof(BadlyBehavedPermissionThatThrowsInConstructor).GetTypeInfo()
-                    };
-
-                    var assemblyMock = new Mock<Assembly>();
-                    assemblyMock.SetupGet(a => a.DefinedTypes).Returns(availablePermissions);
-
-                    assembly = assemblyMock.Object;
-                }
-
-                var result = this.PermissionRegistry.RegisterPermissions(assembly, this.Services);
-
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
         }
     }
 }

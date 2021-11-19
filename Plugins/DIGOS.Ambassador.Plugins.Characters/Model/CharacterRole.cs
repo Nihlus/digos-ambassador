@@ -26,50 +26,49 @@ using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using Remora.Discord.Core;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Plugins.Characters.Model
+namespace DIGOS.Ambassador.Plugins.Characters.Model;
+
+/// <summary>
+/// Represents a role associated with a character, similar to a nickname.
+/// </summary>
+[Table("CharacterRoles", Schema = "CharacterModule")]
+public class CharacterRole : EFEntity, IServerEntity
 {
     /// <summary>
-    /// Represents a role associated with a character, similar to a nickname.
+    /// Gets the server that the role is on.
     /// </summary>
-    [Table("CharacterRoles", Schema = "CharacterModule")]
-    public class CharacterRole : EFEntity, IServerEntity
+    public virtual Server Server { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the role ID, taken from Discord.
+    /// </summary>
+    public Snowflake DiscordID { get; private set; }
+
+    /// <summary>
+    /// Gets the access conditions of the role.
+    /// </summary>
+    public RoleAccess Access { get; internal set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CharacterRole"/> class.
+    /// </summary>
+    /// <remarks>
+    /// Required by EF Core.
+    /// </remarks>
+    protected CharacterRole()
     {
-        /// <summary>
-        /// Gets the server that the role is on.
-        /// </summary>
-        public virtual Server Server { get; private set; } = null!;
+    }
 
-        /// <summary>
-        /// Gets the role ID, taken from Discord.
-        /// </summary>
-        public Snowflake DiscordID { get; private set; }
-
-        /// <summary>
-        /// Gets the access conditions of the role.
-        /// </summary>
-        public RoleAccess Access { get; internal set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CharacterRole"/> class.
-        /// </summary>
-        /// <remarks>
-        /// Required by EF Core.
-        /// </remarks>
-        protected CharacterRole()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CharacterRole"/> class.
-        /// </summary>
-        /// <param name="server">The server the role is on.</param>
-        /// <param name="discordID">The ID of the role.</param>
-        /// <param name="access">The role's access settings.</param>
-        public CharacterRole(Server server, Snowflake discordID, RoleAccess access)
-        {
-            this.Server = server;
-            this.DiscordID = discordID;
-            this.Access = access;
-        }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CharacterRole"/> class.
+    /// </summary>
+    /// <param name="server">The server the role is on.</param>
+    /// <param name="discordID">The ID of the role.</param>
+    /// <param name="access">The role's access settings.</param>
+    public CharacterRole(Server server, Snowflake discordID, RoleAccess access)
+    {
+        this.Server = server;
+        this.DiscordID = discordID;
+        this.Access = access;
     }
 }

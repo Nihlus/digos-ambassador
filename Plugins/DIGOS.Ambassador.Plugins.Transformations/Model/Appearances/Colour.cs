@@ -28,115 +28,114 @@ using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
+namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
+
+/// <summary>
+/// Represents a colour shade with an optional modifier.
+/// </summary>
+[Owned]
+[PublicAPI]
+public class Colour : IColour
 {
+    /// <inheritdoc />
+    public Shade Shade { get; internal set; }
+
+    /// <inheritdoc />
+    public ShadeModifier? Modifier { get; internal set; }
+
     /// <summary>
-    /// Represents a colour shade with an optional modifier.
+    /// Initializes a new instance of the <see cref="Colour"/> class.
     /// </summary>
-    [Owned]
-    [PublicAPI]
-    public class Colour : IColour
+    /// <param name="shade">The colour's shade.</param>
+    /// <param name="modifier">The shade modifier.</param>
+    public Colour(Shade shade, ShadeModifier? modifier)
     {
-        /// <inheritdoc />
-        public Shade Shade { get; internal set; }
+        this.Shade = shade;
+        this.Modifier = modifier;
+    }
 
-        /// <inheritdoc />
-        public ShadeModifier? Modifier { get; internal set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Colour"/> class.
-        /// </summary>
-        /// <param name="shade">The colour's shade.</param>
-        /// <param name="modifier">The shade modifier.</param>
-        public Colour(Shade shade, ShadeModifier? modifier)
+    /// <summary>
+    /// Determines whether this colour is the same colour as the given one.
+    /// </summary>
+    /// <param name="other">The other colour.</param>
+    /// <returns>true if the colours are the same; otherwise, false.</returns>
+    [Pure]
+    public bool IsSameColourAs(Colour? other)
+    {
+        if (other is null)
         {
-            this.Shade = shade;
-            this.Modifier = modifier;
+            return false;
         }
 
-        /// <summary>
-        /// Determines whether this colour is the same colour as the given one.
-        /// </summary>
-        /// <param name="other">The other colour.</param>
-        /// <returns>true if the colours are the same; otherwise, false.</returns>
-        [Pure]
-        public bool IsSameColourAs(Colour? other)
-        {
-            if (other is null)
-            {
-                return false;
-            }
+        return this.Shade == other.Shade && this.Modifier == other.Modifier;
+    }
 
-            return this.Shade == other.Shade && this.Modifier == other.Modifier;
+    /// <summary>
+    /// Attempts to parse the given input into a colour.
+    /// </summary>
+    /// <param name="input">The input text to parse.</param>
+    /// <param name="colour">The output colour.</param>
+    /// <returns>true if the parsing was successful; otherwise, false.</returns>
+    [Pure]
+    public static bool TryParse
+    (
+        string? input,
+        [NotNullWhen(true)] out Colour? colour
+    )
+    {
+        colour = null;
+
+        if (input.IsNullOrWhitespace())
+        {
+            return false;
         }
 
-        /// <summary>
-        /// Attempts to parse the given input into a colour.
-        /// </summary>
-        /// <param name="input">The input text to parse.</param>
-        /// <param name="colour">The output colour.</param>
-        /// <returns>true if the parsing was successful; otherwise, false.</returns>
-        [Pure]
-        public static bool TryParse
-        (
-            string? input,
-            [NotNullWhen(true)] out Colour? colour
-        )
+        // First, break the input up into parts based on spaces
+        var parts = input.Split(' ');
+
+        // Check for a modifier
+        ShadeModifier? modifier = null;
+        if (Enum.TryParse(parts[0], true, out ShadeModifier realModifier))
+        {
+            modifier = realModifier;
+            parts = parts.Skip(1).ToArray();
+        }
+
+        // Then check for a known shade
+        if (!Enum.TryParse(string.Join(string.Empty, parts), true, out Shade shade))
         {
             colour = null;
-
-            if (input.IsNullOrWhitespace())
-            {
-                return false;
-            }
-
-            // First, break the input up into parts based on spaces
-            var parts = input.Split(' ');
-
-            // Check for a modifier
-            ShadeModifier? modifier = null;
-            if (Enum.TryParse(parts[0], true, out ShadeModifier realModifier))
-            {
-                modifier = realModifier;
-                parts = parts.Skip(1).ToArray();
-            }
-
-            // Then check for a known shade
-            if (!Enum.TryParse(string.Join(string.Empty, parts), true, out Shade shade))
-            {
-                colour = null;
-                return false;
-            }
-
-            colour = new Colour(shade, modifier);
-            return true;
+            return false;
         }
 
-        /// <inheritdoc />
-        public override string ToString()
-        {
-            return $"{(this.Modifier is null ? string.Empty : this.Modifier.Humanize())} {this.Shade.Humanize()}".Trim().Humanize(LetterCasing.LowerCase);
-        }
+        colour = new Colour(shade, modifier);
+        return true;
+    }
 
-        /// <summary>
-        /// Clones this colour, creating a new unbound colour with the same settings.
-        /// </summary>
-        /// <returns>The cloned colour.</returns>
-        [Pure]
-        public Colour Clone()
-        {
-            return new Colour(this.Shade, this.Modifier);
-        }
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        return $"{(this.Modifier is null ? string.Empty : this.Modifier.Humanize())} {this.Shade.Humanize()}".Trim().Humanize(LetterCasing.LowerCase);
+    }
 
-        /// <summary>
-        /// Copies the given colour into a new colour.
-        /// </summary>
-        /// <param name="other">The other colour.</param>
-        /// <returns>The copied colour.</returns>
-        [Pure]
-        public static Colour CopyFrom(Colour other)
-        {
-            return other.Clone();
-        }
+    /// <summary>
+    /// Clones this colour, creating a new unbound colour with the same settings.
+    /// </summary>
+    /// <returns>The cloned colour.</returns>
+    [Pure]
+    public Colour Clone()
+    {
+        return new Colour(this.Shade, this.Modifier);
+    }
+
+    /// <summary>
+    /// Copies the given colour into a new colour.
+    /// </summary>
+    /// <param name="other">The other colour.</param>
+    /// <returns>The copied colour.</returns>
+    [Pure]
+    public static Colour CopyFrom(Colour other)
+    {
+        return other.Clone();
     }
 }

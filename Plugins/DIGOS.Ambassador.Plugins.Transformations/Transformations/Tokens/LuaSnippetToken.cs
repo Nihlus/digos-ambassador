@@ -26,58 +26,57 @@ using DIGOS.Ambassador.Plugins.Transformations.Services.Lua;
 using JetBrains.Annotations;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens;
+
+/// <summary>
+/// Represents a token which executes an inline snippet of lua code and gets replaced with the result.
+/// </summary>
+[PublicAPI]
+[TokenIdentifier("snippet", "lua", "sn")]
+public sealed class LuaSnippetToken : ReplaceableTextToken<LuaSnippetToken>
 {
+    private readonly LuaService _lua;
+
     /// <summary>
-    /// Represents a token which executes an inline snippet of lua code and gets replaced with the result.
+    /// Gets the snippet of lua code to execute.
     /// </summary>
-    [PublicAPI]
-    [TokenIdentifier("snippet", "lua", "sn")]
-    public sealed class LuaSnippetToken : ReplaceableTextToken<LuaSnippetToken>
+    public string Snippet { get; private set; } = null!;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LuaSnippetToken"/> class.
+    /// </summary>
+    /// <param name="luaService">The lua execution service.</param>
+    public LuaSnippetToken(LuaService luaService)
     {
-        private readonly LuaService _lua;
+        _lua = luaService;
+    }
 
-        /// <summary>
-        /// Gets the snippet of lua code to execute.
-        /// </summary>
-        public string Snippet { get; private set; } = null!;
+    /// <inheritdoc />
+    public override string GetText(Appearance appearance, AppearanceComponent? component)
+    {
+        return GetTextAsync(appearance, component).GetAwaiter().GetResult();
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="LuaSnippetToken"/> class.
-        /// </summary>
-        /// <param name="luaService">The lua execution service.</param>
-        public LuaSnippetToken(LuaService luaService)
-        {
-            _lua = luaService;
-        }
+    /// <inheritdoc />
+    public override async Task<string> GetTextAsync(Appearance appearance, AppearanceComponent? component)
+    {
+        var result = await _lua.ExecuteSnippetAsync
+        (
+            this.Snippet,
+            (nameof(appearance), appearance),
+            ("character", appearance.Character),
+            (nameof(component), component)
+        );
 
-        /// <inheritdoc />
-        public override string GetText(Appearance appearance, AppearanceComponent? component)
-        {
-            return GetTextAsync(appearance, component).GetAwaiter().GetResult();
-        }
+        return result.IsSuccess
+            ? result.Entity
+            : $"[{result.Error.Message}]";
+    }
 
-        /// <inheritdoc />
-        public override async Task<string> GetTextAsync(Appearance appearance, AppearanceComponent? component)
-        {
-            var result = await _lua.ExecuteSnippetAsync
-            (
-                this.Snippet,
-                (nameof(appearance), appearance),
-                ("character", appearance.Character),
-                (nameof(component), component)
-            );
-
-            return result.IsSuccess
-                ? result.Entity
-                : $"[{result.Error.Message}]";
-        }
-
-        /// <inheritdoc />
-        protected override LuaSnippetToken Initialize(string? data)
-        {
-            this.Snippet = data ?? string.Empty;
-            return this;
-        }
+    /// <inheritdoc />
+    protected override LuaSnippetToken Initialize(string? data)
+    {
+        this.Snippet = data ?? string.Empty;
+        return this;
     }
 }

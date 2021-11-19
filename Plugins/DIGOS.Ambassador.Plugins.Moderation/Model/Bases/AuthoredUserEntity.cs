@@ -27,56 +27,55 @@ using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Plugins.Moderation.Model.Bases
+namespace DIGOS.Ambassador.Plugins.Moderation.Model.Bases;
+
+/// <summary>
+/// Represents an entity authored by a user at a specific time.
+/// </summary>
+public abstract class AuthoredUserEntity : EFEntity
 {
     /// <summary>
-    /// Represents an entity authored by a user at a specific time.
+    /// Gets the server that the entity was authored on.
     /// </summary>
-    public abstract class AuthoredUserEntity : EFEntity
+    public virtual Server Server { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the user that the entity is associated with.
+    /// </summary>
+    public virtual User User { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the user that created the entity.
+    /// </summary>
+    public virtual User Author { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the time at which the entity was created.
+    /// </summary>
+    public DateTimeOffset CreatedAt { get; private set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AuthoredUserEntity"/> class.
+    /// </summary>
+    /// <remarks>
+    /// Required by EF Core.
+    /// </remarks>
+    protected AuthoredUserEntity()
     {
-        /// <summary>
-        /// Gets the server that the entity was authored on.
-        /// </summary>
-        public virtual Server Server { get; private set; } = null!;
+    }
 
-        /// <summary>
-        /// Gets the user that the entity is associated with.
-        /// </summary>
-        public virtual User User { get; private set; } = null!;
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AuthoredUserEntity"/> class.
+    /// </summary>
+    /// <param name="server">The server that the entity was authored on.</param>
+    /// <param name="user">The user that the entity is associated with.</param>
+    /// <param name="author">The user that created the entity.</param>
+    protected AuthoredUserEntity(Server server, User user, User author)
+    {
+        this.Server = server;
+        this.User = user;
+        this.Author = author;
 
-        /// <summary>
-        /// Gets the user that created the entity.
-        /// </summary>
-        public virtual User Author { get; private set; } = null!;
-
-        /// <summary>
-        /// Gets the time at which the entity was created.
-        /// </summary>
-        public DateTimeOffset CreatedAt { get; private set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AuthoredUserEntity"/> class.
-        /// </summary>
-        /// <remarks>
-        /// Required by EF Core.
-        /// </remarks>
-        protected AuthoredUserEntity()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AuthoredUserEntity"/> class.
-        /// </summary>
-        /// <param name="server">The server that the entity was authored on.</param>
-        /// <param name="user">The user that the entity is associated with.</param>
-        /// <param name="author">The user that created the entity.</param>
-        protected AuthoredUserEntity(Server server, User user, User author)
-        {
-            this.Server = server;
-            this.User = user;
-            this.Author = author;
-
-            this.CreatedAt = DateTimeOffset.UtcNow;
-        }
+        this.CreatedAt = DateTimeOffset.UtcNow;
     }
 }

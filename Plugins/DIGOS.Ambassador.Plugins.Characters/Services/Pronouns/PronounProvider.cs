@@ -23,69 +23,68 @@
 using System;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
+namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
+
+/// <summary>
+/// Provides pronouns.
+/// </summary>
+[UsedImplicitly]
+public abstract class PronounProvider : IPronounProvider
 {
-    /// <summary>
-    /// Provides pronouns.
-    /// </summary>
-    [UsedImplicitly]
-    public abstract class PronounProvider : IPronounProvider
+    /// <inheritdoc />
+    public abstract string Family { get; }
+
+    /// <inheritdoc />
+    public abstract string GetSubjectForm(bool withVerb = false);
+
+    /// <inheritdoc />
+    public abstract string GetObjectForm();
+
+    /// <inheritdoc />
+    public abstract string GetPossessiveAdjectiveForm();
+
+    /// <inheritdoc />
+    public abstract string GetPossessiveForm(bool withVerb = false);
+
+    /// <inheritdoc />
+    public abstract string GetReflexiveForm();
+
+    /// <inheritdoc />
+    public string GetForm(PronounForm form)
     {
-        /// <inheritdoc />
-        public abstract string Family { get; }
-
-        /// <inheritdoc />
-        public abstract string GetSubjectForm(bool withVerb = false);
-
-        /// <inheritdoc />
-        public abstract string GetObjectForm();
-
-        /// <inheritdoc />
-        public abstract string GetPossessiveAdjectiveForm();
-
-        /// <inheritdoc />
-        public abstract string GetPossessiveForm(bool withVerb = false);
-
-        /// <inheritdoc />
-        public abstract string GetReflexiveForm();
-
-        /// <inheritdoc />
-        public string GetForm(PronounForm form)
+        switch (form)
         {
-            switch (form)
+            case PronounForm.Subject:
             {
-                case PronounForm.Subject:
-                {
-                    return GetSubjectForm();
-                }
-                case PronounForm.SubjectVerb:
-                {
-                    return GetSubjectForm(true);
-                }
-                case PronounForm.Object:
-                {
-                    return GetObjectForm();
-                }
-                case PronounForm.PossessiveAdjective:
-                {
-                    return GetPossessiveAdjectiveForm();
-                }
-                case PronounForm.Possessive:
-                {
-                    return GetPossessiveForm();
-                }
-                case PronounForm.PossessiveVerb:
-                {
-                    return GetPossessiveForm(true);
-                }
-                case PronounForm.Reflexive:
-                {
-                    return GetReflexiveForm();
-                }
-                default:
-                {
-                    throw new ArgumentOutOfRangeException(nameof(form), form, null);
-                }
+                return GetSubjectForm();
+            }
+            case PronounForm.SubjectVerb:
+            {
+                return GetSubjectForm(true);
+            }
+            case PronounForm.Object:
+            {
+                return GetObjectForm();
+            }
+            case PronounForm.PossessiveAdjective:
+            {
+                return GetPossessiveAdjectiveForm();
+            }
+            case PronounForm.Possessive:
+            {
+                return GetPossessiveForm();
+            }
+            case PronounForm.PossessiveVerb:
+            {
+                return GetPossessiveForm(true);
+            }
+            case PronounForm.Reflexive:
+            {
+                return GetReflexiveForm();
+            }
+            default:
+            {
+                throw new ArgumentOutOfRangeException(nameof(form), form, null);
             }
         }
     }

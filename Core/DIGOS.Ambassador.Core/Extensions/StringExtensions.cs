@@ -25,84 +25,83 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Core.Extensions
+namespace DIGOS.Ambassador.Core.Extensions;
+
+/// <summary>
+/// Extension methods for strings.
+/// </summary>
+public static class StringExtensions
 {
     /// <summary>
-    /// Extension methods for strings.
+    /// Determines whether or not a string is null or consists entirely of whitespace characters.
     /// </summary>
-    public static class StringExtensions
+    /// <param name="source">The string to check.</param>
+    /// <returns>true if the string is null or whitespace; otherwise, false.</returns>
+    [Pure]
+    public static bool IsNullOrWhitespace([NotNullWhen(false)] this string? source)
     {
-        /// <summary>
-        /// Determines whether or not a string is null or consists entirely of whitespace characters.
-        /// </summary>
-        /// <param name="source">The string to check.</param>
-        /// <returns>true if the string is null or whitespace; otherwise, false.</returns>
-        [Pure]
-        public static bool IsNullOrWhitespace([NotNullWhen(false)] this string? source)
+        return string.IsNullOrWhiteSpace(source);
+    }
+
+    /// <summary>
+    /// Determines whether or not a string is null or has no characters.
+    /// </summary>
+    /// <param name="source">The string to check.</param>
+    /// <returns>true if the string is null or empty; otherwise, false.</returns>
+    [Pure]
+    public static bool IsNullOrEmpty([NotNullWhen(false)] this string? source)
+    {
+        return string.IsNullOrEmpty(source);
+    }
+
+    /// <summary>
+    /// Removes surrounding quotes from a given string, if they exist.
+    /// </summary>
+    /// <param name="this">The string.</param>
+    /// <param name="quoteChars">The quote characters.</param>
+    /// <returns>The unquoted string.</returns>
+    [return: NotNullIfNotNull("this")]
+    public static string? Unquote(this string? @this, IReadOnlyCollection<char>? quoteChars = null)
+    {
+        quoteChars ??= new[] { '‘', '\'', '’', '“', '”', '\"' };
+
+        if (@this is null)
         {
-            return string.IsNullOrWhiteSpace(source);
+            return null;
         }
 
-        /// <summary>
-        /// Determines whether or not a string is null or has no characters.
-        /// </summary>
-        /// <param name="source">The string to check.</param>
-        /// <returns>true if the string is null or empty; otherwise, false.</returns>
-        [Pure]
-        public static bool IsNullOrEmpty([NotNullWhen(false)] this string? source)
+        if (@this.IsNullOrWhitespace())
         {
-            return string.IsNullOrEmpty(source);
-        }
-
-        /// <summary>
-        /// Removes surrounding quotes from a given string, if they exist.
-        /// </summary>
-        /// <param name="this">The string.</param>
-        /// <param name="quoteChars">The quote characters.</param>
-        /// <returns>The unquoted string.</returns>
-        [return: NotNullIfNotNull("this")]
-        public static string? Unquote(this string? @this, IReadOnlyCollection<char>? quoteChars = null)
-        {
-            quoteChars ??= new[] { '‘', '\'', '’', '“', '”', '\"' };
-
-            if (@this is null)
-            {
-                return null;
-            }
-
-            if (@this.IsNullOrWhitespace())
-            {
-                return @this;
-            }
-
-            if (quoteChars.Contains(@this[0]) && quoteChars.Contains(@this.Last()))
-            {
-                return @this.Substring(1, @this.Length - 2);
-            }
-
             return @this;
         }
 
-        /// <summary>
-        /// Surrounds the given string in quotation marks, if required.
-        /// </summary>
-        /// <param name="this">The string.</param>
-        /// <param name="quoteChar">The quote character.</param>
-        /// <returns>The quoted string.</returns>
-        [return: NotNullIfNotNull("this")]
-        public static string? Quote(this string? @this, char quoteChar = '"')
+        if (quoteChars.Contains(@this[0]) && quoteChars.Contains(@this.Last()))
         {
-            if (@this is null)
-            {
-                return null;
-            }
-
-            if (@this[0] == quoteChar && @this.Last() == quoteChar)
-            {
-                return @this;
-            }
-
-            return $"{quoteChar}{@this}{quoteChar}";
+            return @this.Substring(1, @this.Length - 2);
         }
+
+        return @this;
+    }
+
+    /// <summary>
+    /// Surrounds the given string in quotation marks, if required.
+    /// </summary>
+    /// <param name="this">The string.</param>
+    /// <param name="quoteChar">The quote character.</param>
+    /// <returns>The quoted string.</returns>
+    [return: NotNullIfNotNull("this")]
+    public static string? Quote(this string? @this, char quoteChar = '"')
+    {
+        if (@this is null)
+        {
+            return null;
+        }
+
+        if (@this[0] == quoteChar && @this.Last() == quoteChar)
+        {
+            return @this;
+        }
+
+        return $"{quoteChar}{@this}{quoteChar}";
     }
 }

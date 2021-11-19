@@ -37,158 +37,157 @@ using FeedbackMessage = Remora.Discord.Commands.Feedback.Messages.FeedbackMessag
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
-namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
+namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules;
+
+public partial class RoleplayCommands
 {
-    public partial class RoleplayCommands
+    /// <summary>
+    /// Setter commands for roleplay properties.
+    /// </summary>
+    [UsedImplicitly]
+    [Group("set")]
+    public class SetCommands : CommandGroup
     {
+        private readonly RoleplayDiscordService _discordRoleplays;
+        private readonly FeedbackService _feedback;
+
         /// <summary>
-        /// Setter commands for roleplay properties.
+        /// Initializes a new instance of the <see cref="SetCommands"/> class.
         /// </summary>
-        [UsedImplicitly]
-        [Group("set")]
-        public class SetCommands : CommandGroup
+        /// <param name="discordRoleplays">The roleplay service.</param>
+        /// <param name="feedback">The feedback service.</param>
+        public SetCommands
+        (
+            RoleplayDiscordService discordRoleplays, FeedbackService feedback)
         {
-            private readonly RoleplayDiscordService _discordRoleplays;
-            private readonly FeedbackService _feedback;
+            _discordRoleplays = discordRoleplays;
+            _feedback = feedback;
+        }
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="SetCommands"/> class.
-            /// </summary>
-            /// <param name="discordRoleplays">The roleplay service.</param>
-            /// <param name="feedback">The feedback service.</param>
-            public SetCommands
+        /// <summary>
+        /// Sets the name of the named roleplay.
+        /// </summary>
+        /// <param name="newRoleplayName">The roleplay's new name.</param>
+        /// <param name="roleplay">The roleplay.</param>
+        [UsedImplicitly]
+        [Command("name")]
+        [Description("Sets the new name of the named roleplay.")]
+        [RequireContext(ChannelContext.Guild)]
+        public async Task<Result<FeedbackMessage>> SetRoleplayNameAsync
+        (
+            string newRoleplayName,
+            [RequireEntityOwner]
+            [AutocompleteProvider("roleplay::owned")]
+            Roleplay roleplay
+        )
+        {
+            var result = await _discordRoleplays.SetRoleplayNameAsync
             (
-                RoleplayDiscordService discordRoleplays, FeedbackService feedback)
+                roleplay,
+                newRoleplayName
+            );
+
+            return !result.IsSuccess
+                ? Result<FeedbackMessage>.FromError(result)
+                : new FeedbackMessage("Roleplay name set.", _feedback.Theme.Secondary);
+        }
+
+        /// <summary>
+        /// Sets the summary of the named roleplay.
+        /// </summary>
+        /// <param name="newRoleplaySummary">The roleplay's new summary.</param>
+        /// <param name="roleplay">The roleplay.</param>
+        [UsedImplicitly]
+        [Command("summary")]
+        [Description("Sets the summary of the named roleplay.")]
+        [RequireContext(ChannelContext.Guild)]
+        public async Task<Result<FeedbackMessage>> SetRoleplaySummaryAsync
+        (
+            string newRoleplaySummary,
+            [RequireEntityOwner]
+            [AutocompleteProvider("roleplay::owned")]
+            Roleplay roleplay
+        )
+        {
+            var result = await _discordRoleplays.SetRoleplaySummaryAsync(roleplay, newRoleplaySummary);
+
+            return !result.IsSuccess
+                ? Result<FeedbackMessage>.FromError(result)
+                : new FeedbackMessage("Roleplay summary set.", _feedback.Theme.Secondary);
+        }
+
+        /// <summary>
+        /// Sets a value indicating whether or not the named roleplay is NSFW. This restricts which channels it
+        /// can be made active in.
+        /// </summary>
+        /// <param name="isNSFW">true if the roleplay is NSFW; otherwise, false.</param>
+        /// <param name="roleplay">The roleplay.</param>
+        [UsedImplicitly]
+        [Command("nsfw")]
+        [Description("Sets a value indicating whether or not the named roleplay is NSFW.")]
+        [RequireContext(ChannelContext.Guild)]
+        public async Task<Result<FeedbackMessage>> SetRoleplayIsNSFW
+        (
+            bool isNSFW,
+            [RequireEntityOwner]
+            [AutocompleteProvider("roleplay::owned")]
+            Roleplay roleplay
+        )
+        {
+            var result = await _discordRoleplays.SetRoleplayIsNSFWAsync(roleplay, isNSFW);
+
+            return !result.IsSuccess
+                ? Result<FeedbackMessage>.FromError(result)
+                : new FeedbackMessage($"Roleplay set to {(isNSFW ? "NSFW" : "SFW")}", _feedback.Theme.Secondary);
+        }
+
+        /// <summary>
+        /// Sets a value indicating whether or not the named roleplay is private. This restricts replays to participants.
+        /// </summary>
+        /// <param name="isPrivate">true if the roleplay is private; otherwise, false.</param>
+        /// <param name="roleplay">The roleplay.</param>
+        [UsedImplicitly]
+        [Command("private")]
+        [Description("Sets a value indicating whether or not the named roleplay is private.")]
+        [RequireContext(ChannelContext.Guild)]
+        public Task<Result<FeedbackMessage>> SetRoleplayIsPrivate
+        (
+            bool isPrivate,
+            [RequireEntityOwner]
+            [AutocompleteProvider("roleplay::owned")]
+            Roleplay roleplay
+        )
+            => SetRoleplayIsPublic(!isPrivate, roleplay);
+
+        /// <summary>
+        /// Sets a value indicating whether or not the named roleplay is public. This restricts replays to
+        /// participants.
+        /// </summary>
+        /// <param name="isPublic">true if the roleplay is public; otherwise, false.</param>
+        /// <param name="roleplay">The roleplay.</param>
+        [UsedImplicitly]
+        [Command("public")]
+        [Description("Sets a value indicating whether or not the named roleplay is public.")]
+        [RequireContext(ChannelContext.Guild)]
+        public async Task<Result<FeedbackMessage>> SetRoleplayIsPublic
+        (
+            bool isPublic,
+            [RequireEntityOwner]
+            [AutocompleteProvider("roleplay::owned")]
+            Roleplay roleplay
+        )
+        {
+            var result = await _discordRoleplays.SetRoleplayIsPublicAsync(roleplay, isPublic);
+            if (!result.IsSuccess)
             {
-                _discordRoleplays = discordRoleplays;
-                _feedback = feedback;
+                return Result<FeedbackMessage>.FromError(result);
             }
 
-            /// <summary>
-            /// Sets the name of the named roleplay.
-            /// </summary>
-            /// <param name="newRoleplayName">The roleplay's new name.</param>
-            /// <param name="roleplay">The roleplay.</param>
-            [UsedImplicitly]
-            [Command("name")]
-            [Description("Sets the new name of the named roleplay.")]
-            [RequireContext(ChannelContext.Guild)]
-            public async Task<Result<FeedbackMessage>> SetRoleplayNameAsync
+            return new FeedbackMessage
             (
-                string newRoleplayName,
-                [RequireEntityOwner]
-                [AutocompleteProvider("roleplay::owned")]
-                Roleplay roleplay
-            )
-            {
-                var result = await _discordRoleplays.SetRoleplayNameAsync
-                (
-                    roleplay,
-                    newRoleplayName
-                );
-
-                return !result.IsSuccess
-                    ? Result<FeedbackMessage>.FromError(result)
-                    : new FeedbackMessage("Roleplay name set.", _feedback.Theme.Secondary);
-            }
-
-            /// <summary>
-            /// Sets the summary of the named roleplay.
-            /// </summary>
-            /// <param name="newRoleplaySummary">The roleplay's new summary.</param>
-            /// <param name="roleplay">The roleplay.</param>
-            [UsedImplicitly]
-            [Command("summary")]
-            [Description("Sets the summary of the named roleplay.")]
-            [RequireContext(ChannelContext.Guild)]
-            public async Task<Result<FeedbackMessage>> SetRoleplaySummaryAsync
-            (
-                string newRoleplaySummary,
-                [RequireEntityOwner]
-                [AutocompleteProvider("roleplay::owned")]
-                Roleplay roleplay
-            )
-            {
-                var result = await _discordRoleplays.SetRoleplaySummaryAsync(roleplay, newRoleplaySummary);
-
-                return !result.IsSuccess
-                    ? Result<FeedbackMessage>.FromError(result)
-                    : new FeedbackMessage("Roleplay summary set.", _feedback.Theme.Secondary);
-            }
-
-            /// <summary>
-            /// Sets a value indicating whether or not the named roleplay is NSFW. This restricts which channels it
-            /// can be made active in.
-            /// </summary>
-            /// <param name="isNSFW">true if the roleplay is NSFW; otherwise, false.</param>
-            /// <param name="roleplay">The roleplay.</param>
-            [UsedImplicitly]
-            [Command("nsfw")]
-            [Description("Sets a value indicating whether or not the named roleplay is NSFW.")]
-            [RequireContext(ChannelContext.Guild)]
-            public async Task<Result<FeedbackMessage>> SetRoleplayIsNSFW
-            (
-                bool isNSFW,
-                [RequireEntityOwner]
-                [AutocompleteProvider("roleplay::owned")]
-                Roleplay roleplay
-            )
-            {
-                var result = await _discordRoleplays.SetRoleplayIsNSFWAsync(roleplay, isNSFW);
-
-                return !result.IsSuccess
-                    ? Result<FeedbackMessage>.FromError(result)
-                    : new FeedbackMessage($"Roleplay set to {(isNSFW ? "NSFW" : "SFW")}", _feedback.Theme.Secondary);
-            }
-
-            /// <summary>
-            /// Sets a value indicating whether or not the named roleplay is private. This restricts replays to participants.
-            /// </summary>
-            /// <param name="isPrivate">true if the roleplay is private; otherwise, false.</param>
-            /// <param name="roleplay">The roleplay.</param>
-            [UsedImplicitly]
-            [Command("private")]
-            [Description("Sets a value indicating whether or not the named roleplay is private.")]
-            [RequireContext(ChannelContext.Guild)]
-            public Task<Result<FeedbackMessage>> SetRoleplayIsPrivate
-            (
-                bool isPrivate,
-                [RequireEntityOwner]
-                [AutocompleteProvider("roleplay::owned")]
-                Roleplay roleplay
-            )
-                => SetRoleplayIsPublic(!isPrivate, roleplay);
-
-            /// <summary>
-            /// Sets a value indicating whether or not the named roleplay is public. This restricts replays to
-            /// participants.
-            /// </summary>
-            /// <param name="isPublic">true if the roleplay is public; otherwise, false.</param>
-            /// <param name="roleplay">The roleplay.</param>
-            [UsedImplicitly]
-            [Command("public")]
-            [Description("Sets a value indicating whether or not the named roleplay is public.")]
-            [RequireContext(ChannelContext.Guild)]
-            public async Task<Result<FeedbackMessage>> SetRoleplayIsPublic
-            (
-                bool isPublic,
-                [RequireEntityOwner]
-                [AutocompleteProvider("roleplay::owned")]
-                Roleplay roleplay
-            )
-            {
-                var result = await _discordRoleplays.SetRoleplayIsPublicAsync(roleplay, isPublic);
-                if (!result.IsSuccess)
-                {
-                    return Result<FeedbackMessage>.FromError(result);
-                }
-
-                return new FeedbackMessage
-                (
-                    $"Roleplay set to {(isPublic ? "public" : "private")}",
-                    _feedback.Theme.Secondary
-                );
-            }
+                $"Roleplay set to {(isPublic ? "public" : "private")}",
+                _feedback.Theme.Secondary
+            );
         }
     }
 }

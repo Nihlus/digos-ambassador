@@ -24,46 +24,45 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations;
+
+/// <summary>
+/// Represents a replaceable token in text.
+/// </summary>
+[PublicAPI]
+public interface IReplaceableTextToken
 {
     /// <summary>
-    /// Represents a replaceable token in text.
+    /// Gets or sets the start index of the token in the text.
     /// </summary>
-    [PublicAPI]
-    public interface IReplaceableTextToken
-    {
-        /// <summary>
-        /// Gets or sets the start index of the token in the text.
-        /// </summary>
-        int Start { get; set; }
+    int Start { get; set; }
 
-        /// <summary>
-        /// Gets or sets the length of the original token.
-        /// </summary>
-        int Length { get; set; }
+    /// <summary>
+    /// Gets or sets the length of the original token.
+    /// </summary>
+    int Length { get; set; }
 
-        /// <summary>
-        /// Gets the text that the token should be replaced with.
-        /// </summary>
-        /// <param name="appearance">The appearance that the text should be relevant for.</param>
-        /// <param name="component">The component that the text originates from.</param>
-        /// <returns>The text that the token should be replaced with.</returns>
-        string GetText
-        (
-            Appearance appearance,
-            AppearanceComponent? component
-        );
+    /// <summary>
+    /// Gets the text that the token should be replaced with.
+    /// </summary>
+    /// <param name="appearance">The appearance that the text should be relevant for.</param>
+    /// <param name="component">The component that the text originates from.</param>
+    /// <returns>The text that the token should be replaced with.</returns>
+    string GetText
+    (
+        Appearance appearance,
+        AppearanceComponent? component
+    );
 
-        /// <summary>
-        /// Gets the text that the token should be replaced with.
-        /// </summary>
-        /// <param name="appearance">The appearance that the text should be relevant for.</param>
-        /// <param name="component">The component that the text originates from.</param>
-        /// <returns>The text that the token should be replaced with.</returns>
-        Task<string> GetTextAsync
-        (
-            Appearance appearance,
-            AppearanceComponent? component
-        );
-    }
+    /// <summary>
+    /// Gets the text that the token should be replaced with.
+    /// </summary>
+    /// <param name="appearance">The appearance that the text should be relevant for.</param>
+    /// <param name="component">The component that the text originates from.</param>
+    /// <returns>The text that the token should be replaced with.</returns>
+    Task<string> GetTextAsync
+    (
+        Appearance appearance,
+        AppearanceComponent? component
+    );
 }

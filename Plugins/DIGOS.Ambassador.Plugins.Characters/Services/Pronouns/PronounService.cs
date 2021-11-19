@@ -29,102 +29,101 @@ using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Utility;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
+namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
+
+/// <summary>
+/// Provides access to pronouns.
+/// </summary>
+public sealed class PronounService
 {
+    private readonly Dictionary<string, IPronounProvider> _pronounProviders;
+
     /// <summary>
-    /// Provides access to pronouns.
+    /// Initializes a new instance of the <see cref="PronounService"/> class.
     /// </summary>
-    public sealed class PronounService
+    public PronounService()
     {
-        private readonly Dictionary<string, IPronounProvider> _pronounProviders;
+        _pronounProviders = new Dictionary<string, IPronounProvider>(new CaseInsensitiveStringEqualityComparer());
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PronounService"/> class.
-        /// </summary>
-        public PronounService()
+    /// <summary>
+    /// Discovers available pronoun providers in the assembly, adding them to the available providers.
+    /// </summary>
+    public void DiscoverPronounProviders()
+    {
+        _pronounProviders.Clear();
+
+        var assembly = Assembly.GetExecutingAssembly();
+        var pronounProviderTypes = assembly.DefinedTypes.Where
+        (
+            t => t.ImplementedInterfaces.Contains(typeof(IPronounProvider))
+                 && t.IsClass
+                 && !t.IsAbstract
+        );
+
+        foreach (var type in pronounProviderTypes)
         {
-            _pronounProviders = new Dictionary<string, IPronounProvider>(new CaseInsensitiveStringEqualityComparer());
+            var pronounProvider = Activator.CreateInstance(type) as IPronounProvider;
+            if (pronounProvider is null)
+            {
+                continue;
+            }
+
+            WithPronounProvider(pronounProvider);
+        }
+    }
+
+    /// <summary>
+    /// Adds the given pronoun provider to the service.
+    /// </summary>
+    /// <param name="pronounProvider">The pronoun provider to add.</param>
+    /// <returns>The service with the provider.</returns>
+    public PronounService WithPronounProvider(IPronounProvider pronounProvider)
+    {
+        _pronounProviders.Add(pronounProvider.Family, pronounProvider);
+        return this;
+    }
+
+    /// <summary>
+    /// Gets the pronoun provider for the specified character.
+    /// </summary>
+    /// <param name="character">The character.</param>
+    /// <returns>A pronoun provider.</returns>
+    /// <exception cref="ArgumentException">Thrown if no pronoun provider exists for the character's preference.</exception>
+    public IPronounProvider GetPronounProvider(Character character)
+    {
+        if (_pronounProviders.ContainsKey(character.PronounProviderFamily))
+        {
+            return _pronounProviders[character.PronounProviderFamily];
         }
 
-        /// <summary>
-        /// Discovers available pronoun providers in the assembly, adding them to the available providers.
-        /// </summary>
-        public void DiscoverPronounProviders()
-        {
-            _pronounProviders.Clear();
+        throw new KeyNotFoundException("No pronoun provider for that family found.");
+    }
 
-            var assembly = Assembly.GetExecutingAssembly();
-            var pronounProviderTypes = assembly.DefinedTypes.Where
+    /// <summary>
+    /// Gets the available pronoun providers.
+    /// </summary>
+    /// <returns>An enumerator over the available pronouns.</returns>
+    public IEnumerable<IPronounProvider> GetAvailablePronounProviders()
+    {
+        return _pronounProviders.Values;
+    }
+
+    /// <summary>
+    /// Gets the pronoun provider with the given family.
+    /// </summary>
+    /// <param name="pronounFamily">The family.</param>
+    /// <returns>A retrieval result which may or may not have succeeded.</returns>
+    public Result<IPronounProvider> GetPronounProvider(string pronounFamily)
+    {
+        if (!_pronounProviders.TryGetValue(pronounFamily, out var provider))
+        {
+            return new UserError
             (
-                t => t.ImplementedInterfaces.Contains(typeof(IPronounProvider))
-                && t.IsClass
-                && !t.IsAbstract
+                "Could not find a pronoun provider for that family."
             );
-
-            foreach (var type in pronounProviderTypes)
-            {
-                var pronounProvider = Activator.CreateInstance(type) as IPronounProvider;
-                if (pronounProvider is null)
-                {
-                    continue;
-                }
-
-                WithPronounProvider(pronounProvider);
-            }
         }
 
-        /// <summary>
-        /// Adds the given pronoun provider to the service.
-        /// </summary>
-        /// <param name="pronounProvider">The pronoun provider to add.</param>
-        /// <returns>The service with the provider.</returns>
-        public PronounService WithPronounProvider(IPronounProvider pronounProvider)
-        {
-            _pronounProviders.Add(pronounProvider.Family, pronounProvider);
-            return this;
-        }
-
-        /// <summary>
-        /// Gets the pronoun provider for the specified character.
-        /// </summary>
-        /// <param name="character">The character.</param>
-        /// <returns>A pronoun provider.</returns>
-        /// <exception cref="ArgumentException">Thrown if no pronoun provider exists for the character's preference.</exception>
-        public IPronounProvider GetPronounProvider(Character character)
-        {
-            if (_pronounProviders.ContainsKey(character.PronounProviderFamily))
-            {
-                return _pronounProviders[character.PronounProviderFamily];
-            }
-
-            throw new KeyNotFoundException("No pronoun provider for that family found.");
-        }
-
-        /// <summary>
-        /// Gets the available pronoun providers.
-        /// </summary>
-        /// <returns>An enumerator over the available pronouns.</returns>
-        public IEnumerable<IPronounProvider> GetAvailablePronounProviders()
-        {
-            return _pronounProviders.Values;
-        }
-
-        /// <summary>
-        /// Gets the pronoun provider with the given family.
-        /// </summary>
-        /// <param name="pronounFamily">The family.</param>
-        /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public Result<IPronounProvider> GetPronounProvider(string pronounFamily)
-        {
-            if (!_pronounProviders.TryGetValue(pronounFamily, out var provider))
-            {
-                return new UserError
-                (
-                    "Could not find a pronoun provider for that family."
-                );
-            }
-
-            return Result<IPronounProvider>.FromSuccess(provider);
-        }
+        return Result<IPronounProvider>.FromSuccess(provider);
     }
 }

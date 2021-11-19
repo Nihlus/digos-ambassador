@@ -26,52 +26,51 @@ using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations;
+
+/// <summary>
+/// Base implementation of replaceable text tokens, allowing static initialization.
+/// </summary>
+/// <typeparam name="T">A class inheriting from this class.</typeparam>
+[PublicAPI]
+public abstract class ReplaceableTextToken<T> : IReplaceableTextToken where T : ReplaceableTextToken<T>
 {
-    /// <summary>
-    /// Base implementation of replaceable text tokens, allowing static initialization.
-    /// </summary>
-    /// <typeparam name="T">A class inheriting from this class.</typeparam>
-    [PublicAPI]
-    public abstract class ReplaceableTextToken<T> : IReplaceableTextToken where T : ReplaceableTextToken<T>
+    /// <inheritdoc />
+    public int Start { get; set; }
+
+    /// <inheritdoc />
+    public int Length { get; set; }
+
+    /// <inheritdoc />
+    public abstract string GetText(Appearance appearance, AppearanceComponent? component);
+
+    /// <inheritdoc />
+    public virtual Task<string> GetTextAsync(Appearance appearance, AppearanceComponent? component)
     {
-        /// <inheritdoc />
-        public int Start { get; set; }
+        return Task.Run(() => GetText(appearance, component));
+    }
 
-        /// <inheritdoc />
-        public int Length { get; set; }
+    /// <summary>
+    /// Initializes the token with generic data coming from the text.
+    /// </summary>
+    /// <param name="data">Generic data.</param>
+    /// <returns>An initialized instance of a token.</returns>
+    protected abstract T Initialize(string? data);
 
-        /// <inheritdoc />
-        public abstract string GetText(Appearance appearance, AppearanceComponent? component);
+    /// <summary>
+    /// Creates a new, initialized token from the given start and end positions, along with generic data.
+    /// </summary>
+    /// <param name="start">The index in the original text where the token starts.</param>
+    /// <param name="length">The length of the original token.</param>
+    /// <param name="data">Generic data.</param>
+    /// <param name="services">The application's service collection.</param>
+    /// <returns>An initialized instance of a token.</returns>
+    public static T CreateFrom(int start, int length, string? data, IServiceProvider services)
+    {
+        var token = (ReplaceableTextToken<T>)ActivatorUtilities.CreateInstance(services, typeof(T));
+        token.Start = start;
+        token.Length = length;
 
-        /// <inheritdoc />
-        public virtual Task<string> GetTextAsync(Appearance appearance, AppearanceComponent? component)
-        {
-            return Task.Run(() => GetText(appearance, component));
-        }
-
-        /// <summary>
-        /// Initializes the token with generic data coming from the text.
-        /// </summary>
-        /// <param name="data">Generic data.</param>
-        /// <returns>An initialized instance of a token.</returns>
-        protected abstract T Initialize(string? data);
-
-        /// <summary>
-        /// Creates a new, initialized token from the given start and end positions, along with generic data.
-        /// </summary>
-        /// <param name="start">The index in the original text where the token starts.</param>
-        /// <param name="length">The length of the original token.</param>
-        /// <param name="data">Generic data.</param>
-        /// <param name="services">The application's service collection.</param>
-        /// <returns>An initialized instance of a token.</returns>
-        public static T CreateFrom(int start, int length, string? data, IServiceProvider services)
-        {
-            var token = (ReplaceableTextToken<T>)ActivatorUtilities.CreateInstance(services, typeof(T));
-            token.Start = start;
-            token.Length = length;
-
-            return token.Initialize(data);
-        }
+        return token.Initialize(data);
     }
 }

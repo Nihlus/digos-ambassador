@@ -23,43 +23,42 @@
 using System;
 using DIGOS.Ambassador.Core.Services;
 
-namespace DIGOS.Ambassador.Plugins.Amby.Services
+namespace DIGOS.Ambassador.Plugins.Amby.Services;
+
+/// <summary>
+/// Provides access to remote URLs with various portraits.
+/// </summary>
+public class PortraitService
 {
     /// <summary>
-    /// Provides access to remote URLs with various portraits.
+    /// Initializes a new instance of the <see cref="PortraitService"/> class.
     /// </summary>
-    public class PortraitService
+    /// <param name="content">The content service.</param>
+    public PortraitService(ContentService content)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PortraitService"/> class.
-        /// </summary>
-        /// <param name="content">The content service.</param>
-        public PortraitService(ContentService content)
-        {
-            this.AmbyPortraitUri = new Uri(content.BaseCDNUri, "portraits/amby-irbynx-3.png");
-            this.BrokenAmbyUri = new Uri(content.BaseCDNUri, "portraits/maintenance.png");
-            this.BwehUri = new Uri(content.BaseCDNUri, "portraits/bweh.png");
-            this.MowUri = new Uri(content.BaseCDNUri, "portraits/mow.png");
-        }
-
-        /// <summary>
-        /// Gets the <see cref="Uri"/> pointing to a proper bweh.
-        /// </summary>
-        public Uri BwehUri { get; }
-
-        /// <summary>
-        /// Gets the <see cref="Uri"/> pointing to a proper mow.
-        /// </summary>
-        public Uri MowUri { get; }
-
-        /// <summary>
-        /// Gets the <see cref="Uri"/> pointing to a portrait of Amby.
-        /// </summary>
-        public Uri AmbyPortraitUri { get; }
-
-        /// <summary>
-        /// Gets the <see cref="Uri"/> pointing to a broken Ambybot portrait.
-        /// </summary>
-        public Uri BrokenAmbyUri { get; }
+        this.AmbyPortraitUri = new Uri(content.BaseCDNUri, "portraits/amby-irbynx-3.png");
+        this.BrokenAmbyUri = new Uri(content.BaseCDNUri, "portraits/maintenance.png");
+        this.BwehUri = new Uri(content.BaseCDNUri, "portraits/bweh.png");
+        this.MowUri = new Uri(content.BaseCDNUri, "portraits/mow.png");
     }
+
+    /// <summary>
+    /// Gets the <see cref="Uri"/> pointing to a proper bweh.
+    /// </summary>
+    public Uri BwehUri { get; }
+
+    /// <summary>
+    /// Gets the <see cref="Uri"/> pointing to a proper mow.
+    /// </summary>
+    public Uri MowUri { get; }
+
+    /// <summary>
+    /// Gets the <see cref="Uri"/> pointing to a portrait of Amby.
+    /// </summary>
+    public Uri AmbyPortraitUri { get; }
+
+    /// <summary>
+    /// Gets the <see cref="Uri"/> pointing to a broken Ambybot portrait.
+    /// </summary>
+    public Uri BrokenAmbyUri { get; }
 }

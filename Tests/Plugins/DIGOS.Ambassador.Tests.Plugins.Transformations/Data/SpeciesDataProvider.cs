@@ -24,26 +24,25 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Transformations
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
+
+/// <summary>
+/// Provides a feed of paths to bundled species files for use as test parameters.
+/// </summary>
+public class SpeciesDataProvider : IEnumerable<object[]>
 {
-    /// <summary>
-    /// Provides a feed of paths to bundled species files for use as test parameters.
-    /// </summary>
-    public class SpeciesDataProvider : IEnumerable<object[]>
+    /// <inheritdoc/>
+    public IEnumerator<object[]> GetEnumerator()
     {
-        /// <inheritdoc/>
-        public IEnumerator<object[]> GetEnumerator()
+        var baseContentPath = Path.Combine("Content", "Transformations", "Species");
+        var speciesDirectories = Directory.EnumerateDirectories(baseContentPath);
+
+        foreach (var speciesDirectory in speciesDirectories)
         {
-            var baseContentPath = Path.Combine("Content", "Transformations", "Species");
-            var speciesDirectories = Directory.EnumerateDirectories(baseContentPath);
-
-            foreach (var speciesDirectory in speciesDirectories)
-            {
-                yield return new object[] { Path.Combine(speciesDirectory, "Species.yml") };
-            }
+            yield return new object[] { Path.Combine(speciesDirectory, "Species.yml") };
         }
-
-        /// <inheritdoc/>
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
+
+    /// <inheritdoc/>
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

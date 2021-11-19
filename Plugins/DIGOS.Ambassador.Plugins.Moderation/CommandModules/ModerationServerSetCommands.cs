@@ -37,94 +37,93 @@ using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
-namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
+namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules;
+
+public partial class ModerationCommands
 {
-    public partial class ModerationCommands
+    /// <summary>
+    /// Server setter commands.
+    /// </summary>
+    [Group("server-set")]
+    public class ModerationServerSetCommands : CommandGroup
     {
+        private readonly ModerationService _moderation;
+        private readonly ICommandContext _context;
+        private readonly FeedbackService _feedback;
+
         /// <summary>
-        /// Server setter commands.
+        /// Initializes a new instance of the <see cref="ModerationServerSetCommands"/> class.
         /// </summary>
-        [Group("server-set")]
-        public class ModerationServerSetCommands : CommandGroup
+        /// <param name="moderation">The moderation service.</param>
+        /// <param name="context">The command context.</param>
+        /// <param name="feedback">The feedback service.</param>
+        public ModerationServerSetCommands
+        (
+            ModerationService moderation,
+            ICommandContext context,
+            FeedbackService feedback
+        )
         {
-            private readonly ModerationService _moderation;
-            private readonly ICommandContext _context;
-            private readonly FeedbackService _feedback;
+            _moderation = moderation;
+            _context = context;
+            _feedback = feedback;
+        }
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="ModerationServerSetCommands"/> class.
-            /// </summary>
-            /// <param name="moderation">The moderation service.</param>
-            /// <param name="context">The command context.</param>
-            /// <param name="feedback">The feedback service.</param>
-            public ModerationServerSetCommands
-            (
-                ModerationService moderation,
-                ICommandContext context,
-                FeedbackService feedback
-            )
+        /// <summary>
+        /// Sets the moderation log channel.
+        /// </summary>
+        /// <param name="channel">The channel.</param>
+        [Command("moderation-log-channel")]
+        [Description("Sets the moderation log channel.")]
+        [RequirePermission(typeof(EditModerationServerSettings), PermissionTarget.Self)]
+        [RequireContext(ChannelContext.Guild)]
+        public async Task<Result<FeedbackMessage>> SetModerationLogChannelAsync(IChannel channel)
+        {
+            var setChannel = await _moderation.SetModerationLogChannelAsync(_context.GuildID.Value, channel.ID);
+            if (!setChannel.IsSuccess)
             {
-                _moderation = moderation;
-                _context = context;
-                _feedback = feedback;
+                return Result<FeedbackMessage>.FromError(setChannel);
             }
 
-            /// <summary>
-            /// Sets the moderation log channel.
-            /// </summary>
-            /// <param name="channel">The channel.</param>
-            [Command("moderation-log-channel")]
-            [Description("Sets the moderation log channel.")]
-            [RequirePermission(typeof(EditModerationServerSettings), PermissionTarget.Self)]
-            [RequireContext(ChannelContext.Guild)]
-            public async Task<Result<FeedbackMessage>> SetModerationLogChannelAsync(IChannel channel)
-            {
-                var setChannel = await _moderation.SetModerationLogChannelAsync(_context.GuildID.Value, channel.ID);
-                if (!setChannel.IsSuccess)
-                {
-                    return Result<FeedbackMessage>.FromError(setChannel);
-                }
+            return new FeedbackMessage("Channel set.", _feedback.Theme.Secondary);
+        }
 
-                return new FeedbackMessage("Channel set.", _feedback.Theme.Secondary);
+        /// <summary>
+        /// Sets the event monitoring channel.
+        /// </summary>
+        /// <param name="channel">The channel.</param>
+        [Command("event-monitoring-channel")]
+        [Description("Sets the event monitoring channel.")]
+        [RequirePermission(typeof(EditModerationServerSettings), PermissionTarget.Self)]
+        [RequireContext(ChannelContext.Guild)]
+        public async Task<Result<FeedbackMessage>> SetMonitoringChannelAsync(IChannel channel)
+        {
+            var setChannel = await _moderation.SetMonitoringChannelAsync(_context.GuildID.Value, channel.ID);
+            if (!setChannel.IsSuccess)
+            {
+                return Result<FeedbackMessage>.FromError(setChannel);
             }
 
-            /// <summary>
-            /// Sets the event monitoring channel.
-            /// </summary>
-            /// <param name="channel">The channel.</param>
-            [Command("event-monitoring-channel")]
-            [Description("Sets the event monitoring channel.")]
-            [RequirePermission(typeof(EditModerationServerSettings), PermissionTarget.Self)]
-            [RequireContext(ChannelContext.Guild)]
-            public async Task<Result<FeedbackMessage>> SetMonitoringChannelAsync(IChannel channel)
-            {
-                var setChannel = await _moderation.SetMonitoringChannelAsync(_context.GuildID.Value, channel.ID);
-                if (!setChannel.IsSuccess)
-                {
-                    return Result<FeedbackMessage>.FromError(setChannel);
-                }
+            return new FeedbackMessage("Channel set.", _feedback.Theme.Secondary);
+        }
 
-                return new FeedbackMessage("Channel set.", _feedback.Theme.Secondary);
+        /// <summary>
+        /// Sets the warning threshold.
+        /// </summary>
+        /// <param name="threshold">The threshold.</param>
+        [Command("warning-threshold")]
+        [Description("Sets the warning threshold.")]
+        [RequirePermission(typeof(EditModerationServerSettings), PermissionTarget.Self)]
+        [RequireContext(ChannelContext.Guild)]
+        public async Task<Result<FeedbackMessage>> SetWarningThresholdAsync(int threshold)
+        {
+            var setChannel = await _moderation.SetWarningThresholdAsync(_context.GuildID.Value, threshold);
+            if (!setChannel.IsSuccess)
+            {
+                return Result<FeedbackMessage>.FromError(setChannel);
             }
 
-            /// <summary>
-            /// Sets the warning threshold.
-            /// </summary>
-            /// <param name="threshold">The threshold.</param>
-            [Command("warning-threshold")]
-            [Description("Sets the warning threshold.")]
-            [RequirePermission(typeof(EditModerationServerSettings), PermissionTarget.Self)]
-            [RequireContext(ChannelContext.Guild)]
-            public async Task<Result<FeedbackMessage>> SetWarningThresholdAsync(int threshold)
-            {
-                var setChannel = await _moderation.SetWarningThresholdAsync(_context.GuildID.Value, threshold);
-                if (!setChannel.IsSuccess)
-                {
-                    return Result<FeedbackMessage>.FromError(setChannel);
-                }
-
-                return new FeedbackMessage("Threshold set.", _feedback.Theme.Secondary);
-            }
+            return new FeedbackMessage("Threshold set.", _feedback.Theme.Secondary);
         }
     }
 }

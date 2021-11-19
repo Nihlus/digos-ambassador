@@ -28,67 +28,66 @@ using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using Remora.Discord.Core;
 
-namespace DIGOS.Ambassador.Plugins.Core.Model.Servers
+namespace DIGOS.Ambassador.Plugins.Core.Model.Servers;
+
+/// <summary>
+/// Represents stored settings for a Discord server.
+/// </summary>
+[Table("Servers", Schema = "Core")]
+public class Server : EFEntity
 {
     /// <summary>
-    /// Represents stored settings for a Discord server.
+    /// Gets the globally unique guild ID of the server.
     /// </summary>
-    [Table("Servers", Schema = "Core")]
-    public class Server : EFEntity
+    public virtual Snowflake DiscordID { get; private set; }
+
+    /// <summary>
+    /// Gets a value indicating whether or not the server allows NSFW content globally.
+    /// </summary>
+    public bool IsNSFW { get; internal set; }
+
+    /// <summary>
+    /// Gets a value indicating whether or not the server should suppress permission warnings.
+    /// </summary>
+    public bool SuppressPermissionWarnings { get; internal set; }
+
+    /// <summary>
+    /// Gets the users known to the bot on this server.
+    /// </summary>
+    public virtual List<ServerUser> KnownUsers { get; internal set; } = new();
+
+    /// <summary>
+    /// Gets the server's description.
+    /// </summary>
+    public string? Description { get; internal set; }
+
+    /// <summary>
+    /// Gets a value indicating whether the first-join message should be sent to users when they first join the
+    /// server.
+    /// </summary>
+    public bool SendJoinMessage { get; internal set; }
+
+    /// <summary>
+    /// Gets the server's first-join message.
+    /// </summary>
+    public string? JoinMessage { get; internal set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Server"/> class.
+    /// </summary>
+    /// <param name="discordID">The server's Discord ID.</param>
+    public Server(Snowflake discordID)
     {
-        /// <summary>
-        /// Gets the globally unique guild ID of the server.
-        /// </summary>
-        public virtual Snowflake DiscordID { get; private set; }
+        this.DiscordID = discordID;
+    }
 
-        /// <summary>
-        /// Gets a value indicating whether or not the server allows NSFW content globally.
-        /// </summary>
-        public bool IsNSFW { get; internal set; }
-
-        /// <summary>
-        /// Gets a value indicating whether or not the server should suppress permission warnings.
-        /// </summary>
-        public bool SuppressPermissionWarnings { get; internal set; }
-
-        /// <summary>
-        /// Gets the users known to the bot on this server.
-        /// </summary>
-        public virtual List<ServerUser> KnownUsers { get; internal set; } = new();
-
-        /// <summary>
-        /// Gets the server's description.
-        /// </summary>
-        public string? Description { get; internal set; }
-
-        /// <summary>
-        /// Gets a value indicating whether the first-join message should be sent to users when they first join the
-        /// server.
-        /// </summary>
-        public bool SendJoinMessage { get; internal set; }
-
-        /// <summary>
-        /// Gets the server's first-join message.
-        /// </summary>
-        public string? JoinMessage { get; internal set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Server"/> class.
-        /// </summary>
-        /// <param name="discordID">The server's Discord ID.</param>
-        public Server(Snowflake discordID)
-        {
-            this.DiscordID = discordID;
-        }
-
-        /// <summary>
-        /// Determines whether or not a given user is known to this server.
-        /// </summary>
-        /// <param name="user">The user.</param>
-        /// <returns>true if the user is known; otherwise, false.</returns>
-        public bool IsUserKnown(Snowflake user)
-        {
-            return this.KnownUsers.Any(su => su.User.DiscordID == user);
-        }
+    /// <summary>
+    /// Determines whether or not a given user is known to this server.
+    /// </summary>
+    /// <param name="user">The user.</param>
+    /// <returns>true if the user is known; otherwise, false.</returns>
+    public bool IsUserKnown(Snowflake user)
+    {
+        return this.KnownUsers.Any(su => su.User.DiscordID == user);
     }
 }

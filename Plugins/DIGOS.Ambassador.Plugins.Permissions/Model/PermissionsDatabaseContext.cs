@@ -26,33 +26,32 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Plugins.Permissions.Model
+namespace DIGOS.Ambassador.Plugins.Permissions.Model;
+
+/// <summary>
+/// Represents the database model of the dossier plugin.
+/// </summary>
+public class PermissionsDatabaseContext : AmbassadorDbContext
 {
+    private const string SchemaName = "PermissionModule";
+
     /// <summary>
-    /// Represents the database model of the dossier plugin.
+    /// Gets or sets the table where role-associated permissions are stored.
     /// </summary>
-    public class PermissionsDatabaseContext : AmbassadorDbContext
+    public DbSet<RolePermission> RolePermissions { get; [UsedImplicitly] set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the table where user-associated permissions are stored.
+    /// </summary>
+    public DbSet<UserPermission> UserPermissions { get; [UsedImplicitly] set; } = null!;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PermissionsDatabaseContext"/> class.
+    /// </summary>
+    /// <param name="contextOptions">The context options.</param>
+    [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
+    public PermissionsDatabaseContext(DbContextOptions<PermissionsDatabaseContext> contextOptions)
+        : base(SchemaName, contextOptions)
     {
-        private const string SchemaName = "PermissionModule";
-
-        /// <summary>
-        /// Gets or sets the table where role-associated permissions are stored.
-        /// </summary>
-        public DbSet<RolePermission> RolePermissions { get; [UsedImplicitly] set; } = null!;
-
-        /// <summary>
-        /// Gets or sets the table where user-associated permissions are stored.
-        /// </summary>
-        public DbSet<UserPermission> UserPermissions { get; [UsedImplicitly] set; } = null!;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PermissionsDatabaseContext"/> class.
-        /// </summary>
-        /// <param name="contextOptions">The context options.</param>
-        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
-        public PermissionsDatabaseContext(DbContextOptions<PermissionsDatabaseContext> contextOptions)
-            : base(SchemaName, contextOptions)
-        {
-        }
     }
 }

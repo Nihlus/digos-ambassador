@@ -37,63 +37,62 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable CS8625
 
-namespace DIGOS.Ambassador.Tests.Plugins.Transformations
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
+
+public class DescriptionBuilderTests
 {
-    public class DescriptionBuilderTests
+    private const string SampleFluentText = "{@f|They have} long {@colour} hair. {@f|Their} name is {@target}. {@f|They are} a DIGOS unit.";
+    private const string ExpectedText = "She has long fluorescent white hair. Her name is Amby. She is a DIGOS unit.";
+
+    [Fact]
+    public void ReplacesFluentTokensCorrectly()
     {
-        private const string SampleFluentText = "{@f|They have} long {@colour} hair. {@f|Their} name is {@target}. {@f|They are} a DIGOS unit.";
-        private const string ExpectedText = "She has long fluorescent white hair. Her name is Amby. She is a DIGOS unit.";
+        var character = new Character
+        (
+            new User(new Snowflake(0)),
+            new Server(new Snowflake(0)),
+            "Amby",
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            pronounProviderFamily: "Feminine"
+        );
 
-        [Fact]
-        public void ReplacesFluentTokensCorrectly()
+        var hairColour = new Colour(Shade.White, ShadeModifier.Fluorescent);
+
+        var hairTransformation = new Transformation
+        (
+            new Species("dummy", "dummy", "dummy"),
+            "dummy",
+            hairColour,
+            "dummy",
+            "dummy",
+            SampleFluentText
+        )
         {
-            var character = new Character
-            (
-                new User(new Snowflake(0)),
-                new Server(new Snowflake(0)),
-                "Amby",
-                string.Empty,
-                string.Empty,
-                string.Empty,
-                string.Empty,
-                pronounProviderFamily: "Feminine"
-            );
+            Part = Bodypart.Hair,
+        };
 
-            var hairColour = new Colour(Shade.White, ShadeModifier.Fluorescent);
+        var hairComponent = AppearanceComponent.CreateFrom(hairTransformation);
 
-            var hairTransformation = new Transformation
-            (
-                new Species("dummy", "dummy", "dummy"),
-                "dummy",
-                hairColour,
-                "dummy",
-                "dummy",
-                SampleFluentText
-            )
-            {
-                Part = Bodypart.Hair,
-            };
+        var appearance = new Appearance(character);
+        appearance.Components.Add(hairComponent);
 
-            var hairComponent = AppearanceComponent.CreateFrom(hairTransformation);
+        var pronounService = new PronounService();
+        pronounService.WithPronounProvider(new FemininePronounProvider());
 
-            var appearance = new Appearance(character);
-            appearance.Components.Add(hairComponent);
+        var characterService = new CharacterService(null!, null!, null!, pronounService);
 
-            var pronounService = new PronounService();
-            pronounService.WithPronounProvider(new FemininePronounProvider());
+        var serviceProvider = new ServiceCollection()
+            .AddSingleton(pronounService)
+            .AddSingleton(characterService)
+            .BuildServiceProvider();
 
-            var characterService = new CharacterService(null!, null!, null!, pronounService);
+        var descriptionBuilder = new TransformationDescriptionBuilder(serviceProvider, new TransformationText());
 
-            var serviceProvider = new ServiceCollection()
-                .AddSingleton(pronounService)
-                .AddSingleton(characterService)
-                .BuildServiceProvider();
+        var result = descriptionBuilder.ReplaceTokensWithContent(SampleFluentText, appearance, hairComponent);
 
-            var descriptionBuilder = new TransformationDescriptionBuilder(serviceProvider, new TransformationText());
-
-            var result = descriptionBuilder.ReplaceTokensWithContent(SampleFluentText, appearance, hairComponent);
-
-            Assert.Equal(ExpectedText, result);
-        }
+        Assert.Equal(ExpectedText, result);
     }
 }

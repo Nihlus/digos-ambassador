@@ -28,36 +28,35 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Core
+namespace DIGOS.Ambassador.Tests.Plugins.Core;
+
+public static partial class UserServiceTests
 {
-    public static partial class UserServiceTests
+    public class IsUserKnownAsync : UserServiceTestBase
     {
-        public class IsUserKnownAsync : UserServiceTestBase
+        private readonly Snowflake _discordUser;
+
+        public IsUserKnownAsync()
         {
-            private readonly Snowflake _discordUser;
+            _discordUser = new Snowflake(0);
+        }
 
-            public IsUserKnownAsync()
-            {
-                _discordUser = new Snowflake(0);
-            }
+        [Fact]
+        public async Task ReturnsFalseIfUserHasNotBeenRegistered()
+        {
+            var result = await this.Users.IsUserKnownAsync(_discordUser);
 
-            [Fact]
-            public async Task ReturnsFalseIfUserHasNotBeenRegistered()
-            {
-                var result = await this.Users.IsUserKnownAsync(_discordUser);
+            Assert.False(result);
+        }
 
-                Assert.False(result);
-            }
+        [Fact]
+        public async Task ReturnsTrueIfUserHasBeenRegistered()
+        {
+            await this.Users.AddUserAsync(_discordUser);
 
-            [Fact]
-            public async Task ReturnsTrueIfUserHasBeenRegistered()
-            {
-                await this.Users.AddUserAsync(_discordUser);
+            var result = await this.Users.IsUserKnownAsync(_discordUser);
 
-                var result = await this.Users.IsUserKnownAsync(_discordUser);
-
-                Assert.True(result);
-            }
+            Assert.True(result);
         }
     }
 }

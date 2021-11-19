@@ -28,47 +28,46 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Core
+namespace DIGOS.Ambassador.Tests.Plugins.Core;
+
+public static partial class UserServiceTests
 {
-    public static partial class UserServiceTests
+    public class GetUserAsync : UserServiceTestBase
     {
-        public class GetUserAsync : UserServiceTestBase
+        private readonly Snowflake _discordUser;
+
+        public GetUserAsync()
         {
-            private readonly Snowflake _discordUser;
+            _discordUser = new Snowflake(0);
+        }
 
-            public GetUserAsync()
-            {
-                _discordUser = new Snowflake(0);
-            }
+        [Fact]
+        public async Task ReturnsFalseIfUserHasNotBeenRegistered()
+        {
+            var result = await this.Users.GetUserAsync(_discordUser);
 
-            [Fact]
-            public async Task ReturnsFalseIfUserHasNotBeenRegistered()
-            {
-                var result = await this.Users.GetUserAsync(_discordUser);
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsTrueIfUserHaBeenRegistered()
+        {
+            await this.Users.AddUserAsync(_discordUser);
 
-            [Fact]
-            public async Task ReturnsTrueIfUserHaBeenRegistered()
-            {
-                await this.Users.AddUserAsync(_discordUser);
+            var result = await this.Users.GetUserAsync(_discordUser);
 
-                var result = await this.Users.GetUserAsync(_discordUser);
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsCorrectUserIfUserHasBeenRegistered()
+        {
+            await this.Users.AddUserAsync(_discordUser);
 
-            [Fact]
-            public async Task ReturnsCorrectUserIfUserHasBeenRegistered()
-            {
-                await this.Users.AddUserAsync(_discordUser);
+            var result = await this.Users.GetUserAsync(_discordUser);
+            var user = result.Entity;
 
-                var result = await this.Users.GetUserAsync(_discordUser);
-                var user = result.Entity;
-
-                Assert.Equal(_discordUser, user.DiscordID);
-            }
+            Assert.Equal(_discordUser, user.DiscordID);
         }
     }
 }

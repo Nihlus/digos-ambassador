@@ -30,98 +30,98 @@ using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Responders
-{
-    /// <summary>
-    /// Responds to message creations, updating relevant autoroles.
-    /// </summary>
-    public class MessageCountConditionResponder : IResponder<IMessageCreate>
-    {
-        private readonly AutoroleService _autoroles;
-        private readonly AutoroleUpdateService _autoroleUpdates;
-        private readonly UserStatisticsService _statistics;
+namespace DIGOS.Ambassador.Plugins.Autorole.Responders;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MessageCountConditionResponder"/> class.
-        /// </summary>
-        /// <param name="autoroles">The autorole service.</param>
-        /// <param name="statistics">The statistics service.</param>
-        /// <param name="autoroleUpdates">The autorole update service.</param>
-        public MessageCountConditionResponder
-        (
-            AutoroleService autoroles,
-            UserStatisticsService statistics,
-            AutoroleUpdateService autoroleUpdates
-        )
+/// <summary>
+/// Responds to message creations, updating relevant autoroles.
+/// </summary>
+public class MessageCountConditionResponder : IResponder<IMessageCreate>
+{
+    private readonly AutoroleService _autoroles;
+    private readonly AutoroleUpdateService _autoroleUpdates;
+    private readonly UserStatisticsService _statistics;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MessageCountConditionResponder"/> class.
+    /// </summary>
+    /// <param name="autoroles">The autorole service.</param>
+    /// <param name="statistics">The statistics service.</param>
+    /// <param name="autoroleUpdates">The autorole update service.</param>
+    public MessageCountConditionResponder
+    (
+        AutoroleService autoroles,
+        UserStatisticsService statistics,
+        AutoroleUpdateService autoroleUpdates
+    )
+    {
+        _autoroles = autoroles;
+        _statistics = statistics;
+        _autoroleUpdates = autoroleUpdates;
+    }
+
+    /// <inheritdoc />
+    public async Task<Result> RespondAsync(IMessageCreate gatewayEvent, CancellationToken ct = default)
+    {
+        if (!gatewayEvent.GuildID.IsDefined(out var guildID))
         {
-            _autoroles = autoroles;
-            _statistics = statistics;
-            _autoroleUpdates = autoroleUpdates;
+            return Result.FromSuccess();
         }
 
-        /// <inheritdoc />
-        public async Task<Result> RespondAsync(IMessageCreate gatewayEvent, CancellationToken ct = default)
+        using var transaction = TransactionFactory.Create();
+
+        var user = gatewayEvent.Author.ID;
+
+        var getUserStatistics = await _statistics.GetOrCreateUserServerStatisticsAsync(guildID, user, ct);
+        if (!getUserStatistics.IsSuccess)
         {
-            if (!gatewayEvent.GuildID.IsDefined(out var guildID))
-            {
-                return Result.FromSuccess();
-            }
+            return Result.FromError(getUserStatistics);
+        }
 
-            using var transaction = TransactionFactory.Create();
+        var userStatistics = getUserStatistics.Entity;
+        var setTotalCount = await _statistics.SetTotalMessageCountAsync
+        (
+            userStatistics,
+            (userStatistics.TotalMessageCount ?? 0) + 1,
+            ct
+        );
 
-            var user = gatewayEvent.Author.ID;
+        if (!setTotalCount.IsSuccess)
+        {
+            return setTotalCount;
+        }
 
-            var getUserStatistics = await _statistics.GetOrCreateUserServerStatisticsAsync(guildID, user, ct);
-            if (!getUserStatistics.IsSuccess)
-            {
-                return Result.FromError(getUserStatistics);
-            }
+        var channel = gatewayEvent.ChannelID;
+        var getChannelStatistics = await _statistics.GetOrCreateUserChannelStatisticsAsync
+        (
+            guildID,
+            user,
+            channel,
+            ct
+        );
 
-            var userStatistics = getUserStatistics.Entity;
-            var setTotalCount = await _statistics.SetTotalMessageCountAsync
-            (
-                userStatistics,
-                (userStatistics.TotalMessageCount ?? 0) + 1,
-                ct
-            );
+        if (!getChannelStatistics.IsSuccess)
+        {
+            return Result.FromError(getChannelStatistics);
+        }
 
-            if (!setTotalCount.IsSuccess)
-            {
-                return setTotalCount;
-            }
+        var channelStatistics = getChannelStatistics.Entity;
+        var setChannelCount = await _statistics.SetChannelMessageCountAsync
+        (
+            channelStatistics,
+            (channelStatistics.MessageCount ?? 0) + 1,
+            ct
+        );
 
-            var channel = gatewayEvent.ChannelID;
-            var getChannelStatistics = await _statistics.GetOrCreateUserChannelStatisticsAsync
-            (
-                guildID,
-                user,
-                channel,
-                ct
-            );
+        if (!setChannelCount.IsSuccess)
+        {
+            return setChannelCount;
+        }
 
-            if (!getChannelStatistics.IsSuccess)
-            {
-                return Result.FromError(getChannelStatistics);
-            }
-
-            var channelStatistics = getChannelStatistics.Entity;
-            var setChannelCount = await _statistics.SetChannelMessageCountAsync
-            (
-                channelStatistics,
-                (channelStatistics.MessageCount ?? 0) + 1,
-                ct
-            );
-
-            if (!setChannelCount.IsSuccess)
-            {
-                return setChannelCount;
-            }
-
-            // Finally, update the relevant autoroles
-            var autoroles = await _autoroles.GetAutorolesAsync
-            (
-                guildID,
-                q => q
+        // Finally, update the relevant autoroles
+        var autoroles = await _autoroles.GetAutorolesAsync
+        (
+            guildID,
+            q => q
                 .Where(a => a.IsEnabled)
                 .Where
                 (
@@ -132,20 +132,19 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Responders
                             c.GetType() == typeof(MessageCountInChannelCondition)
                     )
                 ),
-                ct
-            );
+            ct
+        );
 
-            foreach (var autorole in autoroles)
+        foreach (var autorole in autoroles)
+        {
+            var updateAutorole = await _autoroleUpdates.UpdateAutoroleForUserAsync(autorole, guildID, user, ct);
+            if (!updateAutorole.IsSuccess)
             {
-                var updateAutorole = await _autoroleUpdates.UpdateAutoroleForUserAsync(autorole, guildID, user, ct);
-                if (!updateAutorole.IsSuccess)
-                {
-                    return Result.FromError(updateAutorole);
-                }
+                return Result.FromError(updateAutorole);
             }
-
-            transaction.Complete();
-            return Result.FromSuccess();
         }
+
+        transaction.Complete();
+        return Result.FromSuccess();
     }
 }

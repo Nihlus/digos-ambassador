@@ -30,40 +30,39 @@ using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using Remora.Discord.Core;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Transformations
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
+
+public partial class TransformationServiceTests
 {
-    public partial class TransformationServiceTests
+    public class SetDefaultProtectionTypeAsync : TransformationServiceTestBase
     {
-        public class SetDefaultProtectionTypeAsync : TransformationServiceTestBase
+        private readonly Snowflake _user = new Snowflake(0);
+
+        [Fact]
+        public async Task CanSetType()
         {
-            private readonly Snowflake _user = new Snowflake(0);
+            var expected = ProtectionType.Whitelist;
+            var result = await this.Transformations.SetDefaultProtectionTypeAsync
+            (
+                _user,
+                expected
+            );
 
-            [Fact]
-            public async Task CanSetType()
-            {
-                var expected = ProtectionType.Whitelist;
-                var result = await this.Transformations.SetDefaultProtectionTypeAsync
-                (
-                    _user,
-                    expected
-                );
+            Assert.True(result.IsSuccess);
+            Assert.Equal(expected, this.Database.GlobalUserProtections.First().DefaultType);
+        }
 
-                Assert.True(result.IsSuccess);
-                Assert.Equal(expected, this.Database.GlobalUserProtections.First().DefaultType);
-            }
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfSameTypeIsAlreadySet()
+        {
+            var currentType = ProtectionType.Blacklist;
+            var result = await this.Transformations.SetDefaultProtectionTypeAsync
+            (
+                _user,
+                currentType
+            );
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfSameTypeIsAlreadySet()
-            {
-                var currentType = ProtectionType.Blacklist;
-                var result = await this.Transformations.SetDefaultProtectionTypeAsync
-                (
-                    _user,
-                    currentType
-                );
-
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
         }
     }
 }

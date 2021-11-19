@@ -23,20 +23,19 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
 
-namespace DIGOS.Ambassador.Plugins.Moderation.Permissions
+namespace DIGOS.Ambassador.Plugins.Moderation.Permissions;
+
+/// <summary>
+/// Represents a permission that allows a user to edit server-specific moderation settings.
+/// </summary>
+public sealed class EditModerationServerSettings : Permission
 {
-    /// <summary>
-    /// Represents a permission that allows a user to edit server-specific moderation settings.
-    /// </summary>
-    public sealed class EditModerationServerSettings : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("A41141B7-1010-43DA-9372-2866B1CB78F7");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("A41141B7-1010-43DA-9372-2866B1CB78F7");
 
-        /// <inheritdoc />
-        public override string FriendlyName => nameof(EditModerationServerSettings);
+    /// <inheritdoc />
+    public override string FriendlyName => nameof(EditModerationServerSettings);
 
-        /// <inheritdoc />
-        public override string Description => "Allows you to edit server-specific moderation settings.";
-    }
+    /// <inheritdoc />
+    public override string Description => "Allows you to edit server-specific moderation settings.";
 }

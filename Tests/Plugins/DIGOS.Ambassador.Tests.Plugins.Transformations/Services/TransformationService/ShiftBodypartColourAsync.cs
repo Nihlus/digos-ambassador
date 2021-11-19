@@ -40,186 +40,185 @@ using Remora.Discord.Core;
 using Xunit;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Transformations
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
+
+public partial class TransformationServiceTests
 {
-    public partial class TransformationServiceTests
+    public class ShiftBodypartColourAsync : TransformationServiceTestBase
     {
-        public class ShiftBodypartColourAsync : TransformationServiceTestBase
+        private readonly Snowflake _guild = new Snowflake(1);
+        private readonly Snowflake _owner = new Snowflake(2);
+        private readonly Snowflake _invoker = new Snowflake(3);
+
+        private readonly Colour _newColour;
+        private Character _character = null!;
+
+        private Colour _originalColour = null!;
+
+        public ShiftBodypartColourAsync()
         {
-            private readonly Snowflake _guild = new Snowflake(1);
-            private readonly Snowflake _owner = new Snowflake(2);
-            private readonly Snowflake _invoker = new Snowflake(3);
-
-            private readonly Colour _newColour;
-            private Character _character = null!;
-
-            private Colour _originalColour = null!;
-
-            public ShiftBodypartColourAsync()
+            if (!Colour.TryParse("bright purple", out var colour))
             {
-                if (!Colour.TryParse("bright purple", out var colour))
-                {
-                    throw new InvalidOperationException("Bad colour.");
-                }
-
-                _newColour = colour;
+                throw new InvalidOperationException("Bad colour.");
             }
 
-            /// <inheritdoc />
-            protected override void RegisterServices(IServiceCollection serviceCollection)
-            {
-                base.RegisterServices(serviceCollection);
+            _newColour = colour;
+        }
 
-                serviceCollection
-                    .AddScoped<OwnedEntityService>()
-                    .AddScoped<CommandService>()
-                    .AddScoped<CharacterService>();
-            }
+        /// <inheritdoc />
+        protected override void RegisterServices(IServiceCollection serviceCollection)
+        {
+            base.RegisterServices(serviceCollection);
 
-            protected override async Task InitializeTestAsync()
-            {
-                // Ensure owner is opted into transformations
-                await this.Transformations.OptInUserAsync
-                (
-                    _owner,
-                    _guild
-                );
+            serviceCollection
+                .AddScoped<OwnedEntityService>()
+                .AddScoped<CommandService>()
+                .AddScoped<CharacterService>();
+        }
 
-                // Create a test character
-                var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
-                var server = (await this.Servers.GetOrRegisterServerAsync(_guild)).Entity;
+        protected override async Task InitializeTestAsync()
+        {
+            // Ensure owner is opted into transformations
+            await this.Transformations.OptInUserAsync
+            (
+                _owner,
+                _guild
+            );
 
-                var character = new Character
-                (
-                    owner,
-                    server,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    "They"
-                );
+            // Create a test character
+            var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
+            var server = (await this.Servers.GetOrRegisterServerAsync(_guild)).Entity;
 
-                this.CharacterDatabase.Characters.Update(character);
-                await this.CharacterDatabase.SaveChangesAsync();
+            var character = new Character
+            (
+                owner,
+                server,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                "They"
+            );
 
-                _character = this.CharacterDatabase.Characters.First();
+            this.CharacterDatabase.Characters.Update(character);
+            await this.CharacterDatabase.SaveChangesAsync();
 
-                // Set up the default appearance
-                var getAppearanceConfigurationResult = await this.Transformations.GetOrCreateCurrentAppearanceAsync
-                (
-                    _character
-                );
+            _character = this.CharacterDatabase.Characters.First();
 
-                var appearance = getAppearanceConfigurationResult.Entity;
-                _originalColour = appearance.GetAppearanceComponent(Bodypart.Face, Chirality.Center).BaseColour;
-            }
+            // Set up the default appearance
+            var getAppearanceConfigurationResult = await this.Transformations.GetOrCreateCurrentAppearanceAsync
+            (
+                _character
+            );
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfUserIsNotAllowedToTransformTarget()
-            {
-                await this.Transformations.BlacklistUserAsync(_owner, _invoker);
+            var appearance = getAppearanceConfigurationResult.Entity;
+            _originalColour = appearance.GetAppearanceComponent(Bodypart.Face, Chirality.Center).BaseColour;
+        }
 
-                var result = await this.Transformations.ShiftBodypartColourAsync
-                (
-                    _invoker,
-                    _character,
-                    Bodypart.Face,
-                    _newColour
-                );
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfUserIsNotAllowedToTransformTarget()
+        {
+            await this.Transformations.BlacklistUserAsync(_owner, _invoker);
 
-                Assert.False(result.IsSuccess);
-            }
+            var result = await this.Transformations.ShiftBodypartColourAsync
+            (
+                _invoker,
+                _character,
+                Bodypart.Face,
+                _newColour
+            );
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfCharacterDoesNotHaveBodypart()
-            {
-                var result = await this.Transformations.ShiftBodypartColourAsync
-                (
-                    _invoker,
-                    _character,
-                    Bodypart.Wing,
-                    _newColour,
-                    Chirality.Left
-                );
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfCharacterDoesNotHaveBodypart()
+        {
+            var result = await this.Transformations.ShiftBodypartColourAsync
+            (
+                _invoker,
+                _character,
+                Bodypart.Wing,
+                _newColour,
+                Chirality.Left
+            );
 
-            [Fact]
-            public async Task ReturnsSuccessfulResultIfBodypartIsAlreadyThatColour()
-            {
-                var result = await this.Transformations.ShiftBodypartColourAsync
-                (
-                    _invoker,
-                    _character,
-                    Bodypart.Face,
-                    _originalColour
-                );
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsSuccessfulResultIfBodypartIsAlreadyThatColour()
+        {
+            var result = await this.Transformations.ShiftBodypartColourAsync
+            (
+                _invoker,
+                _character,
+                Bodypart.Face,
+                _originalColour
+            );
 
-            [Fact]
-            public async Task ReturnsNoChangeIfBodypartIsAlreadyThatColour()
-            {
-                var result = await this.Transformations.ShiftBodypartColourAsync
-                (
-                    _invoker,
-                    _character,
-                    Bodypart.Face,
-                    _originalColour
-                );
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.Equal(ShiftBodypartAction.Nothing, result.Entity.Action);
-            }
+        [Fact]
+        public async Task ReturnsNoChangeIfBodypartIsAlreadyThatColour()
+        {
+            var result = await this.Transformations.ShiftBodypartColourAsync
+            (
+                _invoker,
+                _character,
+                Bodypart.Face,
+                _originalColour
+            );
 
-            [Fact]
-            public async Task CanShiftBodypartColour()
-            {
-                var result = await this.Transformations.ShiftBodypartColourAsync
-                (
-                    _invoker,
-                    _character,
-                    Bodypart.Face,
-                    _newColour
-                );
+            Assert.Equal(ShiftBodypartAction.Nothing, result.Entity.Action);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public async Task CanShiftBodypartColour()
+        {
+            var result = await this.Transformations.ShiftBodypartColourAsync
+            (
+                _invoker,
+                _character,
+                Bodypart.Face,
+                _newColour
+            );
 
-            [Fact]
-            public async Task ShiftsBodypartIntoCorrectColour()
-            {
-                await this.Transformations.ShiftBodypartColourAsync
-                (
-                    _invoker,
-                    _character,
-                    Bodypart.Face,
-                    _newColour
-                );
+            Assert.True(result.IsSuccess);
+        }
 
-                var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity;
+        [Fact]
+        public async Task ShiftsBodypartIntoCorrectColour()
+        {
+            await this.Transformations.ShiftBodypartColourAsync
+            (
+                _invoker,
+                _character,
+                Bodypart.Face,
+                _newColour
+            );
 
-                var face = appearance.Components.First(c => c.Bodypart == Bodypart.Face);
-                Assert.True(_newColour.IsSameColourAs(face.BaseColour));
-            }
+            var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity;
 
-            [Fact]
-            public async Task ReturnsShiftMessage()
-            {
-                var result = await this.Transformations.ShiftBodypartColourAsync
-                (
-                    _invoker,
-                    _character,
-                    Bodypart.Face,
-                    _newColour
-                );
+            var face = appearance.Components.First(c => c.Bodypart == Bodypart.Face);
+            Assert.True(_newColour.IsSameColourAs(face.BaseColour));
+        }
 
-                Assert.NotNull(result.Entity.ShiftMessage);
-                Assert.NotEmpty(result.Entity.ShiftMessage);
-            }
+        [Fact]
+        public async Task ReturnsShiftMessage()
+        {
+            var result = await this.Transformations.ShiftBodypartColourAsync
+            (
+                _invoker,
+                _character,
+                Bodypart.Face,
+                _newColour
+            );
+
+            Assert.NotNull(result.Entity.ShiftMessage);
+            Assert.NotEmpty(result.Entity.ShiftMessage);
         }
     }
 }

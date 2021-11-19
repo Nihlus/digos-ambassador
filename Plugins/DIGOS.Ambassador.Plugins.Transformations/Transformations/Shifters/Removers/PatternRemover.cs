@@ -27,84 +27,83 @@ using DIGOS.Ambassador.Plugins.Transformations.Results;
 using Humanizer;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters;
+
+/// <summary>
+/// Shifts the colour of components.
+/// </summary>
+internal sealed class PatternRemover : AppearanceRemover
 {
+    private readonly TransformationDescriptionBuilder _descriptionBuilder;
+
     /// <summary>
-    /// Shifts the colour of components.
+    /// Initializes a new instance of the <see cref="PatternRemover"/> class.
     /// </summary>
-    internal sealed class PatternRemover : AppearanceRemover
+    /// <param name="appearance">The appearance to shift.</param>
+    /// <param name="descriptionBuilder">The description builder.</param>
+    public PatternRemover
+    (
+        Appearance appearance,
+        TransformationDescriptionBuilder descriptionBuilder
+    )
+        : base(appearance)
     {
-        private readonly TransformationDescriptionBuilder _descriptionBuilder;
+        _descriptionBuilder = descriptionBuilder;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PatternRemover"/> class.
-        /// </summary>
-        /// <param name="appearance">The appearance to shift.</param>
-        /// <param name="descriptionBuilder">The description builder.</param>
-        public PatternRemover
-        (
-            Appearance appearance,
-            TransformationDescriptionBuilder descriptionBuilder
-        )
-            : base(appearance)
+    /// <inheritdoc />
+    protected override async Task<Result<ShiftBodypartResult>> RemoveBodypartAsync(Bodypart bodypart, Chirality chirality)
+    {
+        if (!this.Appearance.TryGetAppearanceComponent(bodypart, chirality, out var currentComponent))
         {
-            _descriptionBuilder = descriptionBuilder;
+            return new UserError("The character doesn't have that bodypart.");
         }
 
-        /// <inheritdoc />
-        protected override async Task<Result<ShiftBodypartResult>> RemoveBodypartAsync(Bodypart bodypart, Chirality chirality)
+        if (currentComponent.Pattern is null)
         {
-            if (!this.Appearance.TryGetAppearanceComponent(bodypart, chirality, out var currentComponent))
-            {
-                return new UserError("The character doesn't have that bodypart.");
-            }
-
-            if (currentComponent.Pattern is null)
-            {
-                return new ShiftBodypartResult(await GetNoChangeMessageAsync(bodypart), ShiftBodypartAction.Nothing);
-            }
-
-            currentComponent.Pattern = null;
-            currentComponent.PatternColour = null;
-
-            var shiftMessage = await GetRemoveMessageAsync(bodypart, chirality);
-            return new ShiftBodypartResult(shiftMessage, ShiftBodypartAction.Remove);
+            return new ShiftBodypartResult(await GetNoChangeMessageAsync(bodypart), ShiftBodypartAction.Nothing);
         }
 
-        /// <inheritdoc />
-        protected override Task<string> GetUniformRemoveMessageAsync(Bodypart bodypart)
+        currentComponent.Pattern = null;
+        currentComponent.PatternColour = null;
+
+        var shiftMessage = await GetRemoveMessageAsync(bodypart, chirality);
+        return new ShiftBodypartResult(shiftMessage, ShiftBodypartAction.Remove);
+    }
+
+    /// <inheritdoc />
+    protected override Task<string> GetUniformRemoveMessageAsync(Bodypart bodypart)
+    {
+        var component = this.Appearance.GetAppearanceComponent(bodypart, Chirality.Left);
+        return Task.FromResult(_descriptionBuilder.BuildUniformPatternRemoveMessage(this.Appearance, component));
+    }
+
+    /// <inheritdoc />
+    protected override Task<string> GetRemoveMessageAsync(Bodypart bodypart, Chirality chirality)
+    {
+        var component = this.Appearance.GetAppearanceComponent(bodypart, chirality);
+        return Task.FromResult(_descriptionBuilder.BuildPatternRemoveMessage(this.Appearance, component));
+    }
+
+    /// <inheritdoc />
+    protected override Task<string> GetNoChangeMessageAsync(Bodypart bodypart)
+    {
+        var character = this.Appearance.Character;
+
+        var bodypartHumanized = bodypart.Humanize();
+
+        if (bodypart == Bodypart.Full)
         {
-            var component = this.Appearance.GetAppearanceComponent(bodypart, Chirality.Left);
-            return Task.FromResult(_descriptionBuilder.BuildUniformPatternRemoveMessage(this.Appearance, component));
+            var fullMessage = $"{character.Nickname} doesn't have any patterns.";
+            fullMessage = fullMessage.Transform(To.LowerCase, To.SentenceCase);
+
+            return Task.FromResult(fullMessage);
         }
 
-        /// <inheritdoc />
-        protected override Task<string> GetRemoveMessageAsync(Bodypart bodypart, Chirality chirality)
-        {
-            var component = this.Appearance.GetAppearanceComponent(bodypart, chirality);
-            return Task.FromResult(_descriptionBuilder.BuildPatternRemoveMessage(this.Appearance, component));
-        }
+        var message =
+            $"{character.Name}'s {bodypartHumanized} doesn't have any pattern.";
 
-        /// <inheritdoc />
-        protected override Task<string> GetNoChangeMessageAsync(Bodypart bodypart)
-        {
-            var character = this.Appearance.Character;
-
-            var bodypartHumanized = bodypart.Humanize();
-
-            if (bodypart == Bodypart.Full)
-            {
-                var fullMessage = $"{character.Nickname} doesn't have any patterns.";
-                fullMessage = fullMessage.Transform(To.LowerCase, To.SentenceCase);
-
-                return Task.FromResult(fullMessage);
-            }
-
-            var message =
-                $"{character.Name}'s {bodypartHumanized} doesn't have any pattern.";
-
-            message = message.Transform(To.LowerCase, To.SentenceCase);
-            return Task.FromResult(message);
-        }
+        message = message.Transform(To.LowerCase, To.SentenceCase);
+        return Task.FromResult(message);
     }
 }

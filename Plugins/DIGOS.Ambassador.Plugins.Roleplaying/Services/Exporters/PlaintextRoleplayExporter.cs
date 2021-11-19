@@ -28,104 +28,103 @@ using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Discord.API.Abstractions.Rest;
 
-namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
+namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters;
+
+/// <summary>
+/// Exports roleplays in plaintext format.
+/// </summary>
+internal sealed class PlaintextRoleplayExporter : RoleplayExporterBase
 {
-    /// <summary>
-    /// Exports roleplays in plaintext format.
-    /// </summary>
-    internal sealed class PlaintextRoleplayExporter : RoleplayExporterBase
+    /// <inheritdoc />
+    public override async Task<ExportedRoleplay> ExportAsync(IServiceProvider services, Roleplay roleplay)
     {
-        /// <inheritdoc />
-        public override async Task<ExportedRoleplay> ExportAsync(IServiceProvider services, Roleplay roleplay)
+        var guildAPI = services.GetRequiredService<IDiscordRestGuildAPI>();
+
+        var ownerNickname = $"Unknown user ({roleplay.Owner.DiscordID})";
+
+        var getOwner = await guildAPI.GetGuildMemberAsync(roleplay.Server.DiscordID, roleplay.Owner.DiscordID);
+        if (!getOwner.IsSuccess)
         {
-            var guildAPI = services.GetRequiredService<IDiscordRestGuildAPI>();
+            var messageByUser = roleplay.Messages.FirstOrDefault
+            (
+                m => m.Author == roleplay.Owner
+            );
 
-            var ownerNickname = $"Unknown user ({roleplay.Owner.DiscordID})";
-
-            var getOwner = await guildAPI.GetGuildMemberAsync(roleplay.Server.DiscordID, roleplay.Owner.DiscordID);
-            if (!getOwner.IsSuccess)
+            if (messageByUser is not null)
             {
-                var messageByUser = roleplay.Messages.FirstOrDefault
-                (
-                    m => m.Author == roleplay.Owner
-                );
-
-                if (messageByUser is not null)
-                {
-                    ownerNickname = messageByUser.AuthorNickname;
-                }
+                ownerNickname = messageByUser.AuthorNickname;
             }
-            else
-            {
-                var owner = getOwner.Entity;
-                ownerNickname = owner.Nickname.HasValue
-                    ? owner.Nickname.Value
-                    : owner.User.HasValue
-                        ? owner.User.Value.Username
-                        : throw new InvalidOperationException();
-            }
+        }
+        else
+        {
+            var owner = getOwner.Entity;
+            ownerNickname = owner.Nickname.HasValue
+                ? owner.Nickname.Value
+                : owner.User.HasValue
+                    ? owner.User.Value.Username
+                    : throw new InvalidOperationException();
+        }
 
-            var filePath = Path.GetTempFileName();
-            await using (var of = File.Create(filePath))
-            {
-                await using var ofw = new StreamWriter(of);
-                await ofw.WriteLineAsync($"Roleplay name: {roleplay.Name}");
-                await ofw.WriteLineAsync($"Owner: {ownerNickname}");
+        var filePath = Path.GetTempFileName();
+        await using (var of = File.Create(filePath))
+        {
+            await using var ofw = new StreamWriter(of);
+            await ofw.WriteLineAsync($"Roleplay name: {roleplay.Name}");
+            await ofw.WriteLineAsync($"Owner: {ownerNickname}");
 
-                var joinedUsers = await Task.WhenAll
+            var joinedUsers = await Task.WhenAll
+            (
+                roleplay.JoinedUsers.Select
                 (
-                    roleplay.JoinedUsers.Select
-                    (
-                        async p =>
+                    async p =>
+                    {
+                        var getParticipant = await guildAPI.GetGuildMemberAsync
+                        (
+                            roleplay.Server.DiscordID,
+                            p.User.DiscordID
+                        );
+
+                        if (!getParticipant.IsSuccess)
                         {
-                            var getParticipant = await guildAPI.GetGuildMemberAsync
+                            var messageByUser = roleplay.Messages.FirstOrDefault
                             (
-                                roleplay.Server.DiscordID,
-                                p.User.DiscordID
+                                m => m.Author == p.User
                             );
 
-                            if (!getParticipant.IsSuccess)
-                            {
-                                var messageByUser = roleplay.Messages.FirstOrDefault
-                                (
-                                    m => m.Author == p.User
-                                );
-
-                                return messageByUser is null
-                                    ? $"Unknown user ({p.User.DiscordID})"
-                                    : messageByUser.AuthorNickname;
-                            }
-
-                            var participant = getParticipant.Entity;
-                            return participant.Nickname.HasValue
-                                ? participant.Nickname.Value
-                                : participant.User.HasValue
-                                    ? participant.User.Value.Username
-                                    : throw new InvalidOperationException();
+                            return messageByUser is null
+                                ? $"Unknown user ({p.User.DiscordID})"
+                                : messageByUser.AuthorNickname;
                         }
-                    )
-                );
 
-                await ofw.WriteLineAsync("Participants:");
-                foreach (var participant in joinedUsers)
-                {
-                    await ofw.WriteLineAsync(participant);
-                }
+                        var participant = getParticipant.Entity;
+                        return participant.Nickname.HasValue
+                            ? participant.Nickname.Value
+                            : participant.User.HasValue
+                                ? participant.User.Value.Username
+                                : throw new InvalidOperationException();
+                    }
+                )
+            );
 
-                await ofw.WriteLineAsync();
-                await ofw.WriteLineAsync();
-
-                var messages = roleplay.Messages.OrderBy(m => m.Timestamp).DistinctBy(m => m.Contents);
-                foreach (var message in messages)
-                {
-                    await ofw.WriteLineAsync($"{message.AuthorNickname}: \n{message.Contents}");
-                    await ofw.WriteLineAsync();
-                }
+            await ofw.WriteLineAsync("Participants:");
+            foreach (var participant in joinedUsers)
+            {
+                await ofw.WriteLineAsync(participant);
             }
 
-            var resultFile = File.OpenRead(filePath);
-            var exported = new ExportedRoleplay(roleplay.Name, ExportFormat.Plaintext, resultFile);
-            return exported;
+            await ofw.WriteLineAsync();
+            await ofw.WriteLineAsync();
+
+            var messages = roleplay.Messages.OrderBy(m => m.Timestamp).DistinctBy(m => m.Contents);
+            foreach (var message in messages)
+            {
+                await ofw.WriteLineAsync($"{message.AuthorNickname}: \n{message.Contents}");
+                await ofw.WriteLineAsync();
+            }
         }
+
+        var resultFile = File.OpenRead(filePath);
+        var exported = new ExportedRoleplay(roleplay.Name, ExportFormat.Plaintext, resultFile);
+        return exported;
     }
 }

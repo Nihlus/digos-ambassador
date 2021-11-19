@@ -23,50 +23,49 @@
 using System.Text;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Plugins.Permissions.Extensions
+namespace DIGOS.Ambassador.Plugins.Permissions.Extensions;
+
+/// <summary>
+/// Extension methods for the <see cref="IPermission"/> interface and <see cref="Permission"/> class.
+/// </summary>
+internal static class PermissionExtensions
 {
     /// <summary>
-    /// Extension methods for the <see cref="IPermission"/> interface and <see cref="Permission"/> class.
+    /// Formats the data in the permission as a title, including the allowed targets.
     /// </summary>
-    internal static class PermissionExtensions
+    /// <param name="permission">The permission to format.</param>
+    /// <returns>The formatted title.</returns>
+    [Pure]
+    public static string FormatTitle(this IPermission permission)
     {
-        /// <summary>
-        /// Formats the data in the permission as a title, including the allowed targets.
-        /// </summary>
-        /// <param name="permission">The permission to format.</param>
-        /// <returns>The formatted title.</returns>
-        [Pure]
-        public static string FormatTitle(this IPermission permission)
+        if (!permission.IsGrantedByDefaultToSelf && !permission.IsGrantedByDefaultToOthers)
         {
-            if (!permission.IsGrantedByDefaultToSelf && !permission.IsGrantedByDefaultToOthers)
-            {
-                return permission.FriendlyName;
-            }
-
-            var extraInfo = new StringBuilder();
-            extraInfo.Append('(');
-            extraInfo.Append("Granted by default, targeting ");
-
-            if (permission.IsGrantedByDefaultToSelf && permission.IsGrantedByDefaultToOthers)
-            {
-                extraInfo.Append("yourself and others.");
-            }
-            else
-            {
-                if (permission.IsGrantedByDefaultToSelf)
-                {
-                    extraInfo.Append("yourself");
-                }
-
-                if (permission.IsGrantedByDefaultToOthers)
-                {
-                    extraInfo.Append("others");
-                }
-            }
-
-            extraInfo.Append(')');
-
-            return $"{permission.FriendlyName} {extraInfo}";
+            return permission.FriendlyName;
         }
+
+        var extraInfo = new StringBuilder();
+        extraInfo.Append('(');
+        extraInfo.Append("Granted by default, targeting ");
+
+        if (permission.IsGrantedByDefaultToSelf && permission.IsGrantedByDefaultToOthers)
+        {
+            extraInfo.Append("yourself and others.");
+        }
+        else
+        {
+            if (permission.IsGrantedByDefaultToSelf)
+            {
+                extraInfo.Append("yourself");
+            }
+
+            if (permission.IsGrantedByDefaultToOthers)
+            {
+                extraInfo.Append("others");
+            }
+        }
+
+        extraInfo.Append(')');
+
+        return $"{permission.FriendlyName} {extraInfo}";
     }
 }

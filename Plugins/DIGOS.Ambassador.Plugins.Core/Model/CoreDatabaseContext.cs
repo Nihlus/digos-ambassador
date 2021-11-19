@@ -27,57 +27,56 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Plugins.Core.Model
+namespace DIGOS.Ambassador.Plugins.Core.Model;
+
+/// <summary>
+/// Represents the database model of the core plugin.
+/// </summary>
+public class CoreDatabaseContext : AmbassadorDbContext
 {
+    private const string SchemaName = "Core";
+
     /// <summary>
-    /// Represents the database model of the core plugin.
+    /// Gets or sets the table where the user information is stored.
     /// </summary>
-    public class CoreDatabaseContext : AmbassadorDbContext
+    public DbSet<User> Users { get; [UsedImplicitly] set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the table where server-specific settings are stored.
+    /// </summary>
+    public DbSet<Server> Servers { get; [UsedImplicitly] set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the table where user consents are stored.
+    /// </summary>
+    public DbSet<UserConsent> UserConsents { get; [UsedImplicitly] set; } = null!;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CoreDatabaseContext"/> class.
+    /// </summary>
+    /// <param name="contextOptions">The context options.</param>
+    public CoreDatabaseContext
+    (
+        DbContextOptions<CoreDatabaseContext> contextOptions
+    )
+        : base(SchemaName, contextOptions)
     {
-        private const string SchemaName = "Core";
+    }
 
-        /// <summary>
-        /// Gets or sets the table where the user information is stored.
-        /// </summary>
-        public DbSet<User> Users { get; [UsedImplicitly] set; } = null!;
+    /// <inheritdoc />
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
 
-        /// <summary>
-        /// Gets or sets the table where server-specific settings are stored.
-        /// </summary>
-        public DbSet<Server> Servers { get; [UsedImplicitly] set; } = null!;
+        modelBuilder.Entity<ServerUser>().HasOne(su => su.Server).WithMany(s => s.KnownUsers);
+        modelBuilder.Entity<ServerUser>().HasOne(su => su.User).WithMany();
 
-        /// <summary>
-        /// Gets or sets the table where user consents are stored.
-        /// </summary>
-        public DbSet<UserConsent> UserConsents { get; [UsedImplicitly] set; } = null!;
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.DiscordID)
+            .IsUnique();
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CoreDatabaseContext"/> class.
-        /// </summary>
-        /// <param name="contextOptions">The context options.</param>
-        public CoreDatabaseContext
-        (
-            DbContextOptions<CoreDatabaseContext> contextOptions
-        )
-            : base(SchemaName, contextOptions)
-        {
-        }
-
-        /// <inheritdoc />
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Entity<ServerUser>().HasOne(su => su.Server).WithMany(s => s.KnownUsers);
-            modelBuilder.Entity<ServerUser>().HasOne(su => su.User).WithMany();
-
-            modelBuilder.Entity<User>()
-                .HasIndex(u => u.DiscordID)
-                .IsUnique();
-
-            modelBuilder.Entity<Server>()
-                .HasIndex(s => s.DiscordID)
-                .IsUnique();
-        }
+        modelBuilder.Entity<Server>()
+            .HasIndex(s => s.DiscordID)
+            .IsUnique();
     }
 }

@@ -33,207 +33,206 @@ using Microsoft.Extensions.DependencyInjection;
 using Remora.Discord.API.Abstractions.Rest;
 using Document = iTextSharp.text.Document;
 
-namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
+namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters;
+
+/// <summary>
+/// Exports roleplays in PDF format.
+/// </summary>
+internal sealed class PDFRoleplayExporter : RoleplayExporterBase
 {
-    /// <summary>
-    /// Exports roleplays in PDF format.
-    /// </summary>
-    internal sealed class PDFRoleplayExporter : RoleplayExporterBase
+    private const float DefaultParagraphSpacing = 8.0f;
+    private static readonly Font StandardFont = new(Font.HELVETICA, 11.0f);
+    private static readonly Font ItalicFont = new(Font.HELVETICA, 11.0f, Font.ITALIC);
+    private static readonly Font TitleFont = new(Font.HELVETICA, 48.0f, Font.BOLD);
+
+    /// <inheritdoc />
+    public override async Task<ExportedRoleplay> ExportAsync(IServiceProvider services, Roleplay roleplay)
     {
-        private const float DefaultParagraphSpacing = 8.0f;
-        private static readonly Font StandardFont = new(Font.HELVETICA, 11.0f);
-        private static readonly Font ItalicFont = new(Font.HELVETICA, 11.0f, Font.ITALIC);
-        private static readonly Font TitleFont = new(Font.HELVETICA, 48.0f, Font.BOLD);
+        var guildAPI = services.GetRequiredService<IDiscordRestGuildAPI>();
 
-        /// <inheritdoc />
-        public override async Task<ExportedRoleplay> ExportAsync(IServiceProvider services, Roleplay roleplay)
+        // Create our document
+        var pdfDoc = new Document();
+
+        var filePath = Path.GetTempFileName();
+        await using (var of = File.Create(filePath))
         {
-            var guildAPI = services.GetRequiredService<IDiscordRestGuildAPI>();
+            var writer = PdfWriter.GetInstance(pdfDoc, of);
+            writer.Open();
+            pdfDoc.Open();
 
-            // Create our document
-            var pdfDoc = new Document();
+            var ownerNickname = $"Unknown user ({roleplay.Owner.DiscordID})";
 
-            var filePath = Path.GetTempFileName();
-            await using (var of = File.Create(filePath))
+            var getOwner = await guildAPI.GetGuildMemberAsync(roleplay.Server.DiscordID, roleplay.Owner.DiscordID);
+            if (!getOwner.IsSuccess)
             {
-                var writer = PdfWriter.GetInstance(pdfDoc, of);
-                writer.Open();
-                pdfDoc.Open();
-
-                var ownerNickname = $"Unknown user ({roleplay.Owner.DiscordID})";
-
-                var getOwner = await guildAPI.GetGuildMemberAsync(roleplay.Server.DiscordID, roleplay.Owner.DiscordID);
-                if (!getOwner.IsSuccess)
-                {
-                    var messageByUser = roleplay.Messages.FirstOrDefault
-                    (
-                        m => m.Author == roleplay.Owner
-                    );
-
-                    if (messageByUser is not null)
-                    {
-                        ownerNickname = messageByUser.AuthorNickname;
-                    }
-                }
-                else
-                {
-                    var owner = getOwner.Entity;
-                    ownerNickname = owner.Nickname.HasValue
-                        ? owner.Nickname.Value
-                        : owner.User.HasValue
-                            ? owner.User.Value.Username
-                            : throw new InvalidOperationException();
-                }
-
-                pdfDoc.AddAuthor(ownerNickname);
-                pdfDoc.AddCreationDate();
-                pdfDoc.AddCreator("DIGOS Ambassador");
-                pdfDoc.AddTitle(roleplay.Name);
-
-                var joinedUsers = await Task.WhenAll
+                var messageByUser = roleplay.Messages.FirstOrDefault
                 (
-                    roleplay.JoinedUsers.Select
-                    (
-                        async p =>
-                        {
-                            var getParticipant = await guildAPI.GetGuildMemberAsync
-                            (
-                                roleplay.Server.DiscordID,
-                                p.User.DiscordID
-                            );
-
-                            if (!getParticipant.IsSuccess)
-                            {
-                                var messageByUser = roleplay.Messages.FirstOrDefault
-                                (
-                                    m => m.Author == p.User
-                                );
-
-                                return messageByUser is null
-                                    ? $"Unknown user ({p.User.DiscordID})"
-                                    : messageByUser.AuthorNickname;
-                            }
-
-                            var participant = getParticipant.Entity;
-                            return participant.Nickname.HasValue && participant.Nickname.Value is not null
-                                ? participant.Nickname.Value
-                                : participant.User.HasValue
-                                    ? participant.User.Value.Username
-                                    : throw new InvalidOperationException();
-                        }
-                    )
+                    m => m.Author == roleplay.Owner
                 );
 
-                pdfDoc.Add(CreateTitle(roleplay.Name));
-                pdfDoc.Add(CreateParticipantList(joinedUsers));
-
-                pdfDoc.NewPage();
-
-                var messages = roleplay.Messages.OrderBy(m => m.Timestamp).DistinctBy(m => m.Contents);
-                foreach (var message in messages)
+                if (messageByUser is not null)
                 {
-                    pdfDoc.Add(CreateMessage(message.AuthorNickname, message.Contents));
-                }
-
-                pdfDoc.Close();
-                writer.Flush();
-                writer.Close();
-            }
-
-            var resultFile = File.OpenRead(filePath);
-            var exported = new ExportedRoleplay(roleplay.Name, ExportFormat.PDF, resultFile);
-            return exported;
-        }
-
-        /// <summary>
-        /// Creates a title that can be inserted into a PDF document.
-        /// </summary>
-        /// <param name="title">The title.</param>
-        /// <returns>The resulting paragraph.</returns>
-        private Paragraph CreateTitle(string title)
-        {
-            var chunk = new Chunk(title, TitleFont);
-
-            var para = new Paragraph(chunk)
-            {
-                SpacingAfter = DefaultParagraphSpacing
-            };
-
-            return para;
-        }
-
-        private Paragraph CreateParticipantList(IEnumerable<string> participantNames)
-        {
-            var paragraph = new Paragraph
-            {
-                SpacingAfter = DefaultParagraphSpacing
-            };
-
-            var participantsTitleChunk = new Chunk("Participants: \n", StandardFont);
-            paragraph.Add(participantsTitleChunk);
-
-            foreach (var participantName in participantNames)
-            {
-                var content = $"{participantName}\n";
-                var participantChunk = new Chunk(content, ItalicFont);
-
-                paragraph.Add(participantChunk);
-            }
-
-            return paragraph;
-        }
-
-        private Paragraph CreateMessage(string author, string contents)
-        {
-            var authorChunk = new Chunk($"{author} \n", ItalicFont);
-
-            var para = new Paragraph
-            {
-                SpacingAfter = DefaultParagraphSpacing
-            };
-
-            para.Add(authorChunk);
-            para.Add(FormatContentString(contents));
-
-            para.SpacingAfter = 8.0f;
-
-            return para;
-        }
-
-        private Paragraph FormatContentString(string contents)
-        {
-            var splits = contents.Split(new[] { "```" }, StringSplitOptions.None).Select(s => s.TrimStart('\n')).ToList();
-            var paragraph = new Paragraph();
-
-            for (var i = 0; i < splits.Count; ++i)
-            {
-                if (splits[i].IsNullOrWhitespace())
-                {
-                    continue;
-                }
-
-                if (i % 2 == 1)
-                {
-                    var subPara = new Paragraph();
-                    var spacingChunk = new Chunk("\n", StandardFont);
-
-                    var chunk = new Chunk($"{splits[i]}", ItalicFont);
-                    chunk.SetBackground(BaseColor.LightGray, 4, 4, 4, 4);
-
-                    subPara.Add(spacingChunk);
-                    subPara.Add(chunk);
-                    subPara.Add(spacingChunk);
-
-                    paragraph.Add(subPara);
-                }
-                else
-                {
-                    var chunk = new Chunk(splits[i], StandardFont);
-                    paragraph.Add(chunk);
+                    ownerNickname = messageByUser.AuthorNickname;
                 }
             }
+            else
+            {
+                var owner = getOwner.Entity;
+                ownerNickname = owner.Nickname.HasValue
+                    ? owner.Nickname.Value
+                    : owner.User.HasValue
+                        ? owner.User.Value.Username
+                        : throw new InvalidOperationException();
+            }
 
-            return paragraph;
+            pdfDoc.AddAuthor(ownerNickname);
+            pdfDoc.AddCreationDate();
+            pdfDoc.AddCreator("DIGOS Ambassador");
+            pdfDoc.AddTitle(roleplay.Name);
+
+            var joinedUsers = await Task.WhenAll
+            (
+                roleplay.JoinedUsers.Select
+                (
+                    async p =>
+                    {
+                        var getParticipant = await guildAPI.GetGuildMemberAsync
+                        (
+                            roleplay.Server.DiscordID,
+                            p.User.DiscordID
+                        );
+
+                        if (!getParticipant.IsSuccess)
+                        {
+                            var messageByUser = roleplay.Messages.FirstOrDefault
+                            (
+                                m => m.Author == p.User
+                            );
+
+                            return messageByUser is null
+                                ? $"Unknown user ({p.User.DiscordID})"
+                                : messageByUser.AuthorNickname;
+                        }
+
+                        var participant = getParticipant.Entity;
+                        return participant.Nickname.HasValue && participant.Nickname.Value is not null
+                            ? participant.Nickname.Value
+                            : participant.User.HasValue
+                                ? participant.User.Value.Username
+                                : throw new InvalidOperationException();
+                    }
+                )
+            );
+
+            pdfDoc.Add(CreateTitle(roleplay.Name));
+            pdfDoc.Add(CreateParticipantList(joinedUsers));
+
+            pdfDoc.NewPage();
+
+            var messages = roleplay.Messages.OrderBy(m => m.Timestamp).DistinctBy(m => m.Contents);
+            foreach (var message in messages)
+            {
+                pdfDoc.Add(CreateMessage(message.AuthorNickname, message.Contents));
+            }
+
+            pdfDoc.Close();
+            writer.Flush();
+            writer.Close();
         }
+
+        var resultFile = File.OpenRead(filePath);
+        var exported = new ExportedRoleplay(roleplay.Name, ExportFormat.PDF, resultFile);
+        return exported;
+    }
+
+    /// <summary>
+    /// Creates a title that can be inserted into a PDF document.
+    /// </summary>
+    /// <param name="title">The title.</param>
+    /// <returns>The resulting paragraph.</returns>
+    private Paragraph CreateTitle(string title)
+    {
+        var chunk = new Chunk(title, TitleFont);
+
+        var para = new Paragraph(chunk)
+        {
+            SpacingAfter = DefaultParagraphSpacing
+        };
+
+        return para;
+    }
+
+    private Paragraph CreateParticipantList(IEnumerable<string> participantNames)
+    {
+        var paragraph = new Paragraph
+        {
+            SpacingAfter = DefaultParagraphSpacing
+        };
+
+        var participantsTitleChunk = new Chunk("Participants: \n", StandardFont);
+        paragraph.Add(participantsTitleChunk);
+
+        foreach (var participantName in participantNames)
+        {
+            var content = $"{participantName}\n";
+            var participantChunk = new Chunk(content, ItalicFont);
+
+            paragraph.Add(participantChunk);
+        }
+
+        return paragraph;
+    }
+
+    private Paragraph CreateMessage(string author, string contents)
+    {
+        var authorChunk = new Chunk($"{author} \n", ItalicFont);
+
+        var para = new Paragraph
+        {
+            SpacingAfter = DefaultParagraphSpacing
+        };
+
+        para.Add(authorChunk);
+        para.Add(FormatContentString(contents));
+
+        para.SpacingAfter = 8.0f;
+
+        return para;
+    }
+
+    private Paragraph FormatContentString(string contents)
+    {
+        var splits = contents.Split(new[] { "```" }, StringSplitOptions.None).Select(s => s.TrimStart('\n')).ToList();
+        var paragraph = new Paragraph();
+
+        for (var i = 0; i < splits.Count; ++i)
+        {
+            if (splits[i].IsNullOrWhitespace())
+            {
+                continue;
+            }
+
+            if (i % 2 == 1)
+            {
+                var subPara = new Paragraph();
+                var spacingChunk = new Chunk("\n", StandardFont);
+
+                var chunk = new Chunk($"{splits[i]}", ItalicFont);
+                chunk.SetBackground(BaseColor.LightGray, 4, 4, 4, 4);
+
+                subPara.Add(spacingChunk);
+                subPara.Add(chunk);
+                subPara.Add(spacingChunk);
+
+                paragraph.Add(subPara);
+            }
+            else
+            {
+                var chunk = new Chunk(splits[i], StandardFont);
+                paragraph.Add(chunk);
+            }
+        }
+
+        return paragraph;
     }
 }

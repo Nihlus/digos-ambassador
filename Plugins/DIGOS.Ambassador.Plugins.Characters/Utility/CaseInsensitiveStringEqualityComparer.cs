@@ -23,33 +23,32 @@
 using System;
 using System.Collections.Generic;
 
-namespace DIGOS.Ambassador.Plugins.Characters.Utility
+namespace DIGOS.Ambassador.Plugins.Characters.Utility;
+
+/// <summary>
+/// Compares strings on a case-insensitive basis.
+/// </summary>
+public class CaseInsensitiveStringEqualityComparer : IEqualityComparer<string>
 {
-    /// <summary>
-    /// Compares strings on a case-insensitive basis.
-    /// </summary>
-    public class CaseInsensitiveStringEqualityComparer : IEqualityComparer<string>
+    /// <inheritdoc />
+    public bool Equals(string? x, string? y)
     {
-        /// <inheritdoc />
-        public bool Equals(string? x, string? y)
+        if (x is null && y is null)
         {
-            if (x is null && y is null)
-            {
-                return true;
-            }
-
-            if (x is null || y is null)
-            {
-                return false;
-            }
-
-            return x.Equals(y, StringComparison.OrdinalIgnoreCase);
+            return true;
         }
 
-        /// <inheritdoc />
-        public int GetHashCode(string obj)
+        if (x is null || y is null)
         {
-            return obj.ToLowerInvariant().GetHashCode();
+            return false;
         }
+
+        return x.Equals(y, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <inheritdoc />
+    public int GetHashCode(string obj)
+    {
+        return obj.ToLowerInvariant().GetHashCode();
     }
 }

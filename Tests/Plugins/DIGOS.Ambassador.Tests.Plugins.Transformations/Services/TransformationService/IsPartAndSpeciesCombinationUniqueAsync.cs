@@ -31,43 +31,42 @@ using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using Xunit;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Transformations
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
+
+public partial class TransformationServiceTests
 {
-    public partial class TransformationServiceTests
+    public class IsPartAndSpeciesCombinationUniqueAsync : TransformationServiceTestBase
     {
-        public class IsPartAndSpeciesCombinationUniqueAsync : TransformationServiceTestBase
+        private Species _templateSpecies = null!;
+
+        protected override async Task InitializeTestAsync()
         {
-            private Species _templateSpecies = null!;
+            await base.InitializeTestAsync();
+            _templateSpecies = this.Database.Species.First(s => s.Name == "template");
+        }
 
-            protected override async Task InitializeTestAsync()
-            {
-                await base.InitializeTestAsync();
-                _templateSpecies = this.Database.Species.First(s => s.Name == "template");
-            }
+        [Fact]
+        public async Task ReturnsTrueForUniqueCombination()
+        {
+            var result = await this.Transformations.IsPartAndSpeciesCombinationUniqueAsync
+            (
+                Bodypart.Wings,
+                _templateSpecies
+            );
 
-            [Fact]
-            public async Task ReturnsTrueForUniqueCombination()
-            {
-                var result = await this.Transformations.IsPartAndSpeciesCombinationUniqueAsync
-                (
-                    Bodypart.Wings,
-                    _templateSpecies
-                );
+            Assert.True(result);
+        }
 
-                Assert.True(result);
-            }
+        [Fact]
+        public async Task ReturnsFalseForNonUniqueCombinationTask()
+        {
+            var result = await this.Transformations.IsPartAndSpeciesCombinationUniqueAsync
+            (
+                Bodypart.Face,
+                _templateSpecies
+            );
 
-            [Fact]
-            public async Task ReturnsFalseForNonUniqueCombinationTask()
-            {
-                var result = await this.Transformations.IsPartAndSpeciesCombinationUniqueAsync
-                (
-                    Bodypart.Face,
-                    _templateSpecies
-                );
-
-                Assert.False(result);
-            }
+            Assert.False(result);
         }
     }
 }

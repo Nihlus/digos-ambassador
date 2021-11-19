@@ -27,73 +27,72 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Plugins.Transformations.Model
+namespace DIGOS.Ambassador.Plugins.Transformations.Model;
+
+/// <summary>
+/// Represents the database model of the dossier plugin.
+/// </summary>
+[PublicAPI]
+public class TransformationsDatabaseContext : AmbassadorDbContext
 {
+    private const string SchemaName = "TransformationModule";
+
     /// <summary>
-    /// Represents the database model of the dossier plugin.
+    /// Gets or sets the table where transformation species are stored.
     /// </summary>
-    [PublicAPI]
-    public class TransformationsDatabaseContext : AmbassadorDbContext
+    public DbSet<Species> Species { get; [UsedImplicitly] set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the table where transformations are stored.
+    /// </summary>
+    public DbSet<Transformation> Transformations { get; [UsedImplicitly] set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the table where global transformation protections are stored.
+    /// </summary>
+    public DbSet<GlobalUserProtection> GlobalUserProtections { get; [UsedImplicitly] set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the table where server-specific transformation protections are stored.
+    /// </summary>
+    public DbSet<ServerUserProtection> ServerUserProtections { get; [UsedImplicitly] set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the table where appearance configurations are stored.
+    /// </summary>
+    public DbSet<Appearance> Appearances { get; [UsedImplicitly] set; } = null!;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TransformationsDatabaseContext"/> class.
+    /// </summary>
+    /// <param name="contextOptions">The context options.</param>
+    [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
+    public TransformationsDatabaseContext
+    (
+        DbContextOptions<TransformationsDatabaseContext> contextOptions
+    )
+        : base(SchemaName, contextOptions)
     {
-        private const string SchemaName = "TransformationModule";
+    }
 
-        /// <summary>
-        /// Gets or sets the table where transformation species are stored.
-        /// </summary>
-        public DbSet<Species> Species { get; [UsedImplicitly] set; } = null!;
+    /// <inheritdoc />
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
 
-        /// <summary>
-        /// Gets or sets the table where transformations are stored.
-        /// </summary>
-        public DbSet<Transformation> Transformations { get; [UsedImplicitly] set; } = null!;
+        modelBuilder.Entity<Transformation>()
+            .OwnsOne(t => t.DefaultBaseColour, od => od.ToTable("DefaultBaseColours", SchemaName))
+            .OwnsOne(t => t.DefaultPatternColour, od => od.ToTable("DefaultPatternColours", SchemaName));
 
-        /// <summary>
-        /// Gets or sets the table where global transformation protections are stored.
-        /// </summary>
-        public DbSet<GlobalUserProtection> GlobalUserProtections { get; [UsedImplicitly] set; } = null!;
-
-        /// <summary>
-        /// Gets or sets the table where server-specific transformation protections are stored.
-        /// </summary>
-        public DbSet<ServerUserProtection> ServerUserProtections { get; [UsedImplicitly] set; } = null!;
-
-        /// <summary>
-        /// Gets or sets the table where appearance configurations are stored.
-        /// </summary>
-        public DbSet<Appearance> Appearances { get; [UsedImplicitly] set; } = null!;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TransformationsDatabaseContext"/> class.
-        /// </summary>
-        /// <param name="contextOptions">The context options.</param>
-        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
-        public TransformationsDatabaseContext
-        (
-            DbContextOptions<TransformationsDatabaseContext> contextOptions
-        )
-            : base(SchemaName, contextOptions)
+        modelBuilder.Entity<Appearance>().OwnsMany(a => a.Components, ao =>
         {
-        }
+            ao.ToTable("AppearanceComponents", SchemaName);
 
-        /// <inheritdoc />
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
+            ao.OwnsOne(c => c.BaseColour, od => od.ToTable("BaseColours", SchemaName));
+            ao.OwnsOne(c => c.PatternColour, od => od.ToTable("PatternColours", SchemaName));
 
-            modelBuilder.Entity<Transformation>()
-                .OwnsOne(t => t.DefaultBaseColour, od => od.ToTable("DefaultBaseColours", SchemaName))
-                .OwnsOne(t => t.DefaultPatternColour, od => od.ToTable("DefaultPatternColours", SchemaName));
-
-            modelBuilder.Entity<Appearance>().OwnsMany(a => a.Components, ao =>
-            {
-                ao.ToTable("AppearanceComponents", SchemaName);
-
-                ao.OwnsOne(c => c.BaseColour, od => od.ToTable("BaseColours", SchemaName));
-                ao.OwnsOne(c => c.PatternColour, od => od.ToTable("PatternColours", SchemaName));
-
-                ao.Property<long>("ID");
-                ao.HasKey("ID");
-            });
-        }
+            ao.Property<long>("ID");
+            ao.HasKey("ID");
+        });
     }
 }

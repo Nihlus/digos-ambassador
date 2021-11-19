@@ -27,39 +27,38 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace DIGOS.Ambassador.Tests.TestBases
+namespace DIGOS.Ambassador.Tests.TestBases;
+
+/// <summary>
+/// Serves as a test base for tests that depend on a database context.
+/// </summary>
+[PublicAPI]
+public abstract class DatabaseProvidingTestBase : ServiceProvidingTestBase, IDisposable
 {
+    private SqliteConnection _connection = new("Filename=:memory:");
+
     /// <summary>
-    /// Serves as a test base for tests that depend on a database context.
+    /// Configures the given options builder to use the underlying test database.
     /// </summary>
-    [PublicAPI]
-    public abstract class DatabaseProvidingTestBase : ServiceProvidingTestBase, IDisposable
+    /// <param name="optionsBuilder">The builder to configure.</param>
+    /// <param name="schema">The schema of the context to configure.</param>
+    protected void ConfigureOptions(DbContextOptionsBuilder optionsBuilder, string schema)
     {
-        private SqliteConnection _connection = new("Filename=:memory:");
+        _connection.Open();
 
-        /// <summary>
-        /// Configures the given options builder to use the underlying test database.
-        /// </summary>
-        /// <param name="optionsBuilder">The builder to configure.</param>
-        /// <param name="schema">The schema of the context to configure.</param>
-        protected void ConfigureOptions(DbContextOptionsBuilder optionsBuilder, string schema)
-        {
-            _connection.Open();
+        optionsBuilder
+            .UseLazyLoadingProxies()
+            .UseSqlite
+            (
+                _connection,
+                b => b.MigrationsHistoryTable(HistoryRepository.DefaultTableName + schema)
+            );
+    }
 
-            optionsBuilder
-                .UseLazyLoadingProxies()
-                .UseSqlite
-                (
-                    _connection,
-                    b => b.MigrationsHistoryTable(HistoryRepository.DefaultTableName + schema)
-                );
-        }
-
-        /// <inheritdoc />
-        public void Dispose()
-        {
-            GC.SuppressFinalize(this);
-            _connection.Dispose();
-        }
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        _connection.Dispose();
     }
 }

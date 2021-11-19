@@ -34,189 +34,188 @@ using Microsoft.EntityFrameworkCore;
 using Remora.Discord.Core;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Core.Services.Users
+namespace DIGOS.Ambassador.Plugins.Core.Services.Users;
+
+/// <summary>
+/// Handles user-related logic.
+/// </summary>
+public sealed class UserService
 {
+    private readonly CoreDatabaseContext _database;
+
     /// <summary>
-    /// Handles user-related logic.
+    /// Initializes a new instance of the <see cref="UserService"/> class.
     /// </summary>
-    public sealed class UserService
+    /// <param name="database">The core database.</param>
+    public UserService(CoreDatabaseContext database)
     {
-        private readonly CoreDatabaseContext _database;
+        _database = database;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserService"/> class.
-        /// </summary>
-        /// <param name="database">The core database.</param>
-        public UserService(CoreDatabaseContext database)
+    /// <summary>
+    /// Determines whether or not a Discord user is stored in the database.
+    /// </summary>
+    /// <param name="discordUser">The Discord user.</param>
+    /// <param name="ct">The cancellation token in use.</param>
+    /// <returns><value>true</value> if the user is stored; otherwise, <value>false</value>.</returns>
+    [Pure]
+    public async Task<bool> IsUserKnownAsync
+    (
+        Snowflake discordUser,
+        CancellationToken ct = default
+    )
+    {
+        var hasUser = await _database.Users.ServersideQueryAsync
+        (
+            q => q
+                .Where(u => u.DiscordID == discordUser)
+                .AnyAsync(ct)
+        );
+
+        return hasUser;
+    }
+
+    /// <summary>
+    /// Gets an existing set of information about a Discord user, or registers them with the database if one is not found.
+    /// </summary>
+    /// <param name="discordUser">The Discord user.</param>
+    /// <param name="ct">The cancellation token in use.</param>
+    /// <returns>Stored information about the user.</returns>
+    public async Task<Result<User>> GetOrRegisterUserAsync
+    (
+        Snowflake discordUser,
+        CancellationToken ct = default
+    )
+    {
+        if (!await IsUserKnownAsync(discordUser, ct))
         {
-            _database = database;
+            return await AddUserAsync(discordUser, ct);
         }
 
-        /// <summary>
-        /// Determines whether or not a Discord user is stored in the database.
-        /// </summary>
-        /// <param name="discordUser">The Discord user.</param>
-        /// <param name="ct">The cancellation token in use.</param>
-        /// <returns><value>true</value> if the user is stored; otherwise, <value>false</value>.</returns>
-        [Pure]
-        public async Task<bool> IsUserKnownAsync
+        return await GetUserAsync(discordUser, ct);
+    }
+
+    /// <summary>
+    /// Gets a stored user from the database that matches the given Discord user.
+    /// </summary>
+    /// <param name="discordUser">The Discord user.</param>
+    /// <param name="ct">The cancellation token in use.</param>
+    /// <returns>Stored information about the user.</returns>
+    [Pure]
+    public async Task<Result<User>> GetUserAsync
+    (
+        Snowflake discordUser,
+        CancellationToken ct = default
+    )
+    {
+        var user = await _database.Users.ServersideQueryAsync
         (
-            Snowflake discordUser,
-            CancellationToken ct = default
-        )
+            q => q
+                .Where(u => u.DiscordID == discordUser)
+                .SingleOrDefaultAsync(ct)
+        );
+
+        if (user is not null)
         {
-            var hasUser = await _database.Users.ServersideQueryAsync
+            return user;
+        }
+
+        return new UserError("Unknown user.");
+    }
+
+    /// <summary>
+    /// Adds a Discord user to the database.
+    /// </summary>
+    /// <param name="discordUser">The Discord user.</param>
+    /// <param name="ct">The cancellation token in use.</param>
+    /// <returns>The freshly created information about the user.</returns>
+    /// <exception cref="ArgumentException">Thrown if the user already exists in the database.</exception>
+    public async Task<Result<User>> AddUserAsync
+    (
+        Snowflake discordUser,
+        CancellationToken ct = default
+    )
+    {
+        if (await IsUserKnownAsync(discordUser, ct))
+        {
+            return new UserError
             (
-                q => q
-                    .Where(u => u.DiscordID == discordUser)
-                    .AnyAsync(ct)
+                $"A user with the ID {discordUser} has already been added to the database."
             );
-
-            return hasUser;
         }
 
-        /// <summary>
-        /// Gets an existing set of information about a Discord user, or registers them with the database if one is not found.
-        /// </summary>
-        /// <param name="discordUser">The Discord user.</param>
-        /// <param name="ct">The cancellation token in use.</param>
-        /// <returns>Stored information about the user.</returns>
-        public async Task<Result<User>> GetOrRegisterUserAsync
-        (
-            Snowflake discordUser,
-            CancellationToken ct = default
-        )
+        var newUser = _database.CreateProxy<User>(discordUser);
+
+        _database.Users.Update(newUser);
+        await _database.SaveChangesAsync(ct);
+
+        return newUser;
+    }
+
+    /// <summary>
+    /// Sets the user's timezone.
+    /// </summary>
+    /// <param name="user">The user.</param>
+    /// <param name="timezoneOffset">The timezone.</param>
+    /// <param name="ct">The cancellation token in use.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public async Task<Result> SetUserTimezoneAsync
+    (
+        User user,
+        int timezoneOffset,
+        CancellationToken ct = default
+    )
+    {
+        if (timezoneOffset < -12 || timezoneOffset > 14)
         {
-            if (!await IsUserKnownAsync(discordUser, ct))
-            {
-                return await AddUserAsync(discordUser, ct);
-            }
-
-            return await GetUserAsync(discordUser, ct);
+            return new UserError($"{timezoneOffset} is not a valid offset.");
         }
 
-        /// <summary>
-        /// Gets a stored user from the database that matches the given Discord user.
-        /// </summary>
-        /// <param name="discordUser">The Discord user.</param>
-        /// <param name="ct">The cancellation token in use.</param>
-        /// <returns>Stored information about the user.</returns>
-        [Pure]
-        public async Task<Result<User>> GetUserAsync
-        (
-            Snowflake discordUser,
-            CancellationToken ct = default
-        )
+        if (user.Timezone == timezoneOffset)
         {
-            var user = await _database.Users.ServersideQueryAsync
-            (
-                q => q
-                    .Where(u => u.DiscordID == discordUser)
-                    .SingleOrDefaultAsync(ct)
-            );
-
-            if (user is not null)
-            {
-                return user;
-            }
-
-            return new UserError("Unknown user.");
+            return new UserError("That's already your timezone.'");
         }
 
-        /// <summary>
-        /// Adds a Discord user to the database.
-        /// </summary>
-        /// <param name="discordUser">The Discord user.</param>
-        /// <param name="ct">The cancellation token in use.</param>
-        /// <returns>The freshly created information about the user.</returns>
-        /// <exception cref="ArgumentException">Thrown if the user already exists in the database.</exception>
-        public async Task<Result<User>> AddUserAsync
-        (
-            Snowflake discordUser,
-            CancellationToken ct = default
-        )
+        user.Timezone = timezoneOffset;
+        await _database.SaveChangesAsync(ct);
+
+        return Result.FromSuccess();
+    }
+
+    /// <summary>
+    /// Sets the user's bio.
+    /// </summary>
+    /// <param name="user">The user.</param>
+    /// <param name="bio">The bio.</param>
+    /// <param name="ct">The cancellation token in use.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public async Task<Result> SetUserBioAsync
+    (
+        User user,
+        string bio,
+        CancellationToken ct = default
+    )
+    {
+        bio = bio.Trim();
+
+        if (bio.IsNullOrWhitespace())
         {
-            if (await IsUserKnownAsync(discordUser, ct))
-            {
-                return new UserError
-                (
-                    $"A user with the ID {discordUser} has already been added to the database."
-                );
-            }
-
-            var newUser = _database.CreateProxy<User>(discordUser);
-
-            _database.Users.Update(newUser);
-            await _database.SaveChangesAsync(ct);
-
-            return newUser;
+            return new UserError("You must provide a bio.");
         }
 
-        /// <summary>
-        /// Sets the user's timezone.
-        /// </summary>
-        /// <param name="user">The user.</param>
-        /// <param name="timezoneOffset">The timezone.</param>
-        /// <param name="ct">The cancellation token in use.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task<Result> SetUserTimezoneAsync
-        (
-            User user,
-            int timezoneOffset,
-            CancellationToken ct = default
-        )
+        if (bio.Length > 1024)
         {
-            if (timezoneOffset < -12 || timezoneOffset > 14)
-            {
-                return new UserError($"{timezoneOffset} is not a valid offset.");
-            }
-
-            if (user.Timezone == timezoneOffset)
-            {
-                return new UserError("That's already your timezone.'");
-            }
-
-            user.Timezone = timezoneOffset;
-            await _database.SaveChangesAsync(ct);
-
-            return Result.FromSuccess();
+            return new UserError("Your bio may not be longer than 1024 characters.");
         }
 
-        /// <summary>
-        /// Sets the user's bio.
-        /// </summary>
-        /// <param name="user">The user.</param>
-        /// <param name="bio">The bio.</param>
-        /// <param name="ct">The cancellation token in use.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task<Result> SetUserBioAsync
-        (
-            User user,
-            string bio,
-            CancellationToken ct = default
-        )
+        if (user.Bio == bio)
         {
-            bio = bio.Trim();
-
-            if (bio.IsNullOrWhitespace())
-            {
-                return new UserError("You must provide a bio.");
-            }
-
-            if (bio.Length > 1024)
-            {
-                return new UserError("Your bio may not be longer than 1024 characters.");
-            }
-
-            if (user.Bio == bio)
-            {
-                return new UserError("That's already your bio.");
-            }
-
-            user.Bio = bio;
-            await _database.SaveChangesAsync(ct);
-
-            return Result.FromSuccess();
+            return new UserError("That's already your bio.");
         }
+
+        user.Bio = bio;
+        await _database.SaveChangesAsync(ct);
+
+        return Result.FromSuccess();
     }
 }

@@ -28,96 +28,95 @@ using JetBrains.Annotations;
 using YamlDotNet.Serialization;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Plugins.Transformations.Model
+namespace DIGOS.Ambassador.Plugins.Transformations.Model;
+
+/// <summary>
+/// Represents a single species (i.e, associated transformations).
+/// </summary>
+[PublicAPI]
+[Table("Species", Schema = "TransformationModule")]
+public class Species : IEFEntity
 {
+    /// <inheritdoc />
+    [YamlIgnore]
+    public long ID { get; set; }
+
     /// <summary>
-    /// Represents a single species (i.e, associated transformations).
+    /// Gets or sets the parent species.
     /// </summary>
-    [PublicAPI]
-    [Table("Species", Schema = "TransformationModule")]
-    public class Species : IEFEntity
+    public virtual Species? Parent { get; set; }
+
+    /// <summary>
+    /// Gets or sets the name of the species.
+    /// </summary>
+    public string Name { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the description of the species.
+    /// </summary>
+    public string Description { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the author of the species.
+    /// </summary>
+    public string Author { get; set; } = null!;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Species"/> class.
+    /// </summary>
+    [UsedImplicitly]
+    [SuppressMessage
+    (
+        "ReSharper",
+        "NotNullMemberIsNotInitialized",
+        Justification = "Initialized by EF Core or YML."
+    )]
+    public Species()
     {
-        /// <inheritdoc />
-        [YamlIgnore]
-        public long ID { get; set; }
+    }
 
-        /// <summary>
-        /// Gets or sets the parent species.
-        /// </summary>
-        public virtual Species? Parent { get; set; }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Species"/> class.
+    /// </summary>
+    /// <param name="name">The species name.</param>
+    /// <param name="description">The description of the species.</param>
+    /// <param name="author">The author of the species..</param>
+    public Species(string name, string description, string author)
+    {
+        this.Name = name;
+        this.Description = description;
+        this.Author = author;
+    }
 
-        /// <summary>
-        /// Gets or sets the name of the species.
-        /// </summary>
-        public string Name { get; set; } = null!;
-
-        /// <summary>
-        /// Gets or sets the description of the species.
-        /// </summary>
-        public string Description { get; set; } = null!;
-
-        /// <summary>
-        /// Gets or sets the author of the species.
-        /// </summary>
-        public string Author { get; set; } = null!;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Species"/> class.
-        /// </summary>
-        [UsedImplicitly]
-        [SuppressMessage
-        (
-            "ReSharper",
-            "NotNullMemberIsNotInitialized",
-            Justification = "Initialized by EF Core or YML."
-        )]
-        public Species()
+    /// <summary>
+    /// Gets the depth of this species in the parent chain.
+    /// </summary>
+    /// <returns>The depth of the species.</returns>
+    [Pure]
+    public uint GetSpeciesDepth()
+    {
+        if (this.Parent is null)
         {
+            return 0;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Species"/> class.
-        /// </summary>
-        /// <param name="name">The species name.</param>
-        /// <param name="description">The description of the species.</param>
-        /// <param name="author">The author of the species..</param>
-        public Species(string name, string description, string author)
-        {
-            this.Name = name;
-            this.Description = description;
-            this.Author = author;
-        }
+        return this.Parent.GetSpeciesDepth() + 1;
+    }
 
-        /// <summary>
-        /// Gets the depth of this species in the parent chain.
-        /// </summary>
-        /// <returns>The depth of the species.</returns>
-        [Pure]
-        public uint GetSpeciesDepth()
-        {
-            if (this.Parent is null)
-            {
-                return 0;
-            }
+    /// <summary>
+    /// Determines whether or not two species are the same by comparing their names.
+    /// </summary>
+    /// <param name="species">The species to compare with.</param>
+    /// <returns>true if the species are the same; otherwise, false.</returns>
+    [Pure]
+    public bool IsSameSpeciesAs(Species? species)
+    {
+        return species is not null && string.Equals(this.Name.ToLower(), species.Name.ToLower());
+    }
 
-            return this.Parent.GetSpeciesDepth() + 1;
-        }
-
-        /// <summary>
-        /// Determines whether or not two species are the same by comparing their names.
-        /// </summary>
-        /// <param name="species">The species to compare with.</param>
-        /// <returns>true if the species are the same; otherwise, false.</returns>
-        [Pure]
-        public bool IsSameSpeciesAs(Species? species)
-        {
-            return species is not null && string.Equals(this.Name.ToLower(), species.Name.ToLower());
-        }
-
-        /// <inheritdoc />
-        public override string ToString()
-        {
-            return this.Name;
-        }
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        return this.Name;
     }
 }

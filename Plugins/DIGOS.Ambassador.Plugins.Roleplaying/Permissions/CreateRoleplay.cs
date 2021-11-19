@@ -23,23 +23,22 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
 
-namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions
+namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions;
+
+/// <summary>
+/// Represents a permission that allows a user to create roleplays.
+/// </summary>
+public sealed class CreateRoleplay : Permission
 {
-    /// <summary>
-    /// Represents a permission that allows a user to create roleplays.
-    /// </summary>
-    public sealed class CreateRoleplay : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("0369FAC5-3609-4143-98C7-B99ED084CEA4");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("0369FAC5-3609-4143-98C7-B99ED084CEA4");
 
-        /// <inheritdoc />
-        public override string FriendlyName => nameof(CreateRoleplay);
+    /// <inheritdoc />
+    public override string FriendlyName => nameof(CreateRoleplay);
 
-        /// <inheritdoc />
-        public override string Description => "Allows you to create roleplays.";
+    /// <inheritdoc />
+    public override string Description => "Allows you to create roleplays.";
 
-        /// <inheritdoc />
-        public override bool IsGrantedByDefaultToSelf => true;
-    }
+    /// <inheritdoc />
+    public override bool IsGrantedByDefaultToSelf => true;
 }

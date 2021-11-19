@@ -27,20 +27,19 @@
 using System.Threading.Tasks;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Transformations
-{
-    public partial class TransformationServiceTests
-    {
-        public class UpdateTransformationDatabaseAsync : TransformationServiceTestBase
-        {
-            [Fact]
-            public async Task FindsBundledSpecies()
-            {
-                var result = await this.Transformations.UpdateTransformationDatabaseAsync();
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
 
-                Assert.True(result.IsSuccess);
-                Assert.NotEmpty(this.Database.Species);
-            }
+public partial class TransformationServiceTests
+{
+    public class UpdateTransformationDatabaseAsync : TransformationServiceTestBase
+    {
+        [Fact]
+        public async Task FindsBundledSpecies()
+        {
+            var result = await this.Transformations.UpdateTransformationDatabaseAsync();
+
+            Assert.True(result.IsSuccess);
+            Assert.NotEmpty(this.Database.Species);
         }
     }
 }

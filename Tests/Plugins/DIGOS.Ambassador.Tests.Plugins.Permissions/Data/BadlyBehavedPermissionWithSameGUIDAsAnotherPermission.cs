@@ -23,20 +23,19 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Permissions.Data
+namespace DIGOS.Ambassador.Tests.Plugins.Permissions.Data;
+
+/// <summary>
+/// Defines a simple test permission.
+/// </summary>
+public class BadlyBehavedPermissionWithSameGUIDAsAnotherPermission : Permission
 {
-    /// <summary>
-    /// Defines a simple test permission.
-    /// </summary>
-    public class BadlyBehavedPermissionWithSameGUIDAsAnotherPermission : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("522DD3BD-BBEA-4C5F-AB95-2A04DBCB606B");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("522DD3BD-BBEA-4C5F-AB95-2A04DBCB606B");
 
-        /// <inheritdoc />
-        public override string FriendlyName => nameof(TestPermission);
+    /// <inheritdoc />
+    public override string FriendlyName => nameof(TestPermission);
 
-        /// <inheritdoc />
-        public override string Description => "A test permission.";
-    }
+    /// <inheritdoc />
+    public override string Description => "A test permission.";
 }

@@ -35,80 +35,79 @@ using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTa
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
-namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
+namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules;
+
+public partial class RoleplayCommands
 {
-    public partial class RoleplayCommands
+    /// <summary>
+    /// Server info setter commands.
+    /// </summary>
+    public partial class RoleplayServerCommands
     {
         /// <summary>
-        /// Server info setter commands.
+        /// Sets the channel category to use for dedicated roleplays.
         /// </summary>
-        public partial class RoleplayServerCommands
+        /// <param name="category">The category to use.</param>
+        [UsedImplicitly]
+        [Command("set-roleplay-category")]
+        [Description("Sets the channel category to use for dedicated roleplays.")]
+        [RequireContext(ChannelContext.Guild)]
+        [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
+        public async Task<Result<FeedbackMessage>> SetDedicatedRoleplayChannelCategory(IChannel category)
         {
-            /// <summary>
-            /// Sets the channel category to use for dedicated roleplays.
-            /// </summary>
-            /// <param name="category">The category to use.</param>
-            [UsedImplicitly]
-            [Command("set-roleplay-category")]
-            [Description("Sets the channel category to use for dedicated roleplays.")]
-            [RequireContext(ChannelContext.Guild)]
-            [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
-            public async Task<Result<FeedbackMessage>> SetDedicatedRoleplayChannelCategory(IChannel category)
-            {
-                var result = await _serverSettings.SetDedicatedChannelCategoryAsync
-                (
-                    _context.GuildID.Value,
-                    category.ID
-                );
+            var result = await _serverSettings.SetDedicatedChannelCategoryAsync
+            (
+                _context.GuildID.Value,
+                category.ID
+            );
 
-                return !result.IsSuccess
-                    ? Result<FeedbackMessage>.FromError(result)
-                    : new FeedbackMessage("Dedicated channel category set.", _feedback.Theme.Secondary);
-            }
+            return !result.IsSuccess
+                ? Result<FeedbackMessage>.FromError(result)
+                : new FeedbackMessage("Dedicated channel category set.", _feedback.Theme.Secondary);
+        }
 
-            /// <summary>
-            /// Sets the channel to use for archival of roleplays.
-            /// </summary>
-            /// <param name="channel">The channel to use.</param>
-            [UsedImplicitly]
-            [Command("set-archive-channel")]
-            [Description("Sets the channel to use for archival of roleplays.")]
-            [RequireContext(ChannelContext.Guild)]
-            [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
-            public async Task<Result<FeedbackMessage>> SetArchiveChannelAsync(IChannel channel)
-            {
-                var result = await _serverSettings.SetArchiveChannelAsync
-                (
-                    _context.GuildID.Value,
-                    channel.ID
-                );
+        /// <summary>
+        /// Sets the channel to use for archival of roleplays.
+        /// </summary>
+        /// <param name="channel">The channel to use.</param>
+        [UsedImplicitly]
+        [Command("set-archive-channel")]
+        [Description("Sets the channel to use for archival of roleplays.")]
+        [RequireContext(ChannelContext.Guild)]
+        [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
+        public async Task<Result<FeedbackMessage>> SetArchiveChannelAsync(IChannel channel)
+        {
+            var result = await _serverSettings.SetArchiveChannelAsync
+            (
+                _context.GuildID.Value,
+                channel.ID
+            );
 
-                return !result.IsSuccess
-                    ? Result<FeedbackMessage>.FromError(result)
-                    : new FeedbackMessage("Archive channel set.", _feedback.Theme.Secondary);
-            }
+            return !result.IsSuccess
+                ? Result<FeedbackMessage>.FromError(result)
+                : new FeedbackMessage("Archive channel set.", _feedback.Theme.Secondary);
+        }
 
-            /// <summary>
-            /// Sets the role to use as a default @everyone role in dynamic roleplays.
-            /// </summary>
-            /// <param name="role">The role to use.</param>
-            [UsedImplicitly]
-            [Command("set-default-user-role")]
-            [Description("Sets the role to use as a default @everyone role in dynamic roleplays.")]
-            [RequireContext(ChannelContext.Guild)]
-            [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
-            public async Task<Result<FeedbackMessage>> SetDefaultUserRole(IRole role)
-            {
-                var result = await _serverSettings.SetDefaultUserRoleAsync
-                (
-                    _context.GuildID.Value,
-                    role.ID
-                );
+        /// <summary>
+        /// Sets the role to use as a default @everyone role in dynamic roleplays.
+        /// </summary>
+        /// <param name="role">The role to use.</param>
+        [UsedImplicitly]
+        [Command("set-default-user-role")]
+        [Description("Sets the role to use as a default @everyone role in dynamic roleplays.")]
+        [RequireContext(ChannelContext.Guild)]
+        [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
+        public async Task<Result<FeedbackMessage>> SetDefaultUserRole(IRole role)
+        {
+            var result = await _serverSettings.SetDefaultUserRoleAsync
+            (
+                _context.GuildID.Value,
+                role.ID
+            );
 
-                return !result.IsSuccess
-                    ? Result<FeedbackMessage>.FromError(result)
-                    : new FeedbackMessage("Default user role set.", _feedback.Theme.Secondary);
-            }
+            return !result.IsSuccess
+                ? Result<FeedbackMessage>.FromError(result)
+                : new FeedbackMessage("Default user role set.", _feedback.Theme.Secondary);
         }
     }
 }

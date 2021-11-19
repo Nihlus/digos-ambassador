@@ -30,69 +30,68 @@ using Zio;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Core.Tests.Services.ContentService
+namespace DIGOS.Ambassador.Core.Tests.Services.ContentService;
+
+public static partial class ContentServiceTests
 {
-    public static partial class ContentServiceTests
+    public class GetBotTokenAsync : ContentServiceTestBase
     {
-        public class GetBotTokenAsync : ContentServiceTestBase
+        private readonly UPath _tokenDirectory;
+        private readonly UPath _tokenPath;
+
+        public GetBotTokenAsync()
         {
-            private readonly UPath _tokenDirectory;
-            private readonly UPath _tokenPath;
+            _tokenDirectory = UPath.Combine(UPath.Root, "Discord");
+            _tokenPath = UPath.Combine(_tokenDirectory, "bot.token");
+        }
 
-            public GetBotTokenAsync()
+        [Fact]
+        public async Task ReturnsFalseIfTokenFileDoesNotExist()
+        {
+            var result = await this.ContentService.GetBotTokenAsync();
+
+            Assert.False(result.IsSuccess);
+        }
+
+        [Fact]
+        public async Task ReturnsFalseIfTokenFileExistsButContainsNoValidToken()
+        {
+            this.FileSystem.CreateDirectory(_tokenDirectory);
+            await this.FileSystem.CreateFile(_tokenPath).DisposeAsync();
+
+            var result = await this.ContentService.GetBotTokenAsync();
+
+            Assert.False(result.IsSuccess);
+        }
+
+        [Fact]
+        public async Task ReturnsTrueIfTokenFileExistsAndContainsValidToken()
+        {
+            this.FileSystem.CreateDirectory(_tokenDirectory);
+            await using (var sw = new StreamWriter(this.FileSystem.CreateFile(_tokenPath)))
             {
-                _tokenDirectory = UPath.Combine(UPath.Root, "Discord");
-                _tokenPath = UPath.Combine(_tokenDirectory, "bot.token");
+                await sw.WriteLineAsync("02f978n90908nsaf908n2908n2908n");
             }
 
-            [Fact]
-            public async Task ReturnsFalseIfTokenFileDoesNotExist()
-            {
-                var result = await this.ContentService.GetBotTokenAsync();
+            var result = await this.ContentService.GetBotTokenAsync();
 
-                Assert.False(result.IsSuccess);
+            Assert.True(result.IsSuccess);
+        }
+
+        [Fact]
+        public async Task ActuallyReturnsToken()
+        {
+            this.FileSystem.CreateDirectory(_tokenDirectory);
+            await using (var sw = new StreamWriter(this.FileSystem.CreateFile(_tokenPath)))
+            {
+                await sw.WriteLineAsync("02f978n90908nsaf908n2908n2908n");
             }
 
-            [Fact]
-            public async Task ReturnsFalseIfTokenFileExistsButContainsNoValidToken()
-            {
-                this.FileSystem.CreateDirectory(_tokenDirectory);
-                await this.FileSystem.CreateFile(_tokenPath).DisposeAsync();
+            var result = await this.ContentService.GetBotTokenAsync();
 
-                var result = await this.ContentService.GetBotTokenAsync();
+            Assert.NotNull(result.Entity);
 
-                Assert.False(result.IsSuccess);
-            }
-
-            [Fact]
-            public async Task ReturnsTrueIfTokenFileExistsAndContainsValidToken()
-            {
-                this.FileSystem.CreateDirectory(_tokenDirectory);
-                await using (var sw = new StreamWriter(this.FileSystem.CreateFile(_tokenPath)))
-                {
-                    await sw.WriteLineAsync("02f978n90908nsaf908n2908n2908n");
-                }
-
-                var result = await this.ContentService.GetBotTokenAsync();
-
-                Assert.True(result.IsSuccess);
-            }
-
-            [Fact]
-            public async Task ActuallyReturnsToken()
-            {
-                this.FileSystem.CreateDirectory(_tokenDirectory);
-                await using (var sw = new StreamWriter(this.FileSystem.CreateFile(_tokenPath)))
-                {
-                    await sw.WriteLineAsync("02f978n90908nsaf908n2908n2908n");
-                }
-
-                var result = await this.ContentService.GetBotTokenAsync();
-
-                Assert.NotNull(result.Entity);
-
-                Assert.Equal("02f978n90908nsaf908n2908n2908n\n", result.Entity);
-            }
+            Assert.Equal("02f978n90908nsaf908n2908n2908n\n", result.Entity);
         }
     }
 }

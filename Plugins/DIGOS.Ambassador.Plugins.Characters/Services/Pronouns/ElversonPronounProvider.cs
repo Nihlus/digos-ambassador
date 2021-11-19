@@ -20,29 +20,28 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
+namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
+
+/// <summary>
+/// Provides Elverson pronouns.
+/// </summary>
+public class ElversonPronounProvider : PronounProvider
 {
-    /// <summary>
-    /// Provides Elverson pronouns.
-    /// </summary>
-    public class ElversonPronounProvider : PronounProvider
-    {
-        /// <inheritdoc />
-        public override string Family => "Elverson";
+    /// <inheritdoc />
+    public override string Family => "Elverson";
 
-        /// <inheritdoc />
-        public override string GetSubjectForm(bool withVerb = false) => withVerb ? "ey are" : "ey";
+    /// <inheritdoc />
+    public override string GetSubjectForm(bool withVerb = false) => withVerb ? "ey are" : "ey";
 
-        /// <inheritdoc />
-        public override string GetObjectForm() => "em";
+    /// <inheritdoc />
+    public override string GetObjectForm() => "em";
 
-        /// <inheritdoc />
-        public override string GetPossessiveAdjectiveForm() => "eir";
+    /// <inheritdoc />
+    public override string GetPossessiveAdjectiveForm() => "eir";
 
-        /// <inheritdoc />
-        public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "ey have" : "eirs";
+    /// <inheritdoc />
+    public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "ey have" : "eirs";
 
-        /// <inheritdoc />
-        public override string GetReflexiveForm() => "emselves";
-    }
+    /// <inheritdoc />
+    public override string GetReflexiveForm() => "emselves";
 }

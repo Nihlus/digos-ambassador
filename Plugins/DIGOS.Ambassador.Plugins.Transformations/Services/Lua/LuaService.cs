@@ -30,121 +30,121 @@ using JetBrains.Annotations;
 using Remora.Results;
 using Zio;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
+namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua;
+
+/// <summary>
+/// Handles execution of lua code.
+/// </summary>
+[PublicAPI]
+public sealed class LuaService
 {
-    /// <summary>
-    /// Handles execution of lua code.
-    /// </summary>
-    [PublicAPI]
-    public sealed class LuaService
+    private readonly IReadOnlyList<string> _functionWhitelist = new[]
     {
-        private readonly IReadOnlyList<string> _functionWhitelist = new[]
+        "assert",
+        "error",
+        "ipairs",
+        "next",
+        "pairs",
+        "pcall",
+        "select",
+        "tonumber",
+        "tostring",
+        "type",
+        "unpack",
+        "_VERSION",
+        "xpcall",
+        "string.byte",
+        "string.char",
+        "string.find",
+        "string.format",
+        "string.gmatch",
+        "string.gsub",
+        "string.len",
+        "string.lower",
+        "string.match",
+        "string.rep",
+        "string.reverse",
+        "string.sub",
+        "string.upper",
+        "table.insert",
+        "table.maxn",
+        "table.remove",
+        "table.sort",
+        "math.abs",
+        "math.acos",
+        "math.asin",
+        "math.atan",
+        "math.atan2",
+        "math.ceil",
+        "math.cos",
+        "math.cosh",
+        "math.deg",
+        "math.exp",
+        "math.floor",
+        "math.fmod",
+        "math.frexp",
+        "math.huge",
+        "math.ldexp",
+        "math.log",
+        "math.log10",
+        "math.max",
+        "math.min",
+        "math.modf",
+        "math.pi",
+        "math.pow",
+        "math.rad",
+        "math.random",
+        "math.randomseed",
+        "math.sin",
+        "math.sinh",
+        "math.sqrt",
+        "math.tan",
+        "math.tanh",
+        "os.clock",
+        "os.time",
+    };
+
+    private readonly ContentService _contentService;
+
+    private readonly Regex _getErroringFunctionRegex =
+        new Regex("(?<=\\((?>global)|(?>field )(?> \')).+(?=\'\\))", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LuaService"/> class.
+    /// </summary>
+    /// <param name="contentService">The application's content service.</param>
+    public LuaService(ContentService contentService)
+    {
+        _contentService = contentService;
+    }
+
+    /// <summary>
+    /// Gets a sandboxed lua state.
+    /// </summary>
+    /// <returns>A sandboxed lua state.</returns>
+    [MustUseReturnValue("The state must be disposed after use.")]
+    private NLua.Lua GetState(params (string Name, object? Value)[] variables)
+    {
+        var state = new NLua.Lua();
+
+        var envBuilder = new MetaTableBuilder();
+
+        foreach (var (name, value) in variables)
         {
-            "assert",
-            "error",
-            "ipairs",
-            "next",
-            "pairs",
-            "pcall",
-            "select",
-            "tonumber",
-            "tostring",
-            "type",
-            "unpack",
-            "_VERSION",
-            "xpcall",
-            "string.byte",
-            "string.char",
-            "string.find",
-            "string.format",
-            "string.gmatch",
-            "string.gsub",
-            "string.len",
-            "string.lower",
-            "string.match",
-            "string.rep",
-            "string.reverse",
-            "string.sub",
-            "string.upper",
-            "table.insert",
-            "table.maxn",
-            "table.remove",
-            "table.sort",
-            "math.abs",
-            "math.acos",
-            "math.asin",
-            "math.atan",
-            "math.atan2",
-            "math.ceil",
-            "math.cos",
-            "math.cosh",
-            "math.deg",
-            "math.exp",
-            "math.floor",
-            "math.fmod",
-            "math.frexp",
-            "math.huge",
-            "math.ldexp",
-            "math.log",
-            "math.log10",
-            "math.max",
-            "math.min",
-            "math.modf",
-            "math.pi",
-            "math.pow",
-            "math.rad",
-            "math.random",
-            "math.randomseed",
-            "math.sin",
-            "math.sinh",
-            "math.sqrt",
-            "math.tan",
-            "math.tanh",
-            "os.clock",
-            "os.time",
-        };
-
-        private readonly ContentService _contentService;
-
-        private readonly Regex _getErroringFunctionRegex =
-            new Regex("(?<=\\((?>global)|(?>field )(?> \')).+(?=\'\\))", RegexOptions.Compiled);
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="LuaService"/> class.
-        /// </summary>
-        /// <param name="contentService">The application's content service.</param>
-        public LuaService(ContentService contentService)
-        {
-            _contentService = contentService;
+            state[name] = value;
+            envBuilder.WithEntry(name);
         }
 
-        /// <summary>
-        /// Gets a sandboxed lua state.
-        /// </summary>
-        /// <returns>A sandboxed lua state.</returns>
-        [MustUseReturnValue("The state must be disposed after use.")]
-        private NLua.Lua GetState(params (string Name, object? Value)[] variables)
+        foreach (var function in _functionWhitelist)
         {
-            var state = new NLua.Lua();
+            envBuilder = envBuilder.WithEntry(function);
+        }
 
-            var envBuilder = new MetaTableBuilder();
+        state.DoString($"{envBuilder.Build()}");
 
-            foreach (var (name, value) in variables)
-            {
-                state[name] = value;
-                envBuilder.WithEntry(name);
-            }
-
-            foreach (var function in _functionWhitelist)
-            {
-                envBuilder = envBuilder.WithEntry(function);
-            }
-
-            state.DoString($"{envBuilder.Build()}");
-
-            state.DoString
-            (
-                @"
+        state.DoString
+        (
+            @"
                 local debug = require ""debug""
 
                 if not setfenv then -- Lua 5.2+
@@ -179,100 +179,99 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
                     return pcall(untrusted_function)
                 end
                 "
-            );
+        );
 
-            // Add a script timeout after 1e8 VM instructions
-            state.DoString
-            (
-                @"
+        // Add a script timeout after 1e8 VM instructions
+        state.DoString
+        (
+            @"
                 function f()
                     error(""timeout!"")
                 end
                 debug.sethook(f,"""", 1e8)
                 "
-            );
+        );
 
-            return state;
-        }
+        return state;
+    }
 
-        /// <summary>
-        /// Executes the given lua snippet and retrieves its first result.
-        /// </summary>
-        /// <param name="snippet">The snippet to execute.</param>
-        /// <param name="variables">Any variables to pass to the snippet as globals.</param>
-        /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public Task<Result<string>> ExecuteSnippetAsync
+    /// <summary>
+    /// Executes the given lua snippet and retrieves its first result.
+    /// </summary>
+    /// <param name="snippet">The snippet to execute.</param>
+    /// <param name="variables">Any variables to pass to the snippet as globals.</param>
+    /// <returns>A retrieval result which may or may not have succeeded.</returns>
+    public Task<Result<string>> ExecuteSnippetAsync
+    (
+        string snippet,
+        params (string Name, object? Value)[] variables
+    )
+    {
+        return Task.Run
         (
-            string snippet,
-            params (string Name, object? Value)[] variables
-        )
-        {
-            return Task.Run
-            (
-                () =>
+            () =>
+            {
+                using var lua = GetState(variables);
+
+                lua.DoString($"status, result = run [[{snippet}]]");
+                lua.DoString("output = tostring(result)");
+
+                var result = lua["output"] as string;
+                var ranSuccessfully = lua["status"] is bool b && b;
+                if (result is not null && ranSuccessfully)
                 {
-                    using var lua = GetState(variables);
+                    return Result<string>.FromSuccess(result);
+                }
 
-                    lua.DoString($"status, result = run [[{snippet}]]");
-                    lua.DoString("output = tostring(result)");
-
-                    var result = lua["output"] as string;
-                    var ranSuccessfully = lua["status"] is bool b && b;
-                    if (result is not null && ranSuccessfully)
-                    {
-                        return Result<string>.FromSuccess(result);
-                    }
-
-                    if (result is not null && result.EndsWith("timeout!"))
-                    {
-                        return new GenericError
-                        (
-                            "Timed out while waiting for the script to complete."
-                        );
-                    }
-
-                    var erroringFunction = _getErroringFunctionRegex.Match(result ?? string.Empty).Value;
-                    if (!_functionWhitelist.Contains(erroringFunction))
-                    {
-                        return new GenericError
-                        (
-                            $"Usage of {erroringFunction} is prohibited."
-                        );
-                    }
-
+                if (result is not null && result.EndsWith("timeout!"))
+                {
                     return new GenericError
                     (
-                        $"Lua error: {result}"
+                        "Timed out while waiting for the script to complete."
                     );
                 }
-            );
-        }
 
-        /// <summary>
-        /// Executes the given lua script file and retrieves its first result.
-        /// </summary>
-        /// <param name="scriptPath">The path to the file which should be executed.</param>
-        /// <param name="variables">Any variables to pass to the script as globals.</param>
-        /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<Result<string>> ExecuteScriptAsync
-        (
-            [PathReference] UPath scriptPath,
-            params (string Name, object? Value)[] variables
-        )
+                var erroringFunction = _getErroringFunctionRegex.Match(result ?? string.Empty).Value;
+                if (!_functionWhitelist.Contains(erroringFunction))
+                {
+                    return new GenericError
+                    (
+                        $"Usage of {erroringFunction} is prohibited."
+                    );
+                }
+
+                return new GenericError
+                (
+                    $"Lua error: {result}"
+                );
+            }
+        );
+    }
+
+    /// <summary>
+    /// Executes the given lua script file and retrieves its first result.
+    /// </summary>
+    /// <param name="scriptPath">The path to the file which should be executed.</param>
+    /// <param name="variables">Any variables to pass to the script as globals.</param>
+    /// <returns>A retrieval result which may or may not have succeeded.</returns>
+    public async Task<Result<string>> ExecuteScriptAsync
+    (
+        [PathReference] UPath scriptPath,
+        params (string Name, object? Value)[] variables
+    )
+    {
+        var getScriptResult = _contentService.OpenLocalStream(scriptPath);
+        if (!getScriptResult.IsSuccess)
         {
-            var getScriptResult = _contentService.OpenLocalStream(scriptPath);
-            if (!getScriptResult.IsSuccess)
-            {
-                return Result<string>.FromError(getScriptResult);
-            }
-
-            string script;
-            using (var sr = new StreamReader(getScriptResult.Entity))
-            {
-                script = await sr.ReadToEndAsync();
-            }
-
-            return await ExecuteSnippetAsync(script, variables);
+            return Result<string>.FromError(getScriptResult);
         }
+
+        string script;
+        using (var sr = new StreamReader(getScriptResult.Entity))
+        {
+            script = await sr.ReadToEndAsync();
+        }
+
+        return await ExecuteSnippetAsync(script, variables);
     }
 }

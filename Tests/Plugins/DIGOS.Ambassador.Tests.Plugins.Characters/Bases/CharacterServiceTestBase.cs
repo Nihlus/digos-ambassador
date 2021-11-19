@@ -43,156 +43,155 @@ using Remora.Discord.Core;
 using Xunit;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Characters
+namespace DIGOS.Ambassador.Tests.Plugins.Characters;
+
+/// <summary>
+/// Serves as a test base for character service tests.
+/// </summary>
+public abstract class CharacterServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
 {
     /// <summary>
-    /// Serves as a test base for character service tests.
+    /// Gets the default character owner.
     /// </summary>
-    public abstract class CharacterServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
+    protected User DefaultOwner { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the default server characters are on.
+    /// </summary>
+    protected Server DefaultServer { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the database.
+    /// </summary>
+    protected CharactersDatabaseContext Database { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the character service object.
+    /// </summary>
+    protected ICharacterService Characters { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the character service object.
+    /// </summary>
+    protected ICharacterEditor CharacterEditor { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the user service.
+    /// </summary>
+    protected UserService Users { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the server service.
+    /// </summary>
+    protected ServerService Servers { get; private set; } = null!;
+
+    /// <summary>
+    /// Creates a character in the database with the given settings.
+    /// </summary>
+    /// <param name="owner">The owner. Defaults to <see cref="DefaultOwner"/>.</param>
+    /// <param name="server">The server. Defaults <see cref="DefaultServer"/>.</param>
+    /// <param name="name">The name.</param>
+    /// <param name="avatarUrl">The avatar.</param>
+    /// <param name="nickname">The nickname.</param>
+    /// <param name="summary">The summary.</param>
+    /// <param name="description">The description.</param>
+    /// <param name="pronouns">The pronouns.</param>
+    /// <param name="isNSFW">Whether the character is NSFW.</param>
+    /// <returns>The character.</returns>
+    protected Character CreateCharacter
+    (
+        User? owner = null,
+        Server? server = null,
+        string? name = null,
+        string? avatarUrl = null,
+        string? nickname = null,
+        string? summary = null,
+        string? description = null,
+        string? pronouns = null,
+        bool? isNSFW = null
+    )
     {
-        /// <summary>
-        /// Gets the default character owner.
-        /// </summary>
-        protected User DefaultOwner { get; private set; } = null!;
-
-        /// <summary>
-        /// Gets the default server characters are on.
-        /// </summary>
-        protected Server DefaultServer { get; private set; } = null!;
-
-        /// <summary>
-        /// Gets the database.
-        /// </summary>
-        protected CharactersDatabaseContext Database { get; private set; } = null!;
-
-        /// <summary>
-        /// Gets the character service object.
-        /// </summary>
-        protected ICharacterService Characters { get; private set; } = null!;
-
-        /// <summary>
-        /// Gets the character service object.
-        /// </summary>
-        protected ICharacterEditor CharacterEditor { get; private set; } = null!;
-
-        /// <summary>
-        /// Gets the user service.
-        /// </summary>
-        protected UserService Users { get; private set; } = null!;
-
-        /// <summary>
-        /// Gets the server service.
-        /// </summary>
-        protected ServerService Servers { get; private set; } = null!;
-
-        /// <summary>
-        /// Creates a character in the database with the given settings.
-        /// </summary>
-        /// <param name="owner">The owner. Defaults to <see cref="DefaultOwner"/>.</param>
-        /// <param name="server">The server. Defaults <see cref="DefaultServer"/>.</param>
-        /// <param name="name">The name.</param>
-        /// <param name="avatarUrl">The avatar.</param>
-        /// <param name="nickname">The nickname.</param>
-        /// <param name="summary">The summary.</param>
-        /// <param name="description">The description.</param>
-        /// <param name="pronouns">The pronouns.</param>
-        /// <param name="isNSFW">Whether the character is NSFW.</param>
-        /// <returns>The character.</returns>
-        protected Character CreateCharacter
+        var character = this.Database.CreateProxy<Character>
         (
-            User? owner = null,
-            Server? server = null,
-            string? name = null,
-            string? avatarUrl = null,
-            string? nickname = null,
-            string? summary = null,
-            string? description = null,
-            string? pronouns = null,
-            bool? isNSFW = null
-        )
+            owner ?? this.DefaultOwner,
+            server ?? this.DefaultServer,
+            name ?? string.Empty,
+            avatarUrl ?? string.Empty,
+            nickname ?? string.Empty,
+            summary ?? string.Empty,
+            description ?? string.Empty,
+            pronouns ?? "They" // a real value is used here to avoid having to set it in the majority of cases
+        );
+
+        if (isNSFW is not null)
         {
-            var character = this.Database.CreateProxy<Character>
-            (
-                owner ?? this.DefaultOwner,
-                server ?? this.DefaultServer,
-                name ?? string.Empty,
-                avatarUrl ?? string.Empty,
-                nickname ?? string.Empty,
-                summary ?? string.Empty,
-                description ?? string.Empty,
-                pronouns ?? "They" // a real value is used here to avoid having to set it in the majority of cases
-            );
-
-            if (isNSFW is not null)
-            {
-                character.IsNSFW = isNSFW.Value;
-            }
-
-            this.Database.Characters.Update(character);
-            this.Database.SaveChanges();
-
-            return character;
+            character.IsNSFW = isNSFW.Value;
         }
 
-        /// <inheritdoc />
-        protected override void RegisterServices(IServiceCollection serviceCollection)
-        {
-            serviceCollection
-                .AddDbContext<CoreDatabaseContext>(o => ConfigureOptions(o, "Core"))
-                .AddDbContext<CharactersDatabaseContext>(o => ConfigureOptions(o, "Characters"));
+        this.Database.Characters.Update(character);
+        this.Database.SaveChanges();
 
-            serviceCollection
-                .AddSingleton(FileSystemFactory.CreateContentFileSystem())
-                .AddSingleton<PronounService>()
-                .AddScoped<ContentService>()
-                .AddScoped<ServerService>()
-                .AddScoped<UserService>()
-                .AddScoped<OwnedEntityService>()
-                .AddScoped<CharacterService>()
-                .AddScoped<ICharacterService>(s => s.GetRequiredService<CharacterService>())
-                .AddScoped<ICharacterEditor>(s => s.GetRequiredService<CharacterService>())
-                .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
-        }
+        return character;
+    }
 
-        /// <inheritdoc />
-        protected override void ConfigureServices(IServiceProvider serviceProvider)
-        {
-            var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            coreDatabase.Database.Create();
+    /// <inheritdoc />
+    protected override void RegisterServices(IServiceCollection serviceCollection)
+    {
+        serviceCollection
+            .AddDbContext<CoreDatabaseContext>(o => ConfigureOptions(o, "Core"))
+            .AddDbContext<CharactersDatabaseContext>(o => ConfigureOptions(o, "Characters"));
 
-            var charactersDatabase = serviceProvider.GetRequiredService<CharactersDatabaseContext>();
-            charactersDatabase.Database.Create();
+        serviceCollection
+            .AddSingleton(FileSystemFactory.CreateContentFileSystem())
+            .AddSingleton<PronounService>()
+            .AddScoped<ContentService>()
+            .AddScoped<ServerService>()
+            .AddScoped<UserService>()
+            .AddScoped<OwnedEntityService>()
+            .AddScoped<CharacterService>()
+            .AddScoped<ICharacterService>(s => s.GetRequiredService<CharacterService>())
+            .AddScoped<ICharacterEditor>(s => s.GetRequiredService<CharacterService>())
+            .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
+    }
 
-            this.Database = charactersDatabase;
+    /// <inheritdoc />
+    protected override void ConfigureServices(IServiceProvider serviceProvider)
+    {
+        var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
+        coreDatabase.Database.Create();
 
-            this.Characters = serviceProvider.GetRequiredService<ICharacterService>();
-            this.CharacterEditor = serviceProvider.GetRequiredService<ICharacterEditor>();
+        var charactersDatabase = serviceProvider.GetRequiredService<CharactersDatabaseContext>();
+        charactersDatabase.Database.Create();
 
-            this.Users = serviceProvider.GetRequiredService<UserService>();
+        this.Database = charactersDatabase;
 
-            this.DefaultOwner = this.Database.CreateProxy<User>(new Snowflake(0));
-            this.Database.Update(this.DefaultOwner);
+        this.Characters = serviceProvider.GetRequiredService<ICharacterService>();
+        this.CharacterEditor = serviceProvider.GetRequiredService<ICharacterEditor>();
 
-            this.DefaultServer = this.Database.CreateProxy<Server>(new Snowflake(1));
-            this.Database.Update(this.DefaultServer);
+        this.Users = serviceProvider.GetRequiredService<UserService>();
 
-            this.Database.SaveChanges();
+        this.DefaultOwner = this.Database.CreateProxy<User>(new Snowflake(0));
+        this.Database.Update(this.DefaultOwner);
 
-            // Default pronouns
-            var pronounService = serviceProvider.GetRequiredService<PronounService>();
-            pronounService.WithPronounProvider(new TheyPronounProvider());
-        }
+        this.DefaultServer = this.Database.CreateProxy<Server>(new Snowflake(1));
+        this.Database.Update(this.DefaultServer);
 
-        /// <inheritdoc />
-        public virtual Task InitializeAsync()
-        {
-            return Task.CompletedTask;
-        }
+        this.Database.SaveChanges();
 
-        /// <inheritdoc />
-        public Task DisposeAsync()
-        {
-            return Task.CompletedTask;
-        }
+        // Default pronouns
+        var pronounService = serviceProvider.GetRequiredService<PronounService>();
+        pronounService.WithPronounProvider(new TheyPronounProvider());
+    }
+
+    /// <inheritdoc />
+    public virtual Task InitializeAsync()
+    {
+        return Task.CompletedTask;
+    }
+
+    /// <inheritdoc />
+    public Task DisposeAsync()
+    {
+        return Task.CompletedTask;
     }
 }

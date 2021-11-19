@@ -25,32 +25,31 @@ using DIGOS.Ambassador.Core.Database.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace DIGOS.Ambassador.Core.Database.Extensions
+namespace DIGOS.Ambassador.Core.Database.Extensions;
+
+/// <summary>
+/// Contains extension methods for the <see cref="IServiceCollection"/> interface.
+/// </summary>
+public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Contains extension methods for the <see cref="IServiceCollection"/> interface.
+    /// Adds and configures a database pool for the given schema-aware context type.
     /// </summary>
-    public static class ServiceCollectionExtensions
+    /// <param name="services">The service collection.</param>
+    /// <typeparam name="TContext">The context type.</typeparam>
+    /// <returns>The service collection, with the pool added.</returns>
+    public static IServiceCollection AddConfiguredSchemaAwareDbContextPool<TContext>
+    (
+        this IServiceCollection services
+    )
+        where TContext : AmbassadorDbContext
     {
-        /// <summary>
-        /// Adds and configures a database pool for the given schema-aware context type.
-        /// </summary>
-        /// <param name="services">The service collection.</param>
-        /// <typeparam name="TContext">The context type.</typeparam>
-        /// <returns>The service collection, with the pool added.</returns>
-            public static IServiceCollection AddConfiguredSchemaAwareDbContextPool<TContext>
-        (
-            this IServiceCollection services
-        )
-            where TContext : AmbassadorDbContext
-        {
-            services.TryAddSingleton<ContextConfigurationService>();
+        services.TryAddSingleton<ContextConfigurationService>();
 
-            return services.AddDbContextPool<TContext>((provider, builder) =>
-            {
-                var configurationService = provider.GetRequiredService<ContextConfigurationService>();
-                configurationService.ConfigureSchemaAwareContext<TContext>(builder);
-            });
-        }
+        return services.AddDbContextPool<TContext>((provider, builder) =>
+        {
+            var configurationService = provider.GetRequiredService<ContextConfigurationService>();
+            configurationService.ConfigureSchemaAwareContext<TContext>(builder);
+        });
     }
 }

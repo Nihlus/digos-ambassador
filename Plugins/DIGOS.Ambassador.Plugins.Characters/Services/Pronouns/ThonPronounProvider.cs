@@ -20,29 +20,28 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
+namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
+
+/// <summary>
+/// Provides thon pronouns.
+/// </summary>
+public class ThonPronounProvider : PronounProvider
 {
-    /// <summary>
-    /// Provides thon pronouns.
-    /// </summary>
-    public class ThonPronounProvider : PronounProvider
-    {
-        /// <inheritdoc />
-        public override string Family => "Thon";
+    /// <inheritdoc />
+    public override string Family => "Thon";
 
-        /// <inheritdoc />
-        public override string GetSubjectForm(bool withVerb = false) => withVerb ? "thon is" : "thon";
+    /// <inheritdoc />
+    public override string GetSubjectForm(bool withVerb = false) => withVerb ? "thon is" : "thon";
 
-        /// <inheritdoc />
-        public override string GetObjectForm() => "thon";
+    /// <inheritdoc />
+    public override string GetObjectForm() => "thon";
 
-        /// <inheritdoc />
-        public override string GetPossessiveAdjectiveForm() => "thons";
+    /// <inheritdoc />
+    public override string GetPossessiveAdjectiveForm() => "thons";
 
-        /// <inheritdoc />
-        public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "thon has" : "thon's";
+    /// <inheritdoc />
+    public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "thon has" : "thon's";
 
-        /// <inheritdoc />
-        public override string GetReflexiveForm() => "thonself";
-    }
+    /// <inheritdoc />
+    public override string GetReflexiveForm() => "thonself";
 }

@@ -24,29 +24,28 @@ using System;
 using System.ComponentModel;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Plugins.Permissions.Model
+namespace DIGOS.Ambassador.Plugins.Permissions.Model;
+
+/// <summary>
+/// Represents target permissions for commands.
+/// </summary>
+[PublicAPI, Flags]
+public enum PermissionTarget
 {
     /// <summary>
-    /// Represents target permissions for commands.
+    /// Allows execution of a command on the invoking user.
     /// </summary>
-    [PublicAPI, Flags]
-    public enum PermissionTarget
-    {
-        /// <summary>
-        /// Allows execution of a command on the invoking user.
-        /// </summary>
-        [Description("Yourself")]
-        Self = 1 << 1,
+    [Description("Yourself")]
+    Self = 1 << 1,
 
-        /// <summary>
-        /// Allows execution of a command on other users.
-        /// </summary>
-        [Description("Others")]
-        Other = 1 << 2,
+    /// <summary>
+    /// Allows execution of a command on other users.
+    /// </summary>
+    [Description("Others")]
+    Other = 1 << 2,
 
-        /// <summary>
-        /// Allows execution of a command on anyone.
-        /// </summary>
-        All = Self | Other
-    }
+    /// <summary>
+    /// Allows execution of a command on anyone.
+    /// </summary>
+    All = Self | Other
 }

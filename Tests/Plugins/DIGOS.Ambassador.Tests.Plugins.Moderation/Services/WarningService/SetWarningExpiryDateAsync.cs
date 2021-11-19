@@ -33,66 +33,65 @@ using DIGOS.Ambassador.Tests.Plugins.Moderation.Bases;
 using Remora.Discord.Core;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
+namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService;
+
+public partial class WarningService
 {
-    public partial class WarningService
+    public class SetWarningExpiryDateAsync : WarningServiceTestBase
     {
-        public class SetWarningExpiryDateAsync : WarningServiceTestBase
+        private readonly UserWarning _warning = new(
+            new Server(new Snowflake(0)),
+            new User(new Snowflake(0)),
+            new User(new Snowflake(1)),
+            string.Empty
+        );
+
+        [Fact]
+        public async Task ReturnsUnsuccessfulIfNewExpiryDateIsSameAsExistingExpiryDate()
         {
-            private readonly UserWarning _warning = new(
-                new Server(new Snowflake(0)),
-                new User(new Snowflake(0)),
-                new User(new Snowflake(1)),
-                string.Empty
-            );
+            await this.Warnings.SetWarningExpiryDateAsync(_warning, DateTimeOffset.UtcNow.Date.AddDays(1));
+            var result = await this.Warnings.SetWarningExpiryDateAsync(_warning, DateTimeOffset.UtcNow.Date.AddDays(1));
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulIfNewExpiryDateIsSameAsExistingExpiryDate()
-            {
-                await this.Warnings.SetWarningExpiryDateAsync(_warning, DateTimeOffset.UtcNow.Date.AddDays(1));
-                var result = await this.Warnings.SetWarningExpiryDateAsync(_warning, DateTimeOffset.UtcNow.Date.AddDays(1));
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsUnsuccessfulIfNewExpiryDateIsInThePast()
+        {
+            var result = await this.Warnings.SetWarningExpiryDateAsync(_warning, DateTimeOffset.UtcNow.Date.AddDays(-1));
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulIfNewExpiryDateIsInThePast()
-            {
-                var result = await this.Warnings.SetWarningExpiryDateAsync(_warning, DateTimeOffset.UtcNow.Date.AddDays(-1));
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsSuccessfulIfNewExpiryDateIsWellFormed()
+        {
+            var result = await this.Warnings.SetWarningExpiryDateAsync(_warning, DateTimeOffset.UtcNow.Date.AddDays(2));
 
-            [Fact]
-            public async Task ReturnsSuccessfulIfNewExpiryDateIsWellFormed()
-            {
-                var result = await this.Warnings.SetWarningExpiryDateAsync(_warning, DateTimeOffset.UtcNow.Date.AddDays(2));
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ActuallySetsExpiryDate()
+        {
+            var expiryDate = DateTimeOffset.UtcNow.Date.AddDays(1);
 
-            [Fact]
-            public async Task ActuallySetsExpiryDate()
-            {
-                var expiryDate = DateTimeOffset.UtcNow.Date.AddDays(1);
+            await this.Warnings.SetWarningExpiryDateAsync(_warning, expiryDate);
 
-                await this.Warnings.SetWarningExpiryDateAsync(_warning, expiryDate);
+            Assert.Equal(expiryDate, _warning.ExpiresOn);
+        }
 
-                Assert.Equal(expiryDate, _warning.ExpiresOn);
-            }
+        [Fact]
+        public async Task SetterUpdatesTimestamp()
+        {
+            var before = _warning.UpdatedAt;
 
-            [Fact]
-            public async Task SetterUpdatesTimestamp()
-            {
-                var before = _warning.UpdatedAt;
+            var expiryDate = DateTimeOffset.UtcNow.Date.AddDays(1);
+            await this.Warnings.SetWarningExpiryDateAsync(_warning, expiryDate);
 
-                var expiryDate = DateTimeOffset.UtcNow.Date.AddDays(1);
-                await this.Warnings.SetWarningExpiryDateAsync(_warning, expiryDate);
+            var after = _warning.UpdatedAt;
 
-                var after = _warning.UpdatedAt;
-
-                Assert.True(before < after);
-            }
+            Assert.True(before < after);
         }
     }
 }

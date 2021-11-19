@@ -25,54 +25,53 @@ using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens;
+
+/// <summary>
+/// A token that gets replaced with a possessive pronoun.
+/// </summary>
+[PublicAPI]
+[TokenIdentifier("pronoun", "pr")]
+public sealed class PronounToken : ReplaceableTextToken<PronounToken>
 {
+    private readonly PronounService _pronouns;
+
     /// <summary>
-    /// A token that gets replaced with a possessive pronoun.
+    /// Gets the form of the pronoun.
     /// </summary>
-    [PublicAPI]
-    [TokenIdentifier("pronoun", "pr")]
-    public sealed class PronounToken : ReplaceableTextToken<PronounToken>
+    public PronounForm Form { get; private set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PronounToken"/> class.
+    /// </summary>
+    /// <param name="pronouns">The character service.</param>
+    public PronounToken(PronounService pronouns)
     {
-        private readonly PronounService _pronouns;
+        _pronouns = pronouns;
+    }
 
-        /// <summary>
-        /// Gets the form of the pronoun.
-        /// </summary>
-        public PronounForm Form { get; private set; }
+    /// <inheritdoc />
+    public override string GetText(Appearance appearance, AppearanceComponent? component)
+    {
+        var character = appearance.Character;
+        var pronounProvider = _pronouns.GetPronounProvider(character);
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PronounToken"/> class.
-        /// </summary>
-        /// <param name="pronouns">The character service.</param>
-        public PronounToken(PronounService pronouns)
+        return pronounProvider.GetForm(this.Form);
+    }
+
+    /// <inheritdoc />
+    protected override PronounToken Initialize(string? data)
+    {
+        if (data is null)
         {
-            _pronouns = pronouns;
-        }
-
-        /// <inheritdoc />
-        public override string GetText(Appearance appearance, AppearanceComponent? component)
-        {
-            var character = appearance.Character;
-            var pronounProvider = _pronouns.GetPronounProvider(character);
-
-            return pronounProvider.GetForm(this.Form);
-        }
-
-        /// <inheritdoc />
-        protected override PronounToken Initialize(string? data)
-        {
-            if (data is null)
-            {
-                return this;
-            }
-
-            if (Enum.TryParse<PronounForm>(data, true, out var result))
-            {
-                this.Form = result;
-            }
-
             return this;
         }
+
+        if (Enum.TryParse<PronounForm>(data, true, out var result))
+        {
+            this.Form = result;
+        }
+
+        return this;
     }
 }

@@ -29,24 +29,23 @@ using Remora.Plugins.Abstractions.Attributes;
 
 [assembly: RemoraPlugin(typeof(JoinMessagesPlugin))]
 
-namespace DIGOS.Ambassador.Plugins.JoinMessages
+namespace DIGOS.Ambassador.Plugins.JoinMessages;
+
+/// <summary>
+/// Describes the JoinMessages plugin.
+/// </summary>
+public sealed class JoinMessagesPlugin : PluginDescriptor
 {
-    /// <summary>
-    /// Describes the JoinMessages plugin.
-    /// </summary>
-    public sealed class JoinMessagesPlugin : PluginDescriptor
+    /// <inheritdoc />
+    public override string Name => "JoinMessages";
+
+    /// <inheritdoc />
+    public override string Description => "Sends initial join messages to new guild members.";
+
+    /// <inheritdoc />
+    public override void ConfigureServices(IServiceCollection serviceCollection)
     {
-        /// <inheritdoc />
-        public override string Name => "JoinMessages";
-
-        /// <inheritdoc />
-        public override string Description => "Sends initial join messages to new guild members.";
-
-        /// <inheritdoc />
-        public override void ConfigureServices(IServiceCollection serviceCollection)
-        {
-            serviceCollection
-                .AddResponder<JoinMessageResponder>();
-        }
+        serviceCollection
+            .AddResponder<JoinMessageResponder>();
     }
 }

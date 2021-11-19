@@ -20,43 +20,42 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
+namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua;
+
+/// <summary>
+/// Represents a named node.
+/// </summary>
+/// <typeparam name="T">The type of value the node holds.</typeparam>
+internal abstract class NamedNode<T> : INode where T : notnull
 {
+    /// <inheritdoc />
+    public string Name { get; }
+
     /// <summary>
-    /// Represents a named node.
+    /// Gets the value of the node.
     /// </summary>
-    /// <typeparam name="T">The type of value the node holds.</typeparam>
-    internal abstract class NamedNode<T> : INode where T : notnull
+    public T Value { get; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="NamedNode{T}"/> class.
+    /// </summary>
+    /// <param name="name">The name of the node.</param>
+    /// <param name="value">The value of the node.</param>
+    protected NamedNode(string name, T value)
     {
-        /// <inheritdoc />
-        public string Name { get; }
+        this.Name = name;
+        this.Value = value;
+    }
 
-        /// <summary>
-        /// Gets the value of the node.
-        /// </summary>
-        public T Value { get; }
+    /// <inheritdoc />
+    public virtual string Format(bool pretty = false)
+    {
+        return this.Value.ToString() ?? "None";
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NamedNode{T}"/> class.
-        /// </summary>
-        /// <param name="name">The name of the node.</param>
-        /// <param name="value">The value of the node.</param>
-        protected NamedNode(string name, T value)
-        {
-            this.Name = name;
-            this.Value = value;
-        }
-
-        /// <inheritdoc />
-        public virtual string Format(bool pretty = false)
-        {
-            return this.Value.ToString() ?? "None";
-        }
-
-        /// <inheritdoc />
-        public override string ToString()
-        {
-            return Format();
-        }
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        return Format();
     }
 }

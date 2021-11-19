@@ -28,27 +28,26 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Transformations
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
+
+public partial class TransformationServiceTests
 {
-    public partial class TransformationServiceTests
+    public class GetAvailableTransformationsAsync : TransformationServiceTestBase
     {
-        public class GetAvailableTransformationsAsync : TransformationServiceTestBase
+        [Fact]
+        public async Task ReturnsNonemptySetForExistingTransformation()
         {
-            [Fact]
-            public async Task ReturnsNonemptySetForExistingTransformation()
-            {
-                var result = await this.Transformations.GetAvailableTransformationsAsync(Bodypart.Face);
+            var result = await this.Transformations.GetAvailableTransformationsAsync(Bodypart.Face);
 
-                Assert.NotEmpty(result);
-            }
+            Assert.NotEmpty(result);
+        }
 
-            [Fact]
-            public async Task ReturnsEmptySetForNonExistentTransformation()
-            {
-                var result = await this.Transformations.GetAvailableTransformationsAsync(Bodypart.Wings);
+        [Fact]
+        public async Task ReturnsEmptySetForNonExistentTransformation()
+        {
+            var result = await this.Transformations.GetAvailableTransformationsAsync(Bodypart.Wings);
 
-                Assert.Empty(result);
-            }
+            Assert.Empty(result);
         }
     }
 }

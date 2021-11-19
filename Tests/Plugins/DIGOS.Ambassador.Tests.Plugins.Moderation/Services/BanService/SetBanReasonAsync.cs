@@ -33,67 +33,66 @@ using DIGOS.Ambassador.Tests.Plugins.Moderation.Bases;
 using Remora.Discord.Core;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
+namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService;
+
+public partial class BanService
 {
-    public partial class BanService
+    public class SetBanReasonAsync : BanServiceTestBase
     {
-        public class SetBanReasonAsync : BanServiceTestBase
+        private readonly UserBan _ban = new(new Server(new Snowflake(0)), new User(new Snowflake(0)), new User(new Snowflake(1)), string.Empty);
+
+        [Fact]
+        public async Task ReturnsUnsuccessfulIfNewReasonsAreEmpty()
         {
-            private readonly UserBan _ban = new(new Server(new Snowflake(0)), new User(new Snowflake(0)), new User(new Snowflake(1)), string.Empty);
+            var result = await this.Bans.SetBanReasonAsync(_ban, string.Empty);
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulIfNewReasonsAreEmpty()
-            {
-                var result = await this.Bans.SetBanReasonAsync(_ban, string.Empty);
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsUnsuccessfulIfNewReasonIsTooLong()
+        {
+            var result = await this.Bans.SetBanReasonAsync(_ban, new string('a', 1025));
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulIfNewReasonIsTooLong()
-            {
-                var result = await this.Bans.SetBanReasonAsync(_ban, new string('a', 1025));
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsUnsuccessfulIfNewReasonsAreIdentical()
+        {
+            await this.Bans.SetBanReasonAsync(_ban, "Dummy thicc");
+            var result = await this.Bans.SetBanReasonAsync(_ban, "Dummy thicc");
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulIfNewReasonsAreIdentical()
-            {
-                await this.Bans.SetBanReasonAsync(_ban, "Dummy thicc");
-                var result = await this.Bans.SetBanReasonAsync(_ban, "Dummy thicc");
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsSuccessfulIfNewReasonsAreWellFormed()
+        {
+            await this.Bans.SetBanReasonAsync(_ban, "Dummy thicc");
+            var result = await this.Bans.SetBanReasonAsync(_ban, "Not dummy thicc");
 
-            [Fact]
-            public async Task ReturnsSuccessfulIfNewReasonsAreWellFormed()
-            {
-                await this.Bans.SetBanReasonAsync(_ban, "Dummy thicc");
-                var result = await this.Bans.SetBanReasonAsync(_ban, "Not dummy thicc");
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ActuallySetsReasons()
+        {
+            await this.Bans.SetBanReasonAsync(_ban, "Dummy thicc");
 
-            [Fact]
-            public async Task ActuallySetsReasons()
-            {
-                await this.Bans.SetBanReasonAsync(_ban, "Dummy thicc");
+            Assert.Equal("Dummy thicc", _ban.Reason);
+        }
 
-                Assert.Equal("Dummy thicc", _ban.Reason);
-            }
+        [Fact]
+        public async Task SetterUpdatesTimestamp()
+        {
+            var before = _ban.UpdatedAt;
 
-            [Fact]
-            public async Task SetterUpdatesTimestamp()
-            {
-                var before = _ban.UpdatedAt;
+            await this.Bans.SetBanReasonAsync(_ban, "Dummy thicc");
 
-                await this.Bans.SetBanReasonAsync(_ban, "Dummy thicc");
+            var after = _ban.UpdatedAt;
 
-                var after = _ban.UpdatedAt;
-
-                Assert.True(before < after);
-            }
+            Assert.True(before < after);
         }
     }
 }

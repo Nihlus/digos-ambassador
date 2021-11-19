@@ -23,21 +23,20 @@
 using JetBrains.Annotations;
 
 #pragma warning disable 1591, SA1602
-namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
+namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
+
+/// <summary>
+/// Patterns that components can have.
+/// </summary>
+[PublicAPI]
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+public enum Pattern
 {
-    /// <summary>
-    /// Patterns that components can have.
-    /// </summary>
-    [PublicAPI]
-    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    public enum Pattern
-    {
-        Striped,
-        Spotted,
-        Swirly,
-        Checkered,
-        Splotchy,
-        Patchy,
-        Banded,
-    }
+    Striped,
+    Spotted,
+    Swirly,
+    Checkered,
+    Splotchy,
+    Patchy,
+    Banded,
 }

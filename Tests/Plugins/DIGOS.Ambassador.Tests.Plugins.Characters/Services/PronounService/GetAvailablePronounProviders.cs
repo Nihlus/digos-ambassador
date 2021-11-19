@@ -27,26 +27,25 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Characters
+namespace DIGOS.Ambassador.Tests.Plugins.Characters;
+
+public partial class PronounServiceTests
 {
-    public partial class PronounServiceTests
+    public class GetAvailablePronounProviders : PronounServiceTestBase
     {
-        public class GetAvailablePronounProviders : PronounServiceTestBase
+        [Fact]
+        public void ReturnsEmptySetWhenNoProvidersHaveBeenAdded()
         {
-            [Fact]
-            public void ReturnsEmptySetWhenNoProvidersHaveBeenAdded()
-            {
-                Assert.Empty(this.Pronouns.GetAvailablePronounProviders());
-            }
+            Assert.Empty(this.Pronouns.GetAvailablePronounProviders());
+        }
 
-            [Fact]
-            public void ReturnsNonEmptySetWhenProvidersHaveBeenAdded()
-            {
-                var provider = new TheyPronounProvider();
-                this.Pronouns.WithPronounProvider(provider);
+        [Fact]
+        public void ReturnsNonEmptySetWhenProvidersHaveBeenAdded()
+        {
+            var provider = new TheyPronounProvider();
+            this.Pronouns.WithPronounProvider(provider);
 
-                Assert.NotEmpty(this.Pronouns.GetAvailablePronounProviders());
-            }
+            Assert.NotEmpty(this.Pronouns.GetAvailablePronounProviders());
         }
     }
 }

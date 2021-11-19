@@ -23,20 +23,19 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Permissions
+namespace DIGOS.Ambassador.Plugins.Autorole.Permissions;
+
+/// <summary>
+/// Represents a permission that allows a user to edit server-wide autorole settings.
+/// </summary>
+public class EditAutoroleServerSettings : Permission
 {
-    /// <summary>
-    /// Represents a permission that allows a user to edit server-wide autorole settings.
-    /// </summary>
-    public class EditAutoroleServerSettings : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("BFE193B1-2EBC-4E07-936B-DE4C1CC5E625");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("BFE193B1-2EBC-4E07-936B-DE4C1CC5E625");
 
-        /// <inheritdoc/>
-        public override string FriendlyName { get; } = nameof(EditAutoroleServerSettings);
+    /// <inheritdoc/>
+    public override string FriendlyName { get; } = nameof(EditAutoroleServerSettings);
 
-        /// <inheritdoc/>
-        public override string Description { get; } = "Allows you to edit server-wide autorole settings.";
-    }
+    /// <inheritdoc/>
+    public override string Description { get; } = "Allows you to edit server-wide autorole settings.";
 }

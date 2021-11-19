@@ -30,40 +30,39 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Classes.UserWarning
+namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Classes.UserWarning;
+
+public class UserWarningTests
 {
-    public class UserWarningTests
+    public class IsTemporary
     {
-        public class IsTemporary
+        [Fact]
+        public void ReturnsFalseIfExpiryDateIsUnset()
         {
-            [Fact]
-            public void ReturnsFalseIfExpiryDateIsUnset()
-            {
-                var instance = new Ambassador.Plugins.Moderation.Model.UserWarning
-                (
-                    new Server(new Snowflake(0)),
-                    new User(new Snowflake(0)),
-                    new User(new Snowflake(1)),
-                    string.Empty
-                );
+            var instance = new Ambassador.Plugins.Moderation.Model.UserWarning
+            (
+                new Server(new Snowflake(0)),
+                new User(new Snowflake(0)),
+                new User(new Snowflake(1)),
+                string.Empty
+            );
 
-                Assert.False(instance.ExpiresOn.HasValue);
-            }
+            Assert.False(instance.ExpiresOn.HasValue);
+        }
 
-            [Fact]
-            public void ReturnsTrueIfExpiryDateIsSet()
-            {
-                var instance = new Ambassador.Plugins.Moderation.Model.UserWarning
-                (
-                    new Server(new Snowflake(0)),
-                    new User(new Snowflake(0)),
-                    new User(new Snowflake(1)),
-                    string.Empty,
-                    expiresOn: DateTimeOffset.UtcNow
-                );
+        [Fact]
+        public void ReturnsTrueIfExpiryDateIsSet()
+        {
+            var instance = new Ambassador.Plugins.Moderation.Model.UserWarning
+            (
+                new Server(new Snowflake(0)),
+                new User(new Snowflake(0)),
+                new User(new Snowflake(1)),
+                string.Empty,
+                expiresOn: DateTimeOffset.UtcNow
+            );
 
-                Assert.True(instance.ExpiresOn.HasValue);
-            }
+            Assert.True(instance.ExpiresOn.HasValue);
         }
     }
 }

@@ -36,159 +36,158 @@ using Remora.Discord.Core;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Roleplaying.Responders
-{
-    /// <summary>
-    /// Acts on user messages, logging them into an active roleplay if relevant.
-    /// </summary>
-    [UsedImplicitly]
-    internal sealed class RoleplayLoggingResponder :
-        IResponder<IReady>,
-        IResponder<IMessageCreate>,
-        IResponder<IMessageUpdate>
-    {
-        private readonly RoleplayDiscordService _roleplays;
-        private readonly ILogger<RoleplayLoggingResponder> _log;
-        private readonly IDiscordRestUserAPI _userAPI;
+namespace DIGOS.Ambassador.Plugins.Roleplaying.Responders;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RoleplayLoggingResponder"/> class.
-        /// </summary>
-        /// <param name="roleplays">The roleplay service.</param>
-        /// <param name="log">The logging instance.</param>
-        /// <param name="userAPI">The user API.</param>
-        public RoleplayLoggingResponder
-        (
-            RoleplayDiscordService roleplays,
-            ILogger<RoleplayLoggingResponder> log,
-            IDiscordRestUserAPI userAPI
-        )
+/// <summary>
+/// Acts on user messages, logging them into an active roleplay if relevant.
+/// </summary>
+[UsedImplicitly]
+internal sealed class RoleplayLoggingResponder :
+    IResponder<IReady>,
+    IResponder<IMessageCreate>,
+    IResponder<IMessageUpdate>
+{
+    private readonly RoleplayDiscordService _roleplays;
+    private readonly ILogger<RoleplayLoggingResponder> _log;
+    private readonly IDiscordRestUserAPI _userAPI;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RoleplayLoggingResponder"/> class.
+    /// </summary>
+    /// <param name="roleplays">The roleplay service.</param>
+    /// <param name="log">The logging instance.</param>
+    /// <param name="userAPI">The user API.</param>
+    public RoleplayLoggingResponder
+    (
+        RoleplayDiscordService roleplays,
+        ILogger<RoleplayLoggingResponder> log,
+        IDiscordRestUserAPI userAPI
+    )
+    {
+        _roleplays = roleplays;
+        _log = log;
+        _userAPI = userAPI;
+    }
+
+    /// <inheritdoc />
+    public async Task<Result> RespondAsync(IReady gatewayEvent, CancellationToken ct = default)
+    {
+        var joinedGuilds = new List<Snowflake>();
+        await foreach (var get in GetGuildsAsync(ct))
         {
-            _roleplays = roleplays;
-            _log = log;
-            _userAPI = userAPI;
+            if (get.IsSuccess)
+            {
+                joinedGuilds.Add(get.Entity);
+            }
         }
 
-        /// <inheritdoc />
-        public async Task<Result> RespondAsync(IReady gatewayEvent, CancellationToken ct = default)
+        var activeRoleplays = await _roleplays.QueryRoleplaysAsync
+        (
+            q => q
+                .Where(rp => rp.IsActive)
+                .Where(rp => rp.DedicatedChannelID.HasValue)
+                .Where(rp => joinedGuilds.Contains(rp.Server.DiscordID))
+        );
+
+        foreach (var activeRoleplay in activeRoleplays)
         {
-            var joinedGuilds = new List<Snowflake>();
-            await foreach (var get in GetGuildsAsync(ct))
+            var ensureLogged = await _roleplays.EnsureAllMessagesAreLoggedAsync(activeRoleplay);
+            if (!ensureLogged.IsSuccess)
             {
-                if (get.IsSuccess)
-                {
-                    joinedGuilds.Add(get.Entity);
-                }
+                return Result.FromError(ensureLogged);
             }
 
-            var activeRoleplays = await _roleplays.QueryRoleplaysAsync
-            (
-                q => q
-                    .Where(rp => rp.IsActive)
-                    .Where(rp => rp.DedicatedChannelID.HasValue)
-                    .Where(rp => joinedGuilds.Contains(rp.Server.DiscordID))
-            );
+            var updatedMessages = ensureLogged.Entity;
 
-            foreach (var activeRoleplay in activeRoleplays)
+            if (updatedMessages > 0)
             {
-                var ensureLogged = await _roleplays.EnsureAllMessagesAreLoggedAsync(activeRoleplay);
-                if (!ensureLogged.IsSuccess)
-                {
-                    return Result.FromError(ensureLogged);
-                }
-
-                var updatedMessages = ensureLogged.Entity;
-
-                if (updatedMessages > 0)
-                {
-                    _log.LogInformation
-                    (
-                        "Added or updated {UpdateCount} missed {Pluralized} in \"{RoleplayName}\"",
-                        updatedMessages,
-                        updatedMessages > 1 ? "messages" : "message",
-                        activeRoleplay.Name
-                    );
-                }
+                _log.LogInformation
+                (
+                    "Added or updated {UpdateCount} missed {Pluralized} in \"{RoleplayName}\"",
+                    updatedMessages,
+                    updatedMessages > 1 ? "messages" : "message",
+                    activeRoleplay.Name
+                );
             }
+        }
 
+        return Result.FromSuccess();
+    }
+
+    /// <inheritdoc />
+    public async Task<Result> RespondAsync(IMessageCreate gatewayEvent, CancellationToken ct = default)
+    {
+        var isBot = gatewayEvent.Author.IsBot.HasValue && gatewayEvent.Author.IsBot.Value;
+        var isSystem = gatewayEvent.Author.IsSystem.HasValue && gatewayEvent.Author.IsSystem.Value;
+        if (isBot || isSystem)
+        {
             return Result.FromSuccess();
         }
 
-        /// <inheritdoc />
-        public async Task<Result> RespondAsync(IMessageCreate gatewayEvent, CancellationToken ct = default)
-        {
-            var isBot = gatewayEvent.Author.IsBot.HasValue && gatewayEvent.Author.IsBot.Value;
-            var isSystem = gatewayEvent.Author.IsSystem.HasValue && gatewayEvent.Author.IsSystem.Value;
-            if (isBot || isSystem)
-            {
-                return Result.FromSuccess();
-            }
+        return await _roleplays.ConsumeMessageAsync(gatewayEvent);
+    }
 
-            return await _roleplays.ConsumeMessageAsync(gatewayEvent);
+    /// <inheritdoc />
+    public async Task<Result> RespondAsync(IMessageUpdate gatewayEvent, CancellationToken ct = default)
+    {
+        if (!gatewayEvent.Author.HasValue)
+        {
+            return Result.FromSuccess();
         }
 
-        /// <inheritdoc />
-        public async Task<Result> RespondAsync(IMessageUpdate gatewayEvent, CancellationToken ct = default)
+        if (gatewayEvent.Author.Value.IsBot.Value || gatewayEvent.Author.Value.IsSystem.Value)
         {
-            if (!gatewayEvent.Author.HasValue)
-            {
-                return Result.FromSuccess();
-            }
-
-            if (gatewayEvent.Author.Value.IsBot.Value || gatewayEvent.Author.Value.IsSystem.Value)
-            {
-                return Result.FromSuccess();
-            }
-
-            // Ignore all changes except text changes
-            var isTextUpdate = gatewayEvent.EditedTimestamp.HasValue &&
-                               gatewayEvent.EditedTimestamp.Value > DateTimeOffset.UtcNow - 1.Minutes();
-
-            if (!isTextUpdate)
-            {
-                return Result.FromSuccess();
-            }
-
-            return await _roleplays.ConsumeMessageAsync(gatewayEvent);
+            return Result.FromSuccess();
         }
 
-        private async IAsyncEnumerable<Result<Snowflake>> GetGuildsAsync
-        (
-            [EnumeratorCancellation] CancellationToken ct = default
-        )
+        // Ignore all changes except text changes
+        var isTextUpdate = gatewayEvent.EditedTimestamp.HasValue &&
+                           gatewayEvent.EditedTimestamp.Value > DateTimeOffset.UtcNow - 1.Minutes();
+
+        if (!isTextUpdate)
         {
-            Optional<Snowflake> after = default;
-            while (true)
+            return Result.FromSuccess();
+        }
+
+        return await _roleplays.ConsumeMessageAsync(gatewayEvent);
+    }
+
+    private async IAsyncEnumerable<Result<Snowflake>> GetGuildsAsync
+    (
+        [EnumeratorCancellation] CancellationToken ct = default
+    )
+    {
+        Optional<Snowflake> after = default;
+        while (true)
+        {
+            if (ct.IsCancellationRequested)
             {
-                if (ct.IsCancellationRequested)
-                {
-                    yield break;
-                }
-
-                var getGuilds = await _userAPI.GetCurrentUserGuildsAsync(after: after, ct: ct);
-                if (!getGuilds.IsSuccess)
-                {
-                    yield break;
-                }
-
-                var retrievedGuilds = getGuilds.Entity;
-                if (retrievedGuilds.Count == 0)
-                {
-                    break;
-                }
-
-                foreach (var retrievedGuild in retrievedGuilds)
-                {
-                    if (!retrievedGuild.ID.HasValue)
-                    {
-                        continue;
-                    }
-
-                    yield return retrievedGuild.ID.Value;
-                }
-
-                after = getGuilds.Entity[^1].ID;
+                yield break;
             }
+
+            var getGuilds = await _userAPI.GetCurrentUserGuildsAsync(after: after, ct: ct);
+            if (!getGuilds.IsSuccess)
+            {
+                yield break;
+            }
+
+            var retrievedGuilds = getGuilds.Entity;
+            if (retrievedGuilds.Count == 0)
+            {
+                break;
+            }
+
+            foreach (var retrievedGuild in retrievedGuilds)
+            {
+                if (!retrievedGuild.ID.HasValue)
+                {
+                    continue;
+                }
+
+                yield return retrievedGuild.ID.Value;
+            }
+
+            after = getGuilds.Entity[^1].ID;
         }
     }
 }

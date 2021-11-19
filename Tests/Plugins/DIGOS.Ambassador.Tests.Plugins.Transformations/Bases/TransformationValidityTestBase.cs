@@ -28,44 +28,43 @@ using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.NodeDeserializers;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Transformations
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
+
+/// <summary>
+/// Acts as a base for transformation validity tests.
+/// </summary>
+public class TransformationValidityTestBase
 {
     /// <summary>
-    /// Acts as a base for transformation validity tests.
+    /// Gets an instance of a file verifier.
     /// </summary>
-    public class TransformationValidityTestBase
+    protected TransformationFileVerifier Verifier { get; } = new TransformationFileVerifier();
+
+    /// <summary>
+    /// Deserializes a transformation object from the given file. The file is assumed to exist and be valid.
+    /// </summary>
+    /// <param name="file">The file.</param>
+    /// <typeparam name="T">The transformation object type.</typeparam>
+    /// <returns>The object.</returns>
+    protected T Deserialize<T>(string file)
     {
-        /// <summary>
-        /// Gets an instance of a file verifier.
-        /// </summary>
-        protected TransformationFileVerifier Verifier { get; } = new TransformationFileVerifier();
+        using var sr = new StreamReader(File.OpenRead(file));
+        var builder = new DeserializerBuilder()
+            .WithTypeConverter(new ColourYamlConverter())
+            .WithTypeConverter(new EnumYamlConverter<Pattern>())
+            .WithTypeConverter(new NullableEnumYamlConverter<Pattern>())
+            .WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
+            .WithNamingConvention(UnderscoredNamingConvention.Instance);
 
-        /// <summary>
-        /// Deserializes a transformation object from the given file. The file is assumed to exist and be valid.
-        /// </summary>
-        /// <param name="file">The file.</param>
-        /// <typeparam name="T">The transformation object type.</typeparam>
-        /// <returns>The object.</returns>
-        protected T Deserialize<T>(string file)
+        if (typeof(T) != typeof(Species))
         {
-            using var sr = new StreamReader(File.OpenRead(file));
-            var builder = new DeserializerBuilder()
-                .WithTypeConverter(new ColourYamlConverter())
-                .WithTypeConverter(new EnumYamlConverter<Pattern>())
-                .WithTypeConverter(new NullableEnumYamlConverter<Pattern>())
-                .WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
-                .WithNamingConvention(UnderscoredNamingConvention.Instance);
-
-            if (typeof(T) != typeof(Species))
-            {
-                builder = builder.WithTypeConverter(new RawSpeciesYamlConverter());
-            }
-
-            var deserializer = builder.Build();
-
-            var content = sr.ReadToEnd();
-
-            return deserializer.Deserialize<T>(content);
+            builder = builder.WithTypeConverter(new RawSpeciesYamlConverter());
         }
+
+        var deserializer = builder.Build();
+
+        var content = sr.ReadToEnd();
+
+        return deserializer.Deserialize<T>(content);
     }
 }

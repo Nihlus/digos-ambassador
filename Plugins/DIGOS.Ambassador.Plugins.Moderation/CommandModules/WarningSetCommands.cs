@@ -38,123 +38,122 @@ using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
-namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
+namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules;
+
+public partial class WarningCommands
 {
-    public partial class WarningCommands
+    /// <summary>
+    /// Warning setter commands.
+    /// </summary>
+    [Group("set")]
+    public class WarningSetCommands : CommandGroup
     {
+        private readonly WarningService _warnings;
+        private readonly ICommandContext _context;
+        private readonly FeedbackService _feedback;
+
         /// <summary>
-        /// Warning setter commands.
+        /// Initializes a new instance of the <see cref="WarningSetCommands"/> class.
         /// </summary>
-        [Group("set")]
-        public class WarningSetCommands : CommandGroup
+        /// <param name="warnings">The moderation service.</param>
+        /// <param name="context">The command context.</param>
+        /// <param name="feedback">The feedback service.</param>
+        public WarningSetCommands
+        (
+            WarningService warnings,
+            ICommandContext context,
+            FeedbackService feedback
+        )
         {
-            private readonly WarningService _warnings;
-            private readonly ICommandContext _context;
-            private readonly FeedbackService _feedback;
+            _warnings = warnings;
+            _context = context;
+            _feedback = feedback;
+        }
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="WarningSetCommands"/> class.
-            /// </summary>
-            /// <param name="warnings">The moderation service.</param>
-            /// <param name="context">The command context.</param>
-            /// <param name="feedback">The feedback service.</param>
-            public WarningSetCommands
-            (
-                WarningService warnings,
-                ICommandContext context,
-                FeedbackService feedback
-            )
+        /// <summary>
+        /// Sets the reason for the warning.
+        /// </summary>
+        /// <param name="warningID">The ID of the warning to edit.</param>
+        /// <param name="newReason">The new reason for the warning.</param>
+        [Command("reason")]
+        [Description("Sets the reason for the warning.")]
+        [RequirePermission(typeof(ManageWarnings), PermissionTarget.All)]
+        [RequireContext(ChannelContext.Guild)]
+        public async Task<Result<FeedbackMessage>> SetWarningReasonAsync(long warningID, string newReason)
+        {
+            var getWarning = await _warnings.GetWarningAsync(_context.GuildID.Value, warningID);
+            if (!getWarning.IsSuccess)
             {
-                _warnings = warnings;
-                _context = context;
-                _feedback = feedback;
+                return Result<FeedbackMessage>.FromError(getWarning);
             }
 
-            /// <summary>
-            /// Sets the reason for the warning.
-            /// </summary>
-            /// <param name="warningID">The ID of the warning to edit.</param>
-            /// <param name="newReason">The new reason for the warning.</param>
-            [Command("reason")]
-            [Description("Sets the reason for the warning.")]
-            [RequirePermission(typeof(ManageWarnings), PermissionTarget.All)]
-            [RequireContext(ChannelContext.Guild)]
-            public async Task<Result<FeedbackMessage>> SetWarningReasonAsync(long warningID, string newReason)
+            var warning = getWarning.Entity;
+
+            var setContents = await _warnings.SetWarningReasonAsync(warning, newReason);
+            if (!setContents.IsSuccess)
             {
-                var getWarning = await _warnings.GetWarningAsync(_context.GuildID.Value, warningID);
-                if (!getWarning.IsSuccess)
-                {
-                    return Result<FeedbackMessage>.FromError(getWarning);
-                }
-
-                var warning = getWarning.Entity;
-
-                var setContents = await _warnings.SetWarningReasonAsync(warning, newReason);
-                if (!setContents.IsSuccess)
-                {
-                    return Result<FeedbackMessage>.FromError(setContents);
-                }
-
-                return new FeedbackMessage("Warning reason updated.", _feedback.Theme.Secondary);
+                return Result<FeedbackMessage>.FromError(setContents);
             }
 
-            /// <summary>
-            /// Sets the contextually relevant message for the warning.
-            /// </summary>
-            /// <param name="warningID">The ID of the warning to edit.</param>
-            /// <param name="newMessage">The new reason for the warning.</param>
-            [Command("context-message")]
-            [Description("Sets the contextually relevant message for the warning.")]
-            [RequirePermission(typeof(ManageWarnings), PermissionTarget.All)]
-            [RequireContext(ChannelContext.Guild)]
-            public async Task<Result<FeedbackMessage>> SetWarningContextMessageAsync(long warningID, IMessage newMessage)
+            return new FeedbackMessage("Warning reason updated.", _feedback.Theme.Secondary);
+        }
+
+        /// <summary>
+        /// Sets the contextually relevant message for the warning.
+        /// </summary>
+        /// <param name="warningID">The ID of the warning to edit.</param>
+        /// <param name="newMessage">The new reason for the warning.</param>
+        [Command("context-message")]
+        [Description("Sets the contextually relevant message for the warning.")]
+        [RequirePermission(typeof(ManageWarnings), PermissionTarget.All)]
+        [RequireContext(ChannelContext.Guild)]
+        public async Task<Result<FeedbackMessage>> SetWarningContextMessageAsync(long warningID, IMessage newMessage)
+        {
+            var getWarning = await _warnings.GetWarningAsync(_context.GuildID.Value, warningID);
+            if (!getWarning.IsSuccess)
             {
-                var getWarning = await _warnings.GetWarningAsync(_context.GuildID.Value, warningID);
-                if (!getWarning.IsSuccess)
-                {
-                    return Result<FeedbackMessage>.FromError(getWarning);
-                }
-
-                var warning = getWarning.Entity;
-
-                var setMessage = await _warnings.SetWarningContextMessageAsync(warning, newMessage.ID);
-                if (!setMessage.IsSuccess)
-                {
-                    return Result<FeedbackMessage>.FromError(setMessage);
-                }
-
-                return new FeedbackMessage("Warning context message updated.", _feedback.Theme.Secondary);
+                return Result<FeedbackMessage>.FromError(getWarning);
             }
 
-            /// <summary>
-            /// Sets the duration of the warning.
-            /// </summary>
-            /// <param name="warningID">The ID of the warning to edit.</param>
-            /// <param name="newDuration">The new duration of the warning.</param>
-            [Command("duration")]
-            [Description("Sets the duration of the warning.")]
-            [RequirePermission(typeof(ManageWarnings), PermissionTarget.All)]
-            [RequireContext(ChannelContext.Guild)]
-            public async Task<Result<FeedbackMessage>> SetWarningDurationAsync(long warningID, TimeSpan newDuration)
+            var warning = getWarning.Entity;
+
+            var setMessage = await _warnings.SetWarningContextMessageAsync(warning, newMessage.ID);
+            if (!setMessage.IsSuccess)
             {
-                var getWarning = await _warnings.GetWarningAsync(_context.GuildID.Value, warningID);
-                if (!getWarning.IsSuccess)
-                {
-                    return Result<FeedbackMessage>.FromError(getWarning);
-                }
-
-                var warning = getWarning.Entity;
-
-                var newExpiration = warning.CreatedAt.Add(newDuration);
-
-                var setExpiration = await _warnings.SetWarningExpiryDateAsync(warning, newExpiration);
-                if (!setExpiration.IsSuccess)
-                {
-                    return Result<FeedbackMessage>.FromError(setExpiration);
-                }
-
-                return new FeedbackMessage("Warning duration updated.", _feedback.Theme.Secondary);
+                return Result<FeedbackMessage>.FromError(setMessage);
             }
+
+            return new FeedbackMessage("Warning context message updated.", _feedback.Theme.Secondary);
+        }
+
+        /// <summary>
+        /// Sets the duration of the warning.
+        /// </summary>
+        /// <param name="warningID">The ID of the warning to edit.</param>
+        /// <param name="newDuration">The new duration of the warning.</param>
+        [Command("duration")]
+        [Description("Sets the duration of the warning.")]
+        [RequirePermission(typeof(ManageWarnings), PermissionTarget.All)]
+        [RequireContext(ChannelContext.Guild)]
+        public async Task<Result<FeedbackMessage>> SetWarningDurationAsync(long warningID, TimeSpan newDuration)
+        {
+            var getWarning = await _warnings.GetWarningAsync(_context.GuildID.Value, warningID);
+            if (!getWarning.IsSuccess)
+            {
+                return Result<FeedbackMessage>.FromError(getWarning);
+            }
+
+            var warning = getWarning.Entity;
+
+            var newExpiration = warning.CreatedAt.Add(newDuration);
+
+            var setExpiration = await _warnings.SetWarningExpiryDateAsync(warning, newExpiration);
+            if (!setExpiration.IsSuccess)
+            {
+                return Result<FeedbackMessage>.FromError(setExpiration);
+            }
+
+            return new FeedbackMessage("Warning duration updated.", _feedback.Theme.Secondary);
         }
     }
 }

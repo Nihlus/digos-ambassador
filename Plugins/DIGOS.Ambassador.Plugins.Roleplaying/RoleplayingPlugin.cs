@@ -51,81 +51,80 @@ using Remora.Results;
 
 [assembly: RemoraPlugin(typeof(RoleplayingPlugin))]
 
-namespace DIGOS.Ambassador.Plugins.Roleplaying
+namespace DIGOS.Ambassador.Plugins.Roleplaying;
+
+/// <summary>
+/// Describes the roleplay plugin.
+/// </summary>
+public sealed class RoleplayingPlugin : PluginDescriptor, IMigratablePlugin
 {
-    /// <summary>
-    /// Describes the roleplay plugin.
-    /// </summary>
-    public sealed class RoleplayingPlugin : PluginDescriptor, IMigratablePlugin
+    /// <inheritdoc />
+    public override string Name => "Roleplays";
+
+    /// <inheritdoc />
+    public override string Description => "Provides user-managed roleplay libraries.";
+
+    /// <inheritdoc />
+    public override void ConfigureServices(IServiceCollection serviceCollection)
     {
-        /// <inheritdoc />
-        public override string Name => "Roleplays";
+        serviceCollection.TryAddScoped<RoleplayService>();
+        serviceCollection.TryAddScoped<RoleplayDiscordService>();
+        serviceCollection.TryAddScoped<RoleplayServerSettingsService>();
+        serviceCollection.TryAddScoped<DedicatedChannelService>();
+        serviceCollection.AddConfiguredSchemaAwareDbContextPool<RoleplayingDatabaseContext>();
 
-        /// <inheritdoc />
-        public override string Description => "Provides user-managed roleplay libraries.";
+        serviceCollection.AddCommandGroup<RoleplayCommands>();
 
-        /// <inheritdoc />
-        public override void ConfigureServices(IServiceCollection serviceCollection)
-        {
-            serviceCollection.TryAddScoped<RoleplayService>();
-            serviceCollection.TryAddScoped<RoleplayDiscordService>();
-            serviceCollection.TryAddScoped<RoleplayServerSettingsService>();
-            serviceCollection.TryAddScoped<DedicatedChannelService>();
-            serviceCollection.AddConfiguredSchemaAwareDbContextPool<RoleplayingDatabaseContext>();
+        serviceCollection.AddParser<RoleplayParser>();
+        serviceCollection.AddParser<HumanizerEnumTypeReader<ExportFormat>>();
 
-            serviceCollection.AddCommandGroup<RoleplayCommands>();
+        serviceCollection.AddCondition<RequireActiveRoleplayCondition>();
+        serviceCollection.AddCondition<RequireEntityOwnerCondition<Roleplay>>();
 
-            serviceCollection.AddParser<RoleplayParser>();
-            serviceCollection.AddParser<HumanizerEnumTypeReader<ExportFormat>>();
+        serviceCollection.AddAutocompleteProvider<AnyRoleplayAutocompleteProvider>();
+        serviceCollection.AddAutocompleteProvider<OwnedRoleplayAutocompleteProvider>();
+        serviceCollection.AddAutocompleteProvider<JoinedRoleplayAutocompleteProvider>();
+        serviceCollection.AddAutocompleteProvider<NotJoinedRoleplayAutocompleteProvider>();
 
-            serviceCollection.AddCondition<RequireActiveRoleplayCondition>();
-            serviceCollection.AddCondition<RequireEntityOwnerCondition<Roleplay>>();
+        serviceCollection
+            .AddBehaviour<RoleplayArchivalBehaviour>()
+            .AddBehaviour<RoleplayTimeoutBehaviour>();
 
-            serviceCollection.AddAutocompleteProvider<AnyRoleplayAutocompleteProvider>();
-            serviceCollection.AddAutocompleteProvider<OwnedRoleplayAutocompleteProvider>();
-            serviceCollection.AddAutocompleteProvider<JoinedRoleplayAutocompleteProvider>();
-            serviceCollection.AddAutocompleteProvider<NotJoinedRoleplayAutocompleteProvider>();
+        serviceCollection
+            .AddResponder<RoleplayLoggingResponder>();
+    }
 
-            serviceCollection
-                .AddBehaviour<RoleplayArchivalBehaviour>()
-                .AddBehaviour<RoleplayTimeoutBehaviour>();
+    /// <inheritdoc />
+    public override ValueTask<Result> InitializeAsync(IServiceProvider serviceProvider)
+    {
+        var permissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
+        var registrationResult = permissionRegistry.RegisterPermissions
+        (
+            Assembly.GetExecutingAssembly(),
+            serviceProvider
+        );
 
-            serviceCollection
-                .AddResponder<RoleplayLoggingResponder>();
-        }
+        return !registrationResult.IsSuccess
+            ? new ValueTask<Result>(registrationResult)
+            : new ValueTask<Result>(Result.FromSuccess());
+    }
 
-        /// <inheritdoc />
-        public override ValueTask<Result> InitializeAsync(IServiceProvider serviceProvider)
-        {
-            var permissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
-            var registrationResult = permissionRegistry.RegisterPermissions
-            (
-                Assembly.GetExecutingAssembly(),
-                serviceProvider
-            );
+    /// <inheritdoc />
+    public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
+    {
+        var context = serviceProvider.GetRequiredService<RoleplayingDatabaseContext>();
 
-            return !registrationResult.IsSuccess
-                ? new ValueTask<Result>(registrationResult)
-                : new ValueTask<Result>(Result.FromSuccess());
-        }
+        await context.Database.MigrateAsync();
 
-        /// <inheritdoc />
-        public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
-        {
-            var context = serviceProvider.GetRequiredService<RoleplayingDatabaseContext>();
+        return Result.FromSuccess();
+    }
 
-            await context.Database.MigrateAsync();
+    /// <inheritdoc />
+    public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
+    {
+        var context = serviceProvider.GetRequiredService<RoleplayingDatabaseContext>();
+        var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
 
-            return Result.FromSuccess();
-        }
-
-        /// <inheritdoc />
-        public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
-        {
-            var context = serviceProvider.GetRequiredService<RoleplayingDatabaseContext>();
-            var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
-
-            return appliedMigrations.Any();
-        }
+        return appliedMigrations.Any();
     }
 }

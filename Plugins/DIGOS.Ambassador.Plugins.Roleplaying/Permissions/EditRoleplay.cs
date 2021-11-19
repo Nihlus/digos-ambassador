@@ -23,23 +23,22 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
 
-namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions
+namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions;
+
+/// <summary>
+/// Represents a permission that allows a user to edit roleplays.
+/// </summary>
+public sealed class EditRoleplay : Permission
 {
-    /// <summary>
-    /// Represents a permission that allows a user to edit roleplays.
-    /// </summary>
-    public sealed class EditRoleplay : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("83B12FE6-A71B-4449-96B6-A069A2987A27");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("83B12FE6-A71B-4449-96B6-A069A2987A27");
 
-        /// <inheritdoc />
-        public override string FriendlyName => nameof(EditRoleplay);
+    /// <inheritdoc />
+    public override string FriendlyName => nameof(EditRoleplay);
 
-        /// <inheritdoc />
-        public override string Description => "Allows you to edit roleplays.";
+    /// <inheritdoc />
+    public override string Description => "Allows you to edit roleplays.";
 
-        /// <inheritdoc />
-        public override bool IsGrantedByDefaultToSelf => true;
-    }
+    /// <inheritdoc />
+    public override bool IsGrantedByDefaultToSelf => true;
 }

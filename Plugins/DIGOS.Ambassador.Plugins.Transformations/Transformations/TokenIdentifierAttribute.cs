@@ -23,28 +23,27 @@
 using System;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations;
+
+/// <summary>
+/// Decorates a text token class with its in-text identifier.
+/// </summary>
+[PublicAPI]
+[MeansImplicitUse]
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
+public sealed class TokenIdentifierAttribute : Attribute
 {
     /// <summary>
-    /// Decorates a text token class with its in-text identifier.
+    /// Gets or sets the in-text identifier of the token.
     /// </summary>
-    [PublicAPI]
-    [MeansImplicitUse]
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
-    public sealed class TokenIdentifierAttribute : Attribute
-    {
-        /// <summary>
-        /// Gets or sets the in-text identifier of the token.
-        /// </summary>
-        public string[] Identifiers { get; set; }
+    public string[] Identifiers { get; set; }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TokenIdentifierAttribute"/> class.
-        /// </summary>
-        /// <param name="identifiers">The identifiers.</param>
-        public TokenIdentifierAttribute(params string[] identifiers)
-        {
-            this.Identifiers = identifiers;
-        }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TokenIdentifierAttribute"/> class.
+    /// </summary>
+    /// <param name="identifiers">The identifiers.</param>
+    public TokenIdentifierAttribute(params string[] identifiers)
+    {
+        this.Identifiers = identifiers;
     }
 }

@@ -20,29 +20,28 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
+namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
+
+/// <summary>
+/// Provides neuter pronouns.
+/// </summary>
+public class NeuterPronounProvider : PronounProvider
 {
-    /// <summary>
-    /// Provides neuter pronouns.
-    /// </summary>
-    public class NeuterPronounProvider : PronounProvider
-    {
-        /// <inheritdoc />
-        public override string Family => "Neuter";
+    /// <inheritdoc />
+    public override string Family => "Neuter";
 
-        /// <inheritdoc />
-        public override string GetSubjectForm(bool withVerb = false) => withVerb ? "it is" : "it";
+    /// <inheritdoc />
+    public override string GetSubjectForm(bool withVerb = false) => withVerb ? "it is" : "it";
 
-        /// <inheritdoc />
-        public override string GetObjectForm() => "it";
+    /// <inheritdoc />
+    public override string GetObjectForm() => "it";
 
-        /// <inheritdoc />
-        public override string GetPossessiveAdjectiveForm() => "its";
+    /// <inheritdoc />
+    public override string GetPossessiveAdjectiveForm() => "its";
 
-        /// <inheritdoc />
-        public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "it has" : "its";
+    /// <inheritdoc />
+    public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "it has" : "its";
 
-        /// <inheritdoc />
-        public override string GetReflexiveForm() => "itself";
-    }
+    /// <inheritdoc />
+    public override string GetReflexiveForm() => "itself";
 }

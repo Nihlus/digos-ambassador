@@ -30,43 +30,42 @@ using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using Remora.Discord.Core;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Transformations
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
+
+public partial class TransformationServiceTests
 {
-    public partial class TransformationServiceTests
+    public class SetServerProtectionTypeAsync : TransformationServiceTestBase
     {
-        public class SetServerProtectionTypeAsync : TransformationServiceTestBase
+        private readonly Snowflake _user = new Snowflake(0);
+        private readonly Snowflake _guild = new Snowflake(1);
+
+        [Fact]
+        public async Task CanSetType()
         {
-            private readonly Snowflake _user = new Snowflake(0);
-            private readonly Snowflake _guild = new Snowflake(1);
+            var expected = ProtectionType.Whitelist;
+            var result = await this.Transformations.SetServerProtectionTypeAsync
+            (
+                _user,
+                _guild,
+                expected
+            );
 
-            [Fact]
-            public async Task CanSetType()
-            {
-                var expected = ProtectionType.Whitelist;
-                var result = await this.Transformations.SetServerProtectionTypeAsync
-                (
-                    _user,
-                    _guild,
-                    expected
-                );
+            Assert.True(result.IsSuccess);
+            Assert.Equal(expected, this.Database.ServerUserProtections.First().Type);
+        }
 
-                Assert.True(result.IsSuccess);
-                Assert.Equal(expected, this.Database.ServerUserProtections.First().Type);
-            }
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfSameTypeIsAlreadySet()
+        {
+            var existingType = ProtectionType.Blacklist;
+            var result = await this.Transformations.SetServerProtectionTypeAsync
+            (
+                _user,
+                _guild,
+                existingType
+            );
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfSameTypeIsAlreadySet()
-            {
-                var existingType = ProtectionType.Blacklist;
-                var result = await this.Transformations.SetServerProtectionTypeAsync
-                (
-                    _user,
-                    _guild,
-                    existingType
-                );
-
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
         }
     }
 }

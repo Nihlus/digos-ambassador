@@ -27,21 +27,20 @@ using Remora.Commands.Parsers;
 using Remora.Commands.Results;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.TypeParsers
-{
-    /// <summary>
-    /// Reads colours as command arguments.
-    /// </summary>
-    public sealed class ColourTypeParser : AbstractTypeParser<Colour>
-    {
-        /// <inheritdoc />
-        public override ValueTask<Result<Colour>> TryParseAsync(string value, CancellationToken ct = default)
-        {
-            value = value.Trim();
+namespace DIGOS.Ambassador.Plugins.Transformations.TypeParsers;
 
-            return Colour.TryParse(value, out var colour)
-                ? new ValueTask<Result<Colour>>(colour)
-                : new ValueTask<Result<Colour>>(new ParsingError<Colour>(value));
-        }
+/// <summary>
+/// Reads colours as command arguments.
+/// </summary>
+public sealed class ColourTypeParser : AbstractTypeParser<Colour>
+{
+    /// <inheritdoc />
+    public override ValueTask<Result<Colour>> TryParseAsync(string value, CancellationToken ct = default)
+    {
+        value = value.Trim();
+
+        return Colour.TryParse(value, out var colour)
+            ? new ValueTask<Result<Colour>>(colour)
+            : new ValueTask<Result<Colour>>(new ParsingError<Colour>(value));
     }
 }

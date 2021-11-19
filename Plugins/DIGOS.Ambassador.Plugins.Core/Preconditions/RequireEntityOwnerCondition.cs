@@ -28,37 +28,36 @@ using Remora.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Core.Preconditions
+namespace DIGOS.Ambassador.Plugins.Core.Preconditions;
+
+/// <summary>
+/// Acts as a precondition for owned entities, limiting their use to their owners.
+/// </summary>
+/// <typeparam name="TEntity">The entity type.</typeparam>
+public class RequireEntityOwnerCondition<TEntity> : ICondition<RequireEntityOwnerAttribute, TEntity>
+    where TEntity : IOwnedNamedEntity
 {
+    private readonly ICommandContext _context;
+
     /// <summary>
-    /// Acts as a precondition for owned entities, limiting their use to their owners.
+    /// Initializes a new instance of the <see cref="RequireEntityOwnerCondition{TEntity}"/> class.
     /// </summary>
-    /// <typeparam name="TEntity">The entity type.</typeparam>
-    public class RequireEntityOwnerCondition<TEntity> : ICondition<RequireEntityOwnerAttribute, TEntity>
-        where TEntity : IOwnedNamedEntity
+    /// <param name="context">The command context.</param>
+    public RequireEntityOwnerCondition(ICommandContext context)
     {
-        private readonly ICommandContext _context;
+        _context = context;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RequireEntityOwnerCondition{TEntity}"/> class.
-        /// </summary>
-        /// <param name="context">The command context.</param>
-        public RequireEntityOwnerCondition(ICommandContext context)
-        {
-            _context = context;
-        }
-
-        /// <inheritdoc/>
-        public ValueTask<Result> CheckAsync
-        (
-            RequireEntityOwnerAttribute attribute,
-            TEntity data,
-            CancellationToken ct = default
-        )
-        {
-            return data.IsOwner(_context.User.ID)
-                ? new ValueTask<Result>(Result.FromSuccess())
-                : new ValueTask<Result>(new UserError("You don't have permission to do that."));
-        }
+    /// <inheritdoc/>
+    public ValueTask<Result> CheckAsync
+    (
+        RequireEntityOwnerAttribute attribute,
+        TEntity data,
+        CancellationToken ct = default
+    )
+    {
+        return data.IsOwner(_context.User.ID)
+            ? new ValueTask<Result>(Result.FromSuccess())
+            : new ValueTask<Result>(new UserError("You don't have permission to do that."));
     }
 }

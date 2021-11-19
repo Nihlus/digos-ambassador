@@ -22,20 +22,19 @@
 
 using System;
 
-namespace DIGOS.Ambassador.Plugins.Permissions
+namespace DIGOS.Ambassador.Plugins.Permissions;
+
+/// <summary>
+/// Represents a permission that allows a user to grant permissions.
+/// </summary>
+public sealed class GrantPermission : Permission
 {
-    /// <summary>
-    /// Represents a permission that allows a user to grant permissions.
-    /// </summary>
-    public sealed class GrantPermission : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("E87BCAC2-094B-4576-B554-FC5C1F943401");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("E87BCAC2-094B-4576-B554-FC5C1F943401");
 
-        /// <inheritdoc />
-        public override string FriendlyName => nameof(GrantPermission);
+    /// <inheritdoc />
+    public override string FriendlyName => nameof(GrantPermission);
 
-        /// <inheritdoc />
-        public override string Description => "Allows you to grant permissions.";
-    }
+    /// <inheritdoc />
+    public override string Description => "Allows you to grant permissions.";
 }

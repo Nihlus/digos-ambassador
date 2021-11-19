@@ -47,67 +47,66 @@ using Remora.Results;
 [assembly: InternalsVisibleTo("DIGOS.Ambassador.Tests.Plugins.Transformations")]
 [assembly: RemoraPlugin(typeof(TransformationsPlugin))]
 
-namespace DIGOS.Ambassador.Plugins.Transformations
+namespace DIGOS.Ambassador.Plugins.Transformations;
+
+/// <summary>
+/// Describes the transformation plugin.
+/// </summary>
+public sealed class TransformationsPlugin : PluginDescriptor, IMigratablePlugin
 {
-    /// <summary>
-    /// Describes the transformation plugin.
-    /// </summary>
-    public sealed class TransformationsPlugin : PluginDescriptor, IMigratablePlugin
+    /// <inheritdoc />
+    public override string Name => "Transformations";
+
+    /// <inheritdoc />
+    public override string Description => "Provides user-managed transformation services.";
+
+    /// <inheritdoc />
+    public override void ConfigureServices(IServiceCollection serviceCollection)
     {
-        /// <inheritdoc />
-        public override string Name => "Transformations";
-
-        /// <inheritdoc />
-        public override string Description => "Provides user-managed transformation services.";
-
-        /// <inheritdoc />
-        public override void ConfigureServices(IServiceCollection serviceCollection)
+        serviceCollection.TryAddSingleton<TransformationDescriptionBuilder>();
+        serviceCollection.TryAddSingleton(services =>
         {
-            serviceCollection.TryAddSingleton<TransformationDescriptionBuilder>();
-            serviceCollection.TryAddSingleton(services =>
+            var contentService = services.GetRequiredService<ContentService>();
+            var getTransformationText = contentService.GetTransformationMessages();
+
+            if (!getTransformationText.IsSuccess)
             {
-                var contentService = services.GetRequiredService<ContentService>();
-                var getTransformationText = contentService.GetTransformationMessages();
+                throw new InvalidOperationException("Failed to load the transformation messages.");
+            }
 
-                if (!getTransformationText.IsSuccess)
-                {
-                    throw new InvalidOperationException("Failed to load the transformation messages.");
-                }
+            return getTransformationText.Entity;
+        });
 
-                return getTransformationText.Entity;
-            });
+        serviceCollection.TryAddScoped<LuaService>();
+        serviceCollection.TryAddScoped<TransformationService>();
+        serviceCollection.AddConfiguredSchemaAwareDbContextPool<TransformationsDatabaseContext>();
 
-            serviceCollection.TryAddScoped<LuaService>();
-            serviceCollection.TryAddScoped<TransformationService>();
-            serviceCollection.AddConfiguredSchemaAwareDbContextPool<TransformationsDatabaseContext>();
+        serviceCollection.AddParser<ColourTypeParser>();
+        serviceCollection.AddParser<EnumParser<Pattern>>();
+        serviceCollection.AddParser<EnumParser<Shade>>();
+        serviceCollection.AddParser<EnumParser<ShadeModifier>>();
+        serviceCollection.AddParser<EnumParser<ProtectionType>>();
+        serviceCollection.AddParser<EnumParser<Chirality>>();
 
-            serviceCollection.AddParser<ColourTypeParser>();
-            serviceCollection.AddParser<EnumParser<Pattern>>();
-            serviceCollection.AddParser<EnumParser<Shade>>();
-            serviceCollection.AddParser<EnumParser<ShadeModifier>>();
-            serviceCollection.AddParser<EnumParser<ProtectionType>>();
-            serviceCollection.AddParser<EnumParser<Chirality>>();
+        serviceCollection.AddParser<ColourTypeParser>();
+        serviceCollection.AddCommandGroup<TransformationCommands>();
+    }
 
-            serviceCollection.AddParser<ColourTypeParser>();
-            serviceCollection.AddCommandGroup<TransformationCommands>();
-        }
+    /// <inheritdoc />
+    public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
+    {
+        var context = serviceProvider.GetRequiredService<TransformationsDatabaseContext>();
 
-        /// <inheritdoc />
-        public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
-        {
-            var context = serviceProvider.GetRequiredService<TransformationsDatabaseContext>();
+        await context.Database.MigrateAsync();
+        return Result.FromSuccess();
+    }
 
-            await context.Database.MigrateAsync();
-            return Result.FromSuccess();
-        }
+    /// <inheritdoc />
+    public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
+    {
+        var context = serviceProvider.GetRequiredService<TransformationsDatabaseContext>();
+        var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
 
-        /// <inheritdoc />
-        public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
-        {
-            var context = serviceProvider.GetRequiredService<TransformationsDatabaseContext>();
-            var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
-
-            return appliedMigrations.Any();
-        }
+        return appliedMigrations.Any();
     }
 }

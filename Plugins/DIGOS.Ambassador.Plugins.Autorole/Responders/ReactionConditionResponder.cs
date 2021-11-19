@@ -33,262 +33,261 @@ using Remora.Discord.Core;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Responders
+namespace DIGOS.Ambassador.Plugins.Autorole.Responders;
+
+/// <summary>
+/// Responds to message reactions, updating relevant autoroles.
+/// </summary>
+public class ReactionConditionResponder :
+    IResponder<IMessageReactionAdd>,
+    IResponder<IMessageReactionRemove>,
+    IResponder<IMessageReactionRemoveAll>,
+    IResponder<IMessageReactionRemoveEmoji>
 {
+    private readonly AutoroleService _autoroles;
+    private readonly AutoroleUpdateService _autoroleUpdates;
+    private readonly IDiscordRestGuildAPI _guildAPI;
+
     /// <summary>
-    /// Responds to message reactions, updating relevant autoroles.
+    /// Initializes a new instance of the <see cref="ReactionConditionResponder"/> class.
     /// </summary>
-    public class ReactionConditionResponder :
-        IResponder<IMessageReactionAdd>,
-        IResponder<IMessageReactionRemove>,
-        IResponder<IMessageReactionRemoveAll>,
-        IResponder<IMessageReactionRemoveEmoji>
+    /// <param name="autoroles">The autorole service.</param>
+    /// <param name="autoroleUpdates">The autorole update service.</param>
+    /// <param name="guildAPI">The guild API.</param>
+    public ReactionConditionResponder
+    (
+        AutoroleService autoroles,
+        AutoroleUpdateService autoroleUpdates,
+        IDiscordRestGuildAPI guildAPI
+    )
     {
-        private readonly AutoroleService _autoroles;
-        private readonly AutoroleUpdateService _autoroleUpdates;
-        private readonly IDiscordRestGuildAPI _guildAPI;
+        _autoroles = autoroles;
+        _autoroleUpdates = autoroleUpdates;
+        _guildAPI = guildAPI;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ReactionConditionResponder"/> class.
-        /// </summary>
-        /// <param name="autoroles">The autorole service.</param>
-        /// <param name="autoroleUpdates">The autorole update service.</param>
-        /// <param name="guildAPI">The guild API.</param>
-        public ReactionConditionResponder
+    /// <inheritdoc />
+    public async Task<Result> RespondAsync(IMessageReactionAdd gatewayEvent, CancellationToken ct = default)
+    {
+        if (!gatewayEvent.GuildID.IsDefined(out var guildID))
+        {
+            return Result.FromSuccess();
+        }
+
+        var autoroles = await _autoroles.GetAutorolesAsync
         (
-            AutoroleService autoroles,
-            AutoroleUpdateService autoroleUpdates,
-            IDiscordRestGuildAPI guildAPI
-        )
-        {
-            _autoroles = autoroles;
-            _autoroleUpdates = autoroleUpdates;
-            _guildAPI = guildAPI;
-        }
-
-        /// <inheritdoc />
-        public async Task<Result> RespondAsync(IMessageReactionAdd gatewayEvent, CancellationToken ct = default)
-        {
-            if (!gatewayEvent.GuildID.IsDefined(out var guildID))
-            {
-                return Result.FromSuccess();
-            }
-
-            var autoroles = await _autoroles.GetAutorolesAsync
-            (
-                guildID,
-                q => q
-                    .Where(a => a.IsEnabled)
-                    .Where
-                    (
-                        a => a.Conditions.Any
-                        (
-                            c =>
-                                c is ReactionCondition &&
-                                ((ReactionCondition)c).MessageID == gatewayEvent.MessageID &&
-                                ((ReactionCondition)c).ChannelID == gatewayEvent.ChannelID &&
-                                ((ReactionCondition)c).EmoteName == gatewayEvent.Emoji.Name
-                        )
-                    ),
-                ct
-            );
-
-            var user = gatewayEvent.UserID;
-            foreach (var autorole in autoroles)
-            {
-                using var transaction = TransactionFactory.Create();
-
-                var updateAutorole = await _autoroleUpdates.UpdateAutoroleForUserAsync(autorole, guildID, user, ct);
-                if (!updateAutorole.IsSuccess)
-                {
-                    return Result.FromError(updateAutorole);
-                }
-
-                transaction.Complete();
-            }
-
-            return Result.FromSuccess();
-        }
-
-        /// <inheritdoc />
-        public async Task<Result> RespondAsync(IMessageReactionRemove gatewayEvent, CancellationToken ct = default)
-        {
-            if (!gatewayEvent.GuildID.IsDefined(out var guildID))
-            {
-                return Result.FromSuccess();
-            }
-
-            var autoroles = await _autoroles.GetAutorolesAsync
-            (
-                guildID,
-                q => q
-                    .Where(a => a.IsEnabled)
-                    .Where
-                    (
-                        a => a.Conditions.Any
-                        (
-                            c =>
-                                c is ReactionCondition &&
-                                ((ReactionCondition)c).MessageID == gatewayEvent.MessageID &&
-                                ((ReactionCondition)c).ChannelID == gatewayEvent.ChannelID &&
-                                ((ReactionCondition)c).EmoteName == gatewayEvent.Emoji.Name
-                        )
-                    ),
-                ct
-            );
-
-            var user = gatewayEvent.UserID;
-            foreach (var autorole in autoroles)
-            {
-                using var transaction = TransactionFactory.Create();
-
-                var updateAutorole = await _autoroleUpdates.UpdateAutoroleForUserAsync(autorole, guildID, user, ct);
-                if (!updateAutorole.IsSuccess)
-                {
-                    return Result.FromError(updateAutorole);
-                }
-
-                transaction.Complete();
-            }
-
-            return Result.FromSuccess();
-        }
-
-        /// <inheritdoc />
-        public async Task<Result> RespondAsync(IMessageReactionRemoveAll gatewayEvent, CancellationToken ct = default)
-        {
-            if (!gatewayEvent.GuildID.IsDefined(out var guildID))
-            {
-                return Result.FromSuccess();
-            }
-
-            var autoroles = await _autoroles.GetAutorolesAsync
-            (
-                guildID,
-                q => q
-                    .Where(a => a.IsEnabled)
-                    .Where
-                    (
-                        a => a.Conditions.Any
-                        (
-                            c =>
-                                c is ReactionCondition &&
-                                ((ReactionCondition)c).MessageID == gatewayEvent.MessageID &&
-                                ((ReactionCondition)c).ChannelID == gatewayEvent.ChannelID
-                        )
-                    ),
-                ct
-            );
-
-            var users = new List<Snowflake>();
-            Optional<Snowflake> after = default;
-            while (true)
-            {
-                var listMembers = await _guildAPI.ListGuildMembersAsync(guildID, after: after, ct: ct);
-                if (!listMembers.IsSuccess)
-                {
-                    return Result.FromError(listMembers);
-                }
-
-                var members = listMembers.Entity;
-                if (members.Count == 0)
-                {
-                    break;
-                }
-
-                users.AddRange
+            guildID,
+            q => q
+                .Where(a => a.IsEnabled)
+                .Where
                 (
-                    listMembers.Entity
-                        .Where(m => !m.User.Value.IsBot.HasValue || !m.User.Value.IsBot.Value)
-                        .Select(m => m.User.Value.ID)
-                );
+                    a => a.Conditions.Any
+                    (
+                        c =>
+                            c is ReactionCondition &&
+                            ((ReactionCondition)c).MessageID == gatewayEvent.MessageID &&
+                            ((ReactionCondition)c).ChannelID == gatewayEvent.ChannelID &&
+                            ((ReactionCondition)c).EmoteName == gatewayEvent.Emoji.Name
+                    )
+                ),
+            ct
+        );
 
-                after = users.Last();
-            }
+        var user = gatewayEvent.UserID;
+        foreach (var autorole in autoroles)
+        {
+            using var transaction = TransactionFactory.Create();
 
-            foreach (var autorole in autoroles)
+            var updateAutorole = await _autoroleUpdates.UpdateAutoroleForUserAsync(autorole, guildID, user, ct);
+            if (!updateAutorole.IsSuccess)
             {
-                foreach (var user in users)
-                {
-                    using var transaction = TransactionFactory.Create();
-
-                    var updateAutorole = await _autoroleUpdates.UpdateAutoroleForUserAsync(autorole, guildID, user, ct);
-                    if (!updateAutorole.IsSuccess)
-                    {
-                        return Result.FromError(updateAutorole);
-                    }
-
-                    transaction.Complete();
-                }
+                return Result.FromError(updateAutorole);
             }
 
+            transaction.Complete();
+        }
+
+        return Result.FromSuccess();
+    }
+
+    /// <inheritdoc />
+    public async Task<Result> RespondAsync(IMessageReactionRemove gatewayEvent, CancellationToken ct = default)
+    {
+        if (!gatewayEvent.GuildID.IsDefined(out var guildID))
+        {
             return Result.FromSuccess();
         }
 
-        /// <inheritdoc />
-        public async Task<Result> RespondAsync(IMessageReactionRemoveEmoji gatewayEvent, CancellationToken ct = default)
+        var autoroles = await _autoroles.GetAutorolesAsync
+        (
+            guildID,
+            q => q
+                .Where(a => a.IsEnabled)
+                .Where
+                (
+                    a => a.Conditions.Any
+                    (
+                        c =>
+                            c is ReactionCondition &&
+                            ((ReactionCondition)c).MessageID == gatewayEvent.MessageID &&
+                            ((ReactionCondition)c).ChannelID == gatewayEvent.ChannelID &&
+                            ((ReactionCondition)c).EmoteName == gatewayEvent.Emoji.Name
+                    )
+                ),
+            ct
+        );
+
+        var user = gatewayEvent.UserID;
+        foreach (var autorole in autoroles)
         {
-            if (!gatewayEvent.GuildID.IsDefined(out var guildID))
+            using var transaction = TransactionFactory.Create();
+
+            var updateAutorole = await _autoroleUpdates.UpdateAutoroleForUserAsync(autorole, guildID, user, ct);
+            if (!updateAutorole.IsSuccess)
             {
-                return Result.FromSuccess();
+                return Result.FromError(updateAutorole);
             }
 
-            var autoroles = await _autoroles.GetAutorolesAsync
-            (
-                guildID,
-                q => q
-                    .Where(a => a.IsEnabled)
-                    .Where
+            transaction.Complete();
+        }
+
+        return Result.FromSuccess();
+    }
+
+    /// <inheritdoc />
+    public async Task<Result> RespondAsync(IMessageReactionRemoveAll gatewayEvent, CancellationToken ct = default)
+    {
+        if (!gatewayEvent.GuildID.IsDefined(out var guildID))
+        {
+            return Result.FromSuccess();
+        }
+
+        var autoroles = await _autoroles.GetAutorolesAsync
+        (
+            guildID,
+            q => q
+                .Where(a => a.IsEnabled)
+                .Where
+                (
+                    a => a.Conditions.Any
                     (
-                        a => a.Conditions.Any
-                        (
-                            c =>
-                                c is ReactionCondition &&
-                                ((ReactionCondition)c).MessageID == gatewayEvent.MessageID &&
-                                ((ReactionCondition)c).ChannelID == gatewayEvent.ChannelID &&
-                                ((ReactionCondition)c).EmoteName == gatewayEvent.Emoji.Name
-                        )
-                    ),
-                ct
+                        c =>
+                            c is ReactionCondition &&
+                            ((ReactionCondition)c).MessageID == gatewayEvent.MessageID &&
+                            ((ReactionCondition)c).ChannelID == gatewayEvent.ChannelID
+                    )
+                ),
+            ct
+        );
+
+        var users = new List<Snowflake>();
+        Optional<Snowflake> after = default;
+        while (true)
+        {
+            var listMembers = await _guildAPI.ListGuildMembersAsync(guildID, after: after, ct: ct);
+            if (!listMembers.IsSuccess)
+            {
+                return Result.FromError(listMembers);
+            }
+
+            var members = listMembers.Entity;
+            if (members.Count == 0)
+            {
+                break;
+            }
+
+            users.AddRange
+            (
+                listMembers.Entity
+                    .Where(m => !m.User.Value.IsBot.HasValue || !m.User.Value.IsBot.Value)
+                    .Select(m => m.User.Value.ID)
             );
 
-            var users = new List<Snowflake>();
-            Optional<Snowflake> after = default;
-            while (true)
+            after = users.Last();
+        }
+
+        foreach (var autorole in autoroles)
+        {
+            foreach (var user in users)
             {
-                var listMembers = await _guildAPI.ListGuildMembersAsync(guildID, after: after, ct: ct);
-                if (!listMembers.IsSuccess)
+                using var transaction = TransactionFactory.Create();
+
+                var updateAutorole = await _autoroleUpdates.UpdateAutoroleForUserAsync(autorole, guildID, user, ct);
+                if (!updateAutorole.IsSuccess)
                 {
-                    return Result.FromError(listMembers);
+                    return Result.FromError(updateAutorole);
                 }
 
-                var members = listMembers.Entity;
-                if (members.Count == 0)
-                {
-                    break;
-                }
-
-                users.AddRange(listMembers.Entity.Select(m => m.User.Value.ID));
-                after = users.Last();
+                transaction.Complete();
             }
+        }
 
-            foreach (var autorole in autoroles)
-            {
-                foreach (var user in users)
-                {
-                    using var transaction = TransactionFactory.Create();
+        return Result.FromSuccess();
+    }
 
-                    var updateAutorole = await _autoroleUpdates.UpdateAutoroleForUserAsync(autorole, guildID, user, ct);
-                    if (!updateAutorole.IsSuccess)
-                    {
-                        return Result.FromError(updateAutorole);
-                    }
-
-                    transaction.Complete();
-                }
-            }
-
+    /// <inheritdoc />
+    public async Task<Result> RespondAsync(IMessageReactionRemoveEmoji gatewayEvent, CancellationToken ct = default)
+    {
+        if (!gatewayEvent.GuildID.IsDefined(out var guildID))
+        {
             return Result.FromSuccess();
         }
+
+        var autoroles = await _autoroles.GetAutorolesAsync
+        (
+            guildID,
+            q => q
+                .Where(a => a.IsEnabled)
+                .Where
+                (
+                    a => a.Conditions.Any
+                    (
+                        c =>
+                            c is ReactionCondition &&
+                            ((ReactionCondition)c).MessageID == gatewayEvent.MessageID &&
+                            ((ReactionCondition)c).ChannelID == gatewayEvent.ChannelID &&
+                            ((ReactionCondition)c).EmoteName == gatewayEvent.Emoji.Name
+                    )
+                ),
+            ct
+        );
+
+        var users = new List<Snowflake>();
+        Optional<Snowflake> after = default;
+        while (true)
+        {
+            var listMembers = await _guildAPI.ListGuildMembersAsync(guildID, after: after, ct: ct);
+            if (!listMembers.IsSuccess)
+            {
+                return Result.FromError(listMembers);
+            }
+
+            var members = listMembers.Entity;
+            if (members.Count == 0)
+            {
+                break;
+            }
+
+            users.AddRange(listMembers.Entity.Select(m => m.User.Value.ID));
+            after = users.Last();
+        }
+
+        foreach (var autorole in autoroles)
+        {
+            foreach (var user in users)
+            {
+                using var transaction = TransactionFactory.Create();
+
+                var updateAutorole = await _autoroleUpdates.UpdateAutoroleForUserAsync(autorole, guildID, user, ct);
+                if (!updateAutorole.IsSuccess)
+                {
+                    return Result.FromError(updateAutorole);
+                }
+
+                transaction.Complete();
+            }
+        }
+
+        return Result.FromSuccess();
     }
 }

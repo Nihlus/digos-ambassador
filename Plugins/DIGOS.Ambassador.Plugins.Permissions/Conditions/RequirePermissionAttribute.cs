@@ -24,34 +24,33 @@ using System;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
 using Remora.Commands.Conditions;
 
-namespace DIGOS.Ambassador.Plugins.Permissions.Conditions
+namespace DIGOS.Ambassador.Plugins.Permissions.Conditions;
+
+/// <summary>
+/// This attribute can be attached to Discord.Net.Commands module commands to restrict them to certain predefined
+/// permissions.
+/// </summary>
+[AttributeUsage(AttributeTargets.Method)]
+public class RequirePermissionAttribute : ConditionAttribute
 {
     /// <summary>
-    /// This attribute can be attached to Discord.Net.Commands module commands to restrict them to certain predefined
-    /// permissions.
+    /// Gets the permission type.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method)]
-    public class RequirePermissionAttribute : ConditionAttribute
+    public Type Type { get; }
+
+    /// <summary>
+    /// Gets the permission target.
+    /// </summary>
+    public PermissionTarget Target { get; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RequirePermissionAttribute"/> class.
+    /// </summary>
+    /// <param name="type">The required permission.</param>
+    /// <param name="target">The required target scope.</param>
+    public RequirePermissionAttribute(Type type, PermissionTarget target)
     {
-        /// <summary>
-        /// Gets the permission type.
-        /// </summary>
-        public Type Type { get; }
-
-        /// <summary>
-        /// Gets the permission target.
-        /// </summary>
-        public PermissionTarget Target { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RequirePermissionAttribute"/> class.
-        /// </summary>
-        /// <param name="type">The required permission.</param>
-        /// <param name="target">The required target scope.</param>
-        public RequirePermissionAttribute(Type type, PermissionTarget target)
-        {
-            this.Type = type;
-            this.Target = target;
-        }
+        this.Type = type;
+        this.Target = target;
     }
 }

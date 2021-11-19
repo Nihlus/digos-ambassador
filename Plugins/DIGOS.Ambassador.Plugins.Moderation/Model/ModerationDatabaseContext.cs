@@ -25,43 +25,42 @@ using DIGOS.Ambassador.Core.Database.Context;
 using Microsoft.EntityFrameworkCore;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Plugins.Moderation.Model
+namespace DIGOS.Ambassador.Plugins.Moderation.Model;
+
+/// <summary>
+/// Represents the database model of the dossier plugin.
+/// </summary>
+public class ModerationDatabaseContext : AmbassadorDbContext
 {
+    private const string SchemaName = "ModerationModule";
+
     /// <summary>
-    /// Represents the database model of the dossier plugin.
+    /// Gets the database set of server settings.
     /// </summary>
-    public class ModerationDatabaseContext : AmbassadorDbContext
+    public DbSet<ServerModerationSettings> ServerSettings { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the database set of user notes.
+    /// </summary>
+    public DbSet<UserNote> UserNotes { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the database set of user warnings.
+    /// </summary>
+    public DbSet<UserWarning> UserWarnings { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the database set of user bans.
+    /// </summary>
+    public DbSet<UserBan> UserBans { get; private set; } = null!;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModerationDatabaseContext"/> class.
+    /// </summary>
+    /// <param name="contextOptions">The context options.</param>
+    [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
+    public ModerationDatabaseContext(DbContextOptions<ModerationDatabaseContext> contextOptions)
+        : base(SchemaName, contextOptions)
     {
-        private const string SchemaName = "ModerationModule";
-
-        /// <summary>
-        /// Gets the database set of server settings.
-        /// </summary>
-        public DbSet<ServerModerationSettings> ServerSettings { get; private set; } = null!;
-
-        /// <summary>
-        /// Gets the database set of user notes.
-        /// </summary>
-        public DbSet<UserNote> UserNotes { get; private set; } = null!;
-
-        /// <summary>
-        /// Gets the database set of user warnings.
-        /// </summary>
-        public DbSet<UserWarning> UserWarnings { get; private set; } = null!;
-
-        /// <summary>
-        /// Gets the database set of user bans.
-        /// </summary>
-        public DbSet<UserBan> UserBans { get; private set; } = null!;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ModerationDatabaseContext"/> class.
-        /// </summary>
-        /// <param name="contextOptions">The context options.</param>
-        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
-        public ModerationDatabaseContext(DbContextOptions<ModerationDatabaseContext> contextOptions)
-            : base(SchemaName, contextOptions)
-        {
-        }
     }
 }

@@ -23,70 +23,69 @@
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
 
-namespace DIGOS.Ambassador.Discord.Pagination
+namespace DIGOS.Ambassador.Discord.Pagination;
+
+/// <summary>
+/// Represents a set of appearance options for a paginated message.
+/// </summary>
+public sealed record PaginatedAppearanceOptions
+(
+    ButtonComponent First,
+    ButtonComponent Back,
+    ButtonComponent Next,
+    ButtonComponent Last,
+    ButtonComponent Close,
+    ButtonComponent Help,
+    string FooterFormat = "Page {0}/{1}",
+    string HelpText = "This is a paginated message. Use the buttons to change page."
+)
 {
     /// <summary>
-    /// Represents a set of appearance options for a paginated message.
+    /// Holds the default appearance instance.
     /// </summary>
-    public sealed record PaginatedAppearanceOptions
+    public static readonly PaginatedAppearanceOptions Default = new
     (
-        ButtonComponent First,
-        ButtonComponent Back,
-        ButtonComponent Next,
-        ButtonComponent Last,
-        ButtonComponent Close,
-        ButtonComponent Help,
-        string FooterFormat = "Page {0}/{1}",
-        string HelpText = "This is a paginated message. Use the buttons to change page."
-    )
-    {
-        /// <summary>
-        /// Holds the default appearance instance.
-        /// </summary>
-        public static readonly PaginatedAppearanceOptions Default = new
+        new ButtonComponent
         (
-            new ButtonComponent
-            (
-                ButtonComponentStyle.Secondary,
-                nameof(First),
-                new PartialEmoji(Name: "⏮"),
-                nameof(First)
-            ),
-            new ButtonComponent
-            (
-                ButtonComponentStyle.Secondary,
-                nameof(Back),
-                new PartialEmoji(Name: "◀"),
-                nameof(Back)
-            ),
-            new ButtonComponent
-            (
-                ButtonComponentStyle.Secondary,
-                nameof(Next),
-                new PartialEmoji(Name: "▶"),
-                nameof(Next)
-            ),
-            new ButtonComponent
-            (
-                ButtonComponentStyle.Secondary,
-                nameof(Last),
-                new PartialEmoji(Name: "⏭"),
-                nameof(Last)
-            ),
-            new ButtonComponent
-            (
-                ButtonComponentStyle.Secondary,
-                nameof(Close),
-                new PartialEmoji(Name: "\x23F9"),
-                nameof(Close)
-            ),
-            new ButtonComponent
-            (
-                ButtonComponentStyle.Secondary,
-                nameof(Help),
-                new PartialEmoji(Name: "ℹ"),
-                nameof(Help)
-            )
-        );
-    }
+            ButtonComponentStyle.Secondary,
+            nameof(First),
+            new PartialEmoji(Name: "⏮"),
+            nameof(First)
+        ),
+        new ButtonComponent
+        (
+            ButtonComponentStyle.Secondary,
+            nameof(Back),
+            new PartialEmoji(Name: "◀"),
+            nameof(Back)
+        ),
+        new ButtonComponent
+        (
+            ButtonComponentStyle.Secondary,
+            nameof(Next),
+            new PartialEmoji(Name: "▶"),
+            nameof(Next)
+        ),
+        new ButtonComponent
+        (
+            ButtonComponentStyle.Secondary,
+            nameof(Last),
+            new PartialEmoji(Name: "⏭"),
+            nameof(Last)
+        ),
+        new ButtonComponent
+        (
+            ButtonComponentStyle.Secondary,
+            nameof(Close),
+            new PartialEmoji(Name: "\x23F9"),
+            nameof(Close)
+        ),
+        new ButtonComponent
+        (
+            ButtonComponentStyle.Secondary,
+            nameof(Help),
+            new PartialEmoji(Name: "ℹ"),
+            nameof(Help)
+        )
+    );
 }

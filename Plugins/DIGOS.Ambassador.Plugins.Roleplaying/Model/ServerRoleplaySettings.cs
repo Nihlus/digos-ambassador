@@ -28,55 +28,54 @@ using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using Remora.Discord.Core;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
+namespace DIGOS.Ambassador.Plugins.Roleplaying.Model;
+
+/// <summary>
+/// Represents server-specific settings related to the roleplaying module.
+/// </summary>
+[Table("ServerSettings", Schema = "RoleplayModule")]
+public class ServerRoleplaySettings : EFEntity
 {
     /// <summary>
-    /// Represents server-specific settings related to the roleplaying module.
+    /// Gets the server the settings are relevant for.
     /// </summary>
-    [Table("ServerSettings", Schema = "RoleplayModule")]
-    public class ServerRoleplaySettings : EFEntity
+    public virtual Server Server { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the channel category generated roleplay channels should be created under.
+    /// </summary>
+    public Snowflake? DedicatedRoleplayChannelsCategory { get; internal set; }
+
+    /// <summary>
+    /// Gets the channel that archived roleplays are exported to.
+    /// </summary>
+    public Snowflake? ArchiveChannel { get; internal set; }
+
+    /// <summary>
+    /// Gets the default user role; that is, the role that all valid users on the server should have. Typically,
+    /// this is the @everyone role, but certain servers use that as a very restricted role, and give users their
+    /// default role after some condition is met. This allows those servers to override the standard @everyone role
+    /// used for dynamic roleplay channels.
+    /// </summary>
+    public Snowflake? DefaultUserRole { get; internal set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ServerRoleplaySettings"/> class.
+    /// </summary>
+    /// <remarks>
+    /// Required by EF Core.
+    /// </remarks>
+    protected ServerRoleplaySettings()
     {
-        /// <summary>
-        /// Gets the server the settings are relevant for.
-        /// </summary>
-        public virtual Server Server { get; private set; } = null!;
+    }
 
-        /// <summary>
-        /// Gets the channel category generated roleplay channels should be created under.
-        /// </summary>
-        public Snowflake? DedicatedRoleplayChannelsCategory { get; internal set; }
-
-        /// <summary>
-        /// Gets the channel that archived roleplays are exported to.
-        /// </summary>
-        public Snowflake? ArchiveChannel { get; internal set; }
-
-        /// <summary>
-        /// Gets the default user role; that is, the role that all valid users on the server should have. Typically,
-        /// this is the @everyone role, but certain servers use that as a very restricted role, and give users their
-        /// default role after some condition is met. This allows those servers to override the standard @everyone role
-        /// used for dynamic roleplay channels.
-        /// </summary>
-        public Snowflake? DefaultUserRole { get; internal set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ServerRoleplaySettings"/> class.
-        /// </summary>
-        /// <remarks>
-        /// Required by EF Core.
-        /// </remarks>
-        protected ServerRoleplaySettings()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ServerRoleplaySettings"/> class.
-        /// </summary>
-        /// <param name="server">The server that the settings are bound to.</param>
-        [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Required by EF Core.")]
-        public ServerRoleplaySettings(Server server)
-        {
-            this.Server = server;
-        }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ServerRoleplaySettings"/> class.
+    /// </summary>
+    /// <param name="server">The server that the settings are bound to.</param>
+    [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Required by EF Core.")]
+    public ServerRoleplaySettings(Server server)
+    {
+        this.Server = server;
     }
 }

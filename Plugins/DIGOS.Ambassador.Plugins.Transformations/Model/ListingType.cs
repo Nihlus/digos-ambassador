@@ -22,22 +22,21 @@
 
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Model
+namespace DIGOS.Ambassador.Plugins.Transformations.Model;
+
+/// <summary>
+/// Represents a value indicating whether a user is on another user's blacklist or whitelist.
+/// </summary>
+[PublicAPI]
+public enum ListingType
 {
     /// <summary>
-    /// Represents a value indicating whether a user is on another user's blacklist or whitelist.
+    /// The user is blacklisted.
     /// </summary>
-    [PublicAPI]
-    public enum ListingType
-    {
-        /// <summary>
-        /// The user is blacklisted.
-        /// </summary>
-        Blacklist,
+    Blacklist,
 
-        /// <summary>
-        /// The user is whitelisted.
-        /// </summary>
-        Whitelist
-    }
+    /// <summary>
+    /// The user is whitelisted.
+    /// </summary>
+    Whitelist
 }

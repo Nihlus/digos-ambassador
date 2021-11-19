@@ -25,61 +25,60 @@ using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens;
+
+/// <summary>
+/// A token that gets replaced with a colour.
+/// </summary>
+[PublicAPI]
+[TokenIdentifier("colour", "c")]
+public sealed class ColourToken : ReplaceableTextToken<ColourToken>
 {
     /// <summary>
-    /// A token that gets replaced with a colour.
+    /// Gets a value indicating whether the pattern colour should be retrieved instead of the base colour.
     /// </summary>
-    [PublicAPI]
-    [TokenIdentifier("colour", "c")]
-    public sealed class ColourToken : ReplaceableTextToken<ColourToken>
+    public bool UsePattern { get; private set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ColourToken"/> class.
+    /// </summary>
+    [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by convention.")]
+    public ColourToken()
     {
-        /// <summary>
-        /// Gets a value indicating whether the pattern colour should be retrieved instead of the base colour.
-        /// </summary>
-        public bool UsePattern { get; private set; }
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ColourToken"/> class.
-        /// </summary>
-        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by convention.")]
-        public ColourToken()
+    /// <inheritdoc />
+    public override string GetText(Appearance appearance, AppearanceComponent? component)
+    {
+        if (component is null)
         {
+            throw new ArgumentNullException(nameof(component));
         }
 
-        /// <inheritdoc />
-        public override string GetText(Appearance appearance, AppearanceComponent? component)
+        if (this.UsePattern)
         {
-            if (component is null)
-            {
-                throw new ArgumentNullException(nameof(component));
-            }
-
-            if (this.UsePattern)
-            {
-                return component.PatternColour?.ToString() ?? string.Empty;
-            }
-
-            return component.BaseColour.ToString();
+            return component.PatternColour?.ToString() ?? string.Empty;
         }
 
-        /// <inheritdoc />
-        protected override ColourToken Initialize(string? data)
+        return component.BaseColour.ToString();
+    }
+
+    /// <inheritdoc />
+    protected override ColourToken Initialize(string? data)
+    {
+        this.UsePattern = false;
+
+        if (data is null)
         {
-            this.UsePattern = false;
-
-            if (data is null)
-            {
-                return this;
-            }
-
-            if (data != "pattern")
-            {
-                return this;
-            }
-
-            this.UsePattern = true;
             return this;
         }
+
+        if (data != "pattern")
+        {
+            return this;
+        }
+
+        this.UsePattern = true;
+        return this;
     }
 }

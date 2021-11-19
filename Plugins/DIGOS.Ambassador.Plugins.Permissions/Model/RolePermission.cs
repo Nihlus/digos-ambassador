@@ -25,45 +25,44 @@ using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Core.Database.Entities;
 using Remora.Discord.Core;
 
-namespace DIGOS.Ambassador.Plugins.Permissions.Model
+namespace DIGOS.Ambassador.Plugins.Permissions.Model;
+
+/// <summary>
+/// Represents a record of a permission associated with a role.
+/// </summary>
+[Table("RolePermissions", Schema = "PermissionModule")]
+public class RolePermission : EFEntity
 {
     /// <summary>
-    /// Represents a record of a permission associated with a role.
+    /// Gets the role's Discord ID.
     /// </summary>
-    [Table("RolePermissions", Schema = "PermissionModule")]
-    public class RolePermission : EFEntity
+    public Snowflake RoleID { get; private set; }
+
+    /// <summary>
+    /// Gets the permission's unique identifier.
+    /// </summary>
+    public Guid Permission { get; private set; }
+
+    /// <summary>
+    /// Gets the allowed targets for the permission.
+    /// </summary>
+    public PermissionTarget Target { get; private set; }
+
+    /// <summary>
+    /// Gets a value indicating whether the permission has been granted.
+    /// </summary>
+    public bool IsGranted { get; internal set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RolePermission"/> class.
+    /// </summary>
+    /// <param name="roleID">The ID of the role that the permission applies to.</param>
+    /// <param name="permission">The unique identifier of the permission.</param>
+    /// <param name="target">The allowed targets for the permission.</param>
+    public RolePermission(Snowflake roleID, Guid permission, PermissionTarget target)
     {
-        /// <summary>
-        /// Gets the role's Discord ID.
-        /// </summary>
-        public Snowflake RoleID { get; private set; }
-
-        /// <summary>
-        /// Gets the permission's unique identifier.
-        /// </summary>
-        public Guid Permission { get; private set; }
-
-        /// <summary>
-        /// Gets the allowed targets for the permission.
-        /// </summary>
-        public PermissionTarget Target { get; private set; }
-
-        /// <summary>
-        /// Gets a value indicating whether the permission has been granted.
-        /// </summary>
-        public bool IsGranted { get; internal set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RolePermission"/> class.
-        /// </summary>
-        /// <param name="roleID">The ID of the role that the permission applies to.</param>
-        /// <param name="permission">The unique identifier of the permission.</param>
-        /// <param name="target">The allowed targets for the permission.</param>
-        public RolePermission(Snowflake roleID, Guid permission, PermissionTarget target)
-        {
-            this.RoleID = roleID;
-            this.Permission = permission;
-            this.Target = target;
-        }
+        this.RoleID = roleID;
+        this.Permission = permission;
+        this.Target = target;
     }
 }

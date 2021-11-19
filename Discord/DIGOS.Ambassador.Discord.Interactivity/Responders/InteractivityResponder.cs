@@ -24,33 +24,32 @@ using System.Threading;
 using System.Threading.Tasks;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Discord.Interactivity.Responders
+namespace DIGOS.Ambassador.Discord.Interactivity.Responders;
+
+/// <summary>
+/// Acts as a base class for interactivity responders.
+/// </summary>
+public abstract class InteractivityResponder
 {
     /// <summary>
-    /// Acts as a base class for interactivity responders.
+    /// Gets the interactivity service.
     /// </summary>
-    public abstract class InteractivityResponder
+    protected InteractivityService Interactivity { get; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="InteractivityResponder"/> class.
+    /// </summary>
+    /// <param name="interactivity">The interactivity service.</param>
+    protected InteractivityResponder(InteractivityService interactivity)
     {
-        /// <summary>
-        /// Gets the interactivity service.
-        /// </summary>
-        protected InteractivityService Interactivity { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InteractivityResponder"/> class.
-        /// </summary>
-        /// <param name="interactivity">The interactivity service.</param>
-        protected InteractivityResponder(InteractivityService interactivity)
-        {
-            this.Interactivity = interactivity;
-        }
-
-        /// <summary>
-        /// Called by the interactivity service when a new interactive entity is created.
-        /// </summary>
-        /// <param name="nonce">The nonce that identifies the entity.</param>
-        /// <param name="ct">The cancellation token for this operation.</param>
-        /// <returns>A result which may or may not have succeeded.</returns>
-        public abstract Task<Result> OnCreateAsync(string nonce, CancellationToken ct = default);
+        this.Interactivity = interactivity;
     }
+
+    /// <summary>
+    /// Called by the interactivity service when a new interactive entity is created.
+    /// </summary>
+    /// <param name="nonce">The nonce that identifies the entity.</param>
+    /// <param name="ct">The cancellation token for this operation.</param>
+    /// <returns>A result which may or may not have succeeded.</returns>
+    public abstract Task<Result> OnCreateAsync(string nonce, CancellationToken ct = default);
 }

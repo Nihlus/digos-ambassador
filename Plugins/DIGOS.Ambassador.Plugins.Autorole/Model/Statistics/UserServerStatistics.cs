@@ -27,50 +27,49 @@ using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Model.Statistics
+namespace DIGOS.Ambassador.Plugins.Autorole.Model.Statistics;
+
+/// <summary>
+/// Represents a set of per-server statistics for a user.
+/// </summary>
+[Table("UserServerStatistics", Schema = "AutoroleModule")]
+public class UserServerStatistics : EFEntity
 {
     /// <summary>
-    /// Represents a set of per-server statistics for a user.
+    /// Gets the server that the statistics are for.
     /// </summary>
-    [Table("UserServerStatistics", Schema = "AutoroleModule")]
-    public class UserServerStatistics : EFEntity
+    public virtual Server Server { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the total message count of the user in this server.
+    /// </summary>
+    public long? TotalMessageCount { get; internal set; }
+
+    /// <summary>
+    /// Gets the individual channel post counts of the user.
+    /// </summary>
+    public virtual List<UserChannelStatistics> ChannelStatistics { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the last time the user performed a tracked activity on the server.
+    /// </summary>
+    public DateTimeOffset? LastActivityTime { get; internal set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserServerStatistics"/> class.
+    /// </summary>
+    [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
+    protected UserServerStatistics()
     {
-        /// <summary>
-        /// Gets the server that the statistics are for.
-        /// </summary>
-        public virtual Server Server { get; private set; } = null!;
+    }
 
-        /// <summary>
-        /// Gets the total message count of the user in this server.
-        /// </summary>
-        public long? TotalMessageCount { get; internal set; }
-
-        /// <summary>
-        /// Gets the individual channel post counts of the user.
-        /// </summary>
-        public virtual List<UserChannelStatistics> ChannelStatistics { get; private set; } = null!;
-
-        /// <summary>
-        /// Gets the last time the user performed a tracked activity on the server.
-        /// </summary>
-        public DateTimeOffset? LastActivityTime { get; internal set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserServerStatistics"/> class.
-        /// </summary>
-        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
-        protected UserServerStatistics()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserServerStatistics"/> class.
-        /// </summary>
-        /// <param name="server">The server the statistics are for.</param>
-        public UserServerStatistics(Server server)
-        {
-            this.Server = server;
-            this.ChannelStatistics = new List<UserChannelStatistics>();
-        }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserServerStatistics"/> class.
+    /// </summary>
+    /// <param name="server">The server the statistics are for.</param>
+    public UserServerStatistics(Server server)
+    {
+        this.Server = server;
+        this.ChannelStatistics = new List<UserChannelStatistics>();
     }
 }

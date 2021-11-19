@@ -23,43 +23,42 @@
 using System;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters;
 
-namespace DIGOS.Ambassador.Plugins.Roleplaying.Extensions
+namespace DIGOS.Ambassador.Plugins.Roleplaying.Extensions;
+
+/// <summary>
+/// Holds extension methods for <see cref="ExportFormat"/>.
+/// </summary>
+internal static class ExportFormatExtensions
 {
     /// <summary>
-    /// Holds extension methods for <see cref="ExportFormat"/>.
+    /// Gets the file extension for the given export format.
     /// </summary>
-    internal static class ExportFormatExtensions
+    /// <param name="format">The format.</param>
+    /// <returns>The extension.</returns>
+    /// <exception cref="NotImplementedException">Thrown if the format has not been implemented.</exception>
+    public static string GetFileExtension(this ExportFormat format)
     {
-        /// <summary>
-        /// Gets the file extension for the given export format.
-        /// </summary>
-        /// <param name="format">The format.</param>
-        /// <returns>The extension.</returns>
-        /// <exception cref="NotImplementedException">Thrown if the format has not been implemented.</exception>
-        public static string GetFileExtension(this ExportFormat format)
+        switch (format)
         {
-            switch (format)
+            case ExportFormat.PDF:
             {
-                case ExportFormat.PDF:
-                {
-                    return "pdf";
-                }
-                case ExportFormat.Plaintext:
-                {
-                    return "txt";
-                }
-                case ExportFormat.JSON:
-                {
-                    return "json";
-                }
-                case ExportFormat.ODT:
-                {
-                    return "odt";
-                }
-                default:
-                {
-                    throw new NotImplementedException();
-                }
+                return "pdf";
+            }
+            case ExportFormat.Plaintext:
+            {
+                return "txt";
+            }
+            case ExportFormat.JSON:
+            {
+                return "json";
+            }
+            case ExportFormat.ODT:
+            {
+                return "odt";
+            }
+            default:
+            {
+                throw new NotImplementedException();
             }
         }
     }

@@ -30,25 +30,24 @@ using Remora.Plugins.Abstractions.Attributes;
 
 [assembly: RemoraPlugin(typeof(JumboEmotesPlugin))]
 
-namespace DIGOS.Ambassador.Plugins.JumboEmotes
+namespace DIGOS.Ambassador.Plugins.JumboEmotes;
+
+/// <summary>
+/// Describes the JumboEmotes plugin.
+/// </summary>
+public sealed class JumboEmotesPlugin : PluginDescriptor
 {
-    /// <summary>
-    /// Describes the JumboEmotes plugin.
-    /// </summary>
-    public sealed class JumboEmotesPlugin : PluginDescriptor
+    /// <inheritdoc />
+    public override string Name => "JumboEmotes";
+
+    /// <inheritdoc />
+    public override string Description => "Provides a command for jumbofying emotes.";
+
+    /// <inheritdoc />
+    public override void ConfigureServices(IServiceCollection serviceCollection)
     {
-        /// <inheritdoc />
-        public override string Name => "JumboEmotes";
-
-        /// <inheritdoc />
-        public override string Description => "Provides a command for jumbofying emotes.";
-
-        /// <inheritdoc />
-        public override void ConfigureServices(IServiceCollection serviceCollection)
-        {
-            serviceCollection
-                .AddParser<EmojiTypeReader>()
-                .AddCommandGroup<JumboCommands>();
-        }
+        serviceCollection
+            .AddParser<EmojiTypeReader>()
+            .AddCommandGroup<JumboCommands>();
     }
 }

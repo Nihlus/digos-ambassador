@@ -23,40 +23,39 @@
 using System;
 using System.Threading;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Concurrency
+namespace DIGOS.Ambassador.Plugins.Autorole.Concurrency;
+
+/// <summary>
+/// Represents a semaphore and a timestamp.
+/// </summary>
+public class TimedSemaphoreSlim
 {
     /// <summary>
-    /// Represents a semaphore and a timestamp.
+    /// Gets the time when the semaphore was last used. Defaults to the time it was created.
     /// </summary>
-    public class TimedSemaphoreSlim
+    public DateTimeOffset Timestamp { get; private set; }
+
+    /// <summary>
+    /// Gets the semaphore.
+    /// </summary>
+    public SemaphoreSlim Semaphore { get; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TimedSemaphoreSlim"/> class.
+    /// </summary>
+    /// <param name="initialPool">The initial number of available slots.</param>
+    /// <param name="maxPool">The maximum number of available slots.</param>
+    public TimedSemaphoreSlim(int initialPool, int maxPool = 0)
     {
-        /// <summary>
-        /// Gets the time when the semaphore was last used. Defaults to the time it was created.
-        /// </summary>
-        public DateTimeOffset Timestamp { get; private set; }
+        this.Timestamp = DateTimeOffset.UtcNow;
+        this.Semaphore = new SemaphoreSlim(initialPool, maxPool);
+    }
 
-        /// <summary>
-        /// Gets the semaphore.
-        /// </summary>
-        public SemaphoreSlim Semaphore { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TimedSemaphoreSlim"/> class.
-        /// </summary>
-        /// <param name="initialPool">The initial number of available slots.</param>
-        /// <param name="maxPool">The maximum number of available slots.</param>
-        public TimedSemaphoreSlim(int initialPool, int maxPool = 0)
-        {
-            this.Timestamp = DateTimeOffset.UtcNow;
-            this.Semaphore = new SemaphoreSlim(initialPool, maxPool);
-        }
-
-        /// <summary>
-        /// Updates the timestamp of the semaphore.
-        /// </summary>
-        public void UpdateTimestamp()
-        {
-            this.Timestamp = DateTimeOffset.UtcNow;
-        }
+    /// <summary>
+    /// Updates the timestamp of the semaphore.
+    /// </summary>
+    public void UpdateTimestamp()
+    {
+        this.Timestamp = DateTimeOffset.UtcNow;
     }
 }

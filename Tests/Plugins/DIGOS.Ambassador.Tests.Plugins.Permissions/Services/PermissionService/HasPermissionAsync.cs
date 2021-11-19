@@ -31,372 +31,371 @@ using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTa
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Permissions
+namespace DIGOS.Ambassador.Tests.Plugins.Permissions;
+
+public static partial class PermissionServiceTests
 {
-    public static partial class PermissionServiceTests
+    public class HasPermissionAsync : PermissionServiceTestBase
     {
-        public class HasPermissionAsync : PermissionServiceTestBase
+        private readonly Snowflake _discordGuild = new Snowflake(0);
+        private readonly Snowflake _discordUser = new Snowflake(1);
+        private readonly Snowflake _discordRole = new Snowflake(2);
+
+        private readonly Snowflake _discordGuildOwner = new Snowflake(3);
+
+        private readonly IPermission _permission = new TestPermission();
+
+        [Fact]
+        public async Task ReturnsFalseIfPermissionIsNotGrantedToUser()
         {
-            private readonly Snowflake _discordGuild = new Snowflake(0);
-            private readonly Snowflake _discordUser = new Snowflake(1);
-            private readonly Snowflake _discordRole = new Snowflake(2);
+            var result = await this.Permissions.HasPermissionAsync
+            (
+                _discordGuild,
+                _discordUser,
+                _permission,
+                PermissionTarget.Self
+            );
 
-            private readonly Snowflake _discordGuildOwner = new Snowflake(3);
+            Assert.False(result.IsSuccess);
+        }
 
-            private readonly IPermission _permission = new TestPermission();
+        [Fact]
+        public async Task ReturnsTrueIfPermissionIsGrantedToRoleButNotUser()
+        {
+            await this.Permissions.GrantPermissionAsync
+            (
+                _discordRole,
+                _permission,
+                PermissionTarget.Self
+            );
 
-            [Fact]
-            public async Task ReturnsFalseIfPermissionIsNotGrantedToUser()
-            {
-                var result = await this.Permissions.HasPermissionAsync
-                (
-                    _discordGuild,
-                    _discordUser,
-                    _permission,
-                    PermissionTarget.Self
-                );
+            var result = await this.Permissions.HasPermissionAsync
+            (
+                _discordGuild,
+                _discordUser,
+                _permission,
+                PermissionTarget.Self
+            );
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.True(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsTrueIfPermissionIsGrantedToRoleButNotUser()
-            {
-                await this.Permissions.GrantPermissionAsync
-                (
-                    _discordRole,
-                    _permission,
-                    PermissionTarget.Self
-                );
+        [Fact]
+        public async Task ReturnsTrueIfPermissionIsGrantedToUserButNotRole()
+        {
+            await this.Permissions.GrantPermissionAsync
+            (
+                _discordGuild,
+                _discordUser,
+                _permission,
+                PermissionTarget.Self
+            );
 
-                var result = await this.Permissions.HasPermissionAsync
-                (
-                    _discordGuild,
-                    _discordUser,
-                    _permission,
-                    PermissionTarget.Self
-                );
+            var result = await this.Permissions.HasPermissionAsync
+            (
+                _discordGuild,
+                _discordUser,
+                _permission,
+                PermissionTarget.Self
+            );
 
-                Assert.True(result.IsSuccess);
-            }
+            Assert.True(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsTrueIfPermissionIsGrantedToUserButNotRole()
-            {
-                await this.Permissions.GrantPermissionAsync
-                (
-                    _discordGuild,
-                    _discordUser,
-                    _permission,
-                    PermissionTarget.Self
-                );
+        [Fact]
+        public async Task ReturnsTrueIfPermissionIsGrantedToUserAndRole()
+        {
+            await this.Permissions.GrantPermissionAsync
+            (
+                _discordRole,
+                _permission,
+                PermissionTarget.Self
+            );
 
-                var result = await this.Permissions.HasPermissionAsync
-                (
-                    _discordGuild,
-                    _discordUser,
-                    _permission,
-                    PermissionTarget.Self
-                );
+            await this.Permissions.GrantPermissionAsync
+            (
+                _discordGuild,
+                _discordUser,
+                _permission,
+                PermissionTarget.Self
+            );
 
-                Assert.True(result.IsSuccess);
-            }
+            var result = await this.Permissions.HasPermissionAsync
+            (
+                _discordGuild,
+                _discordUser,
+                _permission,
+                PermissionTarget.Self
+            );
 
-            [Fact]
-            public async Task ReturnsTrueIfPermissionIsGrantedToUserAndRole()
-            {
-                await this.Permissions.GrantPermissionAsync
-                (
-                    _discordRole,
-                    _permission,
-                    PermissionTarget.Self
-                );
+            Assert.True(result.IsSuccess);
+        }
 
-                await this.Permissions.GrantPermissionAsync
-                (
-                    _discordGuild,
-                    _discordUser,
-                    _permission,
-                    PermissionTarget.Self
-                );
+        [Fact]
+        public async Task ReturnsFalseIfPermissionIsGrantedToRoleButRevokedFromUser()
+        {
+            await this.Permissions.GrantPermissionAsync
+            (
+                _discordRole,
+                _permission,
+                PermissionTarget.Self
+            );
 
-                var result = await this.Permissions.HasPermissionAsync
-                (
-                    _discordGuild,
-                    _discordUser,
-                    _permission,
-                    PermissionTarget.Self
-                );
+            await this.Permissions.RevokePermissionAsync
+            (
+                _discordGuild,
+                _discordUser,
+                _permission,
+                PermissionTarget.Self
+            );
 
-                Assert.True(result.IsSuccess);
-            }
+            var result = await this.Permissions.HasPermissionAsync
+            (
+                _discordGuild,
+                _discordUser,
+                _permission,
+                PermissionTarget.Self
+            );
 
-            [Fact]
-            public async Task ReturnsFalseIfPermissionIsGrantedToRoleButRevokedFromUser()
-            {
-                await this.Permissions.GrantPermissionAsync
-                (
-                    _discordRole,
-                    _permission,
-                    PermissionTarget.Self
-                );
+            Assert.False(result.IsSuccess);
+        }
 
-                await this.Permissions.RevokePermissionAsync
-                (
-                    _discordGuild,
-                    _discordUser,
-                    _permission,
-                    PermissionTarget.Self
-                );
+        [Fact]
+        public async Task ReturnsTrueIfPermissionIsRevokedFromRoleButGrantedToUser()
+        {
+            await this.Permissions.RevokePermissionAsync
+            (
+                _discordRole,
+                _permission,
+                PermissionTarget.Self
+            );
 
-                var result = await this.Permissions.HasPermissionAsync
-                (
-                    _discordGuild,
-                    _discordUser,
-                    _permission,
-                    PermissionTarget.Self
-                );
+            await this.Permissions.GrantPermissionAsync
+            (
+                _discordGuild,
+                _discordUser,
+                _permission,
+                PermissionTarget.Self
+            );
 
-                Assert.False(result.IsSuccess);
-            }
+            var result = await this.Permissions.HasPermissionAsync
+            (
+                _discordGuild,
+                _discordUser,
+                _permission,
+                PermissionTarget.Self
+            );
 
-            [Fact]
-            public async Task ReturnsTrueIfPermissionIsRevokedFromRoleButGrantedToUser()
-            {
-                await this.Permissions.RevokePermissionAsync
-                (
-                    _discordRole,
-                    _permission,
-                    PermissionTarget.Self
-                );
+            Assert.True(result.IsSuccess);
+        }
 
-                await this.Permissions.GrantPermissionAsync
-                (
-                    _discordGuild,
-                    _discordUser,
-                    _permission,
-                    PermissionTarget.Self
-                );
+        [Fact]
+        public async Task ReturnsTrueWithAllTargetIfBothSelfAndOtherAreGrantedToUser()
+        {
+            await this.Permissions.GrantPermissionAsync
+            (
+                _discordGuild,
+                _discordUser,
+                _permission,
+                PermissionTarget.Self
+            );
 
-                var result = await this.Permissions.HasPermissionAsync
-                (
-                    _discordGuild,
-                    _discordUser,
-                    _permission,
-                    PermissionTarget.Self
-                );
+            await this.Permissions.GrantPermissionAsync
+            (
+                _discordGuild,
+                _discordUser,
+                _permission,
+                PermissionTarget.Other
+            );
 
-                Assert.True(result.IsSuccess);
-            }
+            var result = await this.Permissions.HasPermissionAsync
+            (
+                _discordGuild,
+                _discordUser,
+                _permission,
+                PermissionTarget.All
+            );
 
-            [Fact]
-            public async Task ReturnsTrueWithAllTargetIfBothSelfAndOtherAreGrantedToUser()
-            {
-                await this.Permissions.GrantPermissionAsync
-                (
-                    _discordGuild,
-                    _discordUser,
-                    _permission,
-                    PermissionTarget.Self
-                );
+            Assert.True(result.IsSuccess);
+        }
 
-                await this.Permissions.GrantPermissionAsync
-                (
-                    _discordGuild,
-                    _discordUser,
-                    _permission,
-                    PermissionTarget.Other
-                );
+        [Fact]
+        public async Task ReturnsTrueWithAllTargetIfBothSelfAndOtherAreGrantedToRole()
+        {
+            await this.Permissions.GrantPermissionAsync
+            (
+                _discordRole,
+                _permission,
+                PermissionTarget.Self
+            );
 
-                var result = await this.Permissions.HasPermissionAsync
-                (
-                    _discordGuild,
-                    _discordUser,
-                    _permission,
-                    PermissionTarget.All
-                );
+            await this.Permissions.GrantPermissionAsync
+            (
+                _discordRole,
+                _permission,
+                PermissionTarget.Other
+            );
 
-                Assert.True(result.IsSuccess);
-            }
+            var result = await this.Permissions.HasPermissionAsync
+            (
+                _discordGuild,
+                _discordUser,
+                _permission,
+                PermissionTarget.All
+            );
 
-            [Fact]
-            public async Task ReturnsTrueWithAllTargetIfBothSelfAndOtherAreGrantedToRole()
-            {
-                await this.Permissions.GrantPermissionAsync
-                (
-                    _discordRole,
-                    _permission,
-                    PermissionTarget.Self
-                );
+            Assert.True(result.IsSuccess);
+        }
 
-                await this.Permissions.GrantPermissionAsync
-                (
-                    _discordRole,
-                    _permission,
-                    PermissionTarget.Other
-                );
+        [Fact]
+        public async Task ReturnsFalseWithAllTargetIfJustSelfIsGrantedToUser()
+        {
+            await this.Permissions.GrantPermissionAsync
+            (
+                _discordGuild,
+                _discordUser,
+                _permission,
+                PermissionTarget.Self
+            );
 
-                var result = await this.Permissions.HasPermissionAsync
-                (
-                    _discordGuild,
-                    _discordUser,
-                    _permission,
-                    PermissionTarget.All
-                );
+            var result = await this.Permissions.HasPermissionAsync
+            (
+                _discordGuild,
+                _discordUser,
+                _permission,
+                PermissionTarget.All
+            );
 
-                Assert.True(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsFalseWithAllTargetIfJustSelfIsGrantedToUser()
-            {
-                await this.Permissions.GrantPermissionAsync
-                (
-                    _discordGuild,
-                    _discordUser,
-                    _permission,
-                    PermissionTarget.Self
-                );
+        [Fact]
+        public async Task ReturnsFalseWithAllTargetIfJustOtherIsGrantedToUser()
+        {
+            await this.Permissions.GrantPermissionAsync
+            (
+                _discordGuild,
+                _discordUser,
+                _permission,
+                PermissionTarget.Other
+            );
 
-                var result = await this.Permissions.HasPermissionAsync
-                (
-                    _discordGuild,
-                    _discordUser,
-                    _permission,
-                    PermissionTarget.All
-                );
+            var result = await this.Permissions.HasPermissionAsync
+            (
+                _discordGuild,
+                _discordUser,
+                _permission,
+                PermissionTarget.All
+            );
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsFalseWithAllTargetIfJustOtherIsGrantedToUser()
-            {
-                await this.Permissions.GrantPermissionAsync
-                (
-                    _discordGuild,
-                    _discordUser,
-                    _permission,
-                    PermissionTarget.Other
-                );
+        [Fact]
+        public async Task ReturnsFalseWithAllTargetIfJustSelfIsGrantedToRole()
+        {
+            await this.Permissions.GrantPermissionAsync
+            (
+                _discordRole,
+                _permission,
+                PermissionTarget.Self
+            );
 
-                var result = await this.Permissions.HasPermissionAsync
-                (
-                    _discordGuild,
-                    _discordUser,
-                    _permission,
-                    PermissionTarget.All
-                );
+            var result = await this.Permissions.HasPermissionAsync
+            (
+                _discordGuild,
+                _discordUser,
+                _permission,
+                PermissionTarget.All
+            );
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsFalseWithAllTargetIfJustSelfIsGrantedToRole()
-            {
-                await this.Permissions.GrantPermissionAsync
-                (
-                    _discordRole,
-                    _permission,
-                    PermissionTarget.Self
-                );
+        [Fact]
+        public async Task ReturnsFalseWithAllTargetIfJustOtherIsGrantedToRole()
+        {
+            await this.Permissions.GrantPermissionAsync
+            (
+                _discordRole,
+                _permission,
+                PermissionTarget.Other
+            );
 
-                var result = await this.Permissions.HasPermissionAsync
-                (
-                    _discordGuild,
-                    _discordUser,
-                    _permission,
-                    PermissionTarget.All
-                );
+            var result = await this.Permissions.HasPermissionAsync
+            (
+                _discordGuild,
+                _discordUser,
+                _permission,
+                PermissionTarget.All
+            );
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsFalseWithAllTargetIfJustOtherIsGrantedToRole()
-            {
-                await this.Permissions.GrantPermissionAsync
-                (
-                    _discordRole,
-                    _permission,
-                    PermissionTarget.Other
-                );
+        [Fact]
+        public async Task ReturnsTrueWithAllTargetIfSelfIsGrantedToUserAndOtherIsGrantedToRole()
+        {
+            await this.Permissions.GrantPermissionAsync
+            (
+                _discordGuild,
+                _discordUser,
+                _permission,
+                PermissionTarget.Self
+            );
 
-                var result = await this.Permissions.HasPermissionAsync
-                (
-                    _discordGuild,
-                    _discordUser,
-                    _permission,
-                    PermissionTarget.All
-                );
+            await this.Permissions.GrantPermissionAsync
+            (
+                _discordRole,
+                _permission,
+                PermissionTarget.Other
+            );
 
-                Assert.False(result.IsSuccess);
-            }
+            var result = await this.Permissions.HasPermissionAsync
+            (
+                _discordGuild,
+                _discordUser,
+                _permission,
+                PermissionTarget.All
+            );
 
-            [Fact]
-            public async Task ReturnsTrueWithAllTargetIfSelfIsGrantedToUserAndOtherIsGrantedToRole()
-            {
-                await this.Permissions.GrantPermissionAsync
-                (
-                    _discordGuild,
-                    _discordUser,
-                    _permission,
-                    PermissionTarget.Self
-                );
+            Assert.True(result.IsSuccess);
+        }
 
-                await this.Permissions.GrantPermissionAsync
-                (
-                    _discordRole,
-                    _permission,
-                    PermissionTarget.Other
-                );
+        [Fact]
+        public async Task ReturnsTrueIfUserIsGuildOwner()
+        {
+            var result = await this.Permissions.HasPermissionAsync
+            (
+                _discordGuild,
+                _discordGuildOwner,
+                _permission,
+                PermissionTarget.Self
+            );
 
-                var result = await this.Permissions.HasPermissionAsync
-                (
-                    _discordGuild,
-                    _discordUser,
-                    _permission,
-                    PermissionTarget.All
-                );
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsTrueIfUserIsGuildOwnerAndPermissionIsRevoked()
+        {
+            await this.Permissions.RevokePermissionAsync
+            (
+                _discordGuild,
+                _discordGuildOwner,
+                _permission,
+                PermissionTarget.Self
+            );
 
-            [Fact]
-            public async Task ReturnsTrueIfUserIsGuildOwner()
-            {
-                var result = await this.Permissions.HasPermissionAsync
-                (
-                    _discordGuild,
-                    _discordGuildOwner,
-                    _permission,
-                    PermissionTarget.Self
-                );
+            var result = await this.Permissions.HasPermissionAsync
+            (
+                _discordGuild,
+                _discordGuildOwner,
+                _permission,
+                PermissionTarget.Self
+            );
 
-                Assert.True(result.IsSuccess);
-            }
-
-            [Fact]
-            public async Task ReturnsTrueIfUserIsGuildOwnerAndPermissionIsRevoked()
-            {
-                await this.Permissions.RevokePermissionAsync
-                (
-                    _discordGuild,
-                    _discordGuildOwner,
-                    _permission,
-                    PermissionTarget.Self
-                );
-
-                var result = await this.Permissions.HasPermissionAsync
-                (
-                    _discordGuild,
-                    _discordGuildOwner,
-                    _permission,
-                    PermissionTarget.Self
-                );
-
-                Assert.True(result.IsSuccess);
-            }
+            Assert.True(result.IsSuccess);
         }
     }
 }

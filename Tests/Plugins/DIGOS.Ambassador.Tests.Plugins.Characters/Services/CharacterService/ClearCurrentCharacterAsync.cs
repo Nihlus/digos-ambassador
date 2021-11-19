@@ -28,58 +28,57 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Characters
+namespace DIGOS.Ambassador.Tests.Plugins.Characters;
+
+public static partial class CharacterServiceTests
 {
-    public static partial class CharacterServiceTests
+    public class ClearCurrentCharacterAsync : CharacterServiceTestBase
     {
-        public class ClearCurrentCharacterAsync : CharacterServiceTestBase
+        private readonly Character _character;
+
+        public ClearCurrentCharacterAsync()
         {
-            private readonly Character _character;
+            _character = CreateCharacter
+            (
+                this.DefaultOwner,
+                this.DefaultServer,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty
+            );
+        }
 
-            public ClearCurrentCharacterAsync()
-            {
-                _character = CreateCharacter
-                (
-                    this.DefaultOwner,
-                    this.DefaultServer,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty
-                );
-            }
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfCharacterIsNotCurrent()
+        {
+            var result = await this.Characters.ClearCurrentCharacterAsync(this.DefaultOwner, this.DefaultServer);
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfCharacterIsNotCurrent()
-            {
-                var result = await this.Characters.ClearCurrentCharacterAsync(this.DefaultOwner, this.DefaultServer);
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsSuccessfulResultIfCharacterIsCurrent()
+        {
+            _character.IsCurrent = true;
+            await this.Database.SaveChangesAsync();
 
-            [Fact]
-            public async Task ReturnsSuccessfulResultIfCharacterIsCurrent()
-            {
-                _character.IsCurrent = true;
-                await this.Database.SaveChangesAsync();
+            var result = await this.Characters.ClearCurrentCharacterAsync(this.DefaultOwner, this.DefaultServer);
 
-                var result = await this.Characters.ClearCurrentCharacterAsync(this.DefaultOwner, this.DefaultServer);
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public async Task RemovesCorrectServerFromCharacter()
+        {
+            _character.IsCurrent = true;
+            await this.Database.SaveChangesAsync();
 
-            [Fact]
-            public async Task RemovesCorrectServerFromCharacter()
-            {
-                _character.IsCurrent = true;
-                await this.Database.SaveChangesAsync();
+            await this.Characters.ClearCurrentCharacterAsync(this.DefaultOwner, this.DefaultServer);
 
-                await this.Characters.ClearCurrentCharacterAsync(this.DefaultOwner, this.DefaultServer);
-
-                Assert.False(_character.IsCurrent);
-            }
+            Assert.False(_character.IsCurrent);
         }
     }
 }

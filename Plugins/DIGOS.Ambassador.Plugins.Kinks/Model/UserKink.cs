@@ -27,51 +27,50 @@ using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using JetBrains.Annotations;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Plugins.Kinks.Model
+namespace DIGOS.Ambassador.Plugins.Kinks.Model;
+
+/// <summary>
+/// Represents a user's kink, along with their preference for it.
+/// </summary>
+[PublicAPI]
+[Table("UserKinks", Schema = "KinkModule")]
+public class UserKink : EFEntity
 {
     /// <summary>
-    /// Represents a user's kink, along with their preference for it.
+    /// Gets the user the kink belongs to.
     /// </summary>
-    [PublicAPI]
-    [Table("UserKinks", Schema = "KinkModule")]
-    public class UserKink : EFEntity
+    public virtual User User { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the kink.
+    /// </summary>
+    public virtual Kink Kink { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the user's preference for the kink.
+    /// </summary>
+    public KinkPreference Preference { get; internal set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserKink"/> class.
+    /// </summary>
+    /// <remarks>
+    /// Required by EF Core.
+    /// </remarks>
+    protected UserKink()
     {
-        /// <summary>
-        /// Gets the user the kink belongs to.
-        /// </summary>
-        public virtual User User { get; private set; } = null!;
+    }
 
-        /// <summary>
-        /// Gets the kink.
-        /// </summary>
-        public virtual Kink Kink { get; private set; } = null!;
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserKink"/> class.
+    /// </summary>
+    /// <param name="user">The user.</param>
+    /// <param name="kink">The user's kink.</param>
+    public UserKink(User user, Kink kink)
+    {
+        this.User = user;
+        this.Kink = kink;
 
-        /// <summary>
-        /// Gets the user's preference for the kink.
-        /// </summary>
-        public KinkPreference Preference { get; internal set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserKink"/> class.
-        /// </summary>
-        /// <remarks>
-        /// Required by EF Core.
-        /// </remarks>
-        protected UserKink()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserKink"/> class.
-        /// </summary>
-        /// <param name="user">The user.</param>
-        /// <param name="kink">The user's kink.</param>
-        public UserKink(User user, Kink kink)
-        {
-            this.User = user;
-            this.Kink = kink;
-
-            this.Preference = KinkPreference.NoPreference;
-        }
+        this.Preference = KinkPreference.NoPreference;
     }
 }

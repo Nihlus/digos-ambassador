@@ -30,59 +30,58 @@ using Xunit;
 #pragma warning disable SA1649
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Core
+namespace DIGOS.Ambassador.Tests.Plugins.Core;
+
+public static partial class ServerServiceTests
 {
-    public static partial class ServerServiceTests
+    public class GetDescription : ServerServiceTestBase
     {
-        public class GetDescription : ServerServiceTestBase
+        private Server _server = null!;
+
+        public override async Task InitializeAsync()
         {
-            private Server _server = null!;
+            var serverMock = new Snowflake(0);
+            _server = (await this.Servers.GetOrRegisterServerAsync(serverMock)).Entity;
+        }
 
-            public override async Task InitializeAsync()
-            {
-                var serverMock = new Snowflake(0);
-                _server = (await this.Servers.GetOrRegisterServerAsync(serverMock)).Entity;
-            }
+        [Fact]
+        public void ReturnsErrorIfDescriptionIsNull()
+        {
+            var result = this.Servers.GetDescription(_server);
 
-            [Fact]
-            public void ReturnsErrorIfDescriptionIsNull()
-            {
-                var result = this.Servers.GetDescription(_server);
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public void ReturnsErrorIfDescriptionIsEmpty()
+        {
+            _server.Description = string.Empty;
 
-            [Fact]
-            public void ReturnsErrorIfDescriptionIsEmpty()
-            {
-                _server.Description = string.Empty;
+            var result = this.Servers.GetDescription(_server);
 
-                var result = this.Servers.GetDescription(_server);
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public void ReturnsErrorIfDescriptionIsWhitespace()
+        {
+            _server.Description = "      ";
 
-            [Fact]
-            public void ReturnsErrorIfDescriptionIsWhitespace()
-            {
-                _server.Description = "      ";
+            var result = this.Servers.GetDescription(_server);
 
-                var result = this.Servers.GetDescription(_server);
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public void CanGetDescription()
+        {
+            const string expected = "oogabooga";
+            _server.Description = expected;
 
-            [Fact]
-            public void CanGetDescription()
-            {
-                const string expected = "oogabooga";
-                _server.Description = expected;
+            var result = this.Servers.GetDescription(_server);
 
-                var result = this.Servers.GetDescription(_server);
-
-                Assert.True(result.IsSuccess);
-                Assert.Equal(expected, result.Entity);
-            }
+            Assert.True(result.IsSuccess);
+            Assert.Equal(expected, result.Entity);
         }
     }
 }

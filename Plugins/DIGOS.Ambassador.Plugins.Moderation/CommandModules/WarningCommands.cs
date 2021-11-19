@@ -49,235 +49,234 @@ using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTa
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
-namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
+namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules;
+
+/// <summary>
+/// Warning-related commands, such as viewing or editing info about a specific warning.
+/// </summary>
+[Group("warn")]
+[Description("Warning-related commands, such as viewing or editing info about a specific warning.")]
+public partial class WarningCommands : CommandGroup
 {
+    private readonly ModerationService _moderation;
+    private readonly WarningService _warnings;
+    private readonly FeedbackService _feedback;
+    private readonly InteractivityService _interactivity;
+    private readonly ChannelLoggingService _logging;
+    private readonly IDiscordRestUserAPI _userAPI;
+    private readonly ICommandContext _context;
+
     /// <summary>
-    /// Warning-related commands, such as viewing or editing info about a specific warning.
+    /// Initializes a new instance of the <see cref="WarningCommands"/> class.
     /// </summary>
-    [Group("warn")]
-    [Description("Warning-related commands, such as viewing or editing info about a specific warning.")]
-    public partial class WarningCommands : CommandGroup
+    /// <param name="moderation">The moderation service.</param>
+    /// <param name="warnings">The warning service.</param>
+    /// <param name="feedback">The feedback service.</param>
+    /// <param name="interactivity">The interactivity service.</param>
+    /// <param name="logging">The logging service.</param>
+    /// <param name="userAPI">The user API.</param>
+    /// <param name="context">The command context.</param>
+    public WarningCommands
+    (
+        ModerationService moderation,
+        WarningService warnings,
+        FeedbackService feedback,
+        InteractivityService interactivity,
+        ChannelLoggingService logging,
+        IDiscordRestUserAPI userAPI,
+        ICommandContext context
+    )
     {
-        private readonly ModerationService _moderation;
-        private readonly WarningService _warnings;
-        private readonly FeedbackService _feedback;
-        private readonly InteractivityService _interactivity;
-        private readonly ChannelLoggingService _logging;
-        private readonly IDiscordRestUserAPI _userAPI;
-        private readonly ICommandContext _context;
+        _moderation = moderation;
+        _warnings = warnings;
+        _feedback = feedback;
+        _interactivity = interactivity;
+        _logging = logging;
+        _userAPI = userAPI;
+        _context = context;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="WarningCommands"/> class.
-        /// </summary>
-        /// <param name="moderation">The moderation service.</param>
-        /// <param name="warnings">The warning service.</param>
-        /// <param name="feedback">The feedback service.</param>
-        /// <param name="interactivity">The interactivity service.</param>
-        /// <param name="logging">The logging service.</param>
-        /// <param name="userAPI">The user API.</param>
-        /// <param name="context">The command context.</param>
-        public WarningCommands
+    /// <summary>
+    /// Lists the warnings attached to the given user.
+    /// </summary>
+    /// <param name="user">The user.</param>
+    [Command("list")]
+    [Description("Lists the warnings attached to the given user.")]
+    [RequirePermission(typeof(ManageWarnings), PermissionTarget.Other)]
+    [RequireContext(ChannelContext.Guild)]
+    public async Task<IResult> ListWarningsAsync(IUser user)
+    {
+        var warnings = await _warnings.GetWarningsAsync(_context.GuildID.Value, user.ID);
+
+        var createPages = await PaginatedEmbedFactory.PagesFromCollectionAsync
         (
-            ModerationService moderation,
-            WarningService warnings,
-            FeedbackService feedback,
-            InteractivityService interactivity,
-            ChannelLoggingService logging,
-            IDiscordRestUserAPI userAPI,
-            ICommandContext context
-        )
-        {
-            _moderation = moderation;
-            _warnings = warnings;
-            _feedback = feedback;
-            _interactivity = interactivity;
-            _logging = logging;
-            _userAPI = userAPI;
-            _context = context;
-        }
-
-        /// <summary>
-        /// Lists the warnings attached to the given user.
-        /// </summary>
-        /// <param name="user">The user.</param>
-        [Command("list")]
-        [Description("Lists the warnings attached to the given user.")]
-        [RequirePermission(typeof(ManageWarnings), PermissionTarget.Other)]
-        [RequireContext(ChannelContext.Guild)]
-        public async Task<IResult> ListWarningsAsync(IUser user)
-        {
-            var warnings = await _warnings.GetWarningsAsync(_context.GuildID.Value, user.ID);
-
-            var createPages = await PaginatedEmbedFactory.PagesFromCollectionAsync
-            (
-                warnings,
-                async warning =>
+            warnings,
+            async warning =>
+            {
+                var getAuthor = await _userAPI.GetUserAsync(warning.Author.DiscordID);
+                if (!getAuthor.IsSuccess)
                 {
-                    var getAuthor = await _userAPI.GetUserAsync(warning.Author.DiscordID);
-                    if (!getAuthor.IsSuccess)
-                    {
-                        return Result<Embed>.FromError(getAuthor);
-                    }
-
-                    var author = getAuthor.Entity;
-
-                    var getAuthorAvatar = CDN.GetUserAvatarUrl(author);
-
-                    var embedFields = new List<EmbedField>();
-                    var eb = new Embed
-                    {
-                        Title = $"Warning #{warning.ID} for {user.Username}:{user.Discriminator}",
-                        Colour = Color.Orange,
-                        Author = new EmbedAuthor(author.Username)
-                        {
-                            IconUrl = getAuthorAvatar.IsSuccess
-                                ? getAuthorAvatar.Entity.ToString()
-                                : default(Optional<string>)
-                        },
-                        Description = warning.Reason,
-                        Fields = embedFields
-                    };
-
-                    embedFields.Add(new EmbedField("Created", warning.CreatedAt.Humanize()));
-
-                    if (warning.CreatedAt != warning.UpdatedAt)
-                    {
-                        embedFields.Add(new EmbedField("Last Updated", warning.UpdatedAt.Humanize()));
-                    }
-
-                    if (warning.ExpiresOn.HasValue)
-                    {
-                        embedFields.Add(new EmbedField("Expires On", warning.ExpiresOn.Humanize()));
-                    }
-
-                    return eb;
+                    return Result<Embed>.FromError(getAuthor);
                 }
-            );
 
-            if (createPages.Any(p => !p.IsSuccess))
-            {
-                return createPages.First(p => !p.IsSuccess);
+                var author = getAuthor.Entity;
+
+                var getAuthorAvatar = CDN.GetUserAvatarUrl(author);
+
+                var embedFields = new List<EmbedField>();
+                var eb = new Embed
+                {
+                    Title = $"Warning #{warning.ID} for {user.Username}:{user.Discriminator}",
+                    Colour = Color.Orange,
+                    Author = new EmbedAuthor(author.Username)
+                    {
+                        IconUrl = getAuthorAvatar.IsSuccess
+                            ? getAuthorAvatar.Entity.ToString()
+                            : default(Optional<string>)
+                    },
+                    Description = warning.Reason,
+                    Fields = embedFields
+                };
+
+                embedFields.Add(new EmbedField("Created", warning.CreatedAt.Humanize()));
+
+                if (warning.CreatedAt != warning.UpdatedAt)
+                {
+                    embedFields.Add(new EmbedField("Last Updated", warning.UpdatedAt.Humanize()));
+                }
+
+                if (warning.ExpiresOn.HasValue)
+                {
+                    embedFields.Add(new EmbedField("Expires On", warning.ExpiresOn.Humanize()));
+                }
+
+                return eb;
             }
+        );
 
-            var pages = createPages.Select(p => p.Entity).ToList();
-
-            await _interactivity.SendContextualInteractiveMessageAsync
-            (
-                _context.User.ID,
-                pages
-            );
-
-            return Result.FromSuccess();
-        }
-
-        /// <summary>
-        /// Deletes the given warning.
-        /// </summary>
-        /// <param name="warningID">The ID of the warning to delete.</param>
-        [Command("delete")]
-        [Description("Deletes the given warning.")]
-        [RequirePermission(typeof(ManageWarnings), PermissionTarget.All)]
-        [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<FeedbackMessage>> DeleteWarningAsync(long warningID)
+        if (createPages.Any(p => !p.IsSuccess))
         {
-            var getWarning = await _warnings.GetWarningAsync(_context.GuildID.Value, warningID);
-            if (!getWarning.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(getWarning);
-            }
-
-            var warning = getWarning.Entity;
-
-            // This has to be done before the warning is actually deleted - otherwise, the lazy loader is removed and
-            // navigation properties can't be evaluated
-            var notifyResult = await _logging.NotifyUserWarningRemovedAsync(warning, _context.User.ID);
-            if (!notifyResult.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(notifyResult);
-            }
-
-            var deleteWarning = await _warnings.DeleteWarningAsync(warning);
-            if (!deleteWarning.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(deleteWarning);
-            }
-
-            return new FeedbackMessage("Warning deleted.", _feedback.Theme.Secondary);
+            return createPages.First(p => !p.IsSuccess);
         }
 
-        /// <summary>
-        /// Adds a warning to the given user.
-        /// </summary>
-        /// <param name="user">The user to add the warning to.</param>
-        /// <param name="reason">The reason for the warning.</param>
-        /// <param name="expiresAfter">The duration of the warning, if any.</param>
-        [Command("user")]
-        [Description("Adds a warning to the given user.")]
-        [RequirePermission(typeof(ManageWarnings), PermissionTarget.All)]
-        [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<FeedbackMessage>> AddWarningAsync
+        var pages = createPages.Select(p => p.Entity).ToList();
+
+        await _interactivity.SendContextualInteractiveMessageAsync
         (
-            IUser user,
-            string reason,
-            TimeSpan? expiresAfter = null
-        )
+            _context.User.ID,
+            pages
+        );
+
+        return Result.FromSuccess();
+    }
+
+    /// <summary>
+    /// Deletes the given warning.
+    /// </summary>
+    /// <param name="warningID">The ID of the warning to delete.</param>
+    [Command("delete")]
+    [Description("Deletes the given warning.")]
+    [RequirePermission(typeof(ManageWarnings), PermissionTarget.All)]
+    [RequireContext(ChannelContext.Guild)]
+    public async Task<Result<FeedbackMessage>> DeleteWarningAsync(long warningID)
+    {
+        var getWarning = await _warnings.GetWarningAsync(_context.GuildID.Value, warningID);
+        if (!getWarning.IsSuccess)
         {
-            DateTimeOffset? expiresOn = null;
-            if (expiresAfter is not null)
-            {
-                expiresOn = DateTimeOffset.UtcNow.Add(expiresAfter.Value);
-            }
-
-            var addWarning = await _warnings.CreateWarningAsync
-            (
-                _context.User.ID,
-                user.ID,
-                _context.GuildID.Value,
-                reason,
-                expiresOn: expiresOn
-            );
-
-            if (!addWarning.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(addWarning);
-            }
-
-            var warning = addWarning.Entity;
-            var getSettings = await _moderation.GetOrCreateServerSettingsAsync(_context.GuildID.Value);
-            if (!getSettings.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(getSettings);
-            }
-
-            var settings = getSettings.Entity;
-
-            var notifyResult = await _logging.NotifyUserWarningAddedAsync(warning);
-            if (!notifyResult.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(notifyResult);
-            }
-
-            var warnings = await _warnings.GetWarningsAsync(user.ID);
-            if (warnings.Count < settings.WarningThreshold)
-            {
-                return new FeedbackMessage
-                (
-                    $"Warning added (ID {warning.ID}): {warning.Reason}.", _feedback.Theme.Secondary
-                );
-            }
-
-            var sendAlert = await _feedback.SendContextualWarningAsync
-            (
-                $"The warned user now has {warnings.Count} warnings. Consider further action.",
-                _context.User.ID
-            );
-
-            return !sendAlert.IsSuccess
-                ? Result<FeedbackMessage>.FromError(sendAlert)
-                : new FeedbackMessage
-                (
-                    $"Warning added (ID {warning.ID}): {warning.Reason}.", _feedback.Theme.Secondary
-                );
+            return Result<FeedbackMessage>.FromError(getWarning);
         }
+
+        var warning = getWarning.Entity;
+
+        // This has to be done before the warning is actually deleted - otherwise, the lazy loader is removed and
+        // navigation properties can't be evaluated
+        var notifyResult = await _logging.NotifyUserWarningRemovedAsync(warning, _context.User.ID);
+        if (!notifyResult.IsSuccess)
+        {
+            return Result<FeedbackMessage>.FromError(notifyResult);
+        }
+
+        var deleteWarning = await _warnings.DeleteWarningAsync(warning);
+        if (!deleteWarning.IsSuccess)
+        {
+            return Result<FeedbackMessage>.FromError(deleteWarning);
+        }
+
+        return new FeedbackMessage("Warning deleted.", _feedback.Theme.Secondary);
+    }
+
+    /// <summary>
+    /// Adds a warning to the given user.
+    /// </summary>
+    /// <param name="user">The user to add the warning to.</param>
+    /// <param name="reason">The reason for the warning.</param>
+    /// <param name="expiresAfter">The duration of the warning, if any.</param>
+    [Command("user")]
+    [Description("Adds a warning to the given user.")]
+    [RequirePermission(typeof(ManageWarnings), PermissionTarget.All)]
+    [RequireContext(ChannelContext.Guild)]
+    public async Task<Result<FeedbackMessage>> AddWarningAsync
+    (
+        IUser user,
+        string reason,
+        TimeSpan? expiresAfter = null
+    )
+    {
+        DateTimeOffset? expiresOn = null;
+        if (expiresAfter is not null)
+        {
+            expiresOn = DateTimeOffset.UtcNow.Add(expiresAfter.Value);
+        }
+
+        var addWarning = await _warnings.CreateWarningAsync
+        (
+            _context.User.ID,
+            user.ID,
+            _context.GuildID.Value,
+            reason,
+            expiresOn: expiresOn
+        );
+
+        if (!addWarning.IsSuccess)
+        {
+            return Result<FeedbackMessage>.FromError(addWarning);
+        }
+
+        var warning = addWarning.Entity;
+        var getSettings = await _moderation.GetOrCreateServerSettingsAsync(_context.GuildID.Value);
+        if (!getSettings.IsSuccess)
+        {
+            return Result<FeedbackMessage>.FromError(getSettings);
+        }
+
+        var settings = getSettings.Entity;
+
+        var notifyResult = await _logging.NotifyUserWarningAddedAsync(warning);
+        if (!notifyResult.IsSuccess)
+        {
+            return Result<FeedbackMessage>.FromError(notifyResult);
+        }
+
+        var warnings = await _warnings.GetWarningsAsync(user.ID);
+        if (warnings.Count < settings.WarningThreshold)
+        {
+            return new FeedbackMessage
+            (
+                $"Warning added (ID {warning.ID}): {warning.Reason}.", _feedback.Theme.Secondary
+            );
+        }
+
+        var sendAlert = await _feedback.SendContextualWarningAsync
+        (
+            $"The warned user now has {warnings.Count} warnings. Consider further action.",
+            _context.User.ID
+        );
+
+        return !sendAlert.IsSuccess
+            ? Result<FeedbackMessage>.FromError(sendAlert)
+            : new FeedbackMessage
+            (
+                $"Warning added (ID {warning.ID}): {warning.Reason}.", _feedback.Theme.Secondary
+            );
     }
 }

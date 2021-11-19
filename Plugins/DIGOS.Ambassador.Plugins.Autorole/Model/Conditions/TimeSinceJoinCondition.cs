@@ -30,48 +30,47 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Core;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
+namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
+
+/// <summary>
+/// Represents a requirement for an elapsed time since the user joined.
+/// </summary>
+public class TimeSinceJoinCondition : TimeSinceEventCondition<TimeSinceJoinCondition>
 {
     /// <summary>
-    /// Represents a requirement for an elapsed time since the user joined.
+    /// Initializes a new instance of the <see cref="TimeSinceJoinCondition"/> class.
     /// </summary>
-    public class TimeSinceJoinCondition : TimeSinceEventCondition<TimeSinceJoinCondition>
+    /// <param name="requiredTime">The required time.</param>
+    public TimeSinceJoinCondition(TimeSpan requiredTime)
+        : base(requiredTime)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TimeSinceJoinCondition"/> class.
-        /// </summary>
-        /// <param name="requiredTime">The required time.</param>
-        public TimeSinceJoinCondition(TimeSpan requiredTime)
-            : base(requiredTime)
+    }
+
+    /// <inheritdoc />
+    public override string GetDescriptiveUIText()
+    {
+        return $"Has been in the server for at least {this.RequiredTime.Humanize(toWords: true, precision: 3)}";
+    }
+
+    /// <inheritdoc/>
+    public override async Task<Result<bool>> IsConditionFulfilledForUserAsync
+    (
+        IServiceProvider services,
+        Snowflake guildID,
+        Snowflake userID,
+        CancellationToken ct = default
+    )
+    {
+        var guildAPI = services.GetRequiredService<IDiscordRestGuildAPI>();
+        var getMember = await guildAPI.GetGuildMemberAsync(guildID, userID, ct);
+        if (!getMember.IsSuccess)
         {
+            return Result<bool>.FromError(getMember);
         }
 
-        /// <inheritdoc />
-        public override string GetDescriptiveUIText()
-        {
-            return $"Has been in the server for at least {this.RequiredTime.Humanize(toWords: true, precision: 3)}";
-        }
+        var member = getMember.Entity;
 
-        /// <inheritdoc/>
-        public override async Task<Result<bool>> IsConditionFulfilledForUserAsync
-        (
-            IServiceProvider services,
-            Snowflake guildID,
-            Snowflake userID,
-            CancellationToken ct = default
-        )
-        {
-            var guildAPI = services.GetRequiredService<IDiscordRestGuildAPI>();
-            var getMember = await guildAPI.GetGuildMemberAsync(guildID, userID, ct);
-            if (!getMember.IsSuccess)
-            {
-                return Result<bool>.FromError(getMember);
-            }
-
-            var member = getMember.Entity;
-
-            var timeSinceJoin = DateTimeOffset.UtcNow - member.JoinedAt.UtcDateTime;
-            return timeSinceJoin >= this.RequiredTime;
-        }
+        var timeSinceJoin = DateTimeOffset.UtcNow - member.JoinedAt.UtcDateTime;
+        return timeSinceJoin >= this.RequiredTime;
     }
 }

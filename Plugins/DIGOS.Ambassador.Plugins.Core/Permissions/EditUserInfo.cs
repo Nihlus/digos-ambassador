@@ -23,23 +23,22 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
 
-namespace DIGOS.Ambassador.Plugins.Core.Permissions
+namespace DIGOS.Ambassador.Plugins.Core.Permissions;
+
+/// <summary>
+/// Represents a permission that allows a user to edit user information.
+/// </summary>
+public sealed class EditUserInfo : Permission
 {
-    /// <summary>
-    /// Represents a permission that allows a user to edit user information.
-    /// </summary>
-    public sealed class EditUserInfo : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("CCDFAC99-4A25-4A37-A4E8-93C7F0C54323");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("CCDFAC99-4A25-4A37-A4E8-93C7F0C54323");
 
-        /// <inheritdoc />
-        public override string FriendlyName => nameof(EditUserInfo);
+    /// <inheritdoc />
+    public override string FriendlyName => nameof(EditUserInfo);
 
-        /// <inheritdoc />
-        public override string Description => "Allows you to edit user information.";
+    /// <inheritdoc />
+    public override string Description => "Allows you to edit user information.";
 
-        /// <inheritdoc />
-        public override bool IsGrantedByDefaultToSelf => true;
-    }
+    /// <inheritdoc />
+    public override bool IsGrantedByDefaultToSelf => true;
 }

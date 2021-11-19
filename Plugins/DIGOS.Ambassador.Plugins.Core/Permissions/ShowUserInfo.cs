@@ -23,26 +23,25 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
 
-namespace DIGOS.Ambassador.Plugins.Core.Permissions
+namespace DIGOS.Ambassador.Plugins.Core.Permissions;
+
+/// <summary>
+/// Represents a permission that allows a user to view user information.
+/// </summary>
+public sealed class ShowUserInfo : Permission
 {
-    /// <summary>
-    /// Represents a permission that allows a user to view user information.
-    /// </summary>
-    public sealed class ShowUserInfo : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("AE4CA1C8-043C-47EE-8216-FC89FBEE54EF");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("AE4CA1C8-043C-47EE-8216-FC89FBEE54EF");
 
-        /// <inheritdoc />
-        public override string FriendlyName => nameof(ShowUserInfo);
+    /// <inheritdoc />
+    public override string FriendlyName => nameof(ShowUserInfo);
 
-        /// <inheritdoc />
-        public override string Description => "Allows you to view user information.";
+    /// <inheritdoc />
+    public override string Description => "Allows you to view user information.";
 
-        /// <inheritdoc />
-        public override bool IsGrantedByDefaultToSelf => true;
+    /// <inheritdoc />
+    public override bool IsGrantedByDefaultToSelf => true;
 
-        /// <inheritdoc />
-        public override bool IsGrantedByDefaultToOthers => true;
-    }
+    /// <inheritdoc />
+    public override bool IsGrantedByDefaultToOthers => true;
 }

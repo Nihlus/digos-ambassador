@@ -28,44 +28,43 @@ using Xunit;
 #pragma warning disable SA1600
 #pragma warning disable CS1591
 
-namespace DIGOS.Ambassador.Tests.Plugins.Transformations
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
+
+public class SpeciesValidityTests : TransformationValidityTests
 {
-    public class SpeciesValidityTests : TransformationValidityTests
+    [Theory]
+    [ClassData(typeof(SpeciesDataProvider))]
+    public void SpeciesFolderHasASpeciesFile(string speciesFile)
     {
-        [Theory]
-        [ClassData(typeof(SpeciesDataProvider))]
-        public void SpeciesFolderHasASpeciesFile(string speciesFile)
-        {
-            Assert.True(File.Exists(speciesFile));
-        }
+        Assert.True(File.Exists(speciesFile));
+    }
 
-        [Theory]
-        [ClassData(typeof(SpeciesDataProvider))]
-        public void SpeciesFileIsInCorrectFolder(string speciesFile)
-        {
-            var folderName = Directory.GetParent(speciesFile)?.Name;
-            var species = Deserialize<Species>(speciesFile);
+    [Theory]
+    [ClassData(typeof(SpeciesDataProvider))]
+    public void SpeciesFileIsInCorrectFolder(string speciesFile)
+    {
+        var folderName = Directory.GetParent(speciesFile)?.Name;
+        var species = Deserialize<Species>(speciesFile);
 
-            Assert.Equal(species.Name, folderName);
-        }
+        Assert.Equal(species.Name, folderName);
+    }
 
-        [Theory]
-        [ClassData(typeof(SpeciesDataProvider))]
-        public void SpeciesFileHasAuthor(string speciesFile)
-        {
-            var species = Deserialize<Species>(speciesFile);
+    [Theory]
+    [ClassData(typeof(SpeciesDataProvider))]
+    public void SpeciesFileHasAuthor(string speciesFile)
+    {
+        var species = Deserialize<Species>(speciesFile);
 
-            Assert.False(species.Author.IsNullOrWhitespace());
-        }
+        Assert.False(species.Author.IsNullOrWhitespace());
+    }
 
-        [Theory]
-        [ClassData(typeof(SpeciesDataProvider))]
-        public void SpeciesFileIsValid(string speciesFile)
-        {
-            var result = this.Verifier.VerifyFile<Species>(speciesFile);
+    [Theory]
+    [ClassData(typeof(SpeciesDataProvider))]
+    public void SpeciesFileIsValid(string speciesFile)
+    {
+        var result = this.Verifier.VerifyFile<Species>(speciesFile);
 
-            // Guarding ErrorReason here, since it throws if the result was successful.
-            Assert.True(result.IsSuccess, result.IsSuccess ? string.Empty : result.Error.Message);
-        }
+        // Guarding ErrorReason here, since it throws if the result was successful.
+        Assert.True(result.IsSuccess, result.IsSuccess ? string.Empty : result.Error.Message);
     }
 }

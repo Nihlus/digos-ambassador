@@ -24,29 +24,28 @@ using System;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
+namespace DIGOS.Ambassador.Plugins.Transformations.Extensions;
+
+/// <summary>
+/// Extension methods for the <see cref="Chirality"/> enum.
+/// </summary>
+[PublicAPI]
+public static class ChiralityExtensions
 {
     /// <summary>
-    /// Extension methods for the <see cref="Chirality"/> enum.
+    /// Gets the inverse chirality of the given chirality.
     /// </summary>
-    [PublicAPI]
-    public static class ChiralityExtensions
+    /// <param name="this">The chirality.</param>
+    /// <returns>The inverse chirality.</returns>
+    [Pure]
+    public static Chirality Opposite(this Chirality @this)
     {
-        /// <summary>
-        /// Gets the inverse chirality of the given chirality.
-        /// </summary>
-        /// <param name="this">The chirality.</param>
-        /// <returns>The inverse chirality.</returns>
-        [Pure]
-        public static Chirality Opposite(this Chirality @this)
+        switch (@this)
         {
-            switch (@this)
-            {
-                case Chirality.Left: return Chirality.Right;
-                case Chirality.Right: return Chirality.Left;
-                case Chirality.Center: return Chirality.Center;
-                default: throw new ArgumentOutOfRangeException(nameof(@this), @this, "Unknown chirality.");
-            }
+            case Chirality.Left: return Chirality.Right;
+            case Chirality.Right: return Chirality.Left;
+            case Chirality.Center: return Chirality.Center;
+            default: throw new ArgumentOutOfRangeException(nameof(@this), @this, "Unknown chirality.");
         }
     }
 }

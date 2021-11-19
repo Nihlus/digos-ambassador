@@ -22,33 +22,32 @@
 
 using System.Text.Json.Serialization;
 
-namespace DIGOS.Ambassador.Plugins.Kinks.FList.Kinks
+namespace DIGOS.Ambassador.Plugins.Kinks.FList.Kinks;
+
+/// <summary>
+/// Represents a JSON kink category from the F-list API.
+/// </summary>
+internal class FListKinkCategory
 {
     /// <summary>
-    /// Represents a JSON kink category from the F-list API.
+    /// Gets the category name.
     /// </summary>
-    internal class FListKinkCategory
+    public string Group { get; }
+
+    /// <summary>
+    /// Gets the kinks in the category.
+    /// </summary>
+    [JsonPropertyName("items")]
+    public FListKink[] Kinks { get; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FListKinkCategory"/> class.
+    /// </summary>
+    /// <param name="group">The category name.</param>
+    /// <param name="kinks">The retrieved kinks.</param>
+    public FListKinkCategory(string group, FListKink[] kinks)
     {
-        /// <summary>
-        /// Gets the category name.
-        /// </summary>
-        public string Group { get; }
-
-        /// <summary>
-        /// Gets the kinks in the category.
-        /// </summary>
-        [JsonPropertyName("items")]
-        public FListKink[] Kinks { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FListKinkCategory"/> class.
-        /// </summary>
-        /// <param name="group">The category name.</param>
-        /// <param name="kinks">The retrieved kinks.</param>
-        public FListKinkCategory(string group, FListKink[] kinks)
-        {
-            this.Group = group;
-            this.Kinks = kinks;
-        }
+        this.Group = group;
+        this.Kinks = kinks;
     }
 }

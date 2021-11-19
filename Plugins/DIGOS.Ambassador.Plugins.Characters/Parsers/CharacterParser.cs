@@ -32,81 +32,80 @@ using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Core;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Characters.Parsers
-{
-    /// <summary>
-    /// Reads owned characters as command arguments.
-    /// </summary>
-    public sealed class CharacterParser : AbstractTypeParser<Character>
-    {
-        private readonly CharacterDiscordService _characterService;
-        private readonly ICommandContext _context;
+namespace DIGOS.Ambassador.Plugins.Characters.Parsers;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CharacterParser"/> class.
-        /// </summary>
-        /// <param name="characterService">The character service.</param>
-        /// <param name="context">The command context.</param>
-        public CharacterParser(CharacterDiscordService characterService, ICommandContext context)
+/// <summary>
+/// Reads owned characters as command arguments.
+/// </summary>
+public sealed class CharacterParser : AbstractTypeParser<Character>
+{
+    private readonly CharacterDiscordService _characterService;
+    private readonly ICommandContext _context;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CharacterParser"/> class.
+    /// </summary>
+    /// <param name="characterService">The character service.</param>
+    /// <param name="context">The command context.</param>
+    public CharacterParser(CharacterDiscordService characterService, ICommandContext context)
+    {
+        _characterService = characterService;
+        _context = context;
+    }
+
+    /// <inheritdoc />
+    public override async ValueTask<Result<Character>> TryParseAsync(string value, CancellationToken ct)
+    {
+        value = value.Trim();
+
+        if (!_context.GuildID.IsDefined(out var guildID))
         {
-            _characterService = characterService;
-            _context = context;
+            return new UserError("Characters can only be parsed in the context of a guild.");
         }
 
-        /// <inheritdoc />
-        public override async ValueTask<Result<Character>> TryParseAsync(string value, CancellationToken ct)
+        // Special case
+        if (string.Equals(value, "current", StringComparison.OrdinalIgnoreCase))
         {
-            value = value.Trim();
+            return await _characterService.GetCurrentCharacterAsync(guildID, _context.User.ID, ct);
+        }
 
-            if (!_context.GuildID.IsDefined(out var guildID))
-            {
-                return new UserError("Characters can only be parsed in the context of a guild.");
-            }
-
-            // Special case
-            if (string.Equals(value, "current", StringComparison.OrdinalIgnoreCase))
-            {
-                return await _characterService.GetCurrentCharacterAsync(guildID, _context.User.ID, ct);
-            }
-
-            if (!value.Contains(':'))
-            {
-                return await _characterService.GetBestMatchingCharacterAsync
-                (
-                    guildID,
-                    _context.User.ID,
-                    value,
-                    ct
-                );
-            }
-
-            var parts = value.Split(':');
-            if (parts.Length != 2)
-            {
-                return new UserError
-                (
-                    "When searching a specific user, the name must be in the form \"@someone:name\"."
-                );
-            }
-
-            var rawUser = parts[0];
-            if (!Snowflake.TryParse(rawUser.Unmention(), out var parsedUser))
-            {
-                return new UserError
-                (
-                    "I couldn't parse whatever you gave me as a user-scoped character search. Try again?"
-                );
-            }
-
-            var rawName = parts[1];
-
+        if (!value.Contains(':'))
+        {
             return await _characterService.GetBestMatchingCharacterAsync
             (
-                _context.GuildID.Value,
-                parsedUser,
-                rawName,
+                guildID,
+                _context.User.ID,
+                value,
                 ct
             );
         }
+
+        var parts = value.Split(':');
+        if (parts.Length != 2)
+        {
+            return new UserError
+            (
+                "When searching a specific user, the name must be in the form \"@someone:name\"."
+            );
+        }
+
+        var rawUser = parts[0];
+        if (!Snowflake.TryParse(rawUser.Unmention(), out var parsedUser))
+        {
+            return new UserError
+            (
+                "I couldn't parse whatever you gave me as a user-scoped character search. Try again?"
+            );
+        }
+
+        var rawName = parts[1];
+
+        return await _characterService.GetBestMatchingCharacterAsync
+        (
+            _context.GuildID.Value,
+            parsedUser,
+            rawName,
+            ct
+        );
     }
 }

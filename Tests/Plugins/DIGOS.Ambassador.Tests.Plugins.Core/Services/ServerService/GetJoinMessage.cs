@@ -30,59 +30,58 @@ using Xunit;
 #pragma warning disable SA1649
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Core
+namespace DIGOS.Ambassador.Tests.Plugins.Core;
+
+public static partial class ServerServiceTests
 {
-    public static partial class ServerServiceTests
+    public class GetJoinMessage : ServerServiceTestBase
     {
-        public class GetJoinMessage : ServerServiceTestBase
+        private Server _server = null!;
+
+        public override async Task InitializeAsync()
         {
-            private Server _server = null!;
+            var serverMock = new Snowflake(0);
+            _server = (await this.Servers.GetOrRegisterServerAsync(serverMock)).Entity;
+        }
 
-            public override async Task InitializeAsync()
-            {
-                var serverMock = new Snowflake(0);
-                _server = (await this.Servers.GetOrRegisterServerAsync(serverMock)).Entity;
-            }
+        [Fact]
+        public void ReturnsErrorIfJoinMessageIsNull()
+        {
+            var result = this.Servers.GetJoinMessage(_server);
 
-            [Fact]
-            public void ReturnsErrorIfJoinMessageIsNull()
-            {
-                var result = this.Servers.GetJoinMessage(_server);
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public void ReturnsErrorIfJoinMessageIsEmpty()
+        {
+            _server.JoinMessage = string.Empty;
 
-            [Fact]
-            public void ReturnsErrorIfJoinMessageIsEmpty()
-            {
-                _server.JoinMessage = string.Empty;
+            var result = this.Servers.GetJoinMessage(_server);
 
-                var result = this.Servers.GetJoinMessage(_server);
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public void ReturnsErrorIfJoinMessageIsWhitespace()
+        {
+            _server.JoinMessage = "      ";
 
-            [Fact]
-            public void ReturnsErrorIfJoinMessageIsWhitespace()
-            {
-                _server.JoinMessage = "      ";
+            var result = this.Servers.GetJoinMessage(_server);
 
-                var result = this.Servers.GetJoinMessage(_server);
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public void CanGetJoinMessage()
+        {
+            const string expected = "oogabooga";
+            _server.JoinMessage = expected;
 
-            [Fact]
-            public void CanGetJoinMessage()
-            {
-                const string expected = "oogabooga";
-                _server.JoinMessage = expected;
+            var result = this.Servers.GetJoinMessage(_server);
 
-                var result = this.Servers.GetJoinMessage(_server);
-
-                Assert.True(result.IsSuccess);
-                Assert.Equal(expected, result.Entity);
-            }
+            Assert.True(result.IsSuccess);
+            Assert.Equal(expected, result.Entity);
         }
     }
 }

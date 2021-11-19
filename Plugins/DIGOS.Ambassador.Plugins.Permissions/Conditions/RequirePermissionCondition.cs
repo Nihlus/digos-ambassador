@@ -27,59 +27,58 @@ using Remora.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Permissions.Conditions
+namespace DIGOS.Ambassador.Plugins.Permissions.Conditions;
+
+/// <summary>
+/// Marks a command as requiring a certain permission.
+/// </summary>
+public class RequirePermissionCondition : ICondition<RequirePermissionAttribute>
 {
+    private readonly PermissionService _permissions;
+    private readonly PermissionRegistryService _permissionRegistry;
+    private readonly ICommandContext _context;
+
     /// <summary>
-    /// Marks a command as requiring a certain permission.
+    /// Initializes a new instance of the <see cref="RequirePermissionCondition"/> class.
     /// </summary>
-    public class RequirePermissionCondition : ICondition<RequirePermissionAttribute>
+    /// <param name="permissions">The permissions service.</param>
+    /// <param name="permissionRegistry">The permissions registry.</param>
+    /// <param name="context">The command context.</param>
+    public RequirePermissionCondition
+    (
+        PermissionService permissions,
+        PermissionRegistryService permissionRegistry,
+        ICommandContext context
+    )
     {
-        private readonly PermissionService _permissions;
-        private readonly PermissionRegistryService _permissionRegistry;
-        private readonly ICommandContext _context;
+        _permissions = permissions;
+        _permissionRegistry = permissionRegistry;
+        _context = context;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RequirePermissionCondition"/> class.
-        /// </summary>
-        /// <param name="permissions">The permissions service.</param>
-        /// <param name="permissionRegistry">The permissions registry.</param>
-        /// <param name="context">The command context.</param>
-        public RequirePermissionCondition
+    /// <inheritdoc />
+    public async ValueTask<Result> CheckAsync(RequirePermissionAttribute attribute, CancellationToken ct = default)
+    {
+        if (!_context.GuildID.IsDefined(out var guildID))
+        {
+            return new InvalidOperationError("This condition must be executed in a guild.");
+        }
+
+        var getPermissionResult = _permissionRegistry.GetPermission(attribute.Type);
+        if (!getPermissionResult.IsSuccess)
+        {
+            return Result.FromError(getPermissionResult);
+        }
+
+        var permission = getPermissionResult.Entity;
+
+        return await _permissions.HasPermissionAsync
         (
-            PermissionService permissions,
-            PermissionRegistryService permissionRegistry,
-            ICommandContext context
-        )
-        {
-            _permissions = permissions;
-            _permissionRegistry = permissionRegistry;
-            _context = context;
-        }
-
-        /// <inheritdoc />
-        public async ValueTask<Result> CheckAsync(RequirePermissionAttribute attribute, CancellationToken ct = default)
-        {
-            if (!_context.GuildID.IsDefined(out var guildID))
-            {
-                return new InvalidOperationError("This condition must be executed in a guild.");
-            }
-
-            var getPermissionResult = _permissionRegistry.GetPermission(attribute.Type);
-            if (!getPermissionResult.IsSuccess)
-            {
-                return Result.FromError(getPermissionResult);
-            }
-
-            var permission = getPermissionResult.Entity;
-
-            return await _permissions.HasPermissionAsync
-            (
-                guildID,
-                _context.User.ID,
-                permission,
-                attribute.Target,
-                ct
-            );
-        }
+            guildID,
+            _context.User.ID,
+            permission,
+            attribute.Target,
+            ct
+        );
     }
 }

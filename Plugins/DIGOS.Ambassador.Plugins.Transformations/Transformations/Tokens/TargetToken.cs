@@ -24,27 +24,26 @@ using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens;
+
+/// <summary>
+/// A token that gets replaced with the target's name or nickname.
+/// </summary>
+[PublicAPI]
+[TokenIdentifier("target", "t")]
+public sealed class TargetToken : ReplaceableTextToken<TargetToken>
 {
-    /// <summary>
-    /// A token that gets replaced with the target's name or nickname.
-    /// </summary>
-    [PublicAPI]
-    [TokenIdentifier("target", "t")]
-    public sealed class TargetToken : ReplaceableTextToken<TargetToken>
+    /// <inheritdoc />
+    public override string GetText(Appearance appearance, AppearanceComponent? component)
     {
-        /// <inheritdoc />
-        public override string GetText(Appearance appearance, AppearanceComponent? component)
-        {
-            var character = appearance.Character;
+        var character = appearance.Character;
 
-            return character.Nickname.IsNullOrWhitespace() ? character.Name : character.Nickname;
-        }
+        return character.Nickname.IsNullOrWhitespace() ? character.Name : character.Nickname;
+    }
 
-        /// <inheritdoc />
-        protected override TargetToken Initialize(string? data)
-        {
-            return this;
-        }
+    /// <inheritdoc />
+    protected override TargetToken Initialize(string? data)
+    {
+        return this;
     }
 }

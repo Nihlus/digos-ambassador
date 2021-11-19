@@ -25,41 +25,40 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
+namespace DIGOS.Ambassador.Plugins.Roleplaying.Model;
+
+/// <summary>
+/// Represents the database model of the dossier plugin.
+/// </summary>
+public class RoleplayingDatabaseContext : AmbassadorDbContext
 {
+    private const string SchemaName = "RoleplayModule";
+
     /// <summary>
-    /// Represents the database model of the dossier plugin.
+    /// Gets or sets the table where roleplays are stored.
     /// </summary>
-    public class RoleplayingDatabaseContext : AmbassadorDbContext
+    public DbSet<Roleplay> Roleplays { get; [UsedImplicitly] set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the table where server settings are stored.
+    /// </summary>
+    public DbSet<ServerRoleplaySettings> ServerSettings { get; [UsedImplicitly] set; } = null!;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RoleplayingDatabaseContext"/> class.
+    /// </summary>
+    /// <param name="contextOptions">The context options.</param>
+    public RoleplayingDatabaseContext(DbContextOptions<RoleplayingDatabaseContext> contextOptions)
+        : base(SchemaName, contextOptions)
     {
-        private const string SchemaName = "RoleplayModule";
+    }
 
-        /// <summary>
-        /// Gets or sets the table where roleplays are stored.
-        /// </summary>
-        public DbSet<Roleplay> Roleplays { get; [UsedImplicitly] set; } = null!;
+    /// <inheritdoc/>
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
 
-        /// <summary>
-        /// Gets or sets the table where server settings are stored.
-        /// </summary>
-        public DbSet<ServerRoleplaySettings> ServerSettings { get; [UsedImplicitly] set; } = null!;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RoleplayingDatabaseContext"/> class.
-        /// </summary>
-        /// <param name="contextOptions">The context options.</param>
-        public RoleplayingDatabaseContext(DbContextOptions<RoleplayingDatabaseContext> contextOptions)
-            : base(SchemaName, contextOptions)
-        {
-        }
-
-        /// <inheritdoc/>
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Entity<Roleplay>().HasMany(r => r.ParticipatingUsers).WithOne(pu => pu.Roleplay);
-            modelBuilder.Entity<RoleplayParticipant>().HasOne(rp => rp.User).WithMany();
-        }
+        modelBuilder.Entity<Roleplay>().HasMany(r => r.ParticipatingUsers).WithOne(pu => pu.Roleplay);
+        modelBuilder.Entity<RoleplayParticipant>().HasOne(rp => rp.User).WithMany();
     }
 }

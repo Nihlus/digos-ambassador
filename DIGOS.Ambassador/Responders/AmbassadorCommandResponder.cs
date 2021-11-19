@@ -33,54 +33,53 @@ using Remora.Discord.Commands.Responders;
 using Remora.Discord.Commands.Services;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Responders
+namespace DIGOS.Ambassador.Responders;
+
+/// <summary>
+/// Extends the vanilla responder with an ambient transaction.
+/// </summary>
+public class AmbassadorCommandResponder : CommandResponder
 {
-    /// <summary>
-    /// Extends the vanilla responder with an ambient transaction.
-    /// </summary>
-    public class AmbassadorCommandResponder : CommandResponder
+    /// <inheritdoc cref="CommandResponder"/>
+    public AmbassadorCommandResponder
+    (
+        CommandService commandService,
+        IOptions<CommandResponderOptions> options,
+        ExecutionEventCollectorService eventCollector,
+        IServiceProvider services,
+        ContextInjectionService contextInjection,
+        IOptions<TokenizerOptions> tokenizerOptions,
+        IOptions<TreeSearchOptions> treeSearchOptions
+    )
+        : base
+        (
+            commandService,
+            options,
+            eventCollector,
+            services,
+            contextInjection,
+            tokenizerOptions,
+            treeSearchOptions
+        )
     {
-        /// <inheritdoc cref="CommandResponder"/>
-        public AmbassadorCommandResponder
-        (
-            CommandService commandService,
-            IOptions<CommandResponderOptions> options,
-            ExecutionEventCollectorService eventCollector,
-            IServiceProvider services,
-            ContextInjectionService contextInjection,
-            IOptions<TokenizerOptions> tokenizerOptions,
-            IOptions<TreeSearchOptions> treeSearchOptions
-        )
-            : base
-            (
-                commandService,
-                options,
-                eventCollector,
-                services,
-                contextInjection,
-                tokenizerOptions,
-                treeSearchOptions
-            )
+    }
+
+    /// <inheritdoc />
+    protected override async Task<Result> ExecuteCommandAsync
+    (
+        string content,
+        ICommandContext commandContext,
+        CancellationToken ct = default
+    )
+    {
+        using var transaction = TransactionFactory.Create();
+
+        var executionResult = await base.ExecuteCommandAsync(content, commandContext, ct);
+        if (executionResult.IsSuccess)
         {
+            transaction.Complete();
         }
 
-        /// <inheritdoc />
-        protected override async Task<Result> ExecuteCommandAsync
-        (
-            string content,
-            ICommandContext commandContext,
-            CancellationToken ct = default
-        )
-        {
-            using var transaction = TransactionFactory.Create();
-
-            var executionResult = await base.ExecuteCommandAsync(content, commandContext, ct);
-            if (executionResult.IsSuccess)
-            {
-                transaction.Complete();
-            }
-
-            return executionResult;
-        }
+        return executionResult;
     }
 }

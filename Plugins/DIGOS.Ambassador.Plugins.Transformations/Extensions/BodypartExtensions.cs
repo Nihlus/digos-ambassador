@@ -27,45 +27,45 @@ using DIGOS.Ambassador.Plugins.Transformations.Attributes;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
+namespace DIGOS.Ambassador.Plugins.Transformations.Extensions;
+
+/// <summary>
+/// Extensions for the <see cref="Bodypart"/> enum.
+/// </summary>
+[PublicAPI]
+public static class BodypartExtensions
 {
     /// <summary>
-    /// Extensions for the <see cref="Bodypart"/> enum.
+    /// Determines whether or not a given bodypart is considered gender-neutral.
     /// </summary>
-    [PublicAPI]
-    public static class BodypartExtensions
+    /// <param name="this">The bodypart.</param>
+    /// <returns>true if the part is gender-neutral; otherwise, false.</returns>
+    [Pure]
+    public static bool IsGenderNeutral(this Bodypart @this)
     {
-        /// <summary>
-        /// Determines whether or not a given bodypart is considered gender-neutral.
-        /// </summary>
-        /// <param name="this">The bodypart.</param>
-        /// <returns>true if the part is gender-neutral; otherwise, false.</returns>
-        [Pure]
-        public static bool IsGenderNeutral(this Bodypart @this)
-        {
-            return !@this.HasCustomAttribute<GenderedAttribute>();
-        }
+        return !@this.HasCustomAttribute<GenderedAttribute>();
+    }
 
-        /// <summary>
-        /// Determines whether or not a given bodypart is a composite part.
-        /// </summary>
-        /// <param name="this">The part to check.</param>
-        /// <returns>true if the part is a composite part; otherwise, false.</returns>
-        [Pure]
-        public static bool IsComposite(this Bodypart @this)
-        {
-            return @this.HasCustomAttribute<CompositeAttribute>();
-        }
+    /// <summary>
+    /// Determines whether or not a given bodypart is a composite part.
+    /// </summary>
+    /// <param name="this">The part to check.</param>
+    /// <returns>true if the part is a composite part; otherwise, false.</returns>
+    [Pure]
+    public static bool IsComposite(this Bodypart @this)
+    {
+        return @this.HasCustomAttribute<CompositeAttribute>();
+    }
 
-        /// <summary>
-        /// Determines whether or not a given bodypart is part of a composite part.
-        /// </summary>
-        /// <param name="this">The bodypart to check.</param>
-        /// <returns>true if the bodypart is a composing part; otherwise, false.</returns>
-        [Pure]
-        public static bool IsComposingPart(this Bodypart @this)
-        {
-            var compositeParts = Enum.GetValues(typeof(Bodypart))
+    /// <summary>
+    /// Determines whether or not a given bodypart is part of a composite part.
+    /// </summary>
+    /// <param name="this">The bodypart to check.</param>
+    /// <returns>true if the bodypart is a composing part; otherwise, false.</returns>
+    [Pure]
+    public static bool IsComposingPart(this Bodypart @this)
+    {
+        var compositeParts = Enum.GetValues(typeof(Bodypart))
             .Cast<Bodypart>()
             .SelectMany
             (
@@ -74,42 +74,41 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
                     : Array.Empty<Bodypart>()
             );
 
-            return compositeParts.Contains(@this);
+        return compositeParts.Contains(@this);
+    }
+
+    /// <summary>
+    /// Determines whether or not the given part has a left- or right-handed counterpart.
+    /// </summary>
+    /// <param name="this">The bodypart.</param>
+    /// <returns>true if the part is a chiral part; otherwise, false.</returns>
+    public static bool IsChiral(this Bodypart @this)
+    {
+        return @this.HasCustomAttribute<ChiralAttribute>();
+    }
+
+    /// <summary>
+    /// Gets the bodyparts that a given part consists of.
+    /// </summary>
+    /// <param name="this">The body part to decompose.</param>
+    /// <returns>An iterator over the bodyparts in the given bodypart.</returns>
+    [Pure]
+    public static IEnumerable<Bodypart> GetComposingParts(this Bodypart @this)
+    {
+        if (!IsComposite(@this))
+        {
+            yield return @this;
+            yield break;
         }
 
-        /// <summary>
-        /// Determines whether or not the given part has a left- or right-handed counterpart.
-        /// </summary>
-        /// <param name="this">The bodypart.</param>
-        /// <returns>true if the part is a chiral part; otherwise, false.</returns>
-        public static bool IsChiral(this Bodypart @this)
+        if (!@this.TryGetCustomAttribute<CompositeAttribute>(out var compositeAttribute))
         {
-            return @this.HasCustomAttribute<ChiralAttribute>();
+            yield break;
         }
 
-        /// <summary>
-        /// Gets the bodyparts that a given part consists of.
-        /// </summary>
-        /// <param name="this">The body part to decompose.</param>
-        /// <returns>An iterator over the bodyparts in the given bodypart.</returns>
-        [Pure]
-        public static IEnumerable<Bodypart> GetComposingParts(this Bodypart @this)
+        foreach (var part in compositeAttribute.ComposingParts)
         {
-            if (!IsComposite(@this))
-            {
-                yield return @this;
-                yield break;
-            }
-
-            if (!@this.TryGetCustomAttribute<CompositeAttribute>(out var compositeAttribute))
-            {
-                yield break;
-            }
-
-            foreach (var part in compositeAttribute.ComposingParts)
-            {
-                yield return part;
-            }
+            yield return part;
         }
     }
 }

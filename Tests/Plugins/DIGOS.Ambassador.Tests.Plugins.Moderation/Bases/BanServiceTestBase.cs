@@ -36,64 +36,63 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Bases
+namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Bases;
+
+/// <summary>
+/// Serves as a test base for ban service tests.
+/// </summary>
+[PublicAPI]
+public class BanServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
 {
     /// <summary>
-    /// Serves as a test base for ban service tests.
+    /// Gets the database context.
     /// </summary>
-    [PublicAPI]
-    public class BanServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
+    protected ModerationDatabaseContext Database { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the ban service.
+    /// </summary>
+    protected BanService Bans { get; private set; } = null!;
+
+    /// <inheritdoc />
+    protected override void RegisterServices(IServiceCollection serviceCollection)
     {
-        /// <summary>
-        /// Gets the database context.
-        /// </summary>
-        protected ModerationDatabaseContext Database { get; private set; } = null!;
+        serviceCollection
+            .AddDbContext<CoreDatabaseContext>(o => ConfigureOptions(o, "Core"))
+            .AddDbContext<ModerationDatabaseContext>(o => ConfigureOptions(o, "Moderation"));
 
-        /// <summary>
-        /// Gets the ban service.
-        /// </summary>
-        protected BanService Bans { get; private set; } = null!;
+        serviceCollection
+            .AddScoped<ServerService>()
+            .AddScoped<UserService>()
+            .AddScoped<BanService>()
+            .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
+    }
 
-        /// <inheritdoc />
-        protected override void RegisterServices(IServiceCollection serviceCollection)
-        {
-            serviceCollection
-                .AddDbContext<CoreDatabaseContext>(o => ConfigureOptions(o, "Core"))
-                .AddDbContext<ModerationDatabaseContext>(o => ConfigureOptions(o, "Moderation"));
+    /// <inheritdoc />
+    protected override void ConfigureServices(IServiceProvider serviceProvider)
+    {
+        var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
+        var coreCreateScript = coreDatabase.Database.GenerateCreateScript();
 
-            serviceCollection
-                .AddScoped<ServerService>()
-                .AddScoped<UserService>()
-                .AddScoped<BanService>()
-                .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
-        }
+        var banDatabase = serviceProvider.GetRequiredService<ModerationDatabaseContext>();
+        var banCreateScript = banDatabase.Database.GenerateCreateScript();
 
-        /// <inheritdoc />
-        protected override void ConfigureServices(IServiceProvider serviceProvider)
-        {
-            var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            var coreCreateScript = coreDatabase.Database.GenerateCreateScript();
+        banDatabase.Database.ExecuteSqlRaw(coreCreateScript);
+        banDatabase.Database.ExecuteSqlRaw(banCreateScript);
 
-            var banDatabase = serviceProvider.GetRequiredService<ModerationDatabaseContext>();
-            var banCreateScript = banDatabase.Database.GenerateCreateScript();
+        this.Database = banDatabase;
+        this.Bans = serviceProvider.GetRequiredService<BanService>();
+    }
 
-            banDatabase.Database.ExecuteSqlRaw(coreCreateScript);
-            banDatabase.Database.ExecuteSqlRaw(banCreateScript);
+    /// <inheritdoc />
+    public virtual Task InitializeAsync()
+    {
+        return Task.CompletedTask;
+    }
 
-            this.Database = banDatabase;
-            this.Bans = serviceProvider.GetRequiredService<BanService>();
-        }
-
-        /// <inheritdoc />
-        public virtual Task InitializeAsync()
-        {
-            return Task.CompletedTask;
-        }
-
-        /// <inheritdoc />
-        public Task DisposeAsync()
-        {
-            return Task.CompletedTask;
-        }
+    /// <inheritdoc />
+    public Task DisposeAsync()
+    {
+        return Task.CompletedTask;
     }
 }

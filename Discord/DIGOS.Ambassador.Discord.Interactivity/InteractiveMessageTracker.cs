@@ -28,83 +28,82 @@ using DIGOS.Ambassador.Discord.Interactivity.Messages;
 using Remora.Discord.Core;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Discord.Interactivity
+namespace DIGOS.Ambassador.Discord.Interactivity;
+
+/// <summary>
+/// Singleton service for tracking interactive messages.
+/// </summary>
+public class InteractiveMessageTracker
 {
     /// <summary>
-    /// Singleton service for tracking interactive messages.
+    /// Holds a mapping of message IDs to tracked messages.
     /// </summary>
-    public class InteractiveMessageTracker
+    private readonly ConcurrentDictionary<string, IInteractiveMessage> _trackedMessages = new();
+
+    /// <summary>
+    /// Begins tracking the given message.
+    /// </summary>
+    /// <param name="message">The interactive message.</param>
+    /// <returns>A result which may or may not have succeeded.</returns>
+    public Result TrackMessage(IInteractiveMessage message)
     {
-        /// <summary>
-        /// Holds a mapping of message IDs to tracked messages.
-        /// </summary>
-        private readonly ConcurrentDictionary<string, IInteractiveMessage> _trackedMessages = new();
+        return _trackedMessages.TryAdd(message.Nonce, message)
+            ? Result.FromSuccess()
+            : new InvalidOperationError("A message with that ID is already tracked.");
+    }
 
-        /// <summary>
-        /// Begins tracking the given message.
-        /// </summary>
-        /// <param name="message">The interactive message.</param>
-        /// <returns>A result which may or may not have succeeded.</returns>
-        public Result TrackMessage(IInteractiveMessage message)
+    /// <summary>
+    /// Gets a registered interactive entity that matches the given nonce.
+    /// </summary>
+    /// <param name="nonce">The entity's unique identifier.</param>
+    /// <param name="entity">The entity, or null if none exists.</param>
+    /// <typeparam name="TEntity">The concrete entity type.</typeparam>
+    /// <returns>true if a matching entity was successfully found; otherwise, false.</returns>
+    public bool TryGetInteractiveEntity<TEntity>(string nonce, [NotNullWhen(true)] out TEntity? entity)
+        where TEntity : IInteractiveEntity
+    {
+        entity = default;
+
+        if (!_trackedMessages.TryGetValue(nonce, out var untypedEntity))
         {
-            return _trackedMessages.TryAdd(message.Nonce, message)
-                ? Result.FromSuccess()
-                : new InvalidOperationError("A message with that ID is already tracked.");
+            return false;
         }
 
-        /// <summary>
-        /// Gets a registered interactive entity that matches the given nonce.
-        /// </summary>
-        /// <param name="nonce">The entity's unique identifier.</param>
-        /// <param name="entity">The entity, or null if none exists.</param>
-        /// <typeparam name="TEntity">The concrete entity type.</typeparam>
-        /// <returns>true if a matching entity was successfully found; otherwise, false.</returns>
-        public bool TryGetInteractiveEntity<TEntity>(string nonce, [NotNullWhen(true)] out TEntity? entity)
-            where TEntity : IInteractiveEntity
+        if (untypedEntity is not TEntity typedEntity)
         {
-            entity = default;
-
-            if (!_trackedMessages.TryGetValue(nonce, out var untypedEntity))
-            {
-                return false;
-            }
-
-            if (untypedEntity is not TEntity typedEntity)
-            {
-                return false;
-            }
-
-            entity = typedEntity;
-            return true;
+            return false;
         }
 
-        /// <summary>
-        /// Ceases tracking the message with the given ID.
-        /// </summary>
-        /// <param name="id">The ID of the message.</param>
-        /// <param name="ct">The cancellation token for this operation.</param>
-        /// <returns>A result which may or may not have succeeded.</returns>
-        public async Task<Result> UntrackMessageAsync(Snowflake id, CancellationToken ct = default)
+        entity = typedEntity;
+        return true;
+    }
+
+    /// <summary>
+    /// Ceases tracking the message with the given ID.
+    /// </summary>
+    /// <param name="id">The ID of the message.</param>
+    /// <param name="ct">The cancellation token for this operation.</param>
+    /// <returns>A result which may or may not have succeeded.</returns>
+    public async Task<Result> UntrackMessageAsync(Snowflake id, CancellationToken ct = default)
+    {
+        if (!_trackedMessages.TryRemove(id.ToString(), out var trackedMessage))
         {
-            if (!_trackedMessages.TryRemove(id.ToString(), out var trackedMessage))
-            {
-                // The message is already removed
-                return Result.FromSuccess();
-            }
-
-            await trackedMessage.Semaphore.WaitAsync(ct);
-            trackedMessage.Dispose();
-
+            // The message is already removed
             return Result.FromSuccess();
         }
 
-        /// <summary>
-        /// Ceases tracking the message with the given ID.
-        /// </summary>
-        /// <param name="id">The ID of the message.</param>
-        /// <param name="ct">The cancellation token for this operation.</param>
-        /// <returns>A result which may or may not have succeeded.</returns>
-        public Task<Result> OnMessageDeletedAsync(Snowflake id, CancellationToken ct = default)
-            => UntrackMessageAsync(id, ct);
+        await trackedMessage.Semaphore.WaitAsync(ct);
+        trackedMessage.Dispose();
+
+        return Result.FromSuccess();
     }
+
+    /// <summary>
+    /// Ceases tracking the message with the given ID.
+    /// </summary>
+    /// <param name="id">The ID of the message.</param>
+    /// <param name="ct">The cancellation token for this operation.</param>
+    /// <returns>A result which may or may not have succeeded.</returns>
+    public Task<Result> OnMessageDeletedAsync(Snowflake id, CancellationToken ct = default)
+        => UntrackMessageAsync(id, ct);
 }

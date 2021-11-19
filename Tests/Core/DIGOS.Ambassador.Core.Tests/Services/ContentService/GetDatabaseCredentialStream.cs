@@ -30,56 +30,55 @@ using Zio;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Core.Tests.Services.ContentService
+namespace DIGOS.Ambassador.Core.Tests.Services.ContentService;
+
+public static partial class ContentServiceTests
 {
-    public static partial class ContentServiceTests
+    public class GetDatabaseCredentialStream : ContentServiceTestBase
     {
-        public class GetDatabaseCredentialStream : ContentServiceTestBase
+        protected override async Task ConfigureFileSystemAsync(IFileSystem fileSystem)
         {
-            protected override async Task ConfigureFileSystemAsync(IFileSystem fileSystem)
-            {
-                var databaseDirectory = UPath.Combine(UPath.Root, "Database");
-                var credentialsPath = UPath.Combine(databaseDirectory, "database.credentials");
+            var databaseDirectory = UPath.Combine(UPath.Root, "Database");
+            var credentialsPath = UPath.Combine(databaseDirectory, "database.credentials");
 
-                fileSystem.CreateDirectory(databaseDirectory);
+            fileSystem.CreateDirectory(databaseDirectory);
 
-                await using var sw = new StreamWriter
-                (
-                    fileSystem.OpenFile(credentialsPath, FileMode.Create, FileAccess.Write)
-                );
+            await using var sw = new StreamWriter
+            (
+                fileSystem.OpenFile(credentialsPath, FileMode.Create, FileAccess.Write)
+            );
 
-                await sw.WriteLineAsync("DATABASE CREDENTIALS");
-            }
-
-            [Fact]
-            public void ReturnsTrueIfDatabaseCredentialFileExists()
-            {
-                var result = this.ContentService.GetDatabaseCredentialStream();
-
-                Assert.True(result.IsSuccess);
-            }
-
-            [Fact]
-            public void ActuallyReturnsTheDatabaseCredentialFileStream()
-            {
-                var result = this.ContentService.GetDatabaseCredentialStream();
-
-                using var stream = new StreamReader(result.Entity);
-                var content = stream.ReadToEnd();
-
-                Assert.Equal("DATABASE CREDENTIALS\n", content);
-            }
+            await sw.WriteLineAsync("DATABASE CREDENTIALS");
         }
 
-        public class GetDatabaseCredentialStreamWithoutContent : ContentServiceTestBase
+        [Fact]
+        public void ReturnsTrueIfDatabaseCredentialFileExists()
         {
-            [Fact]
-            public void ReturnsFalseIfDatabaseCredentialFileDoesNotExist()
-            {
-                var result = this.ContentService.GetDatabaseCredentialStream();
+            var result = this.ContentService.GetDatabaseCredentialStream();
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.True(result.IsSuccess);
+        }
+
+        [Fact]
+        public void ActuallyReturnsTheDatabaseCredentialFileStream()
+        {
+            var result = this.ContentService.GetDatabaseCredentialStream();
+
+            using var stream = new StreamReader(result.Entity);
+            var content = stream.ReadToEnd();
+
+            Assert.Equal("DATABASE CREDENTIALS\n", content);
+        }
+    }
+
+    public class GetDatabaseCredentialStreamWithoutContent : ContentServiceTestBase
+    {
+        [Fact]
+        public void ReturnsFalseIfDatabaseCredentialFileDoesNotExist()
+        {
+            var result = this.ContentService.GetDatabaseCredentialStream();
+
+            Assert.False(result.IsSuccess);
         }
     }
 }

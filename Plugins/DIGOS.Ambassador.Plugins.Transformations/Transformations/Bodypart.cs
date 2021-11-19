@@ -23,126 +23,125 @@
 using DIGOS.Ambassador.Plugins.Transformations.Attributes;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations;
+
+/// <summary>
+/// Represents a single transformable body part.
+/// </summary>
+[PublicAPI]
+public enum Bodypart
 {
     /// <summary>
-    /// Represents a single transformable body part.
+    /// The head hair.
     /// </summary>
-    [PublicAPI]
-    public enum Bodypart
-    {
-        /// <summary>
-        /// The head hair.
-        /// </summary>
-        [DescriptionPriority(9)]
-        Hair,
+    [DescriptionPriority(9)]
+    Hair,
 
-        /// <summary>
-        /// The face.
-        /// </summary>
-        [DescriptionPriority(10)]
-        Face,
+    /// <summary>
+    /// The face.
+    /// </summary>
+    [DescriptionPriority(10)]
+    Face,
 
-        /// <summary>
-        /// An ear.
-        /// </summary>
-        [Chiral, DescriptionPriority(6)]
-        Ear,
+    /// <summary>
+    /// An ear.
+    /// </summary>
+    [Chiral, DescriptionPriority(6)]
+    Ear,
 
-        /// <summary>
-        /// An eye.
-        /// </summary>
-        [Chiral, DescriptionPriority(8)]
-        Eye,
+    /// <summary>
+    /// An eye.
+    /// </summary>
+    [Chiral, DescriptionPriority(8)]
+    Eye,
 
-        /// <summary>
-        /// The teeth.
-        /// </summary>
-        [DescriptionPriority(7)]
-        Teeth,
+    /// <summary>
+    /// The teeth.
+    /// </summary>
+    [DescriptionPriority(7)]
+    Teeth,
 
-        /// <summary>
-        /// The main body.
-        /// </summary>
-        [DescriptionPriority(5)]
-        Body,
+    /// <summary>
+    /// The main body.
+    /// </summary>
+    [DescriptionPriority(5)]
+    Body,
 
-        /// <summary>
-        /// An arm.
-        /// </summary>
-        [Chiral, DescriptionPriority(3)]
-        Arm,
+    /// <summary>
+    /// An arm.
+    /// </summary>
+    [Chiral, DescriptionPriority(3)]
+    Arm,
 
-        /// <summary>
-        /// A leg.
-        /// </summary>
-        [Chiral, DescriptionPriority(2)]
-        Leg,
+    /// <summary>
+    /// A leg.
+    /// </summary>
+    [Chiral, DescriptionPriority(2)]
+    Leg,
 
-        /// <summary>
-        /// The tail.
-        /// </summary>
-        [DescriptionPriority(1)]
-        Tail,
+    /// <summary>
+    /// The tail.
+    /// </summary>
+    [DescriptionPriority(1)]
+    Tail,
 
-        /// <summary>
-        /// A wing.
-        /// </summary>
-        [Chiral, DescriptionPriority(4)]
-        Wing,
+    /// <summary>
+    /// A wing.
+    /// </summary>
+    [Chiral, DescriptionPriority(4)]
+    Wing,
 
-        /// <summary>
-        /// The penis.
-        /// </summary>
-        [Gendered, DescriptionPriority(0)]
-        Penis,
+    /// <summary>
+    /// The penis.
+    /// </summary>
+    [Gendered, DescriptionPriority(0)]
+    Penis,
 
-        /// <summary>
-        /// The vagina.
-        /// </summary>
-        [Gendered, DescriptionPriority(0)]
-        Vagina,
+    /// <summary>
+    /// The vagina.
+    /// </summary>
+    [Gendered, DescriptionPriority(0)]
+    Vagina,
 
-        /// <summary>
-        /// The ears.
-        /// </summary>
-        [Composite(Ear)]
-        Ears,
+    /// <summary>
+    /// The ears.
+    /// </summary>
+    [Composite(Ear)]
+    Ears,
 
-        /// <summary>
-        /// The eyes.
-        /// </summary>
-        [Composite(Eye)]
-        Eyes,
+    /// <summary>
+    /// The eyes.
+    /// </summary>
+    [Composite(Eye)]
+    Eyes,
 
-        /// <summary>
-        /// The head, composed of the face, the ears, the teeth, and the eyes.
-        /// </summary>
-        [Composite(Face, Ears, Teeth, Eyes, Hair)]
-        Head,
+    /// <summary>
+    /// The head, composed of the face, the ears, the teeth, and the eyes.
+    /// </summary>
+    [Composite(Face, Ears, Teeth, Eyes, Hair)]
+    Head,
 
-        /// <summary>
-        /// The arms, composed of the left and right arms.
-        /// </summary>
-        [Composite(Arm)]
-        Arms,
+    /// <summary>
+    /// The arms, composed of the left and right arms.
+    /// </summary>
+    [Composite(Arm)]
+    Arms,
 
-        /// <summary>
-        /// The legs, composed of the left and right legs.
-        /// </summary>
-        [Composite(Leg)]
-        Legs,
+    /// <summary>
+    /// The legs, composed of the left and right legs.
+    /// </summary>
+    [Composite(Leg)]
+    Legs,
 
-        /// <summary>
-        /// The wings, composed of the left and right wings.
-        /// </summary>
-        [Composite(Wing)]
-        Wings,
+    /// <summary>
+    /// The wings, composed of the left and right wings.
+    /// </summary>
+    [Composite(Wing)]
+    Wings,
 
-        /// <summary>
-        /// All of the available body parts.
-        /// </summary>
-        [Composite(Head, Body, Arms, Legs, Tail, Wings)]
-        Full
-    }
+    /// <summary>
+    /// All of the available body parts.
+    /// </summary>
+    [Composite(Head, Body, Arms, Legs, Tail, Wings)]
+    Full
 }

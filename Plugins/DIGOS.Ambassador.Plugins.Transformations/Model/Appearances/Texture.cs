@@ -23,23 +23,22 @@
 using JetBrains.Annotations;
 
 #pragma warning disable 1591, SA1602
-namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
+namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
+
+/// <summary>
+/// Represents the physical feeling of something.
+/// </summary>
+[PublicAPI]
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+public enum Texture
 {
-    /// <summary>
-    /// Represents the physical feeling of something.
-    /// </summary>
-    [PublicAPI]
-    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    public enum Texture
-    {
-        Smooth,
-        Rough,
-        Slick,
-        Slimy,
-        Gnarly,
-        Rubbery,
-        Soft,
-        Silky,
-        Hard,
-    }
+    Smooth,
+    Rough,
+    Slick,
+    Slimy,
+    Gnarly,
+    Rubbery,
+    Soft,
+    Silky,
+    Hard,
 }

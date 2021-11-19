@@ -27,119 +27,118 @@ using DIGOS.Ambassador.Plugins.Transformations.Results;
 using Humanizer;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters;
+
+/// <summary>
+/// Shifts the colour of components.
+/// </summary>
+internal sealed class PatternShifter : AppearanceShifter
 {
+    private readonly TransformationDescriptionBuilder _descriptionBuilder;
+
+    private readonly Pattern _pattern;
+
+    private readonly Colour _patternColour;
+
     /// <summary>
-    /// Shifts the colour of components.
+    /// Initializes a new instance of the <see cref="PatternShifter"/> class.
     /// </summary>
-    internal sealed class PatternShifter : AppearanceShifter
+    /// <param name="appearance">The appearance to shift.</param>
+    /// <param name="pattern">The colour to shift into.</param>
+    /// <param name="patternColour">The colour of the pattern to shift into.</param>
+    /// <param name="descriptionBuilder">The description builder.</param>
+    public PatternShifter
+    (
+        Appearance appearance,
+        Pattern pattern,
+        Colour patternColour,
+        TransformationDescriptionBuilder descriptionBuilder
+    )
+        : base(appearance)
     {
-        private readonly TransformationDescriptionBuilder _descriptionBuilder;
+        _pattern = pattern;
+        _patternColour = patternColour;
+        _descriptionBuilder = descriptionBuilder;
+    }
 
-        private readonly Pattern _pattern;
-
-        private readonly Colour _patternColour;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PatternShifter"/> class.
-        /// </summary>
-        /// <param name="appearance">The appearance to shift.</param>
-        /// <param name="pattern">The colour to shift into.</param>
-        /// <param name="patternColour">The colour of the pattern to shift into.</param>
-        /// <param name="descriptionBuilder">The description builder.</param>
-        public PatternShifter
-        (
-            Appearance appearance,
-            Pattern pattern,
-            Colour patternColour,
-            TransformationDescriptionBuilder descriptionBuilder
-        )
-            : base(appearance)
+    /// <inheritdoc />
+    protected override async Task<Result<ShiftBodypartResult>> ShiftBodypartAsync
+    (
+        Bodypart bodypart,
+        Chirality chirality
+    )
+    {
+        if (!this.Appearance.TryGetAppearanceComponent(bodypart, chirality, out var currentComponent))
         {
-            _pattern = pattern;
-            _patternColour = patternColour;
-            _descriptionBuilder = descriptionBuilder;
+            return new UserError("The character doesn't have that bodypart.");
         }
 
-        /// <inheritdoc />
-        protected override async Task<Result<ShiftBodypartResult>> ShiftBodypartAsync
-        (
-            Bodypart bodypart,
-            Chirality chirality
-        )
+        if (currentComponent.Pattern == _pattern)
         {
-            if (!this.Appearance.TryGetAppearanceComponent(bodypart, chirality, out var currentComponent))
-            {
-                return new UserError("The character doesn't have that bodypart.");
-            }
-
-            if (currentComponent.Pattern == _pattern)
-            {
-                return new ShiftBodypartResult(await GetNoChangeMessageAsync(bodypart), ShiftBodypartAction.Nothing);
-            }
-
-            var shiftAction = ShiftBodypartAction.Shift;
-            if (currentComponent.Pattern is null)
-            {
-                shiftAction = ShiftBodypartAction.Add;
-            }
-
-            currentComponent.Pattern = _pattern;
-            currentComponent.PatternColour = _patternColour.Clone();
-
-            var shiftMessage = await GetShiftMessageAsync(bodypart, chirality);
-            return new ShiftBodypartResult(shiftMessage, shiftAction);
+            return new ShiftBodypartResult(await GetNoChangeMessageAsync(bodypart), ShiftBodypartAction.Nothing);
         }
 
-        /// <inheritdoc />
-        protected override Task<string> GetUniformShiftMessageAsync(Bodypart bodypart)
+        var shiftAction = ShiftBodypartAction.Shift;
+        if (currentComponent.Pattern is null)
         {
-            var component = this.Appearance.GetAppearanceComponent(bodypart, Chirality.Left);
-            return Task.FromResult(_descriptionBuilder.BuildUniformPatternShiftMessage(this.Appearance, component));
+            shiftAction = ShiftBodypartAction.Add;
         }
 
-        /// <inheritdoc />
-        protected override Task<string> GetUniformAddMessageAsync(Bodypart bodypart)
+        currentComponent.Pattern = _pattern;
+        currentComponent.PatternColour = _patternColour.Clone();
+
+        var shiftMessage = await GetShiftMessageAsync(bodypart, chirality);
+        return new ShiftBodypartResult(shiftMessage, shiftAction);
+    }
+
+    /// <inheritdoc />
+    protected override Task<string> GetUniformShiftMessageAsync(Bodypart bodypart)
+    {
+        var component = this.Appearance.GetAppearanceComponent(bodypart, Chirality.Left);
+        return Task.FromResult(_descriptionBuilder.BuildUniformPatternShiftMessage(this.Appearance, component));
+    }
+
+    /// <inheritdoc />
+    protected override Task<string> GetUniformAddMessageAsync(Bodypart bodypart)
+    {
+        var component = this.Appearance.GetAppearanceComponent(bodypart, Chirality.Left);
+        return Task.FromResult(_descriptionBuilder.BuildUniformPatternAddMessage(this.Appearance, component));
+    }
+
+    /// <inheritdoc />
+    protected override Task<string> GetShiftMessageAsync(Bodypart bodypart, Chirality chirality)
+    {
+        var component = this.Appearance.GetAppearanceComponent(bodypart, chirality);
+        return Task.FromResult(_descriptionBuilder.BuildPatternShiftMessage(this.Appearance, component));
+    }
+
+    /// <inheritdoc />
+    protected override Task<string> GetAddMessageAsync(Bodypart bodypart, Chirality chirality)
+    {
+        var component = this.Appearance.GetAppearanceComponent(bodypart, chirality);
+        return Task.FromResult(_descriptionBuilder.BuildPatternAddMessage(this.Appearance, component));
+    }
+
+    /// <inheritdoc />
+    protected override Task<string> GetNoChangeMessageAsync(Bodypart bodypart)
+    {
+        var character = this.Appearance.Character;
+
+        var bodypartHumanized = bodypart.Humanize();
+
+        if (bodypart == Bodypart.Full)
         {
-            var component = this.Appearance.GetAppearanceComponent(bodypart, Chirality.Left);
-            return Task.FromResult(_descriptionBuilder.BuildUniformPatternAddMessage(this.Appearance, component));
+            var fullMessage = $"{character.Nickname} is already that pattern.";
+            fullMessage = fullMessage.Transform(To.LowerCase, To.SentenceCase);
+
+            return Task.FromResult(fullMessage);
         }
 
-        /// <inheritdoc />
-        protected override Task<string> GetShiftMessageAsync(Bodypart bodypart, Chirality chirality)
-        {
-            var component = this.Appearance.GetAppearanceComponent(bodypart, chirality);
-            return Task.FromResult(_descriptionBuilder.BuildPatternShiftMessage(this.Appearance, component));
-        }
+        var message =
+            $"{character.Nickname}'s {bodypartHumanized} " +
+            $"{(bodypartHumanized.EndsWith("s") ? "are" : "is")} already that pattern.";
 
-        /// <inheritdoc />
-        protected override Task<string> GetAddMessageAsync(Bodypart bodypart, Chirality chirality)
-        {
-            var component = this.Appearance.GetAppearanceComponent(bodypart, chirality);
-            return Task.FromResult(_descriptionBuilder.BuildPatternAddMessage(this.Appearance, component));
-        }
-
-        /// <inheritdoc />
-        protected override Task<string> GetNoChangeMessageAsync(Bodypart bodypart)
-        {
-            var character = this.Appearance.Character;
-
-            var bodypartHumanized = bodypart.Humanize();
-
-            if (bodypart == Bodypart.Full)
-            {
-                var fullMessage = $"{character.Nickname} is already that pattern.";
-                fullMessage = fullMessage.Transform(To.LowerCase, To.SentenceCase);
-
-                return Task.FromResult(fullMessage);
-            }
-
-            var message =
-                $"{character.Nickname}'s {bodypartHumanized} " +
-                $"{(bodypartHumanized.EndsWith("s") ? "are" : "is")} already that pattern.";
-
-            message = message.Transform(To.LowerCase, To.SentenceCase);
-            return Task.FromResult(message);
-        }
+        message = message.Transform(To.LowerCase, To.SentenceCase);
+        return Task.FromResult(message);
     }
 }

@@ -32,45 +32,44 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Characters
+namespace DIGOS.Ambassador.Tests.Plugins.Characters;
+
+public partial class PronounServiceTests
 {
-    public partial class PronounServiceTests
+    public class GetPronounProvider : PronounServiceTestBase
     {
-        public class GetPronounProvider : PronounServiceTestBase
+        private readonly Character _character;
+
+        public GetPronounProvider()
         {
-            private readonly Character _character;
+            _character = new Character
+            (
+                new User(new Snowflake(0)),
+                new Server(new Snowflake(0)),
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                new TheyPronounProvider().Family
+            );
+        }
 
-            public GetPronounProvider()
-            {
-                _character = new Character
-                (
-                    new User(new Snowflake(0)),
-                    new Server(new Snowflake(0)),
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    new TheyPronounProvider().Family
-                );
-            }
+        [Fact]
+        public void ThrowsIfNoMatchingProviderIsFound()
+        {
+            Assert.Throws<KeyNotFoundException>(() => this.Pronouns.GetPronounProvider(_character));
+        }
 
-            [Fact]
-            public void ThrowsIfNoMatchingProviderIsFound()
-            {
-                Assert.Throws<KeyNotFoundException>(() => this.Pronouns.GetPronounProvider(_character));
-            }
+        [Fact]
+        public void ReturnsCorrectProvider()
+        {
+            var expected = new TheyPronounProvider();
+            this.Pronouns.WithPronounProvider(expected);
 
-            [Fact]
-            public void ReturnsCorrectProvider()
-            {
-                var expected = new TheyPronounProvider();
-                this.Pronouns.WithPronounProvider(expected);
+            var actual = this.Pronouns.GetPronounProvider(_character);
 
-                var actual = this.Pronouns.GetPronounProvider(_character);
-
-                Assert.Same(expected, actual);
-            }
+            Assert.Same(expected, actual);
         }
     }
 }

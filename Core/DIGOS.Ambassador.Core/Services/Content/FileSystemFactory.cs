@@ -26,37 +26,36 @@ using System.Reflection;
 using Zio;
 using Zio.FileSystems;
 
-namespace DIGOS.Ambassador.Core.Services
+namespace DIGOS.Ambassador.Core.Services;
+
+/// <summary>
+/// Serves as a factory class for abstract file systems.
+/// </summary>
+public static class FileSystemFactory
 {
     /// <summary>
-    /// Serves as a factory class for abstract file systems.
+    /// Creates a rooted sub-filesystem for the local content folder.
     /// </summary>
-    public static class FileSystemFactory
+    /// <returns>The rooted filesystem.</returns>
+    public static IFileSystem CreateContentFileSystem()
     {
-        /// <summary>
-        /// Creates a rooted sub-filesystem for the local content folder.
-        /// </summary>
-        /// <returns>The rooted filesystem.</returns>
-        public static IFileSystem CreateContentFileSystem()
+        var realFileSystem = new PhysicalFileSystem();
+
+        var executingAssemblyLocation = Assembly.GetExecutingAssembly().Location;
+        var parentDirectory = Directory.GetParent(executingAssemblyLocation)?.FullName;
+        if (parentDirectory is null)
         {
-            var realFileSystem = new PhysicalFileSystem();
-
-            var executingAssemblyLocation = Assembly.GetExecutingAssembly().Location;
-            var parentDirectory = Directory.GetParent(executingAssemblyLocation)?.FullName;
-            if (parentDirectory is null)
-            {
-                throw new InvalidOperationException();
-            }
-
-            var realContentPath = Path.GetFullPath(Path.Combine(parentDirectory, "Content"));
-            var zioContentPath = realFileSystem.ConvertPathFromInternal(realContentPath);
-
-            if (!realFileSystem.DirectoryExists(zioContentPath))
-            {
-                realFileSystem.CreateDirectory(zioContentPath);
-            }
-
-            return new SubFileSystem(realFileSystem, zioContentPath);
+            throw new InvalidOperationException();
         }
+
+        var realContentPath = Path.GetFullPath(Path.Combine(parentDirectory, "Content"));
+        var zioContentPath = realFileSystem.ConvertPathFromInternal(realContentPath);
+
+        if (!realFileSystem.DirectoryExists(zioContentPath))
+        {
+            realFileSystem.CreateDirectory(zioContentPath);
+        }
+
+        return new SubFileSystem(realFileSystem, zioContentPath);
     }
 }

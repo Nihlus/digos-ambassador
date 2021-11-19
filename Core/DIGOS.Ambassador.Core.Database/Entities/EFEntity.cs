@@ -20,14 +20,13 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Core.Database.Entities
+namespace DIGOS.Ambassador.Core.Database.Entities;
+
+/// <summary>
+/// Acts as a base class for EF Core entities.
+/// </summary>
+public abstract class EFEntity : IEFEntity
 {
-    /// <summary>
-    /// Acts as a base class for EF Core entities.
-    /// </summary>
-    public abstract class EFEntity : IEFEntity
-    {
-        /// <inheritdoc/>
-        public long ID { get; set; }
-    }
+    /// <inheritdoc/>
+    public long ID { get; set; }
 }

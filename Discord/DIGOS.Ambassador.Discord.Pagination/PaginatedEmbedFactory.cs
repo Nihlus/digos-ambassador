@@ -29,125 +29,124 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Discord.Pagination
+namespace DIGOS.Ambassador.Discord.Pagination;
+
+/// <summary>
+/// Factory class for creating paginated embeds from various sources.
+/// </summary>
+public static class PaginatedEmbedFactory
 {
     /// <summary>
-    /// Factory class for creating paginated embeds from various sources.
+    /// Creates a simple paginated list from a collection of items.
     /// </summary>
-    public static class PaginatedEmbedFactory
+    /// <param name="items">The items.</param>
+    /// <param name="pageBuilder">A function that builds a page for a single value in the collection.</param>
+    /// <param name="emptyCollectionDescription">The description to use when the collection is empty.</param>
+    /// <typeparam name="TItem">The type of the items in the collection.</typeparam>
+    /// <returns>The paginated embed.</returns>
+    public static IReadOnlyList<IEmbed> PagesFromCollection<TItem>
+    (
+        IReadOnlyList<TItem> items,
+        Func<TItem, Embed> pageBuilder,
+        string emptyCollectionDescription = "There's nothing here."
+    )
     {
-        /// <summary>
-        /// Creates a simple paginated list from a collection of items.
-        /// </summary>
-        /// <param name="items">The items.</param>
-        /// <param name="pageBuilder">A function that builds a page for a single value in the collection.</param>
-        /// <param name="emptyCollectionDescription">The description to use when the collection is empty.</param>
-        /// <typeparam name="TItem">The type of the items in the collection.</typeparam>
-        /// <returns>The paginated embed.</returns>
-        public static IReadOnlyList<IEmbed> PagesFromCollection<TItem>
-        (
-            IReadOnlyList<TItem> items,
-            Func<TItem, Embed> pageBuilder,
-            string emptyCollectionDescription = "There's nothing here."
-        )
+        List<Embed> pages = new();
+        if (!items.Any())
         {
-            List<Embed> pages = new();
-            if (!items.Any())
+            var eb = new Embed
             {
-                var eb = new Embed
-                {
-                    Colour = Color.Gray,
-                    Description = emptyCollectionDescription
-                };
+                Colour = Color.Gray,
+                Description = emptyCollectionDescription
+            };
 
-                pages.Add(eb);
-            }
-            else
-            {
-                pages.AddRange(items.Select(pageBuilder));
-            }
-
-            return pages;
+            pages.Add(eb);
+        }
+        else
+        {
+            pages.AddRange(items.Select(pageBuilder));
         }
 
-        /// <summary>
-        /// Creates a simple paginated list from a collection of items.
-        /// </summary>
-        /// <param name="items">The items.</param>
-        /// <param name="pageBuilder">A function that builds a page for a single value in the collection.</param>
-        /// <param name="emptyCollectionDescription">The description to use when the collection is empty.</param>
-        /// <typeparam name="TItem">The type of the items in the collection.</typeparam>
-        /// <returns>The paginated embed.</returns>
-        public static async Task<IReadOnlyList<Result<Embed>>> PagesFromCollectionAsync<TItem>
-        (
-            IReadOnlyList<TItem> items,
-            Func<TItem, Task<Result<Embed>>> pageBuilder,
-            string emptyCollectionDescription = "There's nothing here."
-        )
+        return pages;
+    }
+
+    /// <summary>
+    /// Creates a simple paginated list from a collection of items.
+    /// </summary>
+    /// <param name="items">The items.</param>
+    /// <param name="pageBuilder">A function that builds a page for a single value in the collection.</param>
+    /// <param name="emptyCollectionDescription">The description to use when the collection is empty.</param>
+    /// <typeparam name="TItem">The type of the items in the collection.</typeparam>
+    /// <returns>The paginated embed.</returns>
+    public static async Task<IReadOnlyList<Result<Embed>>> PagesFromCollectionAsync<TItem>
+    (
+        IReadOnlyList<TItem> items,
+        Func<TItem, Task<Result<Embed>>> pageBuilder,
+        string emptyCollectionDescription = "There's nothing here."
+    )
+    {
+        List<Result<Embed>> pages = new();
+        if (!items.Any())
         {
-            List<Result<Embed>> pages = new();
-            if (!items.Any())
+            var eb = new Embed
             {
-                var eb = new Embed
-                {
-                    Colour = Color.Gray,
-                    Description = emptyCollectionDescription
-                };
+                Colour = Color.Gray,
+                Description = emptyCollectionDescription
+            };
 
-                pages.Add(eb);
-            }
-            else
-            {
-                pages.AddRange(await Task.WhenAll(items.Select(async i => await pageBuilder(i))));
-            }
-
-            return pages;
+            pages.Add(eb);
+        }
+        else
+        {
+            pages.AddRange(await Task.WhenAll(items.Select(async i => await pageBuilder(i))));
         }
 
-        /// <summary>
-        /// Creates a simple paginated list from a collection of items.
-        /// </summary>
-        /// <param name="items">The items.</param>
-        /// <param name="titleSelector">A function that selects the title for each field.</param>
-        /// <param name="valueSelector">A function that selects the value for each field.</param>
-        /// <param name="emptyCollectionDescription">The description to use when the collection is empty.</param>
-        /// <typeparam name="TItem">The type of the items in the collection.</typeparam>
-        /// <returns>The paginated embed.</returns>
-        public static IReadOnlyList<Embed> SimpleFieldsFromCollection<TItem>
-        (
-            IReadOnlyList<TItem> items,
-            Func<TItem, string> titleSelector,
-            Func<TItem, string> valueSelector,
-            string emptyCollectionDescription = "There's nothing here."
-        )
+        return pages;
+    }
+
+    /// <summary>
+    /// Creates a simple paginated list from a collection of items.
+    /// </summary>
+    /// <param name="items">The items.</param>
+    /// <param name="titleSelector">A function that selects the title for each field.</param>
+    /// <param name="valueSelector">A function that selects the value for each field.</param>
+    /// <param name="emptyCollectionDescription">The description to use when the collection is empty.</param>
+    /// <typeparam name="TItem">The type of the items in the collection.</typeparam>
+    /// <returns>The paginated embed.</returns>
+    public static IReadOnlyList<Embed> SimpleFieldsFromCollection<TItem>
+    (
+        IReadOnlyList<TItem> items,
+        Func<TItem, string> titleSelector,
+        Func<TItem, string> valueSelector,
+        string emptyCollectionDescription = "There's nothing here."
+    )
+    {
+        List<Embed> pages = new();
+        if (!items.Any())
         {
-            List<Embed> pages = new();
-            if (!items.Any())
+            var eb = new Embed
             {
-                var eb = new Embed
-                {
-                    Colour = Color.Gray,
-                    Description = emptyCollectionDescription
-                };
+                Colour = Color.Gray,
+                Description = emptyCollectionDescription
+            };
 
-                pages.Add(eb);
-            }
-            else
-            {
-                var fields = items.Select
-                (
-                    i =>
-                        new EmbedField
-                        (
-                            string.IsNullOrWhiteSpace(titleSelector(i)) ? "Not set" : titleSelector(i),
-                            string.IsNullOrWhiteSpace(valueSelector(i)) ? "Not set" : valueSelector(i)
-                        )
-                );
-
-                pages.AddRange(PageFactory.FromFields(fields));
-            }
-
-            return pages;
+            pages.Add(eb);
         }
+        else
+        {
+            var fields = items.Select
+            (
+                i =>
+                    new EmbedField
+                    (
+                        string.IsNullOrWhiteSpace(titleSelector(i)) ? "Not set" : titleSelector(i),
+                        string.IsNullOrWhiteSpace(valueSelector(i)) ? "Not set" : valueSelector(i)
+                    )
+            );
+
+            pages.AddRange(PageFactory.FromFields(fields));
+        }
+
+        return pages;
     }
 }

@@ -27,53 +27,52 @@ using DIGOS.Ambassador.Core.Utility;
 using JetBrains.Annotations;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Core.Extensions
+namespace DIGOS.Ambassador.Core.Extensions;
+
+/// <summary>
+/// Extensions for enumerables.
+/// </summary>
+public static class EnumerableExtensions
 {
     /// <summary>
-    /// Extensions for enumerables.
+    /// Selects the closest match in the sequence using the levenshtein algorithm.
     /// </summary>
-    public static class EnumerableExtensions
+    /// <param name="this">The sequence to search.</param>
+    /// <param name="search">The value to search for.</param>
+    /// <param name="tolerance">The percentile distance tolerance for results. The distance must be below this value.</param>
+    /// <returns>A retrieval result which may or may not have succeeded.</returns>
+    [Pure]
+    public static Result<string> BestLevenshteinMatch
+    (
+        this IEnumerable<string> @this,
+        string search,
+        double tolerance = 0.25
+    )
     {
-        /// <summary>
-        /// Selects the closest match in the sequence using the levenshtein algorithm.
-        /// </summary>
-        /// <param name="this">The sequence to search.</param>
-        /// <param name="search">The value to search for.</param>
-        /// <param name="tolerance">The percentile distance tolerance for results. The distance must be below this value.</param>
-        /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure]
-        public static Result<string> BestLevenshteinMatch
+        var candidates = @this.Select
         (
-            this IEnumerable<string> @this,
-            string search,
-            double tolerance = 0.25
-        )
-        {
-            var candidates = @this.Select
-            (
-                s =>
-                {
-                    var distance = LevenshteinDistance.Compute
-                    (
-                        s.ToLowerInvariant(),
-                        search.ToLowerInvariant()
-                    );
-
-                    var maxDistance = Math.Max(s.Length, search.Length);
-                    var percentile = distance / (float)maxDistance;
-
-                    return (value: s, distance, percentile);
-                }
-            );
-
-            var passing = candidates.Where(c => c.percentile <= tolerance).ToList();
-            if (!passing.Any())
+            s =>
             {
-                return new NotFoundError("No sufficiently close match found.");
-            }
+                var distance = LevenshteinDistance.Compute
+                (
+                    s.ToLowerInvariant(),
+                    search.ToLowerInvariant()
+                );
 
-            var best = passing.MinBy(c => c.distance);
-            return Result<string>.FromSuccess(best.value);
+                var maxDistance = Math.Max(s.Length, search.Length);
+                var percentile = distance / (float)maxDistance;
+
+                return (value: s, distance, percentile);
+            }
+        );
+
+        var passing = candidates.Where(c => c.percentile <= tolerance).ToList();
+        if (!passing.Any())
+        {
+            return new NotFoundError("No sufficiently close match found.");
         }
+
+        var best = passing.MinBy(c => c.distance);
+        return Result<string>.FromSuccess(best.value);
     }
 }

@@ -23,49 +23,48 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
 
-namespace DIGOS.Ambassador.Plugins.Permissions
+namespace DIGOS.Ambassador.Plugins.Permissions;
+
+/// <summary>
+/// Serves as a base class for permission types.
+/// </summary>
+public abstract class Permission : IPermission
 {
-    /// <summary>
-    /// Serves as a base class for permission types.
-    /// </summary>
-    public abstract class Permission : IPermission
+    /// <inheritdoc />
+    public abstract Guid UniqueIdentifier { get; }
+
+    /// <inheritdoc />
+    public abstract string FriendlyName { get; }
+
+    /// <inheritdoc />
+    public abstract string Description { get; }
+
+    /// <inheritdoc />
+    public virtual bool IsGrantedByDefaultToSelf => false;
+
+    /// <inheritdoc />
+    public virtual bool IsGrantedByDefaultToOthers => false;
+
+    /// <inheritdoc/>
+    public bool IsGrantedByDefaultTo(PermissionTarget target)
     {
-        /// <inheritdoc />
-        public abstract Guid UniqueIdentifier { get; }
-
-        /// <inheritdoc />
-        public abstract string FriendlyName { get; }
-
-        /// <inheritdoc />
-        public abstract string Description { get; }
-
-        /// <inheritdoc />
-        public virtual bool IsGrantedByDefaultToSelf => false;
-
-        /// <inheritdoc />
-        public virtual bool IsGrantedByDefaultToOthers => false;
-
-        /// <inheritdoc/>
-        public bool IsGrantedByDefaultTo(PermissionTarget target)
+        switch (target)
         {
-            switch (target)
+            case PermissionTarget.Self:
             {
-                case PermissionTarget.Self:
-                {
-                    return this.IsGrantedByDefaultToSelf;
-                }
-                case PermissionTarget.Other:
-                {
-                    return this.IsGrantedByDefaultToOthers;
-                }
-                case PermissionTarget.All:
-                {
-                    return this.IsGrantedByDefaultToSelf && this.IsGrantedByDefaultToOthers;
-                }
-                default:
-                {
-                    throw new ArgumentOutOfRangeException(nameof(target), target, null);
-                }
+                return this.IsGrantedByDefaultToSelf;
+            }
+            case PermissionTarget.Other:
+            {
+                return this.IsGrantedByDefaultToOthers;
+            }
+            case PermissionTarget.All:
+            {
+                return this.IsGrantedByDefaultToSelf && this.IsGrantedByDefaultToOthers;
+            }
+            default:
+            {
+                throw new ArgumentOutOfRangeException(nameof(target), target, null);
             }
         }
     }

@@ -22,40 +22,39 @@
 
 using System.Text.Json.Serialization;
 
-namespace DIGOS.Ambassador.Plugins.Kinks.FList.Kinks
+namespace DIGOS.Ambassador.Plugins.Kinks.FList.Kinks;
+
+/// <summary>
+/// Represents a JSON kink from the F-list API.
+/// </summary>
+internal class FListKink
 {
     /// <summary>
-    /// Represents a JSON kink from the F-list API.
+    /// Gets the description of the kink.
     /// </summary>
-    internal class FListKink
+    public string Description { get; }
+
+    /// <summary>
+    /// Gets the ID of the kink.
+    /// </summary>
+    [JsonPropertyName("kink_id")]
+    public uint KinkId { get; }
+
+    /// <summary>
+    /// Gets the name of the kink.
+    /// </summary>
+    public string Name { get; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FListKink"/> class.
+    /// </summary>
+    /// <param name="description">The description of the kink.</param>
+    /// <param name="kinkId">The ID of the kink in F-List's database.</param>
+    /// <param name="name">The name of the kink.</param>
+    public FListKink(string description, uint kinkId, string name)
     {
-        /// <summary>
-        /// Gets the description of the kink.
-        /// </summary>
-        public string Description { get; }
-
-        /// <summary>
-        /// Gets the ID of the kink.
-        /// </summary>
-        [JsonPropertyName("kink_id")]
-        public uint KinkId { get; }
-
-        /// <summary>
-        /// Gets the name of the kink.
-        /// </summary>
-        public string Name { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FListKink"/> class.
-        /// </summary>
-        /// <param name="description">The description of the kink.</param>
-        /// <param name="kinkId">The ID of the kink in F-List's database.</param>
-        /// <param name="name">The name of the kink.</param>
-        public FListKink(string description, uint kinkId, string name)
-        {
-            this.Description = description;
-            this.KinkId = kinkId;
-            this.Name = name;
-        }
+        this.Description = description;
+        this.KinkId = kinkId;
+        this.Name = name;
     }
 }

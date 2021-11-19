@@ -29,104 +29,103 @@ using Xunit;
 #pragma warning disable SA1600
 #pragma warning disable CS1591
 
-namespace DIGOS.Ambassador.Tests.Plugins.Transformations
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
+
+public class TokenizerTests
 {
-    public class TokenizerTests
+    private const string TokenWithoutData = "@target";
+    private const string TokenWithoutOptionalData = "@colour";
+    private const string TokenWithOptionalData = "@colour|pattern";
+
+    private const string SampleText = "lorem ipsum {@target} dolor {@colour} sit amet {@colour|base}";
+
+    private readonly IServiceProvider _services;
+
+    public TokenizerTests()
     {
-        private const string TokenWithoutData = "@target";
-        private const string TokenWithoutOptionalData = "@colour";
-        private const string TokenWithOptionalData = "@colour|pattern";
+        var serviceMock = new Mock<IServiceProvider>();
 
-        private const string SampleText = "lorem ipsum {@target} dolor {@colour} sit amet {@colour|base}";
+        _services = serviceMock.Object;
+    }
 
-        private readonly IServiceProvider _services;
+    [Fact]
+    public void CanParseTokenWithoutData()
+    {
+        var tokenizer = new TransformationTextTokenizer(_services);
+        tokenizer.WithTokenType<TargetToken>();
 
-        public TokenizerTests()
-        {
-            var serviceMock = new Mock<IServiceProvider>();
+        Assert.NotNull(tokenizer.ParseToken(0, TokenWithoutData));
+    }
 
-            _services = serviceMock.Object;
-        }
+    [Fact]
+    public void CanParseTokenWithoutOptionalData()
+    {
+        var tokenizer = new TransformationTextTokenizer(_services);
+        tokenizer.WithTokenType<ColourToken>();
 
-        [Fact]
-        public void CanParseTokenWithoutData()
-        {
-            var tokenizer = new TransformationTextTokenizer(_services);
-            tokenizer.WithTokenType<TargetToken>();
+        var token = tokenizer.ParseToken(0, TokenWithoutOptionalData) as ColourToken;
 
-            Assert.NotNull(tokenizer.ParseToken(0, TokenWithoutData));
-        }
+        Assert.NotNull(token);
+        Assert.False(token!.UsePattern);
+    }
 
-        [Fact]
-        public void CanParseTokenWithoutOptionalData()
-        {
-            var tokenizer = new TransformationTextTokenizer(_services);
-            tokenizer.WithTokenType<ColourToken>();
+    [Fact]
+    public void CanParseTokenWithOptionalData()
+    {
+        var tokenizer = new TransformationTextTokenizer(_services);
+        tokenizer.WithTokenType<ColourToken>();
 
-            var token = tokenizer.ParseToken(0, TokenWithoutOptionalData) as ColourToken;
+        var token = tokenizer.ParseToken(0, TokenWithOptionalData) as ColourToken;
 
-            Assert.NotNull(token);
-            Assert.False(token!.UsePattern);
-        }
+        Assert.NotNull(token);
+        Assert.True(token!.UsePattern);
+    }
 
-        [Fact]
-        public void CanParseTokenWithOptionalData()
-        {
-            var tokenizer = new TransformationTextTokenizer(_services);
-            tokenizer.WithTokenType<ColourToken>();
+    [Fact]
+    public void CanTokenizeText()
+    {
+        var tokenizer = new TransformationTextTokenizer(_services)
+            .WithTokenType<TargetToken>()
+            .WithTokenType<ColourToken>();
 
-            var token = tokenizer.ParseToken(0, TokenWithOptionalData) as ColourToken;
+        var tokens = tokenizer.GetTokens(SampleText);
 
-            Assert.NotNull(token);
-            Assert.True(token!.UsePattern);
-        }
+        Assert.Equal(3, tokens.Count);
 
-        [Fact]
-        public void CanTokenizeText()
-        {
-            var tokenizer = new TransformationTextTokenizer(_services)
-                .WithTokenType<TargetToken>()
-                .WithTokenType<ColourToken>();
+        Assert.IsType<TargetToken>(tokens[0]);
+        Assert.IsType<ColourToken>(tokens[1]);
+        Assert.IsType<ColourToken>(tokens[2]);
+    }
 
-            var tokens = tokenizer.GetTokens(SampleText);
+    [Fact]
+    public void ParsesTokenStartIndexCorrectly()
+    {
+        var tokenizer = new TransformationTextTokenizer(_services)
+            .WithTokenType<TargetToken>()
+            .WithTokenType<ColourToken>();
 
-            Assert.Equal(3, tokens.Count);
+        var tokens = tokenizer.GetTokens(SampleText);
 
-            Assert.IsType<TargetToken>(tokens[0]);
-            Assert.IsType<ColourToken>(tokens[1]);
-            Assert.IsType<ColourToken>(tokens[2]);
-        }
+        Assert.Equal(12, tokens[0].Start);
 
-        [Fact]
-        public void ParsesTokenStartIndexCorrectly()
-        {
-            var tokenizer = new TransformationTextTokenizer(_services)
-                .WithTokenType<TargetToken>()
-                .WithTokenType<ColourToken>();
+        Assert.Equal(28, tokens[1].Start);
 
-            var tokens = tokenizer.GetTokens(SampleText);
+        Assert.Equal(47, tokens[2].Start);
+    }
 
-            Assert.Equal(12, tokens[0].Start);
+    [Fact]
+    public void ParsesTokenLengthCorrectly()
+    {
+        var tokenizer = new TransformationTextTokenizer(_services)
+            .WithTokenType<TargetToken>()
+            .WithTokenType<ColourToken>();
 
-            Assert.Equal(28, tokens[1].Start);
+        var tokens = tokenizer.GetTokens(SampleText);
 
-            Assert.Equal(47, tokens[2].Start);
-        }
+        Assert.Equal(9, tokens[0].Length);
 
-        [Fact]
-        public void ParsesTokenLengthCorrectly()
-        {
-            var tokenizer = new TransformationTextTokenizer(_services)
-                .WithTokenType<TargetToken>()
-                .WithTokenType<ColourToken>();
+        Assert.Equal(9, tokens[1].Length);
 
-            var tokens = tokenizer.GetTokens(SampleText);
-
-            Assert.Equal(9, tokens[0].Length);
-
-            Assert.Equal(9, tokens[1].Length);
-
-            Assert.Equal(14, tokens[2].Length);
-        }
+        Assert.Equal(14, tokens[2].Length);
     }
 }

@@ -23,23 +23,22 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
 
-namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions
+namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions;
+
+/// <summary>
+/// Represents a permission that allows a user to transfer roleplays to other users.
+/// </summary>
+public sealed class TransferRoleplay : Permission
 {
-    /// <summary>
-    /// Represents a permission that allows a user to transfer roleplays to other users.
-    /// </summary>
-    public sealed class TransferRoleplay : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("8ED46D73-5666-440B-825D-2D107E75BA7B");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("8ED46D73-5666-440B-825D-2D107E75BA7B");
 
-        /// <inheritdoc />
-        public override string FriendlyName => nameof(TransferRoleplay);
+    /// <inheritdoc />
+    public override string FriendlyName => nameof(TransferRoleplay);
 
-        /// <inheritdoc />
-        public override string Description => "Allows you to transfer ownership of roleplays to other users.";
+    /// <inheritdoc />
+    public override string Description => "Allows you to transfer ownership of roleplays to other users.";
 
-        /// <inheritdoc />
-        public override bool IsGrantedByDefaultToSelf => true;
-    }
+    /// <inheritdoc />
+    public override bool IsGrantedByDefaultToSelf => true;
 }

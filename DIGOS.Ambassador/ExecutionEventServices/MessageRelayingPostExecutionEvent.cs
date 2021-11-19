@@ -46,246 +46,245 @@ using Remora.Discord.Commands.Services;
 using Remora.Discord.Core;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.ExecutionEventServices
+namespace DIGOS.Ambassador.ExecutionEventServices;
+
+/// <summary>
+/// Relays returned messages to the user upon completion of a command.
+/// </summary>
+public class MessageRelayingPostExecutionEvent : IPostExecutionEvent
 {
+    private readonly IDiscordRestInteractionAPI _interactionAPI;
+    private readonly ContentService _content;
+    private readonly PortraitService _portraits;
+    private readonly FeedbackService _feedback;
+
     /// <summary>
-    /// Relays returned messages to the user upon completion of a command.
+    /// Initializes a new instance of the <see cref="MessageRelayingPostExecutionEvent"/> class.
     /// </summary>
-    public class MessageRelayingPostExecutionEvent : IPostExecutionEvent
+    /// <param name="interactionAPI">The webhook API.</param>
+    /// <param name="feedback">The feedback service.</param>
+    /// <param name="portraits">The portrait service.</param>
+    /// <param name="content">The content service.</param>
+    public MessageRelayingPostExecutionEvent
+    (
+        IDiscordRestInteractionAPI interactionAPI,
+        FeedbackService feedback,
+        PortraitService portraits,
+        ContentService content
+    )
     {
-        private readonly IDiscordRestInteractionAPI _interactionAPI;
-        private readonly ContentService _content;
-        private readonly PortraitService _portraits;
-        private readonly FeedbackService _feedback;
+        _interactionAPI = interactionAPI;
+        _feedback = feedback;
+        _portraits = portraits;
+        _content = content;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MessageRelayingPostExecutionEvent"/> class.
-        /// </summary>
-        /// <param name="interactionAPI">The webhook API.</param>
-        /// <param name="feedback">The feedback service.</param>
-        /// <param name="portraits">The portrait service.</param>
-        /// <param name="content">The content service.</param>
-        public MessageRelayingPostExecutionEvent
-        (
-            IDiscordRestInteractionAPI interactionAPI,
-            FeedbackService feedback,
-            PortraitService portraits,
-            ContentService content
-        )
+    /// <inheritdoc />
+    public async Task<Result> AfterExecutionAsync
+    (
+        ICommandContext context,
+        IResult commandResult,
+        CancellationToken ct = default
+    )
+    {
+        if (commandResult.IsSuccess)
         {
-            _interactionAPI = interactionAPI;
-            _feedback = feedback;
-            _portraits = portraits;
-            _content = content;
-        }
-
-        /// <inheritdoc />
-        public async Task<Result> AfterExecutionAsync
-        (
-            ICommandContext context,
-            IResult commandResult,
-            CancellationToken ct = default
-        )
-        {
-            if (commandResult.IsSuccess)
+            if (commandResult is not Result<FeedbackMessage> messageResult)
             {
-                if (commandResult is not Result<FeedbackMessage> messageResult)
+                if (context is not InteractionContext interactionContext || _feedback.HasEditedOriginalMessage)
                 {
-                    if (context is not InteractionContext interactionContext || _feedback.HasEditedOriginalMessage)
-                    {
-                        return Result.FromSuccess();
-                    }
-
-                    // Erase the original interaction
-                    return await _interactionAPI.DeleteOriginalInteractionResponseAsync
-                    (
-                        interactionContext.ApplicationID,
-                        interactionContext.Token,
-                        ct
-                    );
+                    return Result.FromSuccess();
                 }
 
-                // Relay the message to the user
-                var sendMessage = await _feedback.SendContextualMessageAsync
+                // Erase the original interaction
+                return await _interactionAPI.DeleteOriginalInteractionResponseAsync
                 (
-                    messageResult.Entity,
+                    interactionContext.ApplicationID,
+                    interactionContext.Token,
+                    ct
+                );
+            }
+
+            // Relay the message to the user
+            var sendMessage = await _feedback.SendContextualMessageAsync
+            (
+                messageResult.Entity,
+                context.User.ID,
+                ct: ct
+            );
+
+            return !sendMessage.IsSuccess
+                ? Result.FromError(sendMessage)
+                : Result.FromSuccess();
+        }
+
+        IResult result = commandResult;
+        while (result.Error is ParameterParsingError or ConditionNotSatisfiedError && result.Inner is not null)
+        {
+            result = result.Inner;
+        }
+
+        var error = result.Error;
+        switch (error)
+        {
+            case AmbiguousCommandInvocationError:
+            case UserError:
+            case { } e when
+                e.GetType().IsGenericType && e.GetType().GetGenericTypeDefinition() == typeof(ParsingError<>):
+            {
+                var sendError = await _feedback.SendContextualErrorAsync
+                (
+                    error.Message,
                     context.User.ID,
                     ct: ct
                 );
 
-                return !sendMessage.IsSuccess
-                    ? Result.FromError(sendMessage)
-                    : Result.FromSuccess();
-            }
+                if (!sendError.IsSuccess)
+                {
+                    return Result.FromError(sendError);
+                }
 
-            IResult result = commandResult;
-            while (result.Error is ParameterParsingError or ConditionNotSatisfiedError && result.Inner is not null)
+                break;
+            }
+            case CommandNotFoundError:
             {
-                result = result.Inner;
-            }
+                var sendError = await _feedback.SendContextualErrorAsync
+                (
+                    "No matching command found.",
+                    context.User.ID,
+                    ct: ct
+                );
 
-            var error = result.Error;
-            switch (error)
+                if (!sendError.IsSuccess)
+                {
+                    return Result.FromError(sendError);
+                }
+
+                break;
+            }
+            default:
             {
-                case AmbiguousCommandInvocationError:
-                case UserError:
-                case { } e when
-                    e.GetType().IsGenericType && e.GetType().GetGenericTypeDefinition() == typeof(ParsingError<>):
+                var errorEmbed = new Embed("Internal Error")
                 {
-                    var sendError = await _feedback.SendContextualErrorAsync
-                    (
-                        error.Message,
-                        context.User.ID,
-                        ct: ct
-                    );
+                    Description =
+                        "Oops! Looks like you've found a bug in the bot - fear not, though. If we " +
+                        "work together, we'll have it licked in no time at all.\n" +
+                        "\n" +
+                        "I've prepared a short report of the technical details of what happened, but it's not " +
+                        "going to be worth much without your help. In order to fix this problem, it would be " +
+                        "extremely helpful if you wrote down the exact steps you did to encounter this error, " +
+                        "and post them along with the generated report on the GitHub repository. You can go " +
+                        "there by clicking the link in this message.\n" +
+                        "\n" +
+                        "The report contains some information about you, so please check it and erase anything " +
+                        "you don't want to share before passing it on.\n" +
+                        "\n" +
+                        "Your assistance is essential, and very much appreciated!",
+                    Colour = _feedback.Theme.FaultOrDanger,
+                    Timestamp = DateTimeOffset.UtcNow,
+                    Thumbnail = new EmbedThumbnail(_portraits.BrokenAmbyUri.ToString())
+                };
 
-                    if (!sendError.IsSuccess)
-                    {
-                        return Result.FromError(sendError);
-                    }
-
-                    break;
+                var sendError = await _feedback.SendPrivateEmbedAsync(context.User.ID, errorEmbed, ct: ct);
+                if (!sendError.IsSuccess)
+                {
+                    return Result.FromError(sendError);
                 }
-                case CommandNotFoundError:
-                {
-                    var sendError = await _feedback.SendContextualErrorAsync
-                    (
-                        "No matching command found.",
-                        context.User.ID,
-                        ct: ct
-                    );
 
-                    if (!sendError.IsSuccess)
+                var reportEmbed = new Embed("Click here to create a new issue")
+                {
+                    Url = _content.AutomaticBugReportCreationUri.ToString(),
+                    Colour = _feedback.Theme.Primary
+                };
+
+                await using var ms = new MemoryStream();
+                var now = DateTime.UtcNow;
+
+                await using (var sw = new StreamWriter(ms, Encoding.Default, 1024, true))
+                {
+                    await sw.WriteLineAsync("Automatic bug report");
+                    await sw.WriteLineAsync("====================");
+                    await sw.WriteLineAsync();
+                    await sw.WriteLineAsync($"Generated at: {now}");
+
+                    var entryAssembly = Assembly.GetEntryAssembly();
+                    if (entryAssembly is not null)
                     {
-                        return Result.FromError(sendError);
+                        await sw.WriteLineAsync($"Bot version: {entryAssembly.GetName().Version}");
                     }
 
-                    break;
-                }
-                default:
-                {
-                    var errorEmbed = new Embed("Internal Error")
+                    string command;
+                    switch (context)
                     {
-                        Description =
-                            "Oops! Looks like you've found a bug in the bot - fear not, though. If we " +
-                            "work together, we'll have it licked in no time at all.\n" +
-                            "\n" +
-                            "I've prepared a short report of the technical details of what happened, but it's not " +
-                            "going to be worth much without your help. In order to fix this problem, it would be " +
-                            "extremely helpful if you wrote down the exact steps you did to encounter this error, " +
-                            "and post them along with the generated report on the GitHub repository. You can go " +
-                            "there by clicking the link in this message.\n" +
-                            "\n" +
-                            "The report contains some information about you, so please check it and erase anything " +
-                            "you don't want to share before passing it on.\n" +
-                            "\n" +
-                            "Your assistance is essential, and very much appreciated!",
-                        Colour = _feedback.Theme.FaultOrDanger,
-                        Timestamp = DateTimeOffset.UtcNow,
-                        Thumbnail = new EmbedThumbnail(_portraits.BrokenAmbyUri.ToString())
-                    };
-
-                    var sendError = await _feedback.SendPrivateEmbedAsync(context.User.ID, errorEmbed, ct: ct);
-                    if (!sendError.IsSuccess)
-                    {
-                        return Result.FromError(sendError);
-                    }
-
-                    var reportEmbed = new Embed("Click here to create a new issue")
-                    {
-                        Url = _content.AutomaticBugReportCreationUri.ToString(),
-                        Colour = _feedback.Theme.Primary
-                    };
-
-                    await using var ms = new MemoryStream();
-                    var now = DateTime.UtcNow;
-
-                    await using (var sw = new StreamWriter(ms, Encoding.Default, 1024, true))
-                    {
-                        await sw.WriteLineAsync("Automatic bug report");
-                        await sw.WriteLineAsync("====================");
-                        await sw.WriteLineAsync();
-                        await sw.WriteLineAsync($"Generated at: {now}");
-
-                        var entryAssembly = Assembly.GetEntryAssembly();
-                        if (entryAssembly is not null)
+                        case MessageContext messageContext:
                         {
-                            await sw.WriteLineAsync($"Bot version: {entryAssembly.GetName().Version}");
+                            command = messageContext.Message.Content.IsDefined(out var messageContent)
+                                ? messageContent
+                                : "Unknown";
+                            break;
                         }
-
-                        string command;
-                        switch (context)
+                        case InteractionContext interactionContext:
                         {
-                            case MessageContext messageContext:
-                            {
-                                command = messageContext.Message.Content.IsDefined(out var messageContent)
-                                    ? messageContent
-                                    : "Unknown";
-                                break;
-                            }
-                            case InteractionContext interactionContext:
-                            {
-                                interactionContext.Data.UnpackInteraction(out var commandPath, out var parameters);
-                                command = string.Join(" ", commandPath) +
-                                          " " +
-                                          string.Join(" ", parameters.Select(kvp => string.Join(" ", kvp.Key, string.Join(" ", kvp.Value))));
-                                break;
-                            }
-                            default:
-                            {
-                                command = "Unknown";
-                                break;
-                            }
+                            interactionContext.Data.UnpackInteraction(out var commandPath, out var parameters);
+                            command = string.Join(" ", commandPath) +
+                                      " " +
+                                      string.Join(" ", parameters.Select(kvp => string.Join(" ", kvp.Key, string.Join(" ", kvp.Value))));
+                            break;
                         }
-
-                        await sw.WriteLineAsync($"Full command: {command}");
-                        await sw.WriteLineAsync();
-                        await sw.WriteLineAsync("### Error");
-                        var errorJson = JsonSerializer.Serialize
-                        (
-                            result,
-                            new JsonSerializerOptions { WriteIndented = true }
-                        );
-
-                        await sw.WriteLineAsync(errorJson);
-                    }
-
-                    ms.Position = 0;
-
-                    var date = now.ToShortDateString();
-                    var time = now.ToShortTimeString();
-                    var sendReport = await _feedback.SendPrivateEmbedAsync
-                    (
-                        context.User.ID,
-                        reportEmbed,
-                        new FeedbackMessageOptions(Attachments: new List<OneOf<FileData, IPartialAttachment>>
+                        default:
                         {
-                            new FileData($"bug-report-{date}-{time}.md", ms, "Generated bug report")
-                        }),
-                        ct
-                    );
-
-                    if (!sendReport.IsSuccess)
-                    {
-                        return Result.FromError(sendReport);
+                            command = "Unknown";
+                            break;
+                        }
                     }
 
-                    if (context is not InteractionContext inter || _feedback.HasEditedOriginalMessage)
-                    {
-                        return Result.FromSuccess();
-                    }
-
-                    // Erase the original interaction
-                    return await _interactionAPI.DeleteOriginalInteractionResponseAsync
+                    await sw.WriteLineAsync($"Full command: {command}");
+                    await sw.WriteLineAsync();
+                    await sw.WriteLineAsync("### Error");
+                    var errorJson = JsonSerializer.Serialize
                     (
-                        inter.ApplicationID,
-                        inter.Token,
-                        ct
+                        result,
+                        new JsonSerializerOptions { WriteIndented = true }
                     );
+
+                    await sw.WriteLineAsync(errorJson);
                 }
+
+                ms.Position = 0;
+
+                var date = now.ToShortDateString();
+                var time = now.ToShortTimeString();
+                var sendReport = await _feedback.SendPrivateEmbedAsync
+                (
+                    context.User.ID,
+                    reportEmbed,
+                    new FeedbackMessageOptions(Attachments: new List<OneOf<FileData, IPartialAttachment>>
+                    {
+                        new FileData($"bug-report-{date}-{time}.md", ms, "Generated bug report")
+                    }),
+                    ct
+                );
+
+                if (!sendReport.IsSuccess)
+                {
+                    return Result.FromError(sendReport);
+                }
+
+                if (context is not InteractionContext inter || _feedback.HasEditedOriginalMessage)
+                {
+                    return Result.FromSuccess();
+                }
+
+                // Erase the original interaction
+                return await _interactionAPI.DeleteOriginalInteractionResponseAsync
+                (
+                    inter.ApplicationID,
+                    inter.Token,
+                    ct
+                );
             }
-
-            return Result.FromError(result.Error!);
         }
+
+        return Result.FromError(result.Error!);
     }
 }

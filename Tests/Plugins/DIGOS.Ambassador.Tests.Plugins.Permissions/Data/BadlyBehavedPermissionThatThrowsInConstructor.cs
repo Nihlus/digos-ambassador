@@ -23,28 +23,27 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
 
-namespace DIGOS.Ambassador.Tests.Plugins.Permissions.Data
+namespace DIGOS.Ambassador.Tests.Plugins.Permissions.Data;
+
+/// <summary>
+/// Defines a simple test permission.
+/// </summary>
+public class BadlyBehavedPermissionThatThrowsInConstructor : Permission
 {
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("522DD3BD-BBEA-4C5F-AB95-2A04DBCB606B");
+
+    /// <inheritdoc />
+    public override string FriendlyName => nameof(TestPermission);
+
+    /// <inheritdoc />
+    public override string Description => "A test permission.";
+
     /// <summary>
-    /// Defines a simple test permission.
+    /// Initializes a new instance of the <see cref="BadlyBehavedPermissionThatThrowsInConstructor"/> class.
     /// </summary>
-    public class BadlyBehavedPermissionThatThrowsInConstructor : Permission
+    public BadlyBehavedPermissionThatThrowsInConstructor()
     {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("522DD3BD-BBEA-4C5F-AB95-2A04DBCB606B");
-
-        /// <inheritdoc />
-        public override string FriendlyName => nameof(TestPermission);
-
-        /// <inheritdoc />
-        public override string Description => "A test permission.";
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="BadlyBehavedPermissionThatThrowsInConstructor"/> class.
-        /// </summary>
-        public BadlyBehavedPermissionThatThrowsInConstructor()
-        {
-            throw new Exception("Bang!");
-        }
+        throw new Exception("Bang!");
     }
 }

@@ -28,67 +28,66 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Core
+namespace DIGOS.Ambassador.Tests.Plugins.Core;
+
+public static partial class UserServiceTests
 {
-    public static partial class UserServiceTests
+    public class GetOrRegisterUserAsync : UserServiceTestBase
     {
-        public class GetOrRegisterUserAsync : UserServiceTestBase
+        private readonly Snowflake _discordUser;
+
+        public GetOrRegisterUserAsync()
         {
-            private readonly Snowflake _discordUser;
+            _discordUser = new Snowflake(0);
+        }
 
-            public GetOrRegisterUserAsync()
-            {
-                _discordUser = new Snowflake(0);
-            }
+        [Fact]
+        public async Task ReturnsTrueIfUserHasNotBeenRegistered()
+        {
+            var result = await this.Users.GetOrRegisterUserAsync(_discordUser);
 
-            [Fact]
-            public async Task ReturnsTrueIfUserHasNotBeenRegistered()
-            {
-                var result = await this.Users.GetOrRegisterUserAsync(_discordUser);
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsTrueIfUserHasBeenRegistered()
+        {
+            await this.Users.AddUserAsync(_discordUser);
+            var result = await this.Users.GetOrRegisterUserAsync(_discordUser);
 
-            [Fact]
-            public async Task ReturnsTrueIfUserHasBeenRegistered()
-            {
-                await this.Users.AddUserAsync(_discordUser);
-                var result = await this.Users.GetOrRegisterUserAsync(_discordUser);
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsCorrectUserIfUserHasNotBeenRegistered()
+        {
+            var result = await this.Users.GetOrRegisterUserAsync(_discordUser);
+            var user = result.Entity;
 
-            [Fact]
-            public async Task ReturnsCorrectUserIfUserHasNotBeenRegistered()
-            {
-                var result = await this.Users.GetOrRegisterUserAsync(_discordUser);
-                var user = result.Entity;
+            Assert.Equal(_discordUser, user.DiscordID);
+        }
 
-                Assert.Equal(_discordUser, user.DiscordID);
-            }
+        [Fact]
+        public async Task ReturnsCorrectUserIfUserHasBeenRegistered()
+        {
+            await this.Users.AddUserAsync(_discordUser);
 
-            [Fact]
-            public async Task ReturnsCorrectUserIfUserHasBeenRegistered()
-            {
-                await this.Users.AddUserAsync(_discordUser);
+            var result = await this.Users.GetOrRegisterUserAsync(_discordUser);
+            var user = result.Entity;
 
-                var result = await this.Users.GetOrRegisterUserAsync(_discordUser);
-                var user = result.Entity;
+            Assert.Equal(_discordUser, user.DiscordID);
+        }
 
-                Assert.Equal(_discordUser, user.DiscordID);
-            }
+        [Fact]
+        public async Task ReturnsSameUserForMultipleCalls()
+        {
+            var firstResult = await this.Users.GetOrRegisterUserAsync(_discordUser);
+            var firstUser = firstResult.Entity;
 
-            [Fact]
-            public async Task ReturnsSameUserForMultipleCalls()
-            {
-                var firstResult = await this.Users.GetOrRegisterUserAsync(_discordUser);
-                var firstUser = firstResult.Entity;
+            var secondResult = await this.Users.GetOrRegisterUserAsync(_discordUser);
+            var secondUser = secondResult.Entity;
 
-                var secondResult = await this.Users.GetOrRegisterUserAsync(_discordUser);
-                var secondUser = secondResult.Entity;
-
-                Assert.Same(firstUser, secondUser);
-            }
+            Assert.Same(firstUser, secondUser);
         }
     }
 }

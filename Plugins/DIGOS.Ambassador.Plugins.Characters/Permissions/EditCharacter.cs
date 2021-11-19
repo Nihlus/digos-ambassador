@@ -23,23 +23,22 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
 
-namespace DIGOS.Ambassador.Plugins.Characters.Permissions
+namespace DIGOS.Ambassador.Plugins.Characters.Permissions;
+
+/// <summary>
+/// Represents a permission that allows a user to edit characters.
+/// </summary>
+public sealed class EditCharacter : Permission
 {
-    /// <summary>
-    /// Represents a permission that allows a user to edit characters.
-    /// </summary>
-    public sealed class EditCharacter : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("47AB9A74-56AA-419B-A97E-992C15EF3320");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("47AB9A74-56AA-419B-A97E-992C15EF3320");
 
-        /// <inheritdoc />
-        public override string FriendlyName => nameof(EditCharacter);
+    /// <inheritdoc />
+    public override string FriendlyName => nameof(EditCharacter);
 
-        /// <inheritdoc />
-        public override string Description => "Allows you to edit characters.";
+    /// <inheritdoc />
+    public override string Description => "Allows you to edit characters.";
 
-        /// <inheritdoc />
-        public override bool IsGrantedByDefaultToSelf => true;
-    }
+    /// <inheritdoc />
+    public override bool IsGrantedByDefaultToSelf => true;
 }

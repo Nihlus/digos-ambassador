@@ -27,64 +27,63 @@ using DIGOS.Ambassador.Plugins.Transformations.Services.Lua;
 using JetBrains.Annotations;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens;
+
+/// <summary>
+/// Represents a token which executes a named lua code script and gets replaced with the result.
+/// </summary>
+[PublicAPI]
+[TokenIdentifier("script", "sc")]
+public sealed class LuaScriptToken : ReplaceableTextToken<LuaScriptToken>
 {
+    private readonly LuaService _lua;
+
     /// <summary>
-    /// Represents a token which executes a named lua code script and gets replaced with the result.
+    /// Gets the name of the script to execute.
     /// </summary>
-    [PublicAPI]
-    [TokenIdentifier("script", "sc")]
-    public sealed class LuaScriptToken : ReplaceableTextToken<LuaScriptToken>
+    public string ScriptName { get; private set; } = null!;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LuaScriptToken"/> class.
+    /// </summary>
+    /// <param name="luaService">The lua execution service.</param>
+    public LuaScriptToken(LuaService luaService)
     {
-        private readonly LuaService _lua;
+        _lua = luaService;
+    }
 
-        /// <summary>
-        /// Gets the name of the script to execute.
-        /// </summary>
-        public string ScriptName { get; private set; } = null!;
+    /// <inheritdoc />
+    public override string GetText(Appearance appearance, AppearanceComponent? component)
+    {
+        return GetTextAsync(appearance, component).GetAwaiter().GetResult();
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="LuaScriptToken"/> class.
-        /// </summary>
-        /// <param name="luaService">The lua execution service.</param>
-        public LuaScriptToken(LuaService luaService)
+    /// <inheritdoc />
+    public override async Task<string> GetTextAsync(Appearance appearance, AppearanceComponent? component)
+    {
+        if (component is null)
         {
-            _lua = luaService;
+            return string.Empty;
         }
 
-        /// <inheritdoc />
-        public override string GetText(Appearance appearance, AppearanceComponent? component)
-        {
-            return GetTextAsync(appearance, component).GetAwaiter().GetResult();
-        }
+        var scriptPath = ContentServiceExtensions.GetLuaScriptPath(component.Transformation, this.ScriptName);
+        var result = await _lua.ExecuteScriptAsync
+        (
+            scriptPath,
+            (nameof(appearance), appearance),
+            ("character", appearance.Character),
+            (nameof(component), component)
+        );
 
-        /// <inheritdoc />
-        public override async Task<string> GetTextAsync(Appearance appearance, AppearanceComponent? component)
-        {
-            if (component is null)
-            {
-                return string.Empty;
-            }
+        return result.IsSuccess
+            ? result.Entity
+            : $"[{result.Error.Message}]";
+    }
 
-            var scriptPath = ContentServiceExtensions.GetLuaScriptPath(component.Transformation, this.ScriptName);
-            var result = await _lua.ExecuteScriptAsync
-            (
-                scriptPath,
-                (nameof(appearance), appearance),
-                ("character", appearance.Character),
-                (nameof(component), component)
-            );
-
-            return result.IsSuccess
-                ? result.Entity
-                : $"[{result.Error.Message}]";
-        }
-
-        /// <inheritdoc />
-        protected override LuaScriptToken Initialize(string? data)
-        {
-            this.ScriptName = data ?? string.Empty;
-            return this;
-        }
+    /// <inheritdoc />
+    protected override LuaScriptToken Initialize(string? data)
+    {
+        this.ScriptName = data ?? string.Empty;
+        return this;
     }
 }

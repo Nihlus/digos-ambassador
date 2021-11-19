@@ -22,22 +22,21 @@
 
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
+namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
+
+/// <summary>
+/// Represents a transformation colour.
+/// </summary>
+[PublicAPI]
+public interface IColour
 {
     /// <summary>
-    /// Represents a transformation colour.
+    /// Gets the shade of the colour.
     /// </summary>
-    [PublicAPI]
-    public interface IColour
-    {
-        /// <summary>
-        /// Gets the shade of the colour.
-        /// </summary>
-        Shade Shade { get; }
+    Shade Shade { get; }
 
-        /// <summary>
-        /// Gets the colour modifier.
-        /// </summary>
-        ShadeModifier? Modifier { get; }
-    }
+    /// <summary>
+    /// Gets the colour modifier.
+    /// </summary>
+    ShadeModifier? Modifier { get; }
 }

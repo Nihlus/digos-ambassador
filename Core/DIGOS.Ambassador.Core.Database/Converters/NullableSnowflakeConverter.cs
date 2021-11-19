@@ -23,28 +23,27 @@
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Remora.Discord.Core;
 
-namespace DIGOS.Ambassador.Core.Database.Converters
+namespace DIGOS.Ambassador.Core.Database.Converters;
+
+/// <summary>
+/// Converts <see cref="Snowflake"/> instances to and from a database provider representation.
+/// </summary>
+public class NullableSnowflakeConverter : ValueConverter<Snowflake?, long?>
 {
     /// <summary>
-    /// Converts <see cref="Snowflake"/> instances to and from a database provider representation.
+    /// Initializes a new instance of the <see cref="NullableSnowflakeConverter"/> class.
     /// </summary>
-    public class NullableSnowflakeConverter : ValueConverter<Snowflake?, long?>
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NullableSnowflakeConverter"/> class.
-        /// </summary>
-        /// <param name="mappingHints">The mapping hints.</param>
-        public NullableSnowflakeConverter
+    /// <param name="mappingHints">The mapping hints.</param>
+    public NullableSnowflakeConverter
+    (
+        ConverterMappingHints? mappingHints = null
+    )
+        : base
         (
-            ConverterMappingHints? mappingHints = null
+            v => v.HasValue ? (long)v.Value.Value : null,
+            v => v.HasValue ? new Snowflake((ulong)v) : null,
+            mappingHints
         )
-            : base
-            (
-                v => v.HasValue ? (long)v.Value.Value : null,
-                v => v.HasValue ? new Snowflake((ulong)v) : null,
-                mappingHints
-            )
-        {
-        }
+    {
     }
 }

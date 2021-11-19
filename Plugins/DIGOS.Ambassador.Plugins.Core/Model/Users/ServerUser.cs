@@ -26,43 +26,42 @@ using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Plugins.Core.Model.Users
+namespace DIGOS.Ambassador.Plugins.Core.Model.Users;
+
+/// <summary>
+/// Represents a join table entry for a server-user mapping.
+/// </summary>
+[Table("ServerUser", Schema = "Core")]
+public class ServerUser : EFEntity
 {
     /// <summary>
-    /// Represents a join table entry for a server-user mapping.
+    /// Gets the server the user has joined.
     /// </summary>
-    [Table("ServerUser", Schema = "Core")]
-    public class ServerUser : EFEntity
+    public virtual Server Server { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the user that has joined the server.
+    /// </summary>
+    public virtual User User { get; private set; } = null!;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ServerUser"/> class.
+    /// </summary>
+    /// <remarks>
+    /// Required by EF Core.
+    /// </remarks>
+    protected ServerUser()
     {
-        /// <summary>
-        /// Gets the server the user has joined.
-        /// </summary>
-        public virtual Server Server { get; private set; } = null!;
+    }
 
-        /// <summary>
-        /// Gets the user that has joined the server.
-        /// </summary>
-        public virtual User User { get; private set; } = null!;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ServerUser"/> class.
-        /// </summary>
-        /// <remarks>
-        /// Required by EF Core.
-        /// </remarks>
-        protected ServerUser()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ServerUser"/> class.
-        /// </summary>
-        /// <param name="server">The server.</param>
-        /// <param name="user">The user.</param>
-        public ServerUser(Server server, User user)
-        {
-            this.Server = server;
-            this.User = user;
-        }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ServerUser"/> class.
+    /// </summary>
+    /// <param name="server">The server.</param>
+    /// <param name="user">The user.</param>
+    public ServerUser(Server server, User user)
+    {
+        this.Server = server;
+        this.User = user;
     }
 }

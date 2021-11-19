@@ -22,27 +22,26 @@
 
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Plugins.Kinks.Services
+namespace DIGOS.Ambassador.Plugins.Kinks.Services;
+
+/// <summary>
+/// Holds options for the visibility of a user's kink list.
+/// </summary>
+[PublicAPI]
+public enum KinkVisibility
 {
     /// <summary>
-    /// Holds options for the visibility of a user's kink list.
+    /// Anyone can view your kinks.
     /// </summary>
-    [PublicAPI]
-    public enum KinkVisibility
-    {
-        /// <summary>
-        /// Anyone can view your kinks.
-        /// </summary>
-        All,
+    All,
 
-        /// <summary>
-        /// Only your friends can view your kinks.
-        /// </summary>
-        Friends,
+    /// <summary>
+    /// Only your friends can view your kinks.
+    /// </summary>
+    Friends,
 
-        /// <summary>
-        /// Only people on your whitelist can view your kinks.
-        /// </summary>
-        Whitelist
-    }
+    /// <summary>
+    /// Only people on your whitelist can view your kinks.
+    /// </summary>
+    Whitelist
 }

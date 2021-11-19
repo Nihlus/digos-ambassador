@@ -24,26 +24,25 @@ using System;
 using System.Collections.Generic;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Attributes
+namespace DIGOS.Ambassador.Plugins.Transformations.Attributes;
+
+/// <summary>
+/// An attribute which marks a bodypart as a composite part.
+/// </summary>
+[AttributeUsage(AttributeTargets.Field)]
+internal sealed class CompositeAttribute : Attribute
 {
     /// <summary>
-    /// An attribute which marks a bodypart as a composite part.
+    /// Gets the list of parts that compose this part.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field)]
-    internal sealed class CompositeAttribute : Attribute
-    {
-        /// <summary>
-        /// Gets the list of parts that compose this part.
-        /// </summary>
-        public IReadOnlyList<Bodypart> ComposingParts { get; }
+    public IReadOnlyList<Bodypart> ComposingParts { get; }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CompositeAttribute"/> class.
-        /// </summary>
-        /// <param name="composingParts">The parts that compose this part.</param>
-        public CompositeAttribute(params Bodypart[] composingParts)
-        {
-            this.ComposingParts = composingParts;
-        }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CompositeAttribute"/> class.
+    /// </summary>
+    /// <param name="composingParts">The parts that compose this part.</param>
+    public CompositeAttribute(params Bodypart[] composingParts)
+    {
+        this.ComposingParts = composingParts;
     }
 }

@@ -23,23 +23,22 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
 
-namespace DIGOS.Ambassador.Plugins.Characters.Permissions
+namespace DIGOS.Ambassador.Plugins.Characters.Permissions;
+
+/// <summary>
+/// Represents a permission that allows a user to delete characters.
+/// </summary>
+public sealed class DeleteCharacter : Permission
 {
-    /// <summary>
-    /// Represents a permission that allows a user to delete characters.
-    /// </summary>
-    public sealed class DeleteCharacter : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("511A9A88-4797-41D9-939E-C5DDD5479C1E");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("511A9A88-4797-41D9-939E-C5DDD5479C1E");
 
-        /// <inheritdoc />
-        public override string FriendlyName => nameof(DeleteCharacter);
+    /// <inheritdoc />
+    public override string FriendlyName => nameof(DeleteCharacter);
 
-        /// <inheritdoc />
-        public override string Description => "Allows you to delete characters.";
+    /// <inheritdoc />
+    public override string Description => "Allows you to delete characters.";
 
-        /// <inheritdoc />
-        public override bool IsGrantedByDefaultToSelf => true;
-    }
+    /// <inheritdoc />
+    public override bool IsGrantedByDefaultToSelf => true;
 }

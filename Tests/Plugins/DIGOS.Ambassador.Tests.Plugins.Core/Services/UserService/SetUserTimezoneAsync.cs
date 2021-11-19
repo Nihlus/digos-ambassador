@@ -32,74 +32,73 @@ using Xunit;
 #pragma warning disable SA1649
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Core
-{
-    public static partial class UserServiceTests
-    {
-        public class SetUserTimezoneAsync : UserServiceTestBase
-        {
-            private User _user = null!;
+namespace DIGOS.Ambassador.Tests.Plugins.Core;
 
-            public static IEnumerable<object[]> ValidTimezoneOffsets
+public static partial class UserServiceTests
+{
+    public class SetUserTimezoneAsync : UserServiceTestBase
+    {
+        private User _user = null!;
+
+        public static IEnumerable<object[]> ValidTimezoneOffsets
+        {
+            [UsedImplicitly]
+            get
             {
-                [UsedImplicitly]
-                get
+                for (var i = -12; i < 14; i++)
                 {
-                    for (var i = -12; i < 14; i++)
-                    {
-                        yield return new object[] { i };
-                    }
+                    yield return new object[] { i };
                 }
             }
+        }
 
-            public override async Task InitializeAsync()
-            {
-                await base.InitializeAsync();
+        public override async Task InitializeAsync()
+        {
+            await base.InitializeAsync();
 
-                var discordUser = new Snowflake(0);
-                var user = await this.Users.AddUserAsync(discordUser);
-                _user = user.Entity;
-            }
+            var discordUser = new Snowflake(0);
+            var user = await this.Users.AddUserAsync(discordUser);
+            _user = user.Entity;
+        }
 
-            [Theory]
-            [MemberData(nameof(ValidTimezoneOffsets))]
-            public async Task ReturnsTrueForValidTimezone(int timezone)
-            {
-                var result = await this.Users.SetUserTimezoneAsync(_user, timezone);
+        [Theory]
+        [MemberData(nameof(ValidTimezoneOffsets))]
+        public async Task ReturnsTrueForValidTimezone(int timezone)
+        {
+            var result = await this.Users.SetUserTimezoneAsync(_user, timezone);
 
-                Assert.True(result.IsSuccess);
-            }
+            Assert.True(result.IsSuccess);
+        }
 
-            [Theory]
-            [MemberData(nameof(ValidTimezoneOffsets))]
-            public async Task ActuallySetsValueForValidTimezone(int timezone)
-            {
-                await this.Users.SetUserTimezoneAsync(_user, timezone);
+        [Theory]
+        [MemberData(nameof(ValidTimezoneOffsets))]
+        public async Task ActuallySetsValueForValidTimezone(int timezone)
+        {
+            await this.Users.SetUserTimezoneAsync(_user, timezone);
 
-                Assert.Equal(timezone, _user.Timezone);
-            }
+            Assert.Equal(timezone, _user.Timezone);
+        }
 
-            [Theory]
-            [InlineData(-13)]
-            [InlineData(15)]
-            public async Task ReturnsFalseForInvalidTimezone(int timezone)
-            {
-                var result = await this.Users.SetUserTimezoneAsync(_user, timezone);
+        [Theory]
+        [InlineData(-13)]
+        [InlineData(15)]
+        public async Task ReturnsFalseForInvalidTimezone(int timezone)
+        {
+            var result = await this.Users.SetUserTimezoneAsync(_user, timezone);
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsFalseIfTimezoneIsAlreadySet()
-            {
-                const int timezone = 10;
+        [Fact]
+        public async Task ReturnsFalseIfTimezoneIsAlreadySet()
+        {
+            const int timezone = 10;
 
-                await this.Users.SetUserTimezoneAsync(_user, timezone);
+            await this.Users.SetUserTimezoneAsync(_user, timezone);
 
-                var result = await this.Users.SetUserTimezoneAsync(_user, timezone);
+            var result = await this.Users.SetUserTimezoneAsync(_user, timezone);
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
         }
     }
 }

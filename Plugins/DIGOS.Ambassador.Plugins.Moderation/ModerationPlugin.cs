@@ -45,71 +45,70 @@ using Remora.Results;
 
 [assembly: RemoraPlugin(typeof(ModerationPlugin))]
 
-namespace DIGOS.Ambassador.Plugins.Moderation
+namespace DIGOS.Ambassador.Plugins.Moderation;
+
+/// <summary>
+/// Describes the moderation plugin.
+/// </summary>
+public class ModerationPlugin : PluginDescriptor, IMigratablePlugin
 {
-    /// <summary>
-    /// Describes the moderation plugin.
-    /// </summary>
-    public class ModerationPlugin : PluginDescriptor, IMigratablePlugin
+    /// <inheritdoc />
+    public override string Name => "Moderation";
+
+    /// <inheritdoc />
+    public override string Description => "Provides simple moderation tools.";
+
+    /// <inheritdoc />
+    public override void ConfigureServices(IServiceCollection serviceCollection)
     {
-        /// <inheritdoc />
-        public override string Name => "Moderation";
+        serviceCollection.TryAddInteractivityResponder<PaginatedMessageResponder>();
+        serviceCollection
+            .AddConfiguredSchemaAwareDbContextPool<ModerationDatabaseContext>();
 
-        /// <inheritdoc />
-        public override string Description => "Provides simple moderation tools.";
+        serviceCollection
+            .AddScoped<ModerationService>()
+            .AddScoped<NoteService>()
+            .AddScoped<WarningService>()
+            .AddScoped<BanService>()
+            .AddScoped<ChannelLoggingService>();
 
-        /// <inheritdoc />
-        public override void ConfigureServices(IServiceCollection serviceCollection)
-        {
-            serviceCollection.TryAddInteractivityResponder<PaginatedMessageResponder>();
-            serviceCollection
-                .AddConfiguredSchemaAwareDbContextPool<ModerationDatabaseContext>();
+        serviceCollection
+            .AddCommandGroup<BanCommands>()
+            .AddCommandGroup<ModerationCommands>()
+            .AddCommandGroup<NoteCommands>()
+            .AddCommandGroup<WarningCommands>();
 
-            serviceCollection
-                .AddScoped<ModerationService>()
-                .AddScoped<NoteService>()
-                .AddScoped<WarningService>()
-                .AddScoped<BanService>()
-                .AddScoped<ChannelLoggingService>();
+        serviceCollection.AddResponder<EventLoggingResponder>();
+        serviceCollection.AddBehaviour<ExpirationBehaviour>();
+    }
 
-            serviceCollection
-                .AddCommandGroup<BanCommands>()
-                .AddCommandGroup<ModerationCommands>()
-                .AddCommandGroup<NoteCommands>()
-                .AddCommandGroup<WarningCommands>();
+    /// <inheritdoc />
+    public override ValueTask<Result> InitializeAsync(IServiceProvider serviceProvider)
+    {
+        var permissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
+        return new ValueTask<Result>(permissionRegistry.RegisterPermissions
+        (
+            Assembly.GetExecutingAssembly(),
+            serviceProvider
+        ));
+    }
 
-            serviceCollection.AddResponder<EventLoggingResponder>();
-            serviceCollection.AddBehaviour<ExpirationBehaviour>();
-        }
+    /// <inheritdoc />
+    public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
+    {
+        var context = serviceProvider.GetRequiredService<ModerationDatabaseContext>();
 
-        /// <inheritdoc />
-        public override ValueTask<Result> InitializeAsync(IServiceProvider serviceProvider)
-        {
-            var permissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
-            return new ValueTask<Result>(permissionRegistry.RegisterPermissions
-            (
-                Assembly.GetExecutingAssembly(),
-                serviceProvider
-            ));
-        }
+        await context.Database.MigrateAsync();
 
-        /// <inheritdoc />
-        public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
-        {
-            var context = serviceProvider.GetRequiredService<ModerationDatabaseContext>();
+        return Result.FromSuccess();
+    }
 
-            await context.Database.MigrateAsync();
+    /// <inheritdoc />
+    public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
+    {
+        var context = serviceProvider.GetRequiredService<ModerationDatabaseContext>();
+        var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
 
-            return Result.FromSuccess();
-        }
-
-        /// <inheritdoc />
-        public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
-        {
-            var context = serviceProvider.GetRequiredService<ModerationDatabaseContext>();
-            var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
-
-            return appliedMigrations.Any();
-        }
+        return appliedMigrations.Any();
     }
 }

@@ -23,45 +23,44 @@
 using System;
 using System.IO;
 
-namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
+namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters;
+
+/// <summary>
+/// Wraps the exported data from a roleplay.
+/// </summary>
+internal sealed class ExportedRoleplay : IDisposable
 {
     /// <summary>
-    /// Wraps the exported data from a roleplay.
+    /// Initializes a new instance of the <see cref="ExportedRoleplay"/> class.
     /// </summary>
-    internal sealed class ExportedRoleplay : IDisposable
+    /// <param name="title">The title of the roleplay.</param>
+    /// <param name="format">The format of the exported data.</param>
+    /// <param name="data">The exported data.</param>
+    public ExportedRoleplay(string title, ExportFormat format, Stream data)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ExportedRoleplay"/> class.
-        /// </summary>
-        /// <param name="title">The title of the roleplay.</param>
-        /// <param name="format">The format of the exported data.</param>
-        /// <param name="data">The exported data.</param>
-        public ExportedRoleplay(string title, ExportFormat format, Stream data)
-        {
-            this.Title = title;
-            this.Format = format;
-            this.Data = data;
-        }
+        this.Title = title;
+        this.Format = format;
+        this.Data = data;
+    }
 
-        /// <summary>
-        /// Gets the title of the roleplay. This is often used for the output file name.
-        /// </summary>
-        public string Title { get; }
+    /// <summary>
+    /// Gets the title of the roleplay. This is often used for the output file name.
+    /// </summary>
+    public string Title { get; }
 
-        /// <summary>
-        /// Gets the exported format of the roleplay.
-        /// </summary>
-        public ExportFormat Format { get; }
+    /// <summary>
+    /// Gets the exported format of the roleplay.
+    /// </summary>
+    public ExportFormat Format { get; }
 
-        /// <summary>
-        /// Gets the stream that contains the data in the roleplay.
-        /// </summary>
-        public Stream Data { get; }
+    /// <summary>
+    /// Gets the stream that contains the data in the roleplay.
+    /// </summary>
+    public Stream Data { get; }
 
-        /// <inheritdoc />
-        public void Dispose()
-        {
-            this.Data.Dispose();
-        }
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        this.Data.Dispose();
     }
 }

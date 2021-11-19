@@ -31,62 +31,61 @@ using Xunit;
 #pragma warning disable CS8625
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Characters
+namespace DIGOS.Ambassador.Tests.Plugins.Characters;
+
+public partial class CharacterServiceTests
 {
-    public partial class CharacterServiceTests
+    public class SetCharacterNicknameAsync : CharacterServiceTestBase
     {
-        public class SetCharacterNicknameAsync : CharacterServiceTestBase
+        private const string Nickname = "Nicke";
+
+        private readonly Character _character;
+
+        public SetCharacterNicknameAsync()
         {
-            private const string Nickname = "Nicke";
+            _character = CreateCharacter(nickname: Nickname);
+        }
 
-            private readonly Character _character;
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfNicknameIsEmpty()
+        {
+            var result = await this.CharacterEditor.SetCharacterNicknameAsync(_character, string.Empty);
 
-            public SetCharacterNicknameAsync()
-            {
-                _character = CreateCharacter(nickname: Nickname);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfNicknameIsEmpty()
-            {
-                var result = await this.CharacterEditor.SetCharacterNicknameAsync(_character, string.Empty);
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfNicknameIsTheSameAsTheCurrentNickname()
+        {
+            var result = await this.CharacterEditor.SetCharacterNicknameAsync(_character, Nickname);
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfNicknameIsTheSameAsTheCurrentNickname()
-            {
-                var result = await this.CharacterEditor.SetCharacterNicknameAsync(_character, Nickname);
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfNewNicknameIsLongerThan32Characters()
+        {
+            var result = await this.CharacterEditor.SetCharacterNicknameAsync(_character, new string('a', 33));
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfNewNicknameIsLongerThan32Characters()
-            {
-                var result = await this.CharacterEditor.SetCharacterNicknameAsync(_character, new string('a', 33));
+        [Fact]
+        public async Task ReturnsSuccessfulResultIfNicknameIsAccepted()
+        {
+            var result = await this.CharacterEditor.SetCharacterNicknameAsync(_character, "Bobby");
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.True(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsSuccessfulResultIfNicknameIsAccepted()
-            {
-                var result = await this.CharacterEditor.SetCharacterNicknameAsync(_character, "Bobby");
+        [Fact]
+        public async Task SetsNickname()
+        {
+            const string newNickname = "Bobby";
+            await this.CharacterEditor.SetCharacterNicknameAsync(_character, newNickname);
 
-                Assert.True(result.IsSuccess);
-            }
-
-            [Fact]
-            public async Task SetsNickname()
-            {
-                const string newNickname = "Bobby";
-                await this.CharacterEditor.SetCharacterNicknameAsync(_character, newNickname);
-
-                var character = this.Database.Characters.First();
-                Assert.Equal(newNickname, character.Nickname);
-            }
+            var character = this.Database.Characters.First();
+            Assert.Equal(newNickname, character.Nickname);
         }
     }
 }

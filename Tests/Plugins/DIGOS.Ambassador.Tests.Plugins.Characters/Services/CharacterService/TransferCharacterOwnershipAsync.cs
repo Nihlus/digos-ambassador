@@ -31,42 +31,41 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Characters
+namespace DIGOS.Ambassador.Tests.Plugins.Characters;
+
+public partial class CharacterServiceTests
 {
-    public partial class CharacterServiceTests
+    public class TransferCharacterOwnershipAsync : CharacterServiceTestBase
     {
-        public class TransferCharacterOwnershipAsync : CharacterServiceTestBase
+        private readonly Character _character;
+        private readonly User _newOwner;
+
+        public TransferCharacterOwnershipAsync()
         {
-            private readonly Character _character;
-            private readonly User _newOwner;
+            _character = CreateCharacter();
+            _newOwner = new User(new Snowflake(1));
+        }
 
-            public TransferCharacterOwnershipAsync()
-            {
-                _character = CreateCharacter();
-                _newOwner = new User(new Snowflake(1));
-            }
+        [Fact]
+        public async Task ReturnsSuccessfulResultIfCharacterIsTransferred()
+        {
+            var result = await this.Characters.TransferCharacterOwnershipAsync
+            (
+                _newOwner,
+                this.DefaultServer,
+                _character
+            );
 
-            [Fact]
-            public async Task ReturnsSuccessfulResultIfCharacterIsTransferred()
-            {
-                var result = await this.Characters.TransferCharacterOwnershipAsync
-                (
-                    _newOwner,
-                    this.DefaultServer,
-                    _character
-                );
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public async Task TransfersCharacter()
+        {
+            await this.Characters.TransferCharacterOwnershipAsync(_newOwner, this.DefaultServer, _character);
 
-            [Fact]
-            public async Task TransfersCharacter()
-            {
-                await this.Characters.TransferCharacterOwnershipAsync(_newOwner, this.DefaultServer, _character);
-
-                var character = this.Database.Characters.First();
-                Assert.Equal(_newOwner.DiscordID, character.Owner.DiscordID);
-            }
+            var character = this.Database.Characters.First();
+            Assert.Equal(_newOwner.DiscordID, character.Owner.DiscordID);
         }
     }
 }

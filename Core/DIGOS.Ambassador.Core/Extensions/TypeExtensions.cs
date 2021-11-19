@@ -24,41 +24,40 @@ using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Core.Extensions
-{
-    /// <summary>
-    /// Holds extension methods for types.
-    /// </summary>
-    public static class TypeExtensions
-    {
-        private static readonly Dictionary<Type, string> TypeAliases = new Dictionary<Type, string>
-        {
-            { typeof(string), "string" },
-            { typeof(int), "int" },
-            { typeof(byte), "byte" },
-            { typeof(sbyte), "sbyte" },
-            { typeof(short), "short" },
-            { typeof(ushort), "ushort" },
-            { typeof(long), "long" },
-            { typeof(uint), "uint" },
-            { typeof(ulong), "ulong" },
-            { typeof(float), "float" },
-            { typeof(double), "double" },
-            { typeof(decimal), "decimal" },
-            { typeof(object), "object" },
-            { typeof(bool), "bool" },
-            { typeof(char), "char" }
-        };
+namespace DIGOS.Ambassador.Core.Extensions;
 
-        /// <summary>
-        /// Humanizes a type, returning its type alias or full name.
-        /// </summary>
-        /// <param name="this">The type to humanize.</param>
-        /// <returns>A humanized string.</returns>
-        [Pure]
-        public static string Humanize(this Type @this)
-        {
-            return TypeAliases.ContainsKey(@this) ? TypeAliases[@this] : @this.Name;
-        }
+/// <summary>
+/// Holds extension methods for types.
+/// </summary>
+public static class TypeExtensions
+{
+    private static readonly Dictionary<Type, string> TypeAliases = new Dictionary<Type, string>
+    {
+        { typeof(string), "string" },
+        { typeof(int), "int" },
+        { typeof(byte), "byte" },
+        { typeof(sbyte), "sbyte" },
+        { typeof(short), "short" },
+        { typeof(ushort), "ushort" },
+        { typeof(long), "long" },
+        { typeof(uint), "uint" },
+        { typeof(ulong), "ulong" },
+        { typeof(float), "float" },
+        { typeof(double), "double" },
+        { typeof(decimal), "decimal" },
+        { typeof(object), "object" },
+        { typeof(bool), "bool" },
+        { typeof(char), "char" }
+    };
+
+    /// <summary>
+    /// Humanizes a type, returning its type alias or full name.
+    /// </summary>
+    /// <param name="this">The type to humanize.</param>
+    /// <returns>A humanized string.</returns>
+    [Pure]
+    public static string Humanize(this Type @this)
+    {
+        return TypeAliases.ContainsKey(@this) ? TypeAliases[@this] : @this.Name;
     }
 }

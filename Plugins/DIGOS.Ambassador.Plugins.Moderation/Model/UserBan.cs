@@ -30,78 +30,77 @@ using DIGOS.Ambassador.Plugins.Moderation.Model.Bases;
 using Remora.Discord.Core;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Plugins.Moderation.Model
+namespace DIGOS.Ambassador.Plugins.Moderation.Model;
+
+/// <summary>
+/// Represents a ban of a user.
+/// </summary>
+[Table("UserBans", Schema = "ModerationModule")]
+public class UserBan : AuthoredUserEntity
 {
     /// <summary>
-    /// Represents a ban of a user.
+    /// Gets the reason for the ban.
     /// </summary>
-    [Table("UserBans", Schema = "ModerationModule")]
-    public class UserBan : AuthoredUserEntity
+    public string Reason { get; internal set; } = null!;
+
+    /// <summary>
+    /// Gets the message that caused the warning, if any.
+    /// </summary>
+    public Snowflake? MessageID { get; internal set; }
+
+    /// <summary>
+    /// Gets the time at which the ban was last updated.
+    /// </summary>
+    public DateTimeOffset UpdatedAt { get; internal set; }
+
+    /// <summary>
+    /// Gets the time at which the ban expires.
+    /// </summary>
+    public DateTimeOffset? ExpiresOn { get; internal set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserBan"/> class.
+    /// </summary>
+    /// <remarks>
+    /// Required by EF Core.
+    /// </remarks>
+    [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
+    protected UserBan()
     {
-        /// <summary>
-        /// Gets the reason for the ban.
-        /// </summary>
-        public string Reason { get; internal set; } = null!;
+    }
 
-        /// <summary>
-        /// Gets the message that caused the warning, if any.
-        /// </summary>
-        public Snowflake? MessageID { get; internal set; }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserBan"/> class.
+    /// </summary>
+    /// <param name="server">The server that the ban was created on.</param>
+    /// <param name="user">The user that the ban is attached to.</param>
+    /// <param name="author">The user that created the ban.</param>
+    /// <param name="reason">The reason for the ban.</param>
+    /// <param name="messageID">The message that caused the warning, if any.</param>
+    /// <param name="expiresOn">The time at which the ban expires.</param>
+    public UserBan
+    (
+        Server server,
+        User user,
+        User author,
+        string reason,
+        Snowflake? messageID = null,
+        DateTimeOffset? expiresOn = null
+    )
+        : base(server, user, author)
+    {
+        this.Reason = reason;
+        this.MessageID = messageID;
 
-        /// <summary>
-        /// Gets the time at which the ban was last updated.
-        /// </summary>
-        public DateTimeOffset UpdatedAt { get; internal set; }
+        this.UpdatedAt = DateTimeOffset.UtcNow;
+        this.ExpiresOn = expiresOn;
+    }
 
-        /// <summary>
-        /// Gets the time at which the ban expires.
-        /// </summary>
-        public DateTimeOffset? ExpiresOn { get; internal set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserBan"/> class.
-        /// </summary>
-        /// <remarks>
-        /// Required by EF Core.
-        /// </remarks>
-        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
-        protected UserBan()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserBan"/> class.
-        /// </summary>
-        /// <param name="server">The server that the ban was created on.</param>
-        /// <param name="user">The user that the ban is attached to.</param>
-        /// <param name="author">The user that created the ban.</param>
-        /// <param name="reason">The reason for the ban.</param>
-        /// <param name="messageID">The message that caused the warning, if any.</param>
-        /// <param name="expiresOn">The time at which the ban expires.</param>
-        public UserBan
-        (
-            Server server,
-            User user,
-            User author,
-            string reason,
-            Snowflake? messageID = null,
-            DateTimeOffset? expiresOn = null
-        )
-            : base(server, user, author)
-        {
-            this.Reason = reason;
-            this.MessageID = messageID;
-
-            this.UpdatedAt = DateTimeOffset.UtcNow;
-            this.ExpiresOn = expiresOn;
-        }
-
-        /// <summary>
-        /// Notifies the entity that it has been updated, updating its timestamp.
-        /// </summary>
-        public void NotifyUpdate()
-        {
-            this.UpdatedAt = DateTimeOffset.UtcNow;
-        }
+    /// <summary>
+    /// Notifies the entity that it has been updated, updating its timestamp.
+    /// </summary>
+    public void NotifyUpdate()
+    {
+        this.UpdatedAt = DateTimeOffset.UtcNow;
     }
 }

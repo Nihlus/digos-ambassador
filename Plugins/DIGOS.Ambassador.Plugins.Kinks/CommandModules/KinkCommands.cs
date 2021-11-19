@@ -46,287 +46,286 @@ using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
-namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
+namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules;
+
+/// <summary>
+/// Commands for viewing and configuring user kinks.
+/// </summary>
+[Group("kink")]
+[Description("Commands for viewing and configuring user kinks.")]
+public class KinkCommands : CommandGroup
 {
+    private readonly KinkService _kinks;
+    private readonly FeedbackService _feedback;
+
+    private readonly InteractivityService _interactivity;
+    private readonly ICommandContext _context;
+
     /// <summary>
-    /// Commands for viewing and configuring user kinks.
+    /// Initializes a new instance of the <see cref="KinkCommands"/> class.
     /// </summary>
-    [Group("kink")]
-    [Description("Commands for viewing and configuring user kinks.")]
-    public class KinkCommands : CommandGroup
+    /// <param name="kinks">The application's kink service.</param>
+    /// <param name="feedback">The application's feedback service.</param>
+    /// <param name="interactivity">The interactivity service.</param>
+    /// <param name="context">The command context.</param>
+    public KinkCommands
+    (
+        KinkService kinks,
+        FeedbackService feedback,
+        InteractivityService interactivity,
+        ICommandContext context
+    )
     {
-        private readonly KinkService _kinks;
-        private readonly FeedbackService _feedback;
+        _kinks = kinks;
+        _feedback = feedback;
+        _interactivity = interactivity;
+        _context = context;
+    }
 
-        private readonly InteractivityService _interactivity;
-        private readonly ICommandContext _context;
+    /// <summary>
+    /// Shows information about the named kink.
+    /// </summary>
+    /// <param name="kinkName">The name of the kink.</param>
+    [UsedImplicitly]
+    [Command("info")]
+    [Description("Shows information about the named kink.")]
+    public async Task<IResult> ShowKinkAsync(string kinkName)
+    {
+        var getKinkInfoResult = await _kinks.GetKinkByNameAsync(kinkName);
+        if (!getKinkInfoResult.IsSuccess)
+        {
+            return getKinkInfoResult;
+        }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="KinkCommands"/> class.
-        /// </summary>
-        /// <param name="kinks">The application's kink service.</param>
-        /// <param name="feedback">The application's feedback service.</param>
-        /// <param name="interactivity">The interactivity service.</param>
-        /// <param name="context">The command context.</param>
-        public KinkCommands
+        var kink = getKinkInfoResult.Entity;
+        var display = _kinks.BuildKinkInfoEmbed(kink);
+
+        return await _feedback.SendPrivateEmbedAsync(_context.ChannelID, display);
+    }
+
+    /// <summary>
+    /// Shows the user's preference for the named kink.
+    /// </summary>
+    /// <param name="kinkName">The name of the kink.</param>
+    /// <param name="user">The user.</param>
+    [UsedImplicitly]
+    [Command("show")]
+    [Description("Shows the user's preference for the named kink.")]
+    public async Task<IResult> ShowKinkPreferenceAsync(string kinkName, IUser? user = null)
+    {
+        user ??= _context.User;
+
+        var getUserKinkResult = await _kinks.GetUserKinkByNameAsync(user.ID, kinkName);
+        if (!getUserKinkResult.IsSuccess)
+        {
+            return getUserKinkResult;
+        }
+
+        var userKink = getUserKinkResult.Entity;
+        var display = _kinks.BuildUserKinkInfoEmbedBase(userKink);
+
+        return await _feedback.SendPrivateEmbedAsync(_context.ChannelID, display);
+    }
+
+    /// <summary>
+    /// Shows the kinks which overlap between you and the given user.
+    /// </summary>
+    /// <param name="otherUser">The other user.</param>
+    [UsedImplicitly]
+    [Command("overlap")]
+    [Description("Shows the kinks which overlap between you and the given user.")]
+    public async Task<IResult> ShowKinkOverlap(IUser otherUser)
+    {
+        var overlappingKinks = await _kinks.QueryDatabaseAsync
         (
-            KinkService kinks,
-            FeedbackService feedback,
-            InteractivityService interactivity,
-            ICommandContext context
-        )
-        {
-            _kinks = kinks;
-            _feedback = feedback;
-            _interactivity = interactivity;
-            _context = context;
-        }
-
-        /// <summary>
-        /// Shows information about the named kink.
-        /// </summary>
-        /// <param name="kinkName">The name of the kink.</param>
-        [UsedImplicitly]
-        [Command("info")]
-        [Description("Shows information about the named kink.")]
-        public async Task<IResult> ShowKinkAsync(string kinkName)
-        {
-            var getKinkInfoResult = await _kinks.GetKinkByNameAsync(kinkName);
-            if (!getKinkInfoResult.IsSuccess)
+            q =>
             {
-                return getKinkInfoResult;
-            }
+                var otherUserKinks = q
+                    .Where(k => k.User.DiscordID == otherUser.ID);
 
-            var kink = getKinkInfoResult.Entity;
-            var display = _kinks.BuildKinkInfoEmbed(kink);
-
-            return await _feedback.SendPrivateEmbedAsync(_context.ChannelID, display);
-        }
-
-        /// <summary>
-        /// Shows the user's preference for the named kink.
-        /// </summary>
-        /// <param name="kinkName">The name of the kink.</param>
-        /// <param name="user">The user.</param>
-        [UsedImplicitly]
-        [Command("show")]
-        [Description("Shows the user's preference for the named kink.")]
-        public async Task<IResult> ShowKinkPreferenceAsync(string kinkName, IUser? user = null)
-        {
-            user ??= _context.User;
-
-            var getUserKinkResult = await _kinks.GetUserKinkByNameAsync(user.ID, kinkName);
-            if (!getUserKinkResult.IsSuccess)
-            {
-                return getUserKinkResult;
-            }
-
-            var userKink = getUserKinkResult.Entity;
-            var display = _kinks.BuildUserKinkInfoEmbedBase(userKink);
-
-            return await _feedback.SendPrivateEmbedAsync(_context.ChannelID, display);
-        }
-
-        /// <summary>
-        /// Shows the kinks which overlap between you and the given user.
-        /// </summary>
-        /// <param name="otherUser">The other user.</param>
-        [UsedImplicitly]
-        [Command("overlap")]
-        [Description("Shows the kinks which overlap between you and the given user.")]
-        public async Task<IResult> ShowKinkOverlap(IUser otherUser)
-        {
-            var overlappingKinks = await _kinks.QueryDatabaseAsync
-            (
-                q =>
-                {
-                    var otherUserKinks = q
-                        .Where(k => k.User.DiscordID == otherUser.ID);
-
-                    return q
-                        .Where(k => k.User.DiscordID == _context.User.ID)
-                        .Where
-                        (
-                            k => otherUserKinks
-                                .Any(ok => ok.Preference == k.Preference && ok.Kink.FListID == k.Kink.FListID)
-                        );
-                }
-            );
-
-            if (!overlappingKinks.Any())
-            {
-                return Result<FeedbackMessage>.FromSuccess(new FeedbackMessage("You don't overlap anywhere.", _feedback.Theme.Secondary));
-            }
-
-            var pages = _kinks.BuildKinkOverlapEmbeds(_context.User.ID, otherUser.ID, overlappingKinks);
-            return await _interactivity.SendContextualInteractiveMessageAsync(_context.User.ID, pages);
-        }
-
-        /// <summary>
-        /// Shows the given user's kinks with the given preference. Defaults to yourself.
-        /// </summary>
-        /// <param name="preference">The preference.</param>
-        /// <param name="user">The user.</param>
-        [UsedImplicitly]
-        [Command("by-preference")]
-        [Description("Shows the given user's kinks with the given preference. Defaults to yourself.")]
-        public async Task<IResult> ShowKinksByPreferenceAsync
-        (
-            KinkPreference preference,
-            IUser? user = null
-        )
-        {
-            user ??= _context.User;
-
-            var kinksWithPreference = await _kinks.QueryDatabaseAsync
-            (
-                q => q
-                    .Where(k => k.User.DiscordID == user.ID)
-                    .Where(k => k.Preference == preference)
-            );
-
-            if (!kinksWithPreference.Any())
-            {
-                return Result<FeedbackMessage>.FromSuccess
-                (
-                    new FeedbackMessage
+                return q
+                    .Where(k => k.User.DiscordID == _context.User.ID)
+                    .Where
                     (
-                        "The user doesn't have any kinks with that preference.",
-                        _feedback.Theme.Warning
-                    )
-                );
-            }
-
-            var pages = _kinks.BuildPaginatedUserKinkEmbeds(kinksWithPreference);
-            return await _interactivity.SendContextualInteractiveMessageAsync
-            (
-                _context.User.ID,
-                pages
-            );
-        }
-
-        /// <summary>
-        /// Sets your preference for the given kink.
-        /// </summary>
-        /// <param name="kinkName">The name of the kink.</param>
-        /// <param name="preference">The preference for the kink.</param>
-        [UsedImplicitly]
-        [Command("preference")]
-        [Description("Sets your preference for the given kink.")]
-        public async Task<Result<FeedbackMessage>> SetKinkPreferenceAsync
-        (
-            string kinkName,
-            KinkPreference preference
-        )
-        {
-            var getUserKinkResult = await _kinks.GetUserKinkByNameAsync(_context.User.ID, kinkName);
-            if (!getUserKinkResult.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(getUserKinkResult);
-            }
-
-            var userKink = getUserKinkResult.Entity;
-            var setKinkPreferenceResult = await _kinks.SetKinkPreferenceAsync(userKink, preference);
-
-            return setKinkPreferenceResult.IsSuccess
-                ? new FeedbackMessage("Preference set.", _feedback.Theme.Secondary)
-                : Result<FeedbackMessage>.FromError(setKinkPreferenceResult);
-        }
-
-        /// <summary>
-        /// Runs an interactive wizard for setting kink preferences.
-        /// </summary>
-        [UsedImplicitly]
-        [Command("wizard")]
-        [Description("Runs an interactive wizard for setting kink preferences.")]
-        public async Task<Result> RunKinkWizardAsync()
-        {
-            return await _interactivity.SendContextualInteractiveMessageAsync
-            (
-                (c, m) => new KinkWizard(c, m, _context.User.ID)
-            );
-        }
-
-        /// <summary>
-        /// Updates the kink database with data from F-list.
-        /// </summary>
-        /// <returns>A task wrapping the update action.</returns>
-        [UsedImplicitly]
-        [Command("update-db")]
-        [Description("Updates the kink database with data from F-list.")]
-        [RequireContext(ChannelContext.DM)]
-        [RequireOwner]
-        public async Task<Result<FeedbackMessage>> UpdateKinkDatabaseAsync()
-        {
-            var send = await _feedback.SendContextualNeutralAsync("Updating kinks...", _context.User.ID);
-            if (!send.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(send);
-            }
-
-            var updatedKinkCount = 0;
-
-            // Get the latest JSON from F-list
-            string json;
-            using (var web = new HttpClient())
-            {
-                try
-                {
-                    using var response = await web.GetAsync
-                    (
-                        new Uri("https://www.f-list.net/json/api/kink-list.php"),
-                        this.CancellationToken
+                        k => otherUserKinks
+                            .Any(ok => ok.Preference == k.Preference && ok.Kink.FListID == k.Kink.FListID)
                     );
-
-                    json = await response.Content.ReadAsStringAsync();
-                }
-                catch (OperationCanceledException)
-                {
-                    return new UserError("Could not connect to F-list: Operation timed out.");
-                }
             }
+        );
 
-            var jsonOptions = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = new SnakeCaseNamingPolicy()
-            };
-
-            var kinkCollection = JsonSerializer.Deserialize<KinkCollection>(json, jsonOptions)
-                                 ?? throw new InvalidOperationException();
-
-            if (kinkCollection.KinkCategories is null)
-            {
-                return new UserError($"Received an error from F-List: {kinkCollection.Error}");
-            }
-
-            foreach (var (categoryName, category) in kinkCollection.KinkCategories)
-            {
-                if (!Enum.TryParse<KinkCategory>(categoryName, out var kinkCategory))
-                {
-                    return new UserError("Failed to parse kink category.");
-                }
-
-                updatedKinkCount += await _kinks.UpdateKinksAsync(category.Kinks.Select
-                (
-                    k => new Kink(k.Name, k.Description, k.KinkId, kinkCategory)
-                ));
-            }
-
-            return new FeedbackMessage($"Done. {updatedKinkCount} kinks updated.", _feedback.Theme.Secondary);
-        }
-
-        /// <summary>
-        /// Resets all your kink preferences.
-        /// </summary>
-        [UsedImplicitly]
-        [Command("reset")]
-        [Description("Resets all your kink preferences.")]
-        public async Task<Result<FeedbackMessage>> ResetKinksAsync()
+        if (!overlappingKinks.Any())
         {
-            var resetResult = await _kinks.ResetUserKinksAsync(_context.User.ID);
-            return resetResult.IsSuccess
-                ? new FeedbackMessage("Preferences reset.", _feedback.Theme.Secondary)
-                : Result<FeedbackMessage>.FromError(resetResult);
+            return Result<FeedbackMessage>.FromSuccess(new FeedbackMessage("You don't overlap anywhere.", _feedback.Theme.Secondary));
         }
+
+        var pages = _kinks.BuildKinkOverlapEmbeds(_context.User.ID, otherUser.ID, overlappingKinks);
+        return await _interactivity.SendContextualInteractiveMessageAsync(_context.User.ID, pages);
+    }
+
+    /// <summary>
+    /// Shows the given user's kinks with the given preference. Defaults to yourself.
+    /// </summary>
+    /// <param name="preference">The preference.</param>
+    /// <param name="user">The user.</param>
+    [UsedImplicitly]
+    [Command("by-preference")]
+    [Description("Shows the given user's kinks with the given preference. Defaults to yourself.")]
+    public async Task<IResult> ShowKinksByPreferenceAsync
+    (
+        KinkPreference preference,
+        IUser? user = null
+    )
+    {
+        user ??= _context.User;
+
+        var kinksWithPreference = await _kinks.QueryDatabaseAsync
+        (
+            q => q
+                .Where(k => k.User.DiscordID == user.ID)
+                .Where(k => k.Preference == preference)
+        );
+
+        if (!kinksWithPreference.Any())
+        {
+            return Result<FeedbackMessage>.FromSuccess
+            (
+                new FeedbackMessage
+                (
+                    "The user doesn't have any kinks with that preference.",
+                    _feedback.Theme.Warning
+                )
+            );
+        }
+
+        var pages = _kinks.BuildPaginatedUserKinkEmbeds(kinksWithPreference);
+        return await _interactivity.SendContextualInteractiveMessageAsync
+        (
+            _context.User.ID,
+            pages
+        );
+    }
+
+    /// <summary>
+    /// Sets your preference for the given kink.
+    /// </summary>
+    /// <param name="kinkName">The name of the kink.</param>
+    /// <param name="preference">The preference for the kink.</param>
+    [UsedImplicitly]
+    [Command("preference")]
+    [Description("Sets your preference for the given kink.")]
+    public async Task<Result<FeedbackMessage>> SetKinkPreferenceAsync
+    (
+        string kinkName,
+        KinkPreference preference
+    )
+    {
+        var getUserKinkResult = await _kinks.GetUserKinkByNameAsync(_context.User.ID, kinkName);
+        if (!getUserKinkResult.IsSuccess)
+        {
+            return Result<FeedbackMessage>.FromError(getUserKinkResult);
+        }
+
+        var userKink = getUserKinkResult.Entity;
+        var setKinkPreferenceResult = await _kinks.SetKinkPreferenceAsync(userKink, preference);
+
+        return setKinkPreferenceResult.IsSuccess
+            ? new FeedbackMessage("Preference set.", _feedback.Theme.Secondary)
+            : Result<FeedbackMessage>.FromError(setKinkPreferenceResult);
+    }
+
+    /// <summary>
+    /// Runs an interactive wizard for setting kink preferences.
+    /// </summary>
+    [UsedImplicitly]
+    [Command("wizard")]
+    [Description("Runs an interactive wizard for setting kink preferences.")]
+    public async Task<Result> RunKinkWizardAsync()
+    {
+        return await _interactivity.SendContextualInteractiveMessageAsync
+        (
+            (c, m) => new KinkWizard(c, m, _context.User.ID)
+        );
+    }
+
+    /// <summary>
+    /// Updates the kink database with data from F-list.
+    /// </summary>
+    /// <returns>A task wrapping the update action.</returns>
+    [UsedImplicitly]
+    [Command("update-db")]
+    [Description("Updates the kink database with data from F-list.")]
+    [RequireContext(ChannelContext.DM)]
+    [RequireOwner]
+    public async Task<Result<FeedbackMessage>> UpdateKinkDatabaseAsync()
+    {
+        var send = await _feedback.SendContextualNeutralAsync("Updating kinks...", _context.User.ID);
+        if (!send.IsSuccess)
+        {
+            return Result<FeedbackMessage>.FromError(send);
+        }
+
+        var updatedKinkCount = 0;
+
+        // Get the latest JSON from F-list
+        string json;
+        using (var web = new HttpClient())
+        {
+            try
+            {
+                using var response = await web.GetAsync
+                (
+                    new Uri("https://www.f-list.net/json/api/kink-list.php"),
+                    this.CancellationToken
+                );
+
+                json = await response.Content.ReadAsStringAsync();
+            }
+            catch (OperationCanceledException)
+            {
+                return new UserError("Could not connect to F-list: Operation timed out.");
+            }
+        }
+
+        var jsonOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = new SnakeCaseNamingPolicy()
+        };
+
+        var kinkCollection = JsonSerializer.Deserialize<KinkCollection>(json, jsonOptions)
+                             ?? throw new InvalidOperationException();
+
+        if (kinkCollection.KinkCategories is null)
+        {
+            return new UserError($"Received an error from F-List: {kinkCollection.Error}");
+        }
+
+        foreach (var (categoryName, category) in kinkCollection.KinkCategories)
+        {
+            if (!Enum.TryParse<KinkCategory>(categoryName, out var kinkCategory))
+            {
+                return new UserError("Failed to parse kink category.");
+            }
+
+            updatedKinkCount += await _kinks.UpdateKinksAsync(category.Kinks.Select
+            (
+                k => new Kink(k.Name, k.Description, k.KinkId, kinkCategory)
+            ));
+        }
+
+        return new FeedbackMessage($"Done. {updatedKinkCount} kinks updated.", _feedback.Theme.Secondary);
+    }
+
+    /// <summary>
+    /// Resets all your kink preferences.
+    /// </summary>
+    [UsedImplicitly]
+    [Command("reset")]
+    [Description("Resets all your kink preferences.")]
+    public async Task<Result<FeedbackMessage>> ResetKinksAsync()
+    {
+        var resetResult = await _kinks.ResetUserKinksAsync(_context.User.ID);
+        return resetResult.IsSuccess
+            ? new FeedbackMessage("Preferences reset.", _feedback.Theme.Secondary)
+            : Result<FeedbackMessage>.FromError(resetResult);
     }
 }

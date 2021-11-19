@@ -36,61 +36,60 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Bases
+namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Bases;
+
+/// <summary>
+/// Serves as a test base for note service tests.
+/// </summary>
+[PublicAPI]
+public class NoteServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
 {
     /// <summary>
-    /// Serves as a test base for note service tests.
+    /// Gets the database context.
     /// </summary>
-    [PublicAPI]
-    public class NoteServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
+    protected ModerationDatabaseContext Database { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the note service.
+    /// </summary>
+    protected NoteService Notes { get; private set; } = null!;
+
+    /// <inheritdoc />
+    protected override void RegisterServices(IServiceCollection serviceCollection)
     {
-        /// <summary>
-        /// Gets the database context.
-        /// </summary>
-        protected ModerationDatabaseContext Database { get; private set; } = null!;
+        serviceCollection
+            .AddDbContext<CoreDatabaseContext>(o => ConfigureOptions(o, "Core"))
+            .AddDbContext<ModerationDatabaseContext>(o => ConfigureOptions(o, "Moderation"));
 
-        /// <summary>
-        /// Gets the note service.
-        /// </summary>
-        protected NoteService Notes { get; private set; } = null!;
+        serviceCollection
+            .AddScoped<ServerService>()
+            .AddScoped<UserService>()
+            .AddScoped<NoteService>()
+            .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
+    }
 
-        /// <inheritdoc />
-        protected override void RegisterServices(IServiceCollection serviceCollection)
-        {
-            serviceCollection
-                .AddDbContext<CoreDatabaseContext>(o => ConfigureOptions(o, "Core"))
-                .AddDbContext<ModerationDatabaseContext>(o => ConfigureOptions(o, "Moderation"));
+    /// <inheritdoc />
+    protected override void ConfigureServices(IServiceProvider serviceProvider)
+    {
+        var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
+        coreDatabase.Database.Create();
 
-            serviceCollection
-                .AddScoped<ServerService>()
-                .AddScoped<UserService>()
-                .AddScoped<NoteService>()
-                .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
-        }
+        var moderationDatabase = serviceProvider.GetRequiredService<ModerationDatabaseContext>();
+        moderationDatabase.Database.Create();
 
-        /// <inheritdoc />
-        protected override void ConfigureServices(IServiceProvider serviceProvider)
-        {
-            var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            coreDatabase.Database.Create();
+        this.Database = moderationDatabase;
+        this.Notes = serviceProvider.GetRequiredService<NoteService>();
+    }
 
-            var moderationDatabase = serviceProvider.GetRequiredService<ModerationDatabaseContext>();
-            moderationDatabase.Database.Create();
+    /// <inheritdoc />
+    public virtual Task InitializeAsync()
+    {
+        return Task.CompletedTask;
+    }
 
-            this.Database = moderationDatabase;
-            this.Notes = serviceProvider.GetRequiredService<NoteService>();
-        }
-
-        /// <inheritdoc />
-        public virtual Task InitializeAsync()
-        {
-            return Task.CompletedTask;
-        }
-
-        /// <inheritdoc />
-        public Task DisposeAsync()
-        {
-            return Task.CompletedTask;
-        }
+    /// <inheritdoc />
+    public Task DisposeAsync()
+    {
+        return Task.CompletedTask;
     }
 }

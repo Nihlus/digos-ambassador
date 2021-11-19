@@ -23,36 +23,35 @@
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Remora.Discord.Core;
 
-namespace DIGOS.Ambassador.Core.Database.Converters
+namespace DIGOS.Ambassador.Core.Database.Converters;
+
+/// <summary>
+/// Converts <see cref="Snowflake"/> instances to and from a database provider representation.
+/// </summary>
+public class SnowflakeConverter : ValueConverter<Snowflake, long>
 {
     /// <summary>
-    /// Converts <see cref="Snowflake"/> instances to and from a database provider representation.
+    /// Initializes a new instance of the <see cref="SnowflakeConverter"/> class.
     /// </summary>
-    public class SnowflakeConverter : ValueConverter<Snowflake, long>
+    public SnowflakeConverter()
+        : this(null)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SnowflakeConverter"/> class.
-        /// </summary>
-        public SnowflakeConverter()
-            : this(null)
-        {
-        }
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SnowflakeConverter"/> class.
-        /// </summary>
-        /// <param name="mappingHints">The mapping hints.</param>
-        public SnowflakeConverter
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SnowflakeConverter"/> class.
+    /// </summary>
+    /// <param name="mappingHints">The mapping hints.</param>
+    public SnowflakeConverter
+    (
+        ConverterMappingHints? mappingHints = null
+    )
+        : base
         (
-            ConverterMappingHints? mappingHints = null
+            v => (long)v.Value,
+            v => new Snowflake((ulong)v),
+            mappingHints
         )
-            : base
-            (
-                v => (long)v.Value,
-                v => new Snowflake((ulong)v),
-                mappingHints
-            )
-        {
-        }
+    {
     }
 }

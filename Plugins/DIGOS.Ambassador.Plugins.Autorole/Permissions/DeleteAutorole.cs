@@ -23,20 +23,19 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Permissions
+namespace DIGOS.Ambassador.Plugins.Autorole.Permissions;
+
+/// <summary>
+/// Represents a permission that allows a user to delete autoroles.
+/// </summary>
+public class DeleteAutorole : Permission
 {
-    /// <summary>
-    /// Represents a permission that allows a user to delete autoroles.
-    /// </summary>
-    public class DeleteAutorole : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("177728EE-4DD6-4F01-8D0A-B29E4ED84501");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("177728EE-4DD6-4F01-8D0A-B29E4ED84501");
 
-        /// <inheritdoc/>
-        public override string FriendlyName { get; } = nameof(DeleteAutorole);
+    /// <inheritdoc/>
+    public override string FriendlyName { get; } = nameof(DeleteAutorole);
 
-        /// <inheritdoc/>
-        public override string Description { get; } = "Allows you to delete autoroles.";
-    }
+    /// <inheritdoc/>
+    public override string Description { get; } = "Allows you to delete autoroles.";
 }

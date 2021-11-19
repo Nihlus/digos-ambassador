@@ -35,203 +35,202 @@ using Remora.Discord.Core;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Quotes.Responders
+namespace DIGOS.Ambassador.Plugins.Quotes.Responders;
+
+/// <summary>
+/// Generates quotes from message links. Based on code from MODiX.
+/// </summary>
+public class MessageQuoteResponder : IResponder<IMessageCreate>, IResponder<IMessageUpdate>
 {
+    private static readonly Regex Pattern = new
+    (
+        @"(?<!<)https?://(?:(?:ptb|canary)\.)?discord(?:app)?\.com/channels/(?<GuildId>\d+)/(?<ChannelId>\d+)/(?<MessageId>\d+)(?!>)",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant
+    );
+
+    private readonly IDiscordRestChannelAPI _channelAPI;
+    private readonly QuoteService _quotes;
+
     /// <summary>
-    /// Generates quotes from message links. Based on code from MODiX.
+    /// Initializes a new instance of the <see cref="MessageQuoteResponder"/> class.
     /// </summary>
-    public class MessageQuoteResponder : IResponder<IMessageCreate>, IResponder<IMessageUpdate>
+    /// <param name="quotes">The feedback service.</param>
+    /// <param name="channelAPI">The Discord channel API.</param>
+    public MessageQuoteResponder(QuoteService quotes, IDiscordRestChannelAPI channelAPI)
     {
-        private static readonly Regex Pattern = new
-        (
-            @"(?<!<)https?://(?:(?:ptb|canary)\.)?discord(?:app)?\.com/channels/(?<GuildId>\d+)/(?<ChannelId>\d+)/(?<MessageId>\d+)(?!>)",
-            RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant
-        );
+        _quotes = quotes;
+        _channelAPI = channelAPI;
+    }
 
-        private readonly IDiscordRestChannelAPI _channelAPI;
-        private readonly QuoteService _quotes;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MessageQuoteResponder"/> class.
-        /// </summary>
-        /// <param name="quotes">The feedback service.</param>
-        /// <param name="channelAPI">The Discord channel API.</param>
-        public MessageQuoteResponder(QuoteService quotes, IDiscordRestChannelAPI channelAPI)
+    /// <inheritdoc />
+    public async Task<Result> RespondAsync(IMessageCreate gatewayEvent, CancellationToken ct = default)
+    {
+        var author = gatewayEvent.Author;
+        if ((author.IsBot.IsDefined(out var isBot) && isBot) || (author.IsSystem.IsDefined(out var isSystem) && isSystem))
         {
-            _quotes = quotes;
-            _channelAPI = channelAPI;
-        }
-
-        /// <inheritdoc />
-        public async Task<Result> RespondAsync(IMessageCreate gatewayEvent, CancellationToken ct = default)
-        {
-            var author = gatewayEvent.Author;
-            if ((author.IsBot.IsDefined(out var isBot) && isBot) || (author.IsSystem.IsDefined(out var isSystem) && isSystem))
-            {
-                return Result.FromSuccess();
-            }
-
-            if (IsQuote(gatewayEvent))
-            {
-                return Result.FromSuccess();
-            }
-
-            return await CreateQuotesAsync(gatewayEvent.ChannelID, gatewayEvent.Content, gatewayEvent.Author.ID, ct);
-        }
-
-        /// <inheritdoc />
-        public async Task<Result> RespondAsync(IMessageUpdate gatewayEvent, CancellationToken ct = default)
-        {
-            // Ignore all changes except text changes
-            var isTextUpdate = gatewayEvent.EditedTimestamp.HasValue &&
-                               gatewayEvent.EditedTimestamp.Value > DateTimeOffset.UtcNow - 1.Minutes();
-
-            if (!isTextUpdate)
-            {
-                return Result.FromSuccess();
-            }
-
-            if (IsQuote(gatewayEvent))
-            {
-                return Result.FromSuccess();
-            }
-
-            if (!gatewayEvent.Content.IsDefined(out var content))
-            {
-                return Result.FromSuccess();
-            }
-
-            if (!gatewayEvent.Author.IsDefined(out var author))
-            {
-                return Result.FromSuccess();
-            }
-
-            if (!gatewayEvent.ChannelID.IsDefined(out var channelID))
-            {
-                return Result.FromSuccess();
-            }
-
-            return await CreateQuotesAsync
-            (
-                channelID,
-                content,
-                author.ID,
-                ct
-            );
-        }
-
-        private async Task<Result> CreateQuotesAsync
-        (
-            Snowflake channelID,
-            string content,
-            Snowflake quoterID,
-            CancellationToken ct = default
-        )
-        {
-            var matches = Pattern.Matches(content);
-            if (matches.Count == 0)
-            {
-                return Result.FromSuccess();
-            }
-
-            List<IMessage> quotedMessages = new();
-            foreach (Match? match in matches)
-            {
-                if (match is null)
-                {
-                    continue;
-                }
-
-                if (!Snowflake.TryParse(match.Groups["GuildId"].Value, out _) ||
-                    !Snowflake.TryParse(match.Groups["ChannelId"].Value, out var channelId) ||
-                    !Snowflake.TryParse(match.Groups["MessageId"].Value, out var messageId))
-                {
-                    continue;
-                }
-
-                var getMessage = await _channelAPI.GetChannelMessageAsync(channelId.Value, messageId.Value, ct);
-                if (!getMessage.IsSuccess)
-                {
-                    // Maybe it's been deleted, maybe it never existed in the first place
-                    continue;
-                }
-
-                var quotedMessage = getMessage.Entity;
-                if (IsQuote(quotedMessage))
-                {
-                    // No quote recursion please
-                    continue;
-                }
-
-                quotedMessages.Add(quotedMessage);
-            }
-
-            var embeds = quotedMessages.Select
-            (
-                m => _quotes.CreateMessageQuote(m, quoterID) with { Timestamp = m.Timestamp }
-            );
-
-            foreach (var embed in embeds)
-            {
-                var sendQuote = await _channelAPI.CreateMessageAsync(channelID, embeds: new[] { embed }, ct: ct);
-                if (!sendQuote.IsSuccess)
-                {
-                    return Result.FromError(sendQuote);
-                }
-            }
-
             return Result.FromSuccess();
         }
 
-        /// <summary>
-        /// Determines if the given message is a quoted message.
-        /// </summary>
-        /// <param name="message">The message.</param>
-        /// <returns>true if the message is a quoted message; otherwise, false.</returns>
-        private bool IsQuote(IMessage message)
+        if (IsQuote(gatewayEvent))
         {
-            foreach (var embed in message.Embeds)
-            {
-                if (!embed.Fields.IsDefined(out var fields))
-                {
-                    continue;
-                }
+            return Result.FromSuccess();
+        }
 
-                if (fields.Any(f => f.Name.Contains("Quoted by")))
-                {
-                    return true;
-                }
+        return await CreateQuotesAsync(gatewayEvent.ChannelID, gatewayEvent.Content, gatewayEvent.Author.ID, ct);
+    }
+
+    /// <inheritdoc />
+    public async Task<Result> RespondAsync(IMessageUpdate gatewayEvent, CancellationToken ct = default)
+    {
+        // Ignore all changes except text changes
+        var isTextUpdate = gatewayEvent.EditedTimestamp.HasValue &&
+                           gatewayEvent.EditedTimestamp.Value > DateTimeOffset.UtcNow - 1.Minutes();
+
+        if (!isTextUpdate)
+        {
+            return Result.FromSuccess();
+        }
+
+        if (IsQuote(gatewayEvent))
+        {
+            return Result.FromSuccess();
+        }
+
+        if (!gatewayEvent.Content.IsDefined(out var content))
+        {
+            return Result.FromSuccess();
+        }
+
+        if (!gatewayEvent.Author.IsDefined(out var author))
+        {
+            return Result.FromSuccess();
+        }
+
+        if (!gatewayEvent.ChannelID.IsDefined(out var channelID))
+        {
+            return Result.FromSuccess();
+        }
+
+        return await CreateQuotesAsync
+        (
+            channelID,
+            content,
+            author.ID,
+            ct
+        );
+    }
+
+    private async Task<Result> CreateQuotesAsync
+    (
+        Snowflake channelID,
+        string content,
+        Snowflake quoterID,
+        CancellationToken ct = default
+    )
+    {
+        var matches = Pattern.Matches(content);
+        if (matches.Count == 0)
+        {
+            return Result.FromSuccess();
+        }
+
+        List<IMessage> quotedMessages = new();
+        foreach (Match? match in matches)
+        {
+            if (match is null)
+            {
+                continue;
             }
 
+            if (!Snowflake.TryParse(match.Groups["GuildId"].Value, out _) ||
+                !Snowflake.TryParse(match.Groups["ChannelId"].Value, out var channelId) ||
+                !Snowflake.TryParse(match.Groups["MessageId"].Value, out var messageId))
+            {
+                continue;
+            }
+
+            var getMessage = await _channelAPI.GetChannelMessageAsync(channelId.Value, messageId.Value, ct);
+            if (!getMessage.IsSuccess)
+            {
+                // Maybe it's been deleted, maybe it never existed in the first place
+                continue;
+            }
+
+            var quotedMessage = getMessage.Entity;
+            if (IsQuote(quotedMessage))
+            {
+                // No quote recursion please
+                continue;
+            }
+
+            quotedMessages.Add(quotedMessage);
+        }
+
+        var embeds = quotedMessages.Select
+        (
+            m => _quotes.CreateMessageQuote(m, quoterID) with { Timestamp = m.Timestamp }
+        );
+
+        foreach (var embed in embeds)
+        {
+            var sendQuote = await _channelAPI.CreateMessageAsync(channelID, embeds: new[] { embed }, ct: ct);
+            if (!sendQuote.IsSuccess)
+            {
+                return Result.FromError(sendQuote);
+            }
+        }
+
+        return Result.FromSuccess();
+    }
+
+    /// <summary>
+    /// Determines if the given message is a quoted message.
+    /// </summary>
+    /// <param name="message">The message.</param>
+    /// <returns>true if the message is a quoted message; otherwise, false.</returns>
+    private bool IsQuote(IMessage message)
+    {
+        foreach (var embed in message.Embeds)
+        {
+            if (!embed.Fields.IsDefined(out var fields))
+            {
+                continue;
+            }
+
+            if (fields.Any(f => f.Name.Contains("Quoted by")))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Determines if the given message is a quoted message.
+    /// </summary>
+    /// <param name="message">The message.</param>
+    /// <returns>true if the message is a quoted message; otherwise, false.</returns>
+    private bool IsQuote(IPartialMessage message)
+    {
+        if (!message.Embeds.IsDefined(out var embeds))
+        {
             return false;
         }
 
-        /// <summary>
-        /// Determines if the given message is a quoted message.
-        /// </summary>
-        /// <param name="message">The message.</param>
-        /// <returns>true if the message is a quoted message; otherwise, false.</returns>
-        private bool IsQuote(IPartialMessage message)
+        foreach (var embed in embeds)
         {
-            if (!message.Embeds.IsDefined(out var embeds))
+            if (!embed.Fields.IsDefined(out var fields))
             {
-                return false;
+                continue;
             }
 
-            foreach (var embed in embeds)
+            if (fields.Any(f => f.Name.Contains("Quoted by")))
             {
-                if (!embed.Fields.IsDefined(out var fields))
-                {
-                    continue;
-                }
-
-                if (fields.Any(f => f.Name.Contains("Quoted by")))
-                {
-                    return true;
-                }
+                return true;
             }
-
-            return false;
         }
+
+        return false;
     }
 }

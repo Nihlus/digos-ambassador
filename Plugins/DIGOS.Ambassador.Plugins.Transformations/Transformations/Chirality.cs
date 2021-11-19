@@ -22,27 +22,26 @@
 
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations;
+
+/// <summary>
+/// Represents the chirality of a component.
+/// </summary>
+[PublicAPI]
+public enum Chirality
 {
     /// <summary>
-    /// Represents the chirality of a component.
+    /// The component is in the middle, and is not chiral.
     /// </summary>
-    [PublicAPI]
-    public enum Chirality
-    {
-        /// <summary>
-        /// The component is in the middle, and is not chiral.
-        /// </summary>
-        Center,
+    Center,
 
-        /// <summary>
-        /// The component is on the left side.
-        /// </summary>
-        Left,
+    /// <summary>
+    /// The component is on the left side.
+    /// </summary>
+    Left,
 
-        /// <summary>
-        /// The component is on the right side.
-        /// </summary>
-        Right
-    }
+    /// <summary>
+    /// The component is on the right side.
+    /// </summary>
+    Right
 }

@@ -20,31 +20,30 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages;
+
+public sealed partial class TransformationText
 {
-    public sealed partial class TransformationText
+    /// <summary>
+    /// Holds transformation messages.
+    /// </summary>
+    public sealed partial class TransformationMessages
     {
         /// <summary>
-        /// Holds transformation messages.
+        /// Gets a set of addition messages. These are used when something that did not previously exist is added to
+        /// an appearance.
         /// </summary>
-        public sealed partial class TransformationMessages
-        {
-            /// <summary>
-            /// Gets a set of addition messages. These are used when something that did not previously exist is added to
-            /// an appearance.
-            /// </summary>
-            public AddingMessages Adding { get; init; } = new();
+        public AddingMessages Adding { get; init; } = new();
 
-            /// <summary>
-            /// Gets a set of removal messages. These are used when something that exists is removed from an appearance.
-            /// </summary>
-            public RemovalMessages Removal { get; init; } = new();
+        /// <summary>
+        /// Gets a set of removal messages. These are used when something that exists is removed from an appearance.
+        /// </summary>
+        public RemovalMessages Removal { get; init; } = new();
 
-            /// <summary>
-            /// Gets a set of shifting messages. These are used when something that exists is transformed into something
-            /// else.
-            /// </summary>
-            public ShiftingMessages Shifting { get; init; } = new();
-        }
+        /// <summary>
+        /// Gets a set of shifting messages. These are used when something that exists is transformed into something
+        /// else.
+        /// </summary>
+        public ShiftingMessages Shifting { get; init; } = new();
     }
 }

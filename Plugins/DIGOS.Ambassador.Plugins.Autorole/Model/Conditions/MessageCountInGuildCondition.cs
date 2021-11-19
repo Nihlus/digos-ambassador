@@ -31,60 +31,59 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Core;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
+namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
+
+/// <summary>
+/// Represents a condition that requires a certain number of messages in the whole server.
+/// </summary>
+public class MessageCountInGuildCondition : MessageCountInSourceCondition<MessageCountInGuildCondition>
 {
     /// <summary>
-    /// Represents a condition that requires a certain number of messages in the whole server.
+    /// Initializes a new instance of the <see cref="MessageCountInGuildCondition"/> class.
     /// </summary>
-    public class MessageCountInGuildCondition : MessageCountInSourceCondition<MessageCountInGuildCondition>
+    /// <param name="sourceID">The source ID.</param>
+    /// <param name="requiredCount">The required message count.</param>
+    [UsedImplicitly]
+    protected MessageCountInGuildCondition(Snowflake sourceID, long requiredCount)
+        : base(sourceID, requiredCount)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MessageCountInGuildCondition"/> class.
-        /// </summary>
-        /// <param name="sourceID">The source ID.</param>
-        /// <param name="requiredCount">The required message count.</param>
-        [UsedImplicitly]
-        protected MessageCountInGuildCondition(Snowflake sourceID, long requiredCount)
-            : base(sourceID, requiredCount)
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MessageCountInGuildCondition"/> class.
+    /// </summary>
+    /// <param name="guild">The source guild.</param>
+    /// <param name="requiredCount">The required number of messages.</param>
+    public MessageCountInGuildCondition(IGuild guild, long requiredCount)
+        : this(guild.ID, requiredCount)
+    {
+    }
+
+    /// <inheritdoc/>
+    public override string GetDescriptiveUIText()
+    {
+        return $"{this.RequiredCount} messages in the server";
+    }
+
+    /// <inheritdoc/>
+    public override async Task<Result<bool>> IsConditionFulfilledForUserAsync
+    (
+        IServiceProvider services,
+        Snowflake guildID,
+        Snowflake userID,
+        CancellationToken ct = default
+    )
+    {
+        var statistics = services.GetRequiredService<UserStatisticsService>();
+
+        var getUserStatistics = await statistics.GetOrCreateUserServerStatisticsAsync(guildID, userID, ct);
+        if (!getUserStatistics.IsSuccess)
         {
+            return Result<bool>.FromError(getUserStatistics);
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MessageCountInGuildCondition"/> class.
-        /// </summary>
-        /// <param name="guild">The source guild.</param>
-        /// <param name="requiredCount">The required number of messages.</param>
-        public MessageCountInGuildCondition(IGuild guild, long requiredCount)
-            : this(guild.ID, requiredCount)
-        {
-        }
+        var userStatistics = getUserStatistics.Entity;
 
-        /// <inheritdoc/>
-        public override string GetDescriptiveUIText()
-        {
-            return $"{this.RequiredCount} messages in the server";
-        }
-
-        /// <inheritdoc/>
-        public override async Task<Result<bool>> IsConditionFulfilledForUserAsync
-        (
-            IServiceProvider services,
-            Snowflake guildID,
-            Snowflake userID,
-            CancellationToken ct = default
-        )
-        {
-            var statistics = services.GetRequiredService<UserStatisticsService>();
-
-            var getUserStatistics = await statistics.GetOrCreateUserServerStatisticsAsync(guildID, userID, ct);
-            if (!getUserStatistics.IsSuccess)
-            {
-                return Result<bool>.FromError(getUserStatistics);
-            }
-
-            var userStatistics = getUserStatistics.Entity;
-
-            return userStatistics.TotalMessageCount.HasValue && userStatistics.TotalMessageCount >= this.RequiredCount;
-        }
+        return userStatistics.TotalMessageCount.HasValue && userStatistics.TotalMessageCount >= this.RequiredCount;
     }
 }

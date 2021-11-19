@@ -31,74 +31,73 @@ using Xunit;
 #pragma warning disable SA1649
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Characters
+namespace DIGOS.Ambassador.Tests.Plugins.Characters;
+
+public static partial class CharacterServiceTests
 {
-    public static partial class CharacterServiceTests
+    public class GetCharacterByNameAsync : CharacterServiceTestBase
     {
-        public class GetCharacterByNameAsync : CharacterServiceTestBase
+        private const string CharacterName = "Test";
+
+        private readonly Character _character;
+
+        public GetCharacterByNameAsync()
         {
-            private const string CharacterName = "Test";
+            _character = CreateCharacter
+            (
+                this.DefaultOwner,
+                this.DefaultServer,
+                CharacterName,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty
+            );
+        }
 
-            private readonly Character _character;
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfNoCharacterWithThatNameExists()
+        {
+            var result = await this.Characters.GetCharacterByNameAsync(this.DefaultServer, "NonExistant");
 
-            public GetCharacterByNameAsync()
-            {
-                _character = CreateCharacter
-                (
-                    this.DefaultOwner,
-                    this.DefaultServer,
-                    CharacterName,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty
-                );
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfNoCharacterWithThatNameExists()
-            {
-                var result = await this.Characters.GetCharacterByNameAsync(this.DefaultServer, "NonExistant");
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfMoreThanOneCharacterWithThatNameExists()
+        {
+            CreateCharacter
+            (
+                new User(new Snowflake(1)),
+                this.DefaultServer,
+                CharacterName,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty
+            );
 
-                Assert.False(result.IsSuccess);
-            }
+            var result = await this.Characters.GetCharacterByNameAsync(this.DefaultServer, CharacterName);
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfMoreThanOneCharacterWithThatNameExists()
-            {
-                CreateCharacter
-                (
-                    new User(new Snowflake(1)),
-                    this.DefaultServer,
-                    CharacterName,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty
-                );
+            Assert.False(result.IsSuccess);
+        }
 
-                var result = await this.Characters.GetCharacterByNameAsync(this.DefaultServer, CharacterName);
+        [Fact]
+        public async Task ReturnsSuccessfulResultIfASingleCharacterWithThatNameExists()
+        {
+            var result = await this.Characters.GetCharacterByNameAsync(this.DefaultServer, CharacterName);
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.True(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsSuccessfulResultIfASingleCharacterWithThatNameExists()
-            {
-                var result = await this.Characters.GetCharacterByNameAsync(this.DefaultServer, CharacterName);
+        [Fact]
+        public async Task ReturnsCorrectCharacter()
+        {
+            var result = await this.Characters.GetCharacterByNameAsync(this.DefaultServer, CharacterName);
 
-                Assert.True(result.IsSuccess);
-            }
-
-            [Fact]
-            public async Task ReturnsCorrectCharacter()
-            {
-                var result = await this.Characters.GetCharacterByNameAsync(this.DefaultServer, CharacterName);
-
-                Assert.Same(_character, result.Entity);
-            }
+            Assert.Same(_character, result.Entity);
         }
     }
 }

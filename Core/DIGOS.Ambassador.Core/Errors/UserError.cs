@@ -22,10 +22,9 @@
 
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Core.Errors
-{
-    /// <summary>
-    /// Represents an error on the user's part, which should be relayed to them.
-    /// </summary>
-    public record UserError(string Message) : ResultError(Message);
-}
+namespace DIGOS.Ambassador.Core.Errors;
+
+/// <summary>
+/// Represents an error on the user's part, which should be relayed to them.
+/// </summary>
+public record UserError(string Message) : ResultError(Message);

@@ -22,20 +22,19 @@
 
 using System;
 
-namespace DIGOS.Ambassador.Plugins.Permissions
+namespace DIGOS.Ambassador.Plugins.Permissions;
+
+/// <summary>
+/// Represents a permission that allows a user to revoke a permission.
+/// </summary>
+public sealed class RevokePermission : Permission
 {
-    /// <summary>
-    /// Represents a permission that allows a user to revoke a permission.
-    /// </summary>
-    public sealed class RevokePermission : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("6BD7972F-FB72-41F4-9BC2-B2FC67A362FB");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("6BD7972F-FB72-41F4-9BC2-B2FC67A362FB");
 
-        /// <inheritdoc />
-        public override string FriendlyName => nameof(RevokePermission);
+    /// <inheritdoc />
+    public override string FriendlyName => nameof(RevokePermission);
 
-        /// <inheritdoc />
-        public override string Description => "Allows you to revoke permissions.";
-    }
+    /// <inheritdoc />
+    public override string Description => "Allows you to revoke permissions.";
 }

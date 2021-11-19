@@ -39,304 +39,303 @@ using Remora.Discord.Core;
 using Xunit;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Transformations
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
+
+public partial class TransformationServiceTests
 {
-    public partial class TransformationServiceTests
+    public class ShiftBodypartAsync : TransformationServiceTestBase
     {
-        public class ShiftBodypartAsync : TransformationServiceTestBase
+        private readonly Snowflake _guild = new Snowflake(1);
+
+        private readonly Snowflake _owner = new Snowflake(2);
+        private readonly Snowflake _invoker = new Snowflake(3);
+
+        private Character _character = null!;
+
+        /// <inheritdoc />
+        protected override void RegisterServices(IServiceCollection serviceCollection)
         {
-            private readonly Snowflake _guild = new Snowflake(1);
+            base.RegisterServices(serviceCollection);
 
-            private readonly Snowflake _owner = new Snowflake(2);
-            private readonly Snowflake _invoker = new Snowflake(3);
+            serviceCollection
+                .AddScoped<OwnedEntityService>()
+                .AddScoped<CommandService>()
+                .AddScoped<CharacterService>();
+        }
 
-            private Character _character = null!;
+        public ShiftBodypartAsync()
+        {
+            var pronounService = this.Services.GetRequiredService<PronounService>();
+            pronounService.WithPronounProvider(new FemininePronounProvider());
+        }
 
-            /// <inheritdoc />
-            protected override void RegisterServices(IServiceCollection serviceCollection)
-            {
-                base.RegisterServices(serviceCollection);
+        protected override async Task InitializeTestAsync()
+        {
+            // Ensure owner is opted into transformations
+            await this.Transformations.OptInUserAsync
+            (
+                _owner,
+                _guild
+            );
 
-                serviceCollection
-                    .AddScoped<OwnedEntityService>()
-                    .AddScoped<CommandService>()
-                    .AddScoped<CharacterService>();
-            }
+            // Create a test character
+            var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
+            var server = (await this.Servers.GetOrRegisterServerAsync(_guild)).Entity;
 
-            public ShiftBodypartAsync()
-            {
-                var pronounService = this.Services.GetRequiredService<PronounService>();
-                pronounService.WithPronounProvider(new FemininePronounProvider());
-            }
+            var character = new Character
+            (
+                owner,
+                server,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                "They"
+            );
 
-            protected override async Task InitializeTestAsync()
-            {
-                // Ensure owner is opted into transformations
-                await this.Transformations.OptInUserAsync
-                (
-                    _owner,
-                    _guild
-                );
+            this.CharacterDatabase.Characters.Update(character);
+            await this.CharacterDatabase.SaveChangesAsync();
 
-                // Create a test character
-                var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
-                var server = (await this.Servers.GetOrRegisterServerAsync(_guild)).Entity;
+            _character = this.CharacterDatabase.Characters.First();
 
-                var character = new Character
-                (
-                    owner,
-                    server,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    "They"
-                );
+            // Set up the default appearance
+            await this.Transformations.GetOrCreateCurrentAppearanceAsync
+            (
+                _character
+            );
+        }
 
-                this.CharacterDatabase.Characters.Update(character);
-                await this.CharacterDatabase.SaveChangesAsync();
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfUserIsNotAllowedToTransformTarget()
+        {
+            await this.Transformations.BlacklistUserAsync(_owner, _invoker);
 
-                _character = this.CharacterDatabase.Characters.First();
+            var result = await this.Transformations.ShiftBodypartAsync
+            (
+                _invoker,
+                _character,
+                Bodypart.Face,
+                "shark"
+            );
 
-                // Set up the default appearance
-                await this.Transformations.GetOrCreateCurrentAppearanceAsync
-                (
-                    _character
-                );
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfUserIsNotAllowedToTransformTarget()
-            {
-                await this.Transformations.BlacklistUserAsync(_owner, _invoker);
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfSpeciesDoesNotExist()
+        {
+            var result = await this.Transformations.ShiftBodypartAsync
+            (
+                _invoker,
+                _character,
+                Bodypart.Face,
+                "adadadsasd"
+            );
 
-                var result = await this.Transformations.ShiftBodypartAsync
-                (
-                    _invoker,
-                    _character,
-                    Bodypart.Face,
-                    "shark"
-                );
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfSpeciesDoesNotHaveBodypart()
+        {
+            var result = await this.Transformations.ShiftBodypartAsync
+            (
+                _invoker,
+                _character,
+                Bodypart.Wing,
+                "shark",
+                Chirality.Left
+            );
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfSpeciesDoesNotExist()
-            {
-                var result = await this.Transformations.ShiftBodypartAsync
-                (
-                    _invoker,
-                    _character,
-                    Bodypart.Face,
-                    "adadadsasd"
-                );
+            Assert.False(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsSuccessfulResultIfBodypartIsAlreadyThatSpecies()
+        {
+            var result = await this.Transformations.ShiftBodypartAsync
+            (
+                _invoker,
+                _character,
+                Bodypart.Face,
+                "template"
+            );
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfSpeciesDoesNotHaveBodypart()
-            {
-                var result = await this.Transformations.ShiftBodypartAsync
-                (
-                    _invoker,
-                    _character,
-                    Bodypart.Wing,
-                    "shark",
-                    Chirality.Left
-                );
+            Assert.True(result.IsSuccess);
+        }
 
-                Assert.False(result.IsSuccess);
-            }
+        [Fact]
+        public async Task ReturnsNoChangeIfBodypartIsAlreadyThatSpecies()
+        {
+            var result = await this.Transformations.ShiftBodypartAsync
+            (
+                _invoker,
+                _character,
+                Bodypart.Face,
+                "template"
+            );
 
-            [Fact]
-            public async Task ReturnsSuccessfulResultIfBodypartIsAlreadyThatSpecies()
-            {
-                var result = await this.Transformations.ShiftBodypartAsync
-                (
-                    _invoker,
-                    _character,
-                    Bodypart.Face,
-                    "template"
-                );
+            Assert.Equal(ShiftBodypartAction.Nothing, result.Entity.Action);
+        }
 
-                Assert.True(result.IsSuccess);
-            }
+        [Fact]
+        public async Task AddsBodypartIfItDoesNotAlreadyExist()
+        {
+            var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity;
 
-            [Fact]
-            public async Task ReturnsNoChangeIfBodypartIsAlreadyThatSpecies()
-            {
-                var result = await this.Transformations.ShiftBodypartAsync
-                (
-                    _invoker,
-                    _character,
-                    Bodypart.Face,
-                    "template"
-                );
+            Assert.False(appearance.HasComponent(Bodypart.Tail, Chirality.Center));
 
-                Assert.Equal(ShiftBodypartAction.Nothing, result.Entity.Action);
-            }
+            var result = await this.Transformations.ShiftBodypartAsync
+            (
+                _invoker,
+                _character,
+                Bodypart.Tail,
+                "shark"
+            );
 
-            [Fact]
-            public async Task AddsBodypartIfItDoesNotAlreadyExist()
-            {
-                var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity;
+            Assert.True(result.IsSuccess);
+            Assert.True(appearance.HasComponent(Bodypart.Tail, Chirality.Center));
+        }
 
-                Assert.False(appearance.HasComponent(Bodypart.Tail, Chirality.Center));
+        [Fact]
+        public async Task ShiftsBodypartIntoCorrectSpecies()
+        {
+            var result = await this.Transformations.ShiftBodypartAsync
+            (
+                _invoker,
+                _character,
+                Bodypart.Face,
+                "shark"
+            );
 
-                var result = await this.Transformations.ShiftBodypartAsync
-                (
-                    _invoker,
-                    _character,
-                    Bodypart.Tail,
-                    "shark"
-                );
+            var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity;
 
-                Assert.True(result.IsSuccess);
-                Assert.True(appearance.HasComponent(Bodypart.Tail, Chirality.Center));
-            }
+            Assert.True(result.IsSuccess);
+            Assert.Equal("shark", appearance.GetAppearanceComponent(Bodypart.Face, Chirality.Center).Transformation.Species.Name);
+        }
 
-            [Fact]
-            public async Task ShiftsBodypartIntoCorrectSpecies()
-            {
-                var result = await this.Transformations.ShiftBodypartAsync
-                (
-                    _invoker,
-                    _character,
-                    Bodypart.Face,
-                    "shark"
-                );
+        [Fact]
+        public async Task ReturnsShiftMessage()
+        {
+            var result = await this.Transformations.ShiftBodypartAsync
+            (
+                _invoker,
+                _character,
+                Bodypart.Face,
+                "shark"
+            );
 
-                var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity;
+            Assert.NotNull(result.Entity.ShiftMessage);
+            Assert.NotEmpty(result.Entity.ShiftMessage);
+        }
 
-                Assert.True(result.IsSuccess);
-                Assert.Equal("shark", appearance.GetAppearanceComponent(Bodypart.Face, Chirality.Center).Transformation.Species.Name);
-            }
+        [Fact]
+        public async Task ShiftingBodypartDoesNotAlterDefaultAppearance()
+        {
+            await this.Transformations.ShiftBodypartAsync
+            (
+                _invoker,
+                _character,
+                Bodypart.Face,
+                "shark"
+            );
 
-            [Fact]
-            public async Task ReturnsShiftMessage()
-            {
-                var result = await this.Transformations.ShiftBodypartAsync
-                (
-                    _invoker,
-                    _character,
-                    Bodypart.Face,
-                    "shark"
-                );
+            var appearance = (await this.Transformations.GetOrCreateDefaultAppearanceAsync(_character)).Entity;
 
-                Assert.NotNull(result.Entity.ShiftMessage);
-                Assert.NotEmpty(result.Entity.ShiftMessage);
-            }
+            Assert.NotEqual
+            (
+                "shark",
+                appearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name
+            );
+        }
 
-            [Fact]
-            public async Task ShiftingBodypartDoesNotAlterDefaultAppearance()
-            {
-                await this.Transformations.ShiftBodypartAsync
-                (
-                    _invoker,
-                    _character,
-                    Bodypart.Face,
-                    "shark"
-                );
+        [Fact]
+        public async Task CanResetAppearance()
+        {
+            await this.Transformations.ShiftBodypartAsync
+            (
+                _invoker,
+                _character,
+                Bodypart.Face,
+                "shark"
+            );
 
-                var appearance = (await this.Transformations.GetOrCreateDefaultAppearanceAsync(_character)).Entity;
+            await this.Transformations.ResetCharacterFormAsync
+            (
+                _character
+            );
 
-                Assert.NotEqual
-                (
-                    "shark",
-                    appearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name
-                );
-            }
+            var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity;
 
-            [Fact]
-            public async Task CanResetAppearance()
-            {
-                await this.Transformations.ShiftBodypartAsync
-                (
-                    _invoker,
-                    _character,
-                    Bodypart.Face,
-                    "shark"
-                );
+            Assert.NotEqual
+            (
+                "shark",
+                appearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name
+            );
+        }
 
-                await this.Transformations.ResetCharacterFormAsync
-                (
-                    _character
-                );
+        [Fact]
+        public async Task CanSetCustomDefaultAppearance()
+        {
+            await this.Transformations.ShiftBodypartAsync
+            (
+                _invoker,
+                _character,
+                Bodypart.Face,
+                "shark"
+            );
 
-                var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity;
+            await this.Transformations.SetCurrentAppearanceAsDefaultForCharacterAsync
+            (
+                _character
+            );
 
-                Assert.NotEqual
-                (
-                    "shark",
-                    appearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name
-                );
-            }
+            var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity;
 
-            [Fact]
-            public async Task CanSetCustomDefaultAppearance()
-            {
-                await this.Transformations.ShiftBodypartAsync
-                (
-                    _invoker,
-                    _character,
-                    Bodypart.Face,
-                    "shark"
-                );
+            Assert.Equal
+            (
+                "shark",
+                appearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name
+            );
+        }
 
-                await this.Transformations.SetCurrentAppearanceAsDefaultForCharacterAsync
-                (
-                    _character
-                );
+        [Fact]
+        public async Task CanResetToCustomDefaultAppearance()
+        {
+            await this.Transformations.ShiftBodypartAsync
+            (
+                _invoker,
+                _character,
+                Bodypart.Face,
+                "shark"
+            );
 
-                var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity;
+            await this.Transformations.SetCurrentAppearanceAsDefaultForCharacterAsync
+            (
+                _character
+            );
 
-                Assert.Equal
-                (
-                    "shark",
-                    appearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name
-                );
-            }
+            await this.Transformations.ShiftBodypartAsync
+            (
+                _invoker,
+                _character,
+                Bodypart.Face,
+                "shark-dronie"
+            );
 
-            [Fact]
-            public async Task CanResetToCustomDefaultAppearance()
-            {
-                await this.Transformations.ShiftBodypartAsync
-                (
-                    _invoker,
-                    _character,
-                    Bodypart.Face,
-                    "shark"
-                );
+            await this.Transformations.ResetCharacterFormAsync
+            (
+                _character
+            );
 
-                await this.Transformations.SetCurrentAppearanceAsDefaultForCharacterAsync
-                (
-                    _character
-                );
+            var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity;
 
-                await this.Transformations.ShiftBodypartAsync
-                (
-                    _invoker,
-                    _character,
-                    Bodypart.Face,
-                    "shark-dronie"
-                );
-
-                await this.Transformations.ResetCharacterFormAsync
-                (
-                    _character
-                );
-
-                var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity;
-
-                Assert.Equal
-                (
-                    "shark",
-                    appearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name
-                );
-            }
+            Assert.Equal
+            (
+                "shark",
+                appearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name
+            );
         }
     }
 }

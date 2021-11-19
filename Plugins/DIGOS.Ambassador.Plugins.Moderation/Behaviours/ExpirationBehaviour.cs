@@ -37,220 +37,219 @@ using Remora.Discord.Rest.Results;
 using Remora.Results;
 using static Remora.Discord.API.Abstractions.Results.DiscordError;
 
-namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
+namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours;
+
+/// <summary>
+/// Rescinds expired warnings and bans.
+/// </summary>
+[UsedImplicitly]
+internal sealed class ExpirationBehaviour : ContinuousBehaviour<ExpirationBehaviour>
 {
+    /// <inheritdoc/>
+    protected override bool UseTransaction => false;
+
+    /// <inheritdoc/>
+    protected override TimeSpan TickDelay => TimeSpan.FromMinutes(5);
+
     /// <summary>
-    /// Rescinds expired warnings and bans.
+    /// Initializes a new instance of the <see cref="ExpirationBehaviour"/> class.
     /// </summary>
-    [UsedImplicitly]
-    internal sealed class ExpirationBehaviour : ContinuousBehaviour<ExpirationBehaviour>
+    /// <param name="services">The services.</param>
+    /// <param name="logger">The logging instance for this type.</param>
+    public ExpirationBehaviour
+    (
+        IServiceProvider services,
+        ILogger<ExpirationBehaviour> logger
+    )
+        : base(services, logger)
     {
-        /// <inheritdoc/>
-        protected override bool UseTransaction => false;
+    }
 
-        /// <inheritdoc/>
-        protected override TimeSpan TickDelay => TimeSpan.FromMinutes(5);
+    /// <inheritdoc/>
+    protected override async Task<Result> OnTickAsync(CancellationToken ct, IServiceProvider tickServices)
+    {
+        var loggingService = tickServices.GetRequiredService<ChannelLoggingService>();
+        var guildAPI = tickServices.GetRequiredService<IDiscordRestGuildAPI>();
+        var userAPI = tickServices.GetRequiredService<IDiscordRestUserAPI>();
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ExpirationBehaviour"/> class.
-        /// </summary>
-        /// <param name="services">The services.</param>
-        /// <param name="logger">The logging instance for this type.</param>
-        public ExpirationBehaviour
-        (
-            IServiceProvider services,
-            ILogger<ExpirationBehaviour> logger
-        )
-            : base(services, logger)
+        var joinedGuilds = new List<Snowflake>();
+        await foreach (var get in GetGuildsAsync(userAPI, ct))
         {
+            if (get.IsSuccess)
+            {
+                joinedGuilds.Add(get.Entity);
+            }
         }
 
-        /// <inheritdoc/>
-        protected override async Task<Result> OnTickAsync(CancellationToken ct, IServiceProvider tickServices)
+        var getSelf = await userAPI.GetCurrentUserAsync(ct);
+        if (!getSelf.IsSuccess)
         {
-            var loggingService = tickServices.GetRequiredService<ChannelLoggingService>();
-            var guildAPI = tickServices.GetRequiredService<IDiscordRestGuildAPI>();
-            var userAPI = tickServices.GetRequiredService<IDiscordRestUserAPI>();
+            return Result.FromError(getSelf);
+        }
 
-            var joinedGuilds = new List<Snowflake>();
-            await foreach (var get in GetGuildsAsync(userAPI, ct))
+        var self = getSelf.Entity;
+
+        var warningService = tickServices.GetRequiredService<WarningService>();
+        var expiredWarnings = await warningService.GetExpiredWarningsAsync(ct);
+
+        foreach (var expiredWarning in expiredWarnings)
+        {
+            if (ct.IsCancellationRequested)
             {
-                if (get.IsSuccess)
-                {
-                    joinedGuilds.Add(get.Entity);
-                }
+                return Result.FromSuccess();
             }
 
-            var getSelf = await userAPI.GetCurrentUserAsync(ct);
-            if (!getSelf.IsSuccess)
+            if (!joinedGuilds.Contains(expiredWarning.Server.DiscordID))
             {
-                return Result.FromError(getSelf);
+                continue;
             }
 
-            var self = getSelf.Entity;
+            // We'll use a transaction per warning to avoid timeouts
+            using var warningTransaction = new TransactionScope
+            (
+                TransactionScopeOption.Required,
+                this.TransactionOptions,
+                TransactionScopeAsyncFlowOption.Enabled
+            );
 
-            var warningService = tickServices.GetRequiredService<WarningService>();
-            var expiredWarnings = await warningService.GetExpiredWarningsAsync(ct);
+            var notifyResult = await loggingService.NotifyUserWarningRemovedAsync
+            (
+                expiredWarning,
+                self.ID
+            );
 
-            foreach (var expiredWarning in expiredWarnings)
+            if (!notifyResult.IsSuccess)
             {
-                if (ct.IsCancellationRequested)
-                {
-                    return Result.FromSuccess();
-                }
-
-                if (!joinedGuilds.Contains(expiredWarning.Server.DiscordID))
-                {
-                    continue;
-                }
-
-                // We'll use a transaction per warning to avoid timeouts
-                using var warningTransaction = new TransactionScope
-                (
-                    TransactionScopeOption.Required,
-                    this.TransactionOptions,
-                    TransactionScopeAsyncFlowOption.Enabled
-                );
-
-                var notifyResult = await loggingService.NotifyUserWarningRemovedAsync
-                (
-                    expiredWarning,
-                    self.ID
-                );
-
-                if (!notifyResult.IsSuccess)
-                {
-                    this.Log.LogWarning("Failed to rescind warning: {Reason}", notifyResult.Error.Message);
-                    return notifyResult;
-                }
-
-                var deleteResult = await warningService.DeleteWarningAsync(expiredWarning, ct);
-                if (!deleteResult.IsSuccess)
-                {
-                    this.Log.LogWarning("Failed to rescind warning: {Reason}", deleteResult.Error.Message);
-                    return deleteResult;
-                }
-
-                warningTransaction.Complete();
+                this.Log.LogWarning("Failed to rescind warning: {Reason}", notifyResult.Error.Message);
+                return notifyResult;
             }
 
-            var banService = tickServices.GetRequiredService<BanService>();
-            var expiredBans = await banService.GetExpiredBansAsync(ct);
-            foreach (var expiredBan in expiredBans)
+            var deleteResult = await warningService.DeleteWarningAsync(expiredWarning, ct);
+            if (!deleteResult.IsSuccess)
             {
-                if (ct.IsCancellationRequested)
+                this.Log.LogWarning("Failed to rescind warning: {Reason}", deleteResult.Error.Message);
+                return deleteResult;
+            }
+
+            warningTransaction.Complete();
+        }
+
+        var banService = tickServices.GetRequiredService<BanService>();
+        var expiredBans = await banService.GetExpiredBansAsync(ct);
+        foreach (var expiredBan in expiredBans)
+        {
+            if (ct.IsCancellationRequested)
+            {
+                return Result.FromSuccess();
+            }
+
+            if (!joinedGuilds.Contains(expiredBan.Server.DiscordID))
+            {
+                continue;
+            }
+
+            // We'll use a transaction per warning to avoid timeouts
+            using var banTransaction = new TransactionScope
+            (
+                TransactionScopeOption.Required,
+                this.TransactionOptions,
+                TransactionScopeAsyncFlowOption.Enabled
+            );
+
+            var removeBan = await guildAPI.RemoveGuildBanAsync
+            (
+                expiredBan.Server.DiscordID,
+                expiredBan.User.DiscordID,
+                ct: ct
+            );
+
+            if (!removeBan.IsSuccess)
+            {
+                if (removeBan.Error is DiscordRestResultError dre)
                 {
-                    return Result.FromSuccess();
-                }
-
-                if (!joinedGuilds.Contains(expiredBan.Server.DiscordID))
-                {
-                    continue;
-                }
-
-                // We'll use a transaction per warning to avoid timeouts
-                using var banTransaction = new TransactionScope
-                (
-                    TransactionScopeOption.Required,
-                    this.TransactionOptions,
-                    TransactionScopeAsyncFlowOption.Enabled
-                );
-
-                var removeBan = await guildAPI.RemoveGuildBanAsync
-                (
-                    expiredBan.Server.DiscordID,
-                    expiredBan.User.DiscordID,
-                    ct: ct
-                );
-
-                if (!removeBan.IsSuccess)
-                {
-                    if (removeBan.Error is DiscordRestResultError dre)
+                    switch (dre.DiscordError.Code)
                     {
-                        switch (dre.DiscordError.Code)
+                        case MissingPermission:
                         {
-                            case MissingPermission:
-                            {
-                                // Don't save the results, but continue processing expirations
-                                continue;
-                            }
-                            case UnknownBan:
-                            {
-                                // User is probably already unbanned, this is OK
-                                break;
-                            }
-                            default:
-                            {
-                                this.Log.LogWarning("Failed to rescind ban: {Reason}", removeBan.Error.Message);
-                                return removeBan;
-                            }
+                            // Don't save the results, but continue processing expirations
+                            continue;
+                        }
+                        case UnknownBan:
+                        {
+                            // User is probably already unbanned, this is OK
+                            break;
+                        }
+                        default:
+                        {
+                            this.Log.LogWarning("Failed to rescind ban: {Reason}", removeBan.Error.Message);
+                            return removeBan;
                         }
                     }
-                    else
-                    {
-                        this.Log.LogWarning("Failed to rescind ban: {Reason}", removeBan.Error.Message);
-                        return removeBan;
-                    }
                 }
-
-                var notifyResult = await loggingService.NotifyUserUnbannedAsync(expiredBan, self.ID);
-                if (!notifyResult.IsSuccess)
+                else
                 {
-                    this.Log.LogWarning("Failed to rescind ban: {Reason}", notifyResult.Error.Message);
-                    return notifyResult;
+                    this.Log.LogWarning("Failed to rescind ban: {Reason}", removeBan.Error.Message);
+                    return removeBan;
                 }
-
-                var deleteResult = await banService.DeleteBanAsync(expiredBan, ct);
-                if (!deleteResult.IsSuccess)
-                {
-                    this.Log.LogWarning("Failed to rescind ban: {Reason}", deleteResult.Error.Message);
-                    return deleteResult;
-                }
-
-                banTransaction.Complete();
             }
 
-            return Result.FromSuccess();
+            var notifyResult = await loggingService.NotifyUserUnbannedAsync(expiredBan, self.ID);
+            if (!notifyResult.IsSuccess)
+            {
+                this.Log.LogWarning("Failed to rescind ban: {Reason}", notifyResult.Error.Message);
+                return notifyResult;
+            }
+
+            var deleteResult = await banService.DeleteBanAsync(expiredBan, ct);
+            if (!deleteResult.IsSuccess)
+            {
+                this.Log.LogWarning("Failed to rescind ban: {Reason}", deleteResult.Error.Message);
+                return deleteResult;
+            }
+
+            banTransaction.Complete();
         }
 
-        private async IAsyncEnumerable<Result<Snowflake>> GetGuildsAsync
-        (
-            IDiscordRestUserAPI userAPI,
-            [EnumeratorCancellation] CancellationToken ct = default
-        )
+        return Result.FromSuccess();
+    }
+
+    private async IAsyncEnumerable<Result<Snowflake>> GetGuildsAsync
+    (
+        IDiscordRestUserAPI userAPI,
+        [EnumeratorCancellation] CancellationToken ct = default
+    )
+    {
+        Optional<Snowflake> after = default;
+        while (true)
         {
-            Optional<Snowflake> after = default;
-            while (true)
+            if (ct.IsCancellationRequested)
             {
-                if (ct.IsCancellationRequested)
-                {
-                    yield break;
-                }
-
-                var getGuilds = await userAPI.GetCurrentUserGuildsAsync(after: after, ct: ct);
-                if (!getGuilds.IsSuccess)
-                {
-                    yield break;
-                }
-
-                var retrievedGuilds = getGuilds.Entity;
-                if (retrievedGuilds.Count == 0)
-                {
-                    break;
-                }
-
-                foreach (var retrievedGuild in retrievedGuilds)
-                {
-                    if (!retrievedGuild.ID.IsDefined(out var guildID))
-                    {
-                        continue;
-                    }
-
-                    yield return guildID;
-                }
-
-                after = getGuilds.Entity[^1].ID;
+                yield break;
             }
+
+            var getGuilds = await userAPI.GetCurrentUserGuildsAsync(after: after, ct: ct);
+            if (!getGuilds.IsSuccess)
+            {
+                yield break;
+            }
+
+            var retrievedGuilds = getGuilds.Entity;
+            if (retrievedGuilds.Count == 0)
+            {
+                break;
+            }
+
+            foreach (var retrievedGuild in retrievedGuilds)
+            {
+                if (!retrievedGuild.ID.IsDefined(out var guildID))
+                {
+                    continue;
+                }
+
+                yield return guildID;
+            }
+
+            after = getGuilds.Entity[^1].ID;
         }
     }
 }

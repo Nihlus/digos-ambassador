@@ -30,80 +30,79 @@ using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Responders
+namespace DIGOS.Ambassador.Plugins.Autorole.Responders;
+
+/// <summary>
+/// Responds to role changes.
+/// </summary>
+public class RoleConditionResponder : IResponder<IGuildMemberUpdate>
 {
+    private readonly AutoroleService _autoroles;
+    private readonly AutoroleUpdateService _autoroleUpdates;
+
     /// <summary>
-    /// Responds to role changes.
+    /// Initializes a new instance of the <see cref="RoleConditionResponder"/> class.
     /// </summary>
-    public class RoleConditionResponder : IResponder<IGuildMemberUpdate>
+    /// <param name="autoroles">The autorole service.</param>
+    /// <param name="autoroleUpdates">The autorole update service.</param>
+    public RoleConditionResponder(AutoroleService autoroles, AutoroleUpdateService autoroleUpdates)
     {
-        private readonly AutoroleService _autoroles;
-        private readonly AutoroleUpdateService _autoroleUpdates;
+        _autoroles = autoroles;
+        _autoroleUpdates = autoroleUpdates;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RoleConditionResponder"/> class.
-        /// </summary>
-        /// <param name="autoroles">The autorole service.</param>
-        /// <param name="autoroleUpdates">The autorole update service.</param>
-        public RoleConditionResponder(AutoroleService autoroles, AutoroleUpdateService autoroleUpdates)
-        {
-            _autoroles = autoroles;
-            _autoroleUpdates = autoroleUpdates;
-        }
+    /// <inheritdoc />
+    public async Task<Result> RespondAsync(IGuildMemberUpdate gatewayEvent, CancellationToken ct = default)
+    {
+        var guild = gatewayEvent.GuildID;
 
-        /// <inheritdoc />
-        public async Task<Result> RespondAsync(IGuildMemberUpdate gatewayEvent, CancellationToken ct = default)
-        {
-            var guild = gatewayEvent.GuildID;
-
-            var autoroles = await _autoroles.GetAutorolesAsync
-            (
-                guild,
-                q => q
-                    .Where(a => a.IsEnabled)
-                    .Where
+        var autoroles = await _autoroles.GetAutorolesAsync
+        (
+            guild,
+            q => q
+                .Where(a => a.IsEnabled)
+                .Where
+                (
+                    a => a.Conditions.Any
                     (
-                        a => a.Conditions.Any
-                        (
-                            c =>
-                                c.GetType() == typeof(RoleCondition)
-                        )
-                    ),
-                ct
-            );
+                        c =>
+                            c.GetType() == typeof(RoleCondition)
+                    )
+                ),
+            ct
+        );
 
-            foreach (var autorole in autoroles)
+        foreach (var autorole in autoroles)
+        {
+            using var transaction = TransactionFactory.Create();
+
+            var rolesToLookFor = autorole.Conditions
+                .Where(c => c is RoleCondition)
+                .Cast<RoleCondition>()
+                .Select(c => c.RoleID);
+
+            var userHasAutorole = gatewayEvent.Roles.Contains(autorole.DiscordRoleID);
+            var userHasRelevantRole = gatewayEvent.Roles.Any(r => rolesToLookFor.Contains(r));
+
+            if (userHasAutorole || userHasRelevantRole)
             {
-                using var transaction = TransactionFactory.Create();
+                var updateAutorole = await _autoroleUpdates.UpdateAutoroleForUserAsync
+                (
+                    autorole,
+                    guild,
+                    gatewayEvent.User.ID,
+                    ct
+                );
 
-                var rolesToLookFor = autorole.Conditions
-                    .Where(c => c is RoleCondition)
-                    .Cast<RoleCondition>()
-                    .Select(c => c.RoleID);
-
-                var userHasAutorole = gatewayEvent.Roles.Contains(autorole.DiscordRoleID);
-                var userHasRelevantRole = gatewayEvent.Roles.Any(r => rolesToLookFor.Contains(r));
-
-                if (userHasAutorole || userHasRelevantRole)
+                if (!updateAutorole.IsSuccess)
                 {
-                    var updateAutorole = await _autoroleUpdates.UpdateAutoroleForUserAsync
-                    (
-                        autorole,
-                        guild,
-                        gatewayEvent.User.ID,
-                        ct
-                    );
-
-                    if (!updateAutorole.IsSuccess)
-                    {
-                        return Result.FromError(updateAutorole);
-                    }
+                    return Result.FromError(updateAutorole);
                 }
-
-                transaction.Complete();
             }
 
-            return Result.FromSuccess();
+            transaction.Complete();
         }
+
+        return Result.FromSuccess();
     }
 }

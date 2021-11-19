@@ -22,13 +22,12 @@
 
 using System;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Attributes
+namespace DIGOS.Ambassador.Plugins.Transformations.Attributes;
+
+/// <summary>
+/// An attribute which marks a bodypart as chiral.
+/// </summary>
+[AttributeUsage(AttributeTargets.Field)]
+internal sealed class ChiralAttribute : Attribute
 {
-    /// <summary>
-    /// An attribute which marks a bodypart as chiral.
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Field)]
-    internal sealed class ChiralAttribute : Attribute
-    {
-    }
 }

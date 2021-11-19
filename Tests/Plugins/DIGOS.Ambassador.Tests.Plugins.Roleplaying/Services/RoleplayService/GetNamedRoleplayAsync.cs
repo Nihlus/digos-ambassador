@@ -24,12 +24,11 @@
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Roleplaying
+namespace DIGOS.Ambassador.Tests.Plugins.Roleplaying;
+
+public partial class RoleplayServiceTests
 {
-    public partial class RoleplayServiceTests
+    public class GetNamedRoleplayAsync : RoleplayServiceTestBase
     {
-        public class GetNamedRoleplayAsync : RoleplayServiceTestBase
-        {
-        }
     }
 }

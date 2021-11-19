@@ -33,141 +33,140 @@ using Microsoft.EntityFrameworkCore;
 using static DIGOS.Ambassador.Plugins.Transformations.Transformations.Chirality;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
+namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
+
+/// <summary>
+/// Represents a distinct part of a character's appearance.
+/// </summary>
+[Owned]
+[PublicAPI]
+public class AppearanceComponent
 {
     /// <summary>
-    /// Represents a distinct part of a character's appearance.
+    /// Gets the component's current transformation.
     /// </summary>
-    [Owned]
-    [PublicAPI]
-    public class AppearanceComponent
+    public virtual Transformation Transformation { get; internal set; } = null!;
+
+    /// <summary>
+    /// Gets the chirality of the component.
+    /// </summary>
+    public Chirality Chirality { get; private set; }
+
+    /// <summary>
+    /// Gets the base colour of the component.
+    /// </summary>
+    public virtual Colour BaseColour { get; internal set; } = null!;
+
+    /// <summary>
+    /// Gets the pattern of the component's secondary colour (if any).
+    /// </summary>
+    public Pattern? Pattern { get; internal set; }
+
+    /// <summary>
+    /// Gets the component's pattern colour.
+    /// </summary>
+    public virtual Colour? PatternColour { get; internal set; }
+
+    /// <summary>
+    /// Gets the bodypart that the component is.
+    /// </summary>
+    public Bodypart Bodypart => this.Transformation.Part;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AppearanceComponent"/> class.
+    /// </summary>
+    /// <remarks>
+    /// Required by EF Core.
+    /// </remarks>
+    protected AppearanceComponent()
     {
-        /// <summary>
-        /// Gets the component's current transformation.
-        /// </summary>
-        public virtual Transformation Transformation { get; internal set; } = null!;
+    }
 
-        /// <summary>
-        /// Gets the chirality of the component.
-        /// </summary>
-        public Chirality Chirality { get; private set; }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AppearanceComponent"/> class.
+    /// </summary>
+    /// <param name="transformation">The transformation that the component has.</param>
+    /// <param name="chirality">The chirality of the component.</param>
+    [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Required by EF Core.")]
+    public AppearanceComponent(Transformation transformation, Chirality chirality)
+    {
+        this.Transformation = transformation;
+        this.Chirality = chirality;
 
-        /// <summary>
-        /// Gets the base colour of the component.
-        /// </summary>
-        public virtual Colour BaseColour { get; internal set; } = null!;
+        this.BaseColour = transformation.DefaultBaseColour.Clone();
+    }
 
-        /// <summary>
-        /// Gets the pattern of the component's secondary colour (if any).
-        /// </summary>
-        public Pattern? Pattern { get; internal set; }
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        return
+            $"{(this.Chirality == Center ? string.Empty : $"{this.Chirality.Humanize()} ")}{this.Bodypart} ({this.Transformation.Species.Name})";
+    }
 
-        /// <summary>
-        /// Gets the component's pattern colour.
-        /// </summary>
-        public virtual Colour? PatternColour { get; internal set; }
-
-        /// <summary>
-        /// Gets the bodypart that the component is.
-        /// </summary>
-        public Bodypart Bodypart => this.Transformation.Part;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AppearanceComponent"/> class.
-        /// </summary>
-        /// <remarks>
-        /// Required by EF Core.
-        /// </remarks>
-        protected AppearanceComponent()
+    /// <summary>
+    /// Copies the appearance of the given component and creates a new component based on it.
+    /// </summary>
+    /// <param name="other">The other component.</param>
+    /// <returns>A new component with the same settings.</returns>
+    [Pure]
+    public static AppearanceComponent CopyFrom(AppearanceComponent other)
+    {
+        return new AppearanceComponent(other.Transformation, other.Chirality)
         {
+            BaseColour = Colour.CopyFrom(other.BaseColour),
+            Pattern = other.Pattern,
+            PatternColour = other.PatternColour is null ? null : Colour.CopyFrom(other.PatternColour),
+        };
+    }
+
+    /// <summary>
+    /// Creates a new <see cref="AppearanceComponent"/> from a transformation of a bodypart.
+    /// </summary>
+    /// <param name="transformation">The transformation.</param>
+    /// <param name="chirality">The chirality of the transformation, if any.</param>
+    /// <returns>A new component.</returns>
+    [Pure]
+    public static AppearanceComponent CreateFrom(Transformation transformation, Chirality chirality = Center)
+    {
+        if (transformation.Part.IsChiral() && chirality == Center)
+        {
+            throw new ArgumentException("A chiral transformation requires you to specify the chirality.", nameof(transformation));
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AppearanceComponent"/> class.
-        /// </summary>
-        /// <param name="transformation">The transformation that the component has.</param>
-        /// <param name="chirality">The chirality of the component.</param>
-        [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Required by EF Core.")]
-        public AppearanceComponent(Transformation transformation, Chirality chirality)
+        if (!transformation.Part.IsChiral() && chirality != Center)
         {
-            this.Transformation = transformation;
-            this.Chirality = chirality;
-
-            this.BaseColour = transformation.DefaultBaseColour.Clone();
+            throw new ArgumentException("A nonchiral transformation cannot have chirality.", nameof(transformation));
         }
 
-        /// <inheritdoc />
-        public override string ToString()
+        return new AppearanceComponent(transformation, chirality)
         {
-            return
-                $"{(this.Chirality == Center ? string.Empty : $"{this.Chirality.Humanize()} ")}{this.Bodypart} ({this.Transformation.Species.Name})";
+            Pattern = transformation.DefaultPattern,
+            PatternColour = transformation.DefaultPatternColour?.Clone()
+        };
+    }
+
+    /// <summary>
+    /// Creates a set of chiral appearance components from a chiral transformation.
+    /// </summary>
+    /// <param name="transformation">The transformation.</param>
+    /// <returns>A set of appearance components.</returns>
+    [Pure]
+    public static IEnumerable<AppearanceComponent> CreateFromChiral(Transformation transformation)
+    {
+        if (!transformation.Part.IsChiral())
+        {
+            throw new ArgumentException("The transformation was not chiral.", nameof(transformation));
         }
 
-        /// <summary>
-        /// Copies the appearance of the given component and creates a new component based on it.
-        /// </summary>
-        /// <param name="other">The other component.</param>
-        /// <returns>A new component with the same settings.</returns>
-        [Pure]
-        public static AppearanceComponent CopyFrom(AppearanceComponent other)
+        var chiralities = new[] { Left, Right };
+
+        foreach (var chirality in chiralities)
         {
-            return new AppearanceComponent(other.Transformation, other.Chirality)
-            {
-                BaseColour = Colour.CopyFrom(other.BaseColour),
-                Pattern = other.Pattern,
-                PatternColour = other.PatternColour is null ? null : Colour.CopyFrom(other.PatternColour),
-            };
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="AppearanceComponent"/> from a transformation of a bodypart.
-        /// </summary>
-        /// <param name="transformation">The transformation.</param>
-        /// <param name="chirality">The chirality of the transformation, if any.</param>
-        /// <returns>A new component.</returns>
-        [Pure]
-        public static AppearanceComponent CreateFrom(Transformation transformation, Chirality chirality = Center)
-        {
-            if (transformation.Part.IsChiral() && chirality == Center)
-            {
-                throw new ArgumentException("A chiral transformation requires you to specify the chirality.", nameof(transformation));
-            }
-
-            if (!transformation.Part.IsChiral() && chirality != Center)
-            {
-                throw new ArgumentException("A nonchiral transformation cannot have chirality.", nameof(transformation));
-            }
-
-            return new AppearanceComponent(transformation, chirality)
+            yield return new AppearanceComponent(transformation, chirality)
             {
                 Pattern = transformation.DefaultPattern,
                 PatternColour = transformation.DefaultPatternColour?.Clone()
             };
-        }
-
-        /// <summary>
-        /// Creates a set of chiral appearance components from a chiral transformation.
-        /// </summary>
-        /// <param name="transformation">The transformation.</param>
-        /// <returns>A set of appearance components.</returns>
-        [Pure]
-        public static IEnumerable<AppearanceComponent> CreateFromChiral(Transformation transformation)
-        {
-            if (!transformation.Part.IsChiral())
-            {
-                throw new ArgumentException("The transformation was not chiral.", nameof(transformation));
-            }
-
-            var chiralities = new[] { Left, Right };
-
-            foreach (var chirality in chiralities)
-            {
-                yield return new AppearanceComponent(transformation, chirality)
-                {
-                    Pattern = transformation.DefaultPattern,
-                    PatternColour = transformation.DefaultPatternColour?.Clone()
-                };
-            }
         }
     }
 }

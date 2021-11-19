@@ -28,54 +28,53 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.Plugins.Characters
+namespace DIGOS.Ambassador.Tests.Plugins.Characters;
+
+public static partial class CharacterServiceTests
 {
-    public static partial class CharacterServiceTests
+    public class GetUserCharacterByNameAsync : CharacterServiceTestBase
     {
-        public class GetUserCharacterByNameAsync : CharacterServiceTestBase
+        private const string CharacterName = "Test";
+
+        private readonly Character _character;
+
+        public GetUserCharacterByNameAsync()
         {
-            private const string CharacterName = "Test";
+            _character = CreateCharacter
+            (
+                this.DefaultOwner,
+                this.DefaultServer,
+                CharacterName,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty
+            );
+        }
 
-            private readonly Character _character;
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfOwnerDoesNotHaveACharacterWithThatName()
+        {
+            var result = await this.Characters.GetUserCharacterByNameAsync(this.DefaultOwner, this.DefaultServer, "NonExistant");
 
-            public GetUserCharacterByNameAsync()
-            {
-                _character = CreateCharacter
-                (
-                    this.DefaultOwner,
-                    this.DefaultServer,
-                    CharacterName,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty
-                );
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfOwnerDoesNotHaveACharacterWithThatName()
-            {
-                var result = await this.Characters.GetUserCharacterByNameAsync(this.DefaultOwner, this.DefaultServer, "NonExistant");
+        [Fact]
+        public async Task ReturnsSuccessfulResultIfOwnerHasACharacterWithThatName()
+        {
+            var result = await this.Characters.GetUserCharacterByNameAsync(this.DefaultOwner, this.DefaultServer, CharacterName);
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.True(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsSuccessfulResultIfOwnerHasACharacterWithThatName()
-            {
-                var result = await this.Characters.GetUserCharacterByNameAsync(this.DefaultOwner, this.DefaultServer, CharacterName);
+        [Fact]
+        public async Task ReturnsCorrectCharacter()
+        {
+            var result = await this.Characters.GetUserCharacterByNameAsync(this.DefaultOwner, this.DefaultServer, CharacterName);
 
-                Assert.True(result.IsSuccess);
-            }
-
-            [Fact]
-            public async Task ReturnsCorrectCharacter()
-            {
-                var result = await this.Characters.GetUserCharacterByNameAsync(this.DefaultOwner, this.DefaultServer, CharacterName);
-
-                Assert.Same(_character, result.Entity);
-            }
+            Assert.Same(_character, result.Entity);
         }
     }
 }

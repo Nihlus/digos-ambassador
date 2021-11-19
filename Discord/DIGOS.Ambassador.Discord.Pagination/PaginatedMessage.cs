@@ -25,143 +25,142 @@ using DIGOS.Ambassador.Discord.Interactivity.Messages;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Core;
 
-namespace DIGOS.Ambassador.Discord.Pagination
+namespace DIGOS.Ambassador.Discord.Pagination;
+
+/// <summary>
+/// A page building class for paginated galleries.
+/// </summary>
+public class PaginatedMessage : InteractiveMessage
 {
     /// <summary>
-    /// A page building class for paginated galleries.
+    /// Gets the nonces of the buttons this message responds to.
     /// </summary>
-    public class PaginatedMessage : InteractiveMessage
+    public IReadOnlyList<ButtonComponent> Buttons { get; }
+
+    /// <summary>
+    /// Gets the pages in the message.
+    /// </summary>
+    public IReadOnlyList<Embed> Pages { get; }
+
+    /// <summary>
+    /// Gets the appearance options for the message.
+    /// </summary>
+    public PaginatedAppearanceOptions Appearance { get; }
+
+    /// <summary>
+    /// Gets the ID of the source user.
+    /// </summary>
+    public Snowflake SourceUserID { get; }
+
+    /// <summary>
+    /// Gets or sets the current page index.
+    /// </summary>
+    public int CurrentPage { get; set;  }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PaginatedMessage"/> class.
+    /// </summary>
+    /// <param name="channelID">The ID of the channel the message is in.</param>
+    /// <param name="messageID">The ID of the message.</param>
+    /// <param name="sourceUserID">The ID of the source user.</param>
+    /// <param name="pages">The pages in the paginated message.</param>
+    /// <param name="appearance">The appearance options.</param>
+    public PaginatedMessage
+    (
+        Snowflake channelID,
+        Snowflake messageID,
+        Snowflake sourceUserID,
+        IReadOnlyList<Embed> pages,
+        PaginatedAppearanceOptions? appearance = null
+    )
+        : base(channelID, messageID)
     {
-        /// <summary>
-        /// Gets the nonces of the buttons this message responds to.
-        /// </summary>
-        public IReadOnlyList<ButtonComponent> Buttons { get; }
+        appearance ??= PaginatedAppearanceOptions.Default;
 
-        /// <summary>
-        /// Gets the pages in the message.
-        /// </summary>
-        public IReadOnlyList<Embed> Pages { get; }
+        this.SourceUserID = sourceUserID;
+        this.Pages = pages;
+        this.Appearance = appearance;
 
-        /// <summary>
-        /// Gets the appearance options for the message.
-        /// </summary>
-        public PaginatedAppearanceOptions Appearance { get; }
-
-        /// <summary>
-        /// Gets the ID of the source user.
-        /// </summary>
-        public Snowflake SourceUserID { get; }
-
-        /// <summary>
-        /// Gets or sets the current page index.
-        /// </summary>
-        public int CurrentPage { get; set;  }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PaginatedMessage"/> class.
-        /// </summary>
-        /// <param name="channelID">The ID of the channel the message is in.</param>
-        /// <param name="messageID">The ID of the message.</param>
-        /// <param name="sourceUserID">The ID of the source user.</param>
-        /// <param name="pages">The pages in the paginated message.</param>
-        /// <param name="appearance">The appearance options.</param>
-        public PaginatedMessage
-        (
-            Snowflake channelID,
-            Snowflake messageID,
-            Snowflake sourceUserID,
-            IReadOnlyList<Embed> pages,
-            PaginatedAppearanceOptions? appearance = null
-        )
-            : base(channelID, messageID)
+        this.Buttons = new List<ButtonComponent>
         {
-            appearance ??= PaginatedAppearanceOptions.Default;
+            appearance.First,
+            appearance.Back,
+            appearance.Next,
+            appearance.Last,
+            appearance.Close,
+            appearance.Help
+        };
+    }
 
-            this.SourceUserID = sourceUserID;
-            this.Pages = pages;
-            this.Appearance = appearance;
-
-            this.Buttons = new List<ButtonComponent>
-            {
-                appearance.First,
-                appearance.Back,
-                appearance.Next,
-                appearance.Last,
-                appearance.Close,
-                appearance.Help
-            };
+    /// <summary>
+    /// Moves the paginated message to the next page.
+    /// </summary>
+    /// <returns>True if the page changed.</returns>
+    public bool MoveNext()
+    {
+        if (this.CurrentPage >= this.Pages.Count - 1)
+        {
+            return false;
         }
 
-        /// <summary>
-        /// Moves the paginated message to the next page.
-        /// </summary>
-        /// <returns>True if the page changed.</returns>
-        public bool MoveNext()
-        {
-            if (this.CurrentPage >= this.Pages.Count - 1)
-            {
-                return false;
-            }
+        this.CurrentPage += 1;
+        return true;
+    }
 
-            this.CurrentPage += 1;
-            return true;
+    /// <summary>
+    /// Moves the paginated message to the previous page.
+    /// </summary>
+    /// <returns>True if the page changed.</returns>
+    public bool MovePrevious()
+    {
+        if (this.CurrentPage <= 0)
+        {
+            return false;
         }
 
-        /// <summary>
-        /// Moves the paginated message to the previous page.
-        /// </summary>
-        /// <returns>True if the page changed.</returns>
-        public bool MovePrevious()
-        {
-            if (this.CurrentPage <= 0)
-            {
-                return false;
-            }
+        this.CurrentPage -= 1;
+        return true;
+    }
 
-            this.CurrentPage -= 1;
-            return true;
+    /// <summary>
+    /// Moves the paginated message to the first page.
+    /// </summary>
+    /// <returns>True if the page changed.</returns>
+    public bool MoveFirst()
+    {
+        if (this.CurrentPage == 0)
+        {
+            return false;
         }
 
-        /// <summary>
-        /// Moves the paginated message to the first page.
-        /// </summary>
-        /// <returns>True if the page changed.</returns>
-        public bool MoveFirst()
-        {
-            if (this.CurrentPage == 0)
-            {
-                return false;
-            }
+        this.CurrentPage = 0;
+        return true;
+    }
 
-            this.CurrentPage = 0;
-            return true;
+    /// <summary>
+    /// Moves the paginated message to the last page.
+    /// </summary>
+    /// <returns>True if the page changed.</returns>
+    public bool MoveLast()
+    {
+        if (this.CurrentPage == this.Pages.Count - 1)
+        {
+            return false;
         }
 
-        /// <summary>
-        /// Moves the paginated message to the last page.
-        /// </summary>
-        /// <returns>True if the page changed.</returns>
-        public bool MoveLast()
-        {
-            if (this.CurrentPage == this.Pages.Count - 1)
-            {
-                return false;
-            }
+        this.CurrentPage = this.Pages.Count - 1;
+        return true;
+    }
 
-            this.CurrentPage = this.Pages.Count - 1;
-            return true;
-        }
-
-        /// <summary>
-        /// Gets the current page.
-        /// </summary>
-        /// <returns>The page.</returns>
-        public Embed GetCurrentPage()
+    /// <summary>
+    /// Gets the current page.
+    /// </summary>
+    /// <returns>The page.</returns>
+    public Embed GetCurrentPage()
+    {
+        return this.Pages[this.CurrentPage] with
         {
-            return this.Pages[this.CurrentPage] with
-            {
-                Footer = new EmbedFooter(string.Format(this.Appearance.FooterFormat, this.CurrentPage + 1, this.Pages.Count))
-            };
-        }
+            Footer = new EmbedFooter(string.Format(this.Appearance.FooterFormat, this.CurrentPage + 1, this.Pages.Count))
+        };
     }
 }

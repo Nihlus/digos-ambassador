@@ -33,61 +33,60 @@ using Remora.Discord.Core;
 using Xunit;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Transformations
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
+
+public partial class TransformationServiceTests
 {
-    public partial class TransformationServiceTests
+    public class ResetCharacterFormAsync : TransformationServiceTestBase
     {
-        public class ResetCharacterFormAsync : TransformationServiceTestBase
+        private readonly Snowflake _user = new(0);
+        private User _owner = null!;
+        private Character _character = null!;
+
+        private Appearance _appearance = null!;
+
+        protected override async Task InitializeTestAsync()
         {
-            private readonly Snowflake _user = new(0);
-            private User _owner = null!;
-            private Character _character = null!;
+            _owner = (await this.Users.GetOrRegisterUserAsync(_user)).Entity;
 
-            private Appearance _appearance = null!;
+            _character = new Character
+            (
+                _owner,
+                new Server(new Snowflake(0)),
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty
+            );
 
-            protected override async Task InitializeTestAsync()
+            this.CharacterDatabase.Characters.Update(_character);
+
+            // Set up the default appearance
+            var getAppearanceConfigurationResult = await this.Transformations.GetOrCreateDefaultAppearanceAsync
+            (
+                _character
+            );
+
+            _appearance = getAppearanceConfigurationResult.Entity;
+        }
+
+        [Fact]
+        public async Task CanResetForm()
+        {
+            var defaultAppearance = new Appearance(_character)
             {
-                _owner = (await this.Users.GetOrRegisterUserAsync(_user)).Entity;
+                Height = 256
+            };
 
-                _character = new Character
-                (
-                    _owner,
-                    new Server(new Snowflake(0)),
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty
-                );
+            _appearance = defaultAppearance;
 
-                this.CharacterDatabase.Characters.Update(_character);
+            var result = await this.Transformations.ResetCharacterFormAsync(_character);
 
-                // Set up the default appearance
-                var getAppearanceConfigurationResult = await this.Transformations.GetOrCreateDefaultAppearanceAsync
-                (
-                    _character
-                );
-
-                _appearance = getAppearanceConfigurationResult.Entity;
-            }
-
-            [Fact]
-            public async Task CanResetForm()
-            {
-                var defaultAppearance = new Appearance(_character)
-                {
-                    Height = 256
-                };
-
-                _appearance = defaultAppearance;
-
-                var result = await this.Transformations.ResetCharacterFormAsync(_character);
-
-                Assert.True(result.IsSuccess);
-                Assert.NotNull(_appearance);
-                Assert.Equal(_appearance.Height, _appearance.Height);
-            }
+            Assert.True(result.IsSuccess);
+            Assert.NotNull(_appearance);
+            Assert.Equal(_appearance.Height, _appearance.Height);
         }
     }
 }

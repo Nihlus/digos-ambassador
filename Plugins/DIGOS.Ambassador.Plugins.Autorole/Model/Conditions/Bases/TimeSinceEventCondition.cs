@@ -22,38 +22,37 @@
 
 using System;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
+namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
+
+/// <summary>
+/// Represents an abstract condition requiring a set amount of time to have passed since an event.
+/// </summary>
+/// <typeparam name="TActualCondition">The actual condition.</typeparam>
+public abstract class TimeSinceEventCondition<TActualCondition> : AutoroleCondition
+    where TActualCondition : TimeSinceEventCondition<TActualCondition>
 {
     /// <summary>
-    /// Represents an abstract condition requiring a set amount of time to have passed since an event.
+    /// Gets the required elapsed time.
     /// </summary>
-    /// <typeparam name="TActualCondition">The actual condition.</typeparam>
-    public abstract class TimeSinceEventCondition<TActualCondition> : AutoroleCondition
-        where TActualCondition : TimeSinceEventCondition<TActualCondition>
+    public TimeSpan RequiredTime { get; internal set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TimeSinceEventCondition{TActualCondition}"/> class.
+    /// </summary>
+    /// <param name="requiredTime">The required time.</param>
+    protected TimeSinceEventCondition(TimeSpan requiredTime)
     {
-        /// <summary>
-        /// Gets the required elapsed time.
-        /// </summary>
-        public TimeSpan RequiredTime { get; internal set; }
+        this.RequiredTime = requiredTime;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TimeSinceEventCondition{TActualCondition}"/> class.
-        /// </summary>
-        /// <param name="requiredTime">The required time.</param>
-        protected TimeSinceEventCondition(TimeSpan requiredTime)
+    /// <inheritdoc />
+    public override bool HasSameConditionsAs(IAutoroleCondition autoroleCondition)
+    {
+        if (autoroleCondition is not TActualCondition actualCondition)
         {
-            this.RequiredTime = requiredTime;
+            return false;
         }
 
-        /// <inheritdoc />
-        public override bool HasSameConditionsAs(IAutoroleCondition autoroleCondition)
-        {
-            if (autoroleCondition is not TActualCondition actualCondition)
-            {
-                return false;
-            }
-
-            return this.RequiredTime == actualCondition.RequiredTime;
-        }
+        return this.RequiredTime == actualCondition.RequiredTime;
     }
 }

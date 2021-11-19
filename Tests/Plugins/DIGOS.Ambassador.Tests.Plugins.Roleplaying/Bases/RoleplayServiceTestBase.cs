@@ -38,59 +38,58 @@ using Remora.Commands.Services;
 using Xunit;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Roleplaying
+namespace DIGOS.Ambassador.Tests.Plugins.Roleplaying;
+
+/// <summary>
+/// Serves as a test base for roleplay service tests.
+/// </summary>
+[PublicAPI]
+public abstract class RoleplayServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
 {
     /// <summary>
-    /// Serves as a test base for roleplay service tests.
+    /// Gets the database.
     /// </summary>
-    [PublicAPI]
-    public abstract class RoleplayServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
+    public RoleplayingDatabaseContext Database { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the roleplay service object.
+    /// </summary>
+    protected RoleplayService Roleplays { get; private set; } = null!;
+
+    /// <inheritdoc />
+    protected override void RegisterServices(IServiceCollection serviceCollection)
     {
-        /// <summary>
-        /// Gets the database.
-        /// </summary>
-        public RoleplayingDatabaseContext Database { get; private set; } = null!;
+        serviceCollection
+            .AddDbContext<CoreDatabaseContext>(o => ConfigureOptions(o, "Core"))
+            .AddDbContext<RoleplayingDatabaseContext>(o => ConfigureOptions(o, "Roleplaying"));
 
-        /// <summary>
-        /// Gets the roleplay service object.
-        /// </summary>
-        protected RoleplayService Roleplays { get; private set; } = null!;
+        serviceCollection
+            .AddScoped<CommandService>()
+            .AddScoped<OwnedEntityService>()
+            .AddScoped<UserService>()
+            .AddScoped<ServerService>()
+            .AddScoped<RoleplayService>()
+            .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
+    }
 
-        /// <inheritdoc />
-        protected override void RegisterServices(IServiceCollection serviceCollection)
-        {
-            serviceCollection
-                .AddDbContext<CoreDatabaseContext>(o => ConfigureOptions(o, "Core"))
-                .AddDbContext<RoleplayingDatabaseContext>(o => ConfigureOptions(o, "Roleplaying"));
+    /// <inheritdoc />
+    protected override void ConfigureServices(IServiceProvider serviceProvider)
+    {
+        this.Database = serviceProvider.GetRequiredService<RoleplayingDatabaseContext>();
+        this.Database.Database.Create();
 
-            serviceCollection
-                .AddScoped<CommandService>()
-                .AddScoped<OwnedEntityService>()
-                .AddScoped<UserService>()
-                .AddScoped<ServerService>()
-                .AddScoped<RoleplayService>()
-                .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
-        }
+        this.Roleplays = serviceProvider.GetRequiredService<RoleplayService>();
+    }
 
-        /// <inheritdoc />
-        protected override void ConfigureServices(IServiceProvider serviceProvider)
-        {
-            this.Database = serviceProvider.GetRequiredService<RoleplayingDatabaseContext>();
-            this.Database.Database.Create();
+    /// <inheritdoc />
+    public virtual Task InitializeAsync()
+    {
+        return Task.CompletedTask;
+    }
 
-            this.Roleplays = serviceProvider.GetRequiredService<RoleplayService>();
-        }
-
-        /// <inheritdoc />
-        public virtual Task InitializeAsync()
-        {
-            return Task.CompletedTask;
-        }
-
-        /// <inheritdoc />
-        public Task DisposeAsync()
-        {
-            return Task.CompletedTask;
-        }
+    /// <inheritdoc />
+    public Task DisposeAsync()
+    {
+        return Task.CompletedTask;
     }
 }

@@ -55,248 +55,247 @@ using Remora.Discord.Hosting.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Services;
 
-namespace DIGOS.Ambassador
+namespace DIGOS.Ambassador;
+
+/// <summary>
+/// The main entry point class of the program.
+/// </summary>
+internal class Program
 {
     /// <summary>
-    /// The main entry point class of the program.
+    /// The main entry point of the program.
     /// </summary>
-    internal class Program
+    /// <returns>A task.</returns>
+    public static async Task Main()
     {
-        /// <summary>
-        /// The main entry point of the program.
-        /// </summary>
-        /// <returns>A task.</returns>
-        public static async Task Main()
+        var cancellationSource = new CancellationTokenSource();
+
+        Console.CancelKeyPress += (_, eventArgs) =>
         {
-            var cancellationSource = new CancellationTokenSource();
+            eventArgs.Cancel = true;
+            cancellationSource.Cancel();
+        };
 
-            Console.CancelKeyPress += (_, eventArgs) =>
+        // Configure logging
+        const string configurationName = "DIGOS.Ambassador.log4net.config";
+        var logConfig = new XmlDocument();
+        await using (var configStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(configurationName))
+        {
+            if (configStream is null)
             {
-                eventArgs.Cancel = true;
-                cancellationSource.Cancel();
-            };
-
-            // Configure logging
-            const string configurationName = "DIGOS.Ambassador.log4net.config";
-            var logConfig = new XmlDocument();
-            await using (var configStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(configurationName))
-            {
-                if (configStream is null)
-                {
-                    throw new InvalidOperationException("The log4net configuration stream could not be found.");
-                }
-
-                logConfig.Load(configStream);
+                throw new InvalidOperationException("The log4net configuration stream could not be found.");
             }
 
-            var repo = LogManager.CreateRepository(Assembly.GetEntryAssembly(), typeof(Hierarchy));
-            XmlConfigurator.Configure(repo, logConfig["log4net"]);
+            logConfig.Load(configStream);
+        }
 
-            var contentFileSystem = FileSystemFactory.CreateContentFileSystem();
-            var contentService = new ContentService(contentFileSystem);
+        var repo = LogManager.CreateRepository(Assembly.GetEntryAssembly(), typeof(Hierarchy));
+        XmlConfigurator.Configure(repo, logConfig["log4net"]);
 
-            var getBotToken = await contentService.GetBotTokenAsync();
-            if (!getBotToken.IsSuccess)
+        var contentFileSystem = FileSystemFactory.CreateContentFileSystem();
+        var contentService = new ContentService(contentFileSystem);
+
+        var getBotToken = await contentService.GetBotTokenAsync();
+        if (!getBotToken.IsSuccess)
+        {
+            throw new InvalidOperationException("No bot token available.");
+        }
+
+        var token = getBotToken.Entity.Trim();
+
+        var pluginService = new PluginService();
+        var plugins = pluginService.LoadAvailablePlugins().ToList();
+
+        var hostBuilder = Host.CreateDefaultBuilder()
+            .AddDiscordService(_ => token)
+            .UseSystemd()
+            .ConfigureServices(services =>
             {
-                throw new InvalidOperationException("No bot token available.");
-            }
-
-            var token = getBotToken.Entity.Trim();
-
-            var pluginService = new PluginService();
-            var plugins = pluginService.LoadAvailablePlugins().ToList();
-
-            var hostBuilder = Host.CreateDefaultBuilder()
-                .AddDiscordService(_ => token)
-                .UseSystemd()
-                .ConfigureServices(services =>
+                services.Configure<ServiceProviderOptions>(s =>
                 {
-                    services.Configure<ServiceProviderOptions>(s =>
-                    {
-                        s.ValidateScopes = true;
-                        s.ValidateOnBuild = true;
-                    });
-
-                    services.Configure<CommandResponderOptions>(o => o.Prefix = "!");
-
-                    services.AddSingleton<BehaviourService>();
-
-                    services
-                        .AddSingleton(pluginService)
-                        .AddSingleton(contentService)
-                        .AddSingleton(contentFileSystem)
-                        .AddSingleton<Random>();
-
-                    services
-                        .AddDiscordCommands(true)
-                        .AddDiscordCaching();
-
-                    // Configure cache times
-                    services.Configure<CacheSettings>(settings =>
-                    {
-                        settings.SetAbsoluteExpiration<IGuildMember>(TimeSpan.FromDays(1));
-                        settings.SetAbsoluteExpiration<IMessage>(TimeSpan.FromDays(1));
-                    });
-
-                    // Set up the feedback theme
-                    var theme = (FeedbackTheme)FeedbackTheme.DiscordDark with
-                    {
-                        Secondary = Color.MediumPurple
-                    };
-
-                    services.AddSingleton<IFeedbackTheme>(theme);
-
-                    // Add execution events
-                    services
-                        .AddPreExecutionEvent<ConsentCheckingPreExecutionEvent>()
-                        .AddPostExecutionEvent<MessageRelayingPostExecutionEvent>();
-
-                    // Ensure we're automatically joining created threads
-                    services.AddResponder<ThreadJoinResponder>();
-
-                    // Override the default responders
-                    services.Replace(ServiceDescriptor.Scoped<CommandResponder, AmbassadorCommandResponder>());
-                    services.Replace(ServiceDescriptor.Scoped<InteractionResponder, AmbassadorInteractionResponder>());
-
-                    foreach (var plugin in plugins)
-                    {
-                        plugin.ConfigureServices(services);
-                    }
-                })
-                .ConfigureLogging(l =>
-                {
-                    l.ClearProviders();
-
-                    l.AddLog4Net()
-                        .AddFilter("Microsoft.EntityFrameworkCore.Infrastructure", LogLevel.Warning)
-                        .AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Critical)
-                        .AddFilter("Microsoft.EntityFrameworkCore.Migrations", LogLevel.Warning)
-                        .AddFilter("Microsoft.EntityFrameworkCore.Update", LogLevel.Critical);
+                    s.ValidateScopes = true;
+                    s.ValidateOnBuild = true;
                 });
 
-            var host = hostBuilder.Build();
-            var hostServices = host.Services;
+                services.Configure<CommandResponderOptions>(o => o.Prefix = "!");
 
-            var log = hostServices.GetRequiredService<ILogger<Program>>();
-            log.LogInformation("Running on {Framework}", RuntimeInformation.FrameworkDescription);
+                services.AddSingleton<BehaviourService>();
 
-            Snowflake? debugServer = null;
-            var debugServerString = Environment.GetEnvironmentVariable("REMORA_DEBUG_SERVER");
-            if (debugServerString is not null)
-            {
-                if (!Snowflake.TryParse(debugServerString, out debugServer))
+                services
+                    .AddSingleton(pluginService)
+                    .AddSingleton(contentService)
+                    .AddSingleton(contentFileSystem)
+                    .AddSingleton<Random>();
+
+                services
+                    .AddDiscordCommands(true)
+                    .AddDiscordCaching();
+
+                // Configure cache times
+                services.Configure<CacheSettings>(settings =>
                 {
-                    log.LogWarning("Failed to parse debug server from environment");
+                    settings.SetAbsoluteExpiration<IGuildMember>(TimeSpan.FromDays(1));
+                    settings.SetAbsoluteExpiration<IMessage>(TimeSpan.FromDays(1));
+                });
+
+                // Set up the feedback theme
+                var theme = (FeedbackTheme)FeedbackTheme.DiscordDark with
+                {
+                    Secondary = Color.MediumPurple
+                };
+
+                services.AddSingleton<IFeedbackTheme>(theme);
+
+                // Add execution events
+                services
+                    .AddPreExecutionEvent<ConsentCheckingPreExecutionEvent>()
+                    .AddPostExecutionEvent<MessageRelayingPostExecutionEvent>();
+
+                // Ensure we're automatically joining created threads
+                services.AddResponder<ThreadJoinResponder>();
+
+                // Override the default responders
+                services.Replace(ServiceDescriptor.Scoped<CommandResponder, AmbassadorCommandResponder>());
+                services.Replace(ServiceDescriptor.Scoped<InteractionResponder, AmbassadorInteractionResponder>());
+
+                foreach (var plugin in plugins)
+                {
+                    plugin.ConfigureServices(services);
                 }
+            })
+            .ConfigureLogging(l =>
+            {
+                l.ClearProviders();
+
+                l.AddLog4Net()
+                    .AddFilter("Microsoft.EntityFrameworkCore.Infrastructure", LogLevel.Warning)
+                    .AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Critical)
+                    .AddFilter("Microsoft.EntityFrameworkCore.Migrations", LogLevel.Warning)
+                    .AddFilter("Microsoft.EntityFrameworkCore.Update", LogLevel.Critical);
+            });
+
+        var host = hostBuilder.Build();
+        var hostServices = host.Services;
+
+        var log = hostServices.GetRequiredService<ILogger<Program>>();
+        log.LogInformation("Running on {Framework}", RuntimeInformation.FrameworkDescription);
+
+        Snowflake? debugServer = null;
+        var debugServerString = Environment.GetEnvironmentVariable("REMORA_DEBUG_SERVER");
+        if (debugServerString is not null)
+        {
+            if (!Snowflake.TryParse(debugServerString, out debugServer))
+            {
+                log.LogWarning("Failed to parse debug server from environment");
             }
+        }
 
-            var slashService = hostServices.GetRequiredService<SlashService>();
+        var slashService = hostServices.GetRequiredService<SlashService>();
 
-            var checkSlashSupport = slashService.SupportsSlashCommands();
-            if (!checkSlashSupport.IsSuccess)
+        var checkSlashSupport = slashService.SupportsSlashCommands();
+        if (!checkSlashSupport.IsSuccess)
+        {
+            var error = checkSlashSupport.Error;
+            if (error is UnsupportedFeatureError ufe)
             {
-                var error = checkSlashSupport.Error;
-                if (error is UnsupportedFeatureError ufe)
-                {
-                    var location = ufe.Node is not null
-                        ? GetCommandLocation(ufe.Node)
-                        : "unknown";
+                var location = ufe.Node is not null
+                    ? GetCommandLocation(ufe.Node)
+                    : "unknown";
 
-                    log.LogWarning
-                    (
-                        "The registered commands of the bot don't support slash commands: {Reason} ({Location})",
-                        error.Message,
-                        location
-                    );
-                }
-                else
-                {
-                    log.LogError("Failed to check slash command compatibility: {Reason}", error.Message);
-                    return;
-                }
+                log.LogWarning
+                (
+                    "The registered commands of the bot don't support slash commands: {Reason} ({Location})",
+                    error.Message,
+                    location
+                );
             }
             else
             {
-                var updateSlash = await slashService.UpdateSlashCommandsAsync(debugServer, cancellationSource.Token);
-                if (!updateSlash.IsSuccess)
-                {
-                    log.LogWarning("Failed to update slash commands: {Reason}", updateSlash.Error.Message);
-                }
+                log.LogError("Failed to check slash command compatibility: {Reason}", error.Message);
+                return;
             }
-
-            foreach (var plugin in plugins)
+        }
+        else
+        {
+            var updateSlash = await slashService.UpdateSlashCommandsAsync(debugServer, cancellationSource.Token);
+            if (!updateSlash.IsSuccess)
             {
-                log.LogInformation("Initializing plugin {Name}, version {Version}...", plugin.Name, plugin.Version);
-                var initializePlugin = await plugin.InitializeAsync(hostServices);
-                if (!initializePlugin.IsSuccess)
-                {
-                    log.LogError
-                    (
-                        "Failed to initialize plugin {Name}: {Error}",
-                        plugin.Name,
-                        initializePlugin.Error.Message
-                    );
+                log.LogWarning("Failed to update slash commands: {Reason}", updateSlash.Error.Message);
+            }
+        }
 
-                    return;
-                }
-
-                if (plugin is not IMigratablePlugin migratablePlugin)
-                {
-                    continue;
-                }
-
-                log.LogInformation("Applying plugin migrations...");
-
-                var migratePlugin = await migratablePlugin.MigratePluginAsync(hostServices);
-                if (migratePlugin.IsSuccess)
-                {
-                    continue;
-                }
-
+        foreach (var plugin in plugins)
+        {
+            log.LogInformation("Initializing plugin {Name}, version {Version}...", plugin.Name, plugin.Version);
+            var initializePlugin = await plugin.InitializeAsync(hostServices);
+            if (!initializePlugin.IsSuccess)
+            {
                 log.LogError
                 (
-                    "Failed to migrate plugin {Name}: {Error}",
+                    "Failed to initialize plugin {Name}: {Error}",
                     plugin.Name,
-                    migratePlugin.Error.Message
+                    initializePlugin.Error.Message
                 );
 
                 return;
             }
 
-            var behaviourService = hostServices.GetRequiredService<BehaviourService>();
-            await behaviourService.StartBehavioursAsync();
-
-            await host.RunAsync(cancellationSource.Token);
-            await behaviourService.StopBehavioursAsync();
-        }
-
-        private static string GetCommandLocation(IChildNode node)
-        {
-            var sb = new StringBuilder();
-
-            switch (node)
+            if (plugin is not IMigratablePlugin migratablePlugin)
             {
-                case GroupNode group:
-                {
-                    IParentNode current = group;
-                    while (current is IChildNode child)
-                    {
-                        sb.Insert(0, "::");
-                        sb.Insert(0, child.Key);
-                        current = child.Parent;
-                    }
-                    break;
-                }
-                case CommandNode command:
-                {
-                    sb.Append(command.GroupType.FullName);
-                    sb.Append("::");
-                    sb.Append(command.CommandMethod.Name);
-                    break;
-                }
+                continue;
             }
 
-            return sb.ToString();
+            log.LogInformation("Applying plugin migrations...");
+
+            var migratePlugin = await migratablePlugin.MigratePluginAsync(hostServices);
+            if (migratePlugin.IsSuccess)
+            {
+                continue;
+            }
+
+            log.LogError
+            (
+                "Failed to migrate plugin {Name}: {Error}",
+                plugin.Name,
+                migratePlugin.Error.Message
+            );
+
+            return;
         }
+
+        var behaviourService = hostServices.GetRequiredService<BehaviourService>();
+        await behaviourService.StartBehavioursAsync();
+
+        await host.RunAsync(cancellationSource.Token);
+        await behaviourService.StopBehavioursAsync();
+    }
+
+    private static string GetCommandLocation(IChildNode node)
+    {
+        var sb = new StringBuilder();
+
+        switch (node)
+        {
+            case GroupNode group:
+            {
+                IParentNode current = group;
+                while (current is IChildNode child)
+                {
+                    sb.Insert(0, "::");
+                    sb.Insert(0, child.Key);
+                    current = child.Parent;
+                }
+                break;
+            }
+            case CommandNode command:
+            {
+                sb.Append(command.GroupType.FullName);
+                sb.Append("::");
+                sb.Append(command.CommandMethod.Name);
+                break;
+            }
+        }
+
+        return sb.ToString();
     }
 }

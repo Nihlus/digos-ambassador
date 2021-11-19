@@ -36,83 +36,82 @@ using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Drone.CommandModules
+namespace DIGOS.Ambassador.Plugins.Drone.CommandModules;
+
+/// <summary>
+/// Contains droning commands.
+/// </summary>
+[Description("Contains some commands to perform actions with drones.")]
+public class DroneCommands : CommandGroup
 {
+    private readonly ContentService _content;
+    private readonly DroneService _drone;
+    private readonly FeedbackService _feedback;
+    private readonly ICommandContext _context;
+
     /// <summary>
-    /// Contains droning commands.
+    /// Initializes a new instance of the <see cref="DroneCommands"/> class.
     /// </summary>
-    [Description("Contains some commands to perform actions with drones.")]
-    public class DroneCommands : CommandGroup
+    /// <param name="drone">The drone service.</param>
+    /// <param name="feedback">The feedback service.</param>
+    /// <param name="content">The content service.</param>
+    /// <param name="context">The command context.</param>
+    public DroneCommands
+    (
+        DroneService drone,
+        FeedbackService feedback,
+        ContentService content,
+        ICommandContext context
+    )
     {
-        private readonly ContentService _content;
-        private readonly DroneService _drone;
-        private readonly FeedbackService _feedback;
-        private readonly ICommandContext _context;
+        _drone = drone;
+        _feedback = feedback;
+        _content = content;
+        _context = context;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DroneCommands"/> class.
-        /// </summary>
-        /// <param name="drone">The drone service.</param>
-        /// <param name="feedback">The feedback service.</param>
-        /// <param name="content">The content service.</param>
-        /// <param name="context">The command context.</param>
-        public DroneCommands
+    /// <summary>
+    /// Drones the target user... or does it? In reality, this is a turn-the-tables command that drones the invoker
+    /// instead.
+    /// </summary>
+    /// <param name="member">The user to drone.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    [UsedImplicitly]
+    [Command("drone")]
+    [RequireContext(ChannelContext.Guild)]
+    [Description("Drones the target user.")]
+    public async Task<Result<FeedbackMessage>> DroneAsync(IGuildMember member)
+    {
+        if (!member.User.IsDefined(out var user))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var droneMessage = user.ID == _context.User.ID
+            ? _content.GetRandomSelfDroneMessage()
+            : _content.GetRandomTurnTheTablesMessage();
+
+        var sendMessage = await _feedback.SendContextualNeutralAsync
         (
-            DroneService drone,
-            FeedbackService feedback,
-            ContentService content,
-            ICommandContext context
-        )
+            droneMessage,
+            _context.User.ID,
+            ct: this.CancellationToken
+        );
+
+        if (!sendMessage.IsSuccess)
         {
-            _drone = drone;
-            _feedback = feedback;
-            _content = content;
-            _context = context;
+            return Result<FeedbackMessage>.FromError(sendMessage);
         }
 
-        /// <summary>
-        /// Drones the target user... or does it? In reality, this is a turn-the-tables command that drones the invoker
-        /// instead.
-        /// </summary>
-        /// <param name="member">The user to drone.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [UsedImplicitly]
-        [Command("drone")]
-        [RequireContext(ChannelContext.Guild)]
-        [Description("Drones the target user.")]
-        public async Task<Result<FeedbackMessage>> DroneAsync(IGuildMember member)
-        {
-            if (!member.User.IsDefined(out var user))
-            {
-                throw new InvalidOperationException();
-            }
+        var droneResult = await _drone.DroneUserAsync
+        (
+            _context.GuildID.Value,
+            _context.User.ID,
+            this.CancellationToken
+        );
 
-            var droneMessage = user.ID == _context.User.ID
-                ? _content.GetRandomSelfDroneMessage()
-                : _content.GetRandomTurnTheTablesMessage();
-
-            var sendMessage = await _feedback.SendContextualNeutralAsync
-            (
-                droneMessage,
-                _context.User.ID,
-                ct: this.CancellationToken
-            );
-
-            if (!sendMessage.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(sendMessage);
-            }
-
-            var droneResult = await _drone.DroneUserAsync
-            (
-                _context.GuildID.Value,
-                _context.User.ID,
-                this.CancellationToken
-            );
-
-            return !droneResult.IsSuccess
-                ? Result<FeedbackMessage>.FromError(droneResult)
-                : new FeedbackMessage(_content.GetRandomConfirmationMessage(), _feedback.Theme.Secondary);
-        }
+        return !droneResult.IsSuccess
+            ? Result<FeedbackMessage>.FromError(droneResult)
+            : new FeedbackMessage(_content.GetRandomConfirmationMessage(), _feedback.Theme.Secondary);
     }
 }

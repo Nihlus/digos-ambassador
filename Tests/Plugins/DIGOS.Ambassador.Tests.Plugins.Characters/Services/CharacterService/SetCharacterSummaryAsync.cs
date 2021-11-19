@@ -31,62 +31,61 @@ using Xunit;
 #pragma warning disable CS8625
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Characters
+namespace DIGOS.Ambassador.Tests.Plugins.Characters;
+
+public partial class CharacterServiceTests
 {
-    public partial class CharacterServiceTests
+    public class SetCharacterSummaryAsync : CharacterServiceTestBase
     {
-        public class SetCharacterSummaryAsync : CharacterServiceTestBase
+        private const string Summary = "A cool person";
+
+        private readonly Character _character;
+
+        public SetCharacterSummaryAsync()
         {
-            private const string Summary = "A cool person";
+            _character = CreateCharacter(summary: Summary);
+        }
 
-            private readonly Character _character;
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfSummaryIsEmpty()
+        {
+            var result = await this.CharacterEditor.SetCharacterSummaryAsync(_character, string.Empty);
 
-            public SetCharacterSummaryAsync()
-            {
-                _character = CreateCharacter(summary: Summary);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfSummaryIsEmpty()
-            {
-                var result = await this.CharacterEditor.SetCharacterSummaryAsync(_character, string.Empty);
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfSummaryIsTheSameAsTheCurrentSummary()
+        {
+            var result = await this.CharacterEditor.SetCharacterSummaryAsync(_character, Summary);
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfSummaryIsTheSameAsTheCurrentSummary()
-            {
-                var result = await this.CharacterEditor.SetCharacterSummaryAsync(_character, Summary);
+        [Fact]
+        public async Task ReturnsUnsuccessfulResultIfNewSummaryIsLongerThan240Characters()
+        {
+            var result = await this.CharacterEditor.SetCharacterSummaryAsync(_character, new string('a', 241));
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfNewSummaryIsLongerThan240Characters()
-            {
-                var result = await this.CharacterEditor.SetCharacterSummaryAsync(_character, new string('a', 241));
+        [Fact]
+        public async Task ReturnsSuccessfulResultIfSummaryIsAccepted()
+        {
+            var result = await this.CharacterEditor.SetCharacterSummaryAsync(_character, "Bobby");
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.True(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsSuccessfulResultIfSummaryIsAccepted()
-            {
-                var result = await this.CharacterEditor.SetCharacterSummaryAsync(_character, "Bobby");
+        [Fact]
+        public async Task SetsSummary()
+        {
+            const string newSummary = "An uncool person";
+            await this.CharacterEditor.SetCharacterSummaryAsync(_character, newSummary);
 
-                Assert.True(result.IsSuccess);
-            }
-
-            [Fact]
-            public async Task SetsSummary()
-            {
-                const string newSummary = "An uncool person";
-                await this.CharacterEditor.SetCharacterSummaryAsync(_character, newSummary);
-
-                var character = this.Database.Characters.First();
-                Assert.Equal(newSummary, character.Summary);
-            }
+            var character = this.Database.Characters.First();
+            Assert.Equal(newSummary, character.Summary);
         }
     }
 }

@@ -23,26 +23,25 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
 
-namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions
+namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions;
+
+/// <summary>
+/// Represents a permission that allows a user to export roleplays.
+/// </summary>
+public sealed class ExportRoleplay : Permission
 {
-    /// <summary>
-    /// Represents a permission that allows a user to export roleplays.
-    /// </summary>
-    public sealed class ExportRoleplay : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("B563E204-1715-488A-8CEB-5CBD6514D819");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("B563E204-1715-488A-8CEB-5CBD6514D819");
 
-        /// <inheritdoc />
-        public override string FriendlyName => nameof(ExportRoleplay);
+    /// <inheritdoc />
+    public override string FriendlyName => nameof(ExportRoleplay);
 
-        /// <inheritdoc />
-        public override string Description => "Allows you to export roleplays.";
+    /// <inheritdoc />
+    public override string Description => "Allows you to export roleplays.";
 
-        /// <inheritdoc />
-        public override bool IsGrantedByDefaultToSelf => true;
+    /// <inheritdoc />
+    public override bool IsGrantedByDefaultToSelf => true;
 
-        /// <inheritdoc/>
-        public override bool IsGrantedByDefaultToOthers => true;
-    }
+    /// <inheritdoc/>
+    public override bool IsGrantedByDefaultToOthers => true;
 }

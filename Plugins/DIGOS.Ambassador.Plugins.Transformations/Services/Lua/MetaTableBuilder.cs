@@ -23,74 +23,73 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
+namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua;
+
+/// <summary>
+/// Builds a lua metatable from a list of values and functions names.
+/// </summary>
+public sealed class MetaTableBuilder
 {
+    private readonly List<string> _entries = new List<string>();
+
     /// <summary>
-    /// Builds a lua metatable from a list of values and functions names.
+    /// Adds a unique entry to the builder.
     /// </summary>
-    public sealed class MetaTableBuilder
+    /// <param name="entry">The entry.</param>
+    /// <returns>The builder with the entry.</returns>
+    public MetaTableBuilder WithEntry(string entry)
     {
-        private readonly List<string> _entries = new List<string>();
-
-        /// <summary>
-        /// Adds a unique entry to the builder.
-        /// </summary>
-        /// <param name="entry">The entry.</param>
-        /// <returns>The builder with the entry.</returns>
-        public MetaTableBuilder WithEntry(string entry)
+        if (!_entries.Contains(entry))
         {
-            if (!_entries.Contains(entry))
-            {
-                _entries.Add(entry);
-            }
-
-            return this;
+            _entries.Add(entry);
         }
 
-        /// <summary>
-        /// Builds the metatable.
-        /// </summary>
-        /// <param name="pretty">Whether or not the output should be in a pretty format.</param>
-        /// <returns>The metatable as a formatted string.</returns>
-        public string Build(bool pretty = false)
+        return this;
+    }
+
+    /// <summary>
+    /// Builds the metatable.
+    /// </summary>
+    /// <param name="pretty">Whether or not the output should be in a pretty format.</param>
+    /// <returns>The metatable as a formatted string.</returns>
+    public string Build(bool pretty = false)
+    {
+        var metatable = new TableNode("env", new List<INode>());
+
+        foreach (var entry in _entries)
         {
-            var metatable = new TableNode("env", new List<INode>());
-
-            foreach (var entry in _entries)
-            {
-                PopulateSubNodes(metatable, entry, entry);
-            }
-
-            return metatable.Format(pretty);
+            PopulateSubNodes(metatable, entry, entry);
         }
 
-        private void PopulateSubNodes
-        (
-            TableNode parent,
-            string value,
-            string originalValue
-        )
+        return metatable.Format(pretty);
+    }
+
+    private void PopulateSubNodes
+    (
+        TableNode parent,
+        string value,
+        string originalValue
+    )
+    {
+        var components = value.Split('.');
+        if (components.Length == 1)
         {
-            var components = value.Split('.');
-            if (components.Length == 1)
-            {
-                var valueNode = new ValueNode<string>(value, originalValue);
+            var valueNode = new ValueNode<string>(value, originalValue);
 
-                parent.Value.Add(valueNode);
-                return;
-            }
+            parent.Value.Add(valueNode);
+            return;
+        }
 
-            var childNode = parent.Value.FirstOrDefault(t => t.Name == components.First());
-            if (childNode is null)
-            {
-                childNode = new TableNode(components.First(), new List<INode>());
-                parent.Value.Add(childNode);
-            }
+        var childNode = parent.Value.FirstOrDefault(t => t.Name == components.First());
+        if (childNode is null)
+        {
+            childNode = new TableNode(components.First(), new List<INode>());
+            parent.Value.Add(childNode);
+        }
 
-            if (childNode is TableNode childTable)
-            {
-                PopulateSubNodes(childTable, string.Join(".", components.Skip(1)), originalValue);
-            }
+        if (childNode is TableNode childTable)
+        {
+            PopulateSubNodes(childTable, string.Join(".", components.Skip(1)), originalValue);
         }
     }
 }

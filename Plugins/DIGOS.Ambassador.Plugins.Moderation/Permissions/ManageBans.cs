@@ -23,20 +23,19 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
 
-namespace DIGOS.Ambassador.Plugins.Moderation.Permissions
+namespace DIGOS.Ambassador.Plugins.Moderation.Permissions;
+
+/// <summary>
+/// Represents a permission that allows a user to manage bans in the bot.
+/// </summary>
+public sealed class ManageBans : Permission
 {
-    /// <summary>
-    /// Represents a permission that allows a user to manage bans in the bot.
-    /// </summary>
-    public sealed class ManageBans : Permission
-    {
-        /// <inheritdoc />
-        public override Guid UniqueIdentifier { get; } = new Guid("AACA38C2-CF2B-4760-8AE7-7BE88DE0715B");
+    /// <inheritdoc />
+    public override Guid UniqueIdentifier { get; } = new Guid("AACA38C2-CF2B-4760-8AE7-7BE88DE0715B");
 
-        /// <inheritdoc />
-        public override string FriendlyName => nameof(ManageBans);
+    /// <inheritdoc />
+    public override string FriendlyName => nameof(ManageBans);
 
-        /// <inheritdoc />
-        public override string Description => "Allows you to manage bans in the bot.";
-    }
+    /// <inheritdoc />
+    public override string Description => "Allows you to manage bans in the bot.";
 }

@@ -28,46 +28,45 @@ using Remora.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Roleplaying.Preconditions
+namespace DIGOS.Ambassador.Plugins.Roleplaying.Preconditions;
+
+/// <summary>
+/// Restricts the usage of a command to the owner of the currently active roleplay. Furthermore, it also requires a
+/// roleplay to be current.
+/// </summary>
+public class RequireActiveRoleplayCondition : ICondition<RequireActiveRoleplayAttribute>
 {
+    private readonly ICommandContext _context;
+    private readonly RoleplayDiscordService _roleplayService;
+
     /// <summary>
-    /// Restricts the usage of a command to the owner of the currently active roleplay. Furthermore, it also requires a
-    /// roleplay to be current.
+    /// Initializes a new instance of the <see cref="RequireActiveRoleplayCondition"/> class.
     /// </summary>
-    public class RequireActiveRoleplayCondition : ICondition<RequireActiveRoleplayAttribute>
+    /// <param name="context">The command context.</param>
+    /// <param name="roleplayService">The roleplay service.</param>
+    public RequireActiveRoleplayCondition(ICommandContext context, RoleplayDiscordService roleplayService)
     {
-        private readonly ICommandContext _context;
-        private readonly RoleplayDiscordService _roleplayService;
+        _context = context;
+        _roleplayService = roleplayService;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RequireActiveRoleplayCondition"/> class.
-        /// </summary>
-        /// <param name="context">The command context.</param>
-        /// <param name="roleplayService">The roleplay service.</param>
-        public RequireActiveRoleplayCondition(ICommandContext context, RoleplayDiscordService roleplayService)
+    /// <inheritdoc />
+    public async ValueTask<Result> CheckAsync(RequireActiveRoleplayAttribute attribute, CancellationToken ct = default)
+    {
+        var result = await _roleplayService.GetActiveRoleplayAsync(_context.ChannelID);
+        if (!result.IsSuccess)
         {
-            _context = context;
-            _roleplayService = roleplayService;
+            return Result.FromError(result);
         }
 
-        /// <inheritdoc />
-        public async ValueTask<Result> CheckAsync(RequireActiveRoleplayAttribute attribute, CancellationToken ct = default)
+        if (!attribute.RequireOwner)
         {
-            var result = await _roleplayService.GetActiveRoleplayAsync(_context.ChannelID);
-            if (!result.IsSuccess)
-            {
-                return Result.FromError(result);
-            }
-
-            if (!attribute.RequireOwner)
-            {
-                return Result.FromSuccess();
-            }
-
-            var roleplay = result.Entity;
-            return roleplay.Owner.DiscordID != _context.User.ID
-                ? new UserError("Only the roleplay owner can do that.")
-                : Result.FromSuccess();
+            return Result.FromSuccess();
         }
+
+        var roleplay = result.Entity;
+        return roleplay.Owner.DiscordID != _context.User.ID
+            ? new UserError("Only the roleplay owner can do that.")
+            : Result.FromSuccess();
     }
 }

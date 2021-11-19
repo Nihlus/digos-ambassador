@@ -29,42 +29,41 @@ using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Characters
+namespace DIGOS.Ambassador.Tests.Plugins.Characters;
+
+/// <summary>
+/// Serves as a test base for pronoun service tests.
+/// </summary>
+[PublicAPI]
+public abstract class PronounServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
 {
     /// <summary>
-    /// Serves as a test base for pronoun service tests.
+    /// Gets the pronoun service object.
     /// </summary>
-    [PublicAPI]
-    public abstract class PronounServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
+    protected PronounService Pronouns { get; private set; } = null!;
+
+    /// <inheritdoc />
+    protected override void RegisterServices(IServiceCollection serviceCollection)
     {
-        /// <summary>
-        /// Gets the pronoun service object.
-        /// </summary>
-        protected PronounService Pronouns { get; private set; } = null!;
+        serviceCollection
+            .AddSingleton<PronounService>();
+    }
 
-        /// <inheritdoc />
-        protected override void RegisterServices(IServiceCollection serviceCollection)
-        {
-            serviceCollection
-                .AddSingleton<PronounService>();
-        }
+    /// <inheritdoc />
+    protected override void ConfigureServices(IServiceProvider serviceProvider)
+    {
+        this.Pronouns = serviceProvider.GetRequiredService<PronounService>();
+    }
 
-        /// <inheritdoc />
-        protected override void ConfigureServices(IServiceProvider serviceProvider)
-        {
-            this.Pronouns = serviceProvider.GetRequiredService<PronounService>();
-        }
+    /// <inheritdoc />
+    public virtual Task InitializeAsync()
+    {
+        return Task.CompletedTask;
+    }
 
-        /// <inheritdoc />
-        public virtual Task InitializeAsync()
-        {
-            return Task.CompletedTask;
-        }
-
-        /// <inheritdoc />
-        public virtual Task DisposeAsync()
-        {
-            return Task.CompletedTask;
-        }
+    /// <inheritdoc />
+    public virtual Task DisposeAsync()
+    {
+        return Task.CompletedTask;
     }
 }

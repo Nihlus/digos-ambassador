@@ -23,33 +23,32 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
+namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua;
+
+/// <summary>
+/// Represents a named table, which holds a list of nodes.
+/// </summary>
+internal sealed class TableNode : NamedNode<List<INode>>
 {
     /// <summary>
-    /// Represents a named table, which holds a list of nodes.
+    /// Initializes a new instance of the <see cref="TableNode"/> class.
     /// </summary>
-    internal sealed class TableNode : NamedNode<List<INode>>
+    /// <param name="name">The name of the table.</param>
+    /// <param name="value">The nodes in the table.</param>
+    public TableNode(string name, List<INode> value)
+        : base(name, value)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TableNode"/> class.
-        /// </summary>
-        /// <param name="name">The name of the table.</param>
-        /// <param name="value">The nodes in the table.</param>
-        public TableNode(string name, List<INode> value)
-            : base(name, value)
+    }
+
+    /// <inheritdoc />
+    public override string Format(bool pretty = false)
+    {
+        var separator = ",";
+        if (pretty)
         {
+            separator = ",\n";
         }
 
-        /// <inheritdoc />
-        public override string Format(bool pretty = false)
-        {
-            var separator = ",";
-            if (pretty)
-            {
-                separator = ",\n";
-            }
-
-            return $"{this.Name} = {{ {string.Join(separator, this.Value.Select(n => n.Format()))} }}";
-        }
+        return $"{this.Name} = {{ {string.Join(separator, this.Value.Select(n => n.Format()))} }}";
     }
 }

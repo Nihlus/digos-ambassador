@@ -20,46 +20,45 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
+namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
+
+/// <summary>
+/// Holds different forms that a pronoun can have.
+/// </summary>
+public enum PronounForm
 {
     /// <summary>
-    /// Holds different forms that a pronoun can have.
+    /// The subject form, that is, "I" or "you".
     /// </summary>
-    public enum PronounForm
-    {
-        /// <summary>
-        /// The subject form, that is, "I" or "you".
-        /// </summary>
-        Subject,
+    Subject,
 
-        /// <summary>
-        /// The subject form but with a verb, that is, "I am" or "you are".
-        /// </summary>
-        SubjectVerb,
+    /// <summary>
+    /// The subject form but with a verb, that is, "I am" or "you are".
+    /// </summary>
+    SubjectVerb,
 
-        /// <summary>
-        /// The object form, that is, "me" or "you.
-        /// </summary>
-        Object,
+    /// <summary>
+    /// The object form, that is, "me" or "you.
+    /// </summary>
+    Object,
 
-        /// <summary>
-        /// The possessive adjective form, that is, "my" or "yours".
-        /// </summary>
-        PossessiveAdjective,
+    /// <summary>
+    /// The possessive adjective form, that is, "my" or "yours".
+    /// </summary>
+    PossessiveAdjective,
 
-        /// <summary>
-        /// The possessive form, that is, "mine" or "yours".
-        /// </summary>
-        Possessive,
+    /// <summary>
+    /// The possessive form, that is, "mine" or "yours".
+    /// </summary>
+    Possessive,
 
-        /// <summary>
-        /// The possessive form but with a verb, that is, "I have", or "you have".
-        /// </summary>
-        PossessiveVerb,
+    /// <summary>
+    /// The possessive form but with a verb, that is, "I have", or "you have".
+    /// </summary>
+    PossessiveVerb,
 
-        /// <summary>
-        /// The reflexive form, that is, "myself" or "yourself".
-        /// </summary>
-        Reflexive
-    }
+    /// <summary>
+    /// The reflexive form, that is, "myself" or "yourself".
+    /// </summary>
+    Reflexive
 }

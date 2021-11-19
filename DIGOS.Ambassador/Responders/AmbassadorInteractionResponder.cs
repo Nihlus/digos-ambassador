@@ -34,55 +34,54 @@ using Remora.Discord.Commands.Responders;
 using Remora.Discord.Commands.Services;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Responders
+namespace DIGOS.Ambassador.Responders;
+
+/// <summary>
+/// Extends the vanilla responder with an ambient transaction.
+/// </summary>
+public class AmbassadorInteractionResponder : InteractionResponder
 {
-    /// <summary>
-    /// Extends the vanilla responder with an ambient transaction.
-    /// </summary>
-    public class AmbassadorInteractionResponder : InteractionResponder
+    /// <inheritdoc cref="InteractionResponder"/>
+    public AmbassadorInteractionResponder
+    (
+        CommandService commandService,
+        IOptions<InteractionResponderOptions> options,
+        IDiscordRestInteractionAPI interactionAPI,
+        ExecutionEventCollectorService eventCollector,
+        IServiceProvider services,
+        ContextInjectionService contextInjection,
+        IOptions<TokenizerOptions> tokenizerOptions,
+        IOptions<TreeSearchOptions> treeSearchOptions
+    )
+        : base
+        (
+            commandService,
+            options,
+            interactionAPI,
+            eventCollector,
+            services,
+            contextInjection,
+            tokenizerOptions,
+            treeSearchOptions
+        )
     {
-        /// <inheritdoc cref="InteractionResponder"/>
-        public AmbassadorInteractionResponder
-        (
-            CommandService commandService,
-            IOptions<InteractionResponderOptions> options,
-            IDiscordRestInteractionAPI interactionAPI,
-            ExecutionEventCollectorService eventCollector,
-            IServiceProvider services,
-            ContextInjectionService contextInjection,
-            IOptions<TokenizerOptions> tokenizerOptions,
-            IOptions<TreeSearchOptions> treeSearchOptions
-        )
-            : base
-            (
-                commandService,
-                options,
-                interactionAPI,
-                eventCollector,
-                services,
-                contextInjection,
-                tokenizerOptions,
-                treeSearchOptions
-            )
+    }
+
+    /// <inheritdoc />
+    public override async Task<Result> RespondAsync
+    (
+        IInteractionCreate? gatewayEvent,
+        CancellationToken ct = default
+    )
+    {
+        using var transaction = TransactionFactory.Create();
+
+        var executionResult = await base.RespondAsync(gatewayEvent, ct);
+        if (executionResult.IsSuccess)
         {
+            transaction.Complete();
         }
 
-        /// <inheritdoc />
-        public override async Task<Result> RespondAsync
-        (
-            IInteractionCreate? gatewayEvent,
-            CancellationToken ct = default
-        )
-        {
-            using var transaction = TransactionFactory.Create();
-
-            var executionResult = await base.RespondAsync(gatewayEvent, ct);
-            if (executionResult.IsSuccess)
-            {
-                transaction.Complete();
-            }
-
-            return executionResult;
-        }
+        return executionResult;
     }
 }

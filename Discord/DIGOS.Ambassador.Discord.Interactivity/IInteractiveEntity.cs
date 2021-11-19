@@ -23,21 +23,20 @@
 using System;
 using System.Threading;
 
-namespace DIGOS.Ambassador.Discord.Interactivity
+namespace DIGOS.Ambassador.Discord.Interactivity;
+
+/// <summary>
+/// Represents an interactive entity in Discord.
+/// </summary>
+public interface IInteractiveEntity : IDisposable
 {
     /// <summary>
-    /// Represents an interactive entity in Discord.
+    /// Gets a unique nonce that identifies this entity.
     /// </summary>
-    public interface IInteractiveEntity : IDisposable
-    {
-        /// <summary>
-        /// Gets a unique nonce that identifies this entity.
-        /// </summary>
-        string Nonce { get; }
+    string Nonce { get; }
 
-        /// <summary>
-        /// Gets a semaphore used to synchronized access to the entity.
-        /// </summary>
-        SemaphoreSlim Semaphore { get; }
-    }
+    /// <summary>
+    /// Gets a semaphore used to synchronized access to the entity.
+    /// </summary>
+    SemaphoreSlim Semaphore { get; }
 }

@@ -32,71 +32,70 @@ using Xunit;
 #pragma warning disable SA1649
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
-namespace DIGOS.Ambassador.Tests.Plugins.Core
+namespace DIGOS.Ambassador.Tests.Plugins.Core;
+
+public static partial class UserServiceTests
 {
-    public static partial class UserServiceTests
+    public class SetUserBioAsync : UserServiceTestBase
     {
-        public class SetUserBioAsync : UserServiceTestBase
+        private User _user = null!;
+
+        public static IEnumerable<object?[]> InvalidBios
         {
-            private User _user = null!;
-
-            public static IEnumerable<object?[]> InvalidBios
+            [UsedImplicitly]
+            get
             {
-                [UsedImplicitly]
-                get
-                {
-                    yield return new object?[] { string.Empty };
-                    yield return new object?[] { "    " };
-                    yield return new object?[] { new string('a', 1025) };
-                }
+                yield return new object?[] { string.Empty };
+                yield return new object?[] { "    " };
+                yield return new object?[] { new string('a', 1025) };
             }
+        }
 
-            public override async Task InitializeAsync()
-            {
-                await base.InitializeAsync();
+        public override async Task InitializeAsync()
+        {
+            await base.InitializeAsync();
 
-                var discordUser = new Snowflake(0);
-                var user = await this.Users.AddUserAsync(discordUser);
-                _user = user.Entity;
-            }
+            var discordUser = new Snowflake(0);
+            var user = await this.Users.AddUserAsync(discordUser);
+            _user = user.Entity;
+        }
 
-            [Fact]
-            public async Task ReturnsTrueForValidBio()
-            {
-                var result = await this.Users.SetUserBioAsync(_user, "I'm a little teapot, short and stout.");
+        [Fact]
+        public async Task ReturnsTrueForValidBio()
+        {
+            var result = await this.Users.SetUserBioAsync(_user, "I'm a little teapot, short and stout.");
 
-                Assert.True(result.IsSuccess);
-            }
+            Assert.True(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ActuallySetsValueForValidBio()
-            {
-                const string bio = "Here is my handle, here is my spout.";
-                await this.Users.SetUserBioAsync(_user, bio);
+        [Fact]
+        public async Task ActuallySetsValueForValidBio()
+        {
+            const string bio = "Here is my handle, here is my spout.";
+            await this.Users.SetUserBioAsync(_user, bio);
 
-                Assert.Equal(bio, _user.Bio);
-            }
+            Assert.Equal(bio, _user.Bio);
+        }
 
-            [Theory]
-            [MemberData(nameof(InvalidBios))]
-            public async Task ReturnsFalseForInvalidBio(string bio)
-            {
-                var result = await this.Users.SetUserBioAsync(_user, bio);
+        [Theory]
+        [MemberData(nameof(InvalidBios))]
+        public async Task ReturnsFalseForInvalidBio(string bio)
+        {
+            var result = await this.Users.SetUserBioAsync(_user, bio);
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
+        }
 
-            [Fact]
-            public async Task ReturnsFalseIfBioIsAlreadySet()
-            {
-                const string bio = "I prefer kalashnikov.";
+        [Fact]
+        public async Task ReturnsFalseIfBioIsAlreadySet()
+        {
+            const string bio = "I prefer kalashnikov.";
 
-                await this.Users.SetUserBioAsync(_user, bio);
+            await this.Users.SetUserBioAsync(_user, bio);
 
-                var result = await this.Users.SetUserBioAsync(_user, bio);
+            var result = await this.Users.SetUserBioAsync(_user, bio);
 
-                Assert.False(result.IsSuccess);
-            }
+            Assert.False(result.IsSuccess);
         }
     }
 }

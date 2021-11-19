@@ -31,65 +31,64 @@ using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Autocomplete;
 using Remora.Discord.Commands.Contexts;
 
-namespace DIGOS.Ambassador.Plugins.Roleplaying.Autocomplete
+namespace DIGOS.Ambassador.Plugins.Roleplaying.Autocomplete;
+
+/// <summary>
+/// Provides autocomplete suggestions for Roleplay names.
+/// </summary>
+public class NotJoinedRoleplayAutocompleteProvider : IAutocompleteProvider
 {
+    private readonly InteractionContext _context;
+    private readonly RoleplayingDatabaseContext _database;
+
+    /// <inheritdoc />
+    public string Identity => "roleplay::notjoined";
+
     /// <summary>
-    /// Provides autocomplete suggestions for Roleplay names.
+    /// Initializes a new instance of the <see cref="NotJoinedRoleplayAutocompleteProvider"/> class.
     /// </summary>
-    public class NotJoinedRoleplayAutocompleteProvider : IAutocompleteProvider
+    /// <param name="context">The interaction context.</param>
+    /// <param name="database">The database context.</param>
+    public NotJoinedRoleplayAutocompleteProvider(InteractionContext context, RoleplayingDatabaseContext database)
     {
-        private readonly InteractionContext _context;
-        private readonly RoleplayingDatabaseContext _database;
+        _context = context;
+        _database = database;
+    }
 
-        /// <inheritdoc />
-        public string Identity => "roleplay::notjoined";
+    /// <inheritdoc />
+    public async ValueTask<IReadOnlyList<IApplicationCommandOptionChoice>> GetSuggestionsAsync
+    (
+        IReadOnlyList<IApplicationCommandInteractionDataOption> options,
+        string userInput,
+        CancellationToken ct = default
+    )
+    {
+        var scopedRoleplays = _context.GuildID.HasValue
+            ? _database.Roleplays
+                .Where(r => r.Server.DiscordID == _context.GuildID.Value)
+                .Where
+                (
+                    r => r.ParticipatingUsers
+                        .Where(pu => pu.Status == ParticipantStatus.Joined)
+                        .All(ju => ju.User.DiscordID != _context.User.ID)
+                )
+            : _database.Roleplays
+                .Where
+                (
+                    r => r.ParticipatingUsers
+                        .Where(pu => pu.Status == ParticipantStatus.Joined)
+                        .All(ju => ju.User.DiscordID != _context.User.ID)
+                );
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NotJoinedRoleplayAutocompleteProvider"/> class.
-        /// </summary>
-        /// <param name="context">The interaction context.</param>
-        /// <param name="database">The database context.</param>
-        public NotJoinedRoleplayAutocompleteProvider(InteractionContext context, RoleplayingDatabaseContext database)
-        {
-            _context = context;
-            _database = database;
-        }
+        var suggestedRoleplays = await scopedRoleplays
+            .OrderBy(r => EF.Functions.FuzzyStringMatchLevenshtein(r.Name, userInput))
+            .Take(25)
+            .Select(r => r.Name)
+            .ToListAsync(ct);
 
-        /// <inheritdoc />
-        public async ValueTask<IReadOnlyList<IApplicationCommandOptionChoice>> GetSuggestionsAsync
+        return suggestedRoleplays.Select
         (
-            IReadOnlyList<IApplicationCommandInteractionDataOption> options,
-            string userInput,
-            CancellationToken ct = default
-        )
-        {
-            var scopedRoleplays = _context.GuildID.HasValue
-                ? _database.Roleplays
-                    .Where(r => r.Server.DiscordID == _context.GuildID.Value)
-                    .Where
-                    (
-                        r => r.ParticipatingUsers
-                            .Where(pu => pu.Status == ParticipantStatus.Joined)
-                            .All(ju => ju.User.DiscordID != _context.User.ID)
-                    )
-                : _database.Roleplays
-                    .Where
-                    (
-                        r => r.ParticipatingUsers
-                            .Where(pu => pu.Status == ParticipantStatus.Joined)
-                            .All(ju => ju.User.DiscordID != _context.User.ID)
-                    );
-
-            var suggestedRoleplays = await scopedRoleplays
-                .OrderBy(r => EF.Functions.FuzzyStringMatchLevenshtein(r.Name, userInput))
-                .Take(25)
-                .Select(r => r.Name)
-                .ToListAsync(ct);
-
-            return suggestedRoleplays.Select
-            (
-                n => new ApplicationCommandOptionChoice(n, n)
-            ).ToList();
-        }
+            n => new ApplicationCommandOptionChoice(n, n)
+        ).ToList();
     }
 }

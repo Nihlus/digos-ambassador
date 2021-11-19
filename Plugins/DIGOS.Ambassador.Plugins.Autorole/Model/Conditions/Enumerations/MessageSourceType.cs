@@ -20,21 +20,20 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
+namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
+
+/// <summary>
+/// Enumerates the various message source types that are supported.
+/// </summary>
+public enum MessageSourceType
 {
     /// <summary>
-    /// Enumerates the various message source types that are supported.
+    /// A whole guild.
     /// </summary>
-    public enum MessageSourceType
-    {
-        /// <summary>
-        /// A whole guild.
-        /// </summary>
-        Guild,
+    Guild,
 
-        /// <summary>
-        /// A single text channel.
-        /// </summary>
-        TextChannel
-    }
+    /// <summary>
+    /// A single text channel.
+    /// </summary>
+    TextChannel
 }
