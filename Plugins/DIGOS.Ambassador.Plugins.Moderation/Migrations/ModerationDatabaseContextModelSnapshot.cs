@@ -37,29 +37,37 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
 
                     b.Property<string>("Description")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("description");
 
                     b.Property<long>("DiscordID")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("discord_id");
 
                     b.Property<bool>("IsNSFW")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_nsfw");
 
                     b.Property<string>("JoinMessage")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("join_message");
 
                     b.Property<bool>("SendJoinMessage")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("send_join_message");
 
                     b.Property<bool>("SuppressPermissionWarnings")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("suppress_permission_warnings");
 
-                    b.HasKey("ID");
+                    b.HasKey("ID")
+                        .HasName("pk_servers");
 
                     b.ToTable("Servers", "Core", t => t.ExcludeFromMigrations());
                 });
@@ -68,21 +76,27 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
 
                     b.Property<long>("ServerID")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("server_id");
 
                     b.Property<long>("UserID")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id");
 
-                    b.HasKey("ID");
+                    b.HasKey("ID")
+                        .HasName("pk_server_user");
 
-                    b.HasIndex("ServerID");
+                    b.HasIndex("ServerID")
+                        .HasDatabaseName("ix_server_user_server_id");
 
-                    b.HasIndex("UserID");
+                    b.HasIndex("UserID")
+                        .HasDatabaseName("ix_server_user_user_id");
 
                     b.ToTable("ServerUser", "Core", t => t.ExcludeFromMigrations());
                 });
@@ -91,21 +105,26 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
 
                     b.Property<string>("Bio")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("bio");
 
                     b.Property<long>("DiscordID")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("discord_id");
 
                     b.Property<int?>("Timezone")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("timezone");
 
-                    b.HasKey("ID");
+                    b.HasKey("ID")
+                        .HasName("pk_users");
 
                     b.ToTable("Users", "Core", t => t.ExcludeFromMigrations());
                 });
@@ -114,25 +133,32 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
 
                     b.Property<long?>("ModerationLogChannel")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("moderation_log_channel");
 
                     b.Property<long?>("MonitoringChannel")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("monitoring_channel");
 
                     b.Property<long>("ServerID")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("server_id");
 
                     b.Property<int>("WarningThreshold")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("warning_threshold");
 
-                    b.HasKey("ID");
+                    b.HasKey("ID")
+                        .HasName("pk_server_moderation_settings");
 
-                    b.HasIndex("ServerID");
+                    b.HasIndex("ServerID")
+                        .HasDatabaseName("ix_server_moderation_settings_server_id");
 
                     b.ToTable("ServerModerationSettings", "ModerationModule");
                 });
@@ -141,42 +167,55 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
 
                     b.Property<long>("AuthorID")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("author_id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<DateTimeOffset?>("ExpiresOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_on");
 
                     b.Property<long?>("MessageID")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("message_id");
 
                     b.Property<string>("Reason")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
 
                     b.Property<long>("ServerID")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("server_id");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
 
                     b.Property<long>("UserID")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id");
 
-                    b.HasKey("ID");
+                    b.HasKey("ID")
+                        .HasName("pk_user_bans");
 
-                    b.HasIndex("AuthorID");
+                    b.HasIndex("AuthorID")
+                        .HasDatabaseName("ix_user_bans_author_id");
 
-                    b.HasIndex("ServerID");
+                    b.HasIndex("ServerID")
+                        .HasDatabaseName("ix_user_bans_server_id");
 
-                    b.HasIndex("UserID");
+                    b.HasIndex("UserID")
+                        .HasDatabaseName("ix_user_bans_user_id");
 
                     b.ToTable("UserBans", "ModerationModule");
                 });
@@ -185,36 +224,47 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
 
                     b.Property<long>("AuthorID")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("author_id");
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("content");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<long>("ServerID")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("server_id");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
 
                     b.Property<long>("UserID")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id");
 
-                    b.HasKey("ID");
+                    b.HasKey("ID")
+                        .HasName("pk_user_notes");
 
-                    b.HasIndex("AuthorID");
+                    b.HasIndex("AuthorID")
+                        .HasDatabaseName("ix_user_notes_author_id");
 
-                    b.HasIndex("ServerID");
+                    b.HasIndex("ServerID")
+                        .HasDatabaseName("ix_user_notes_server_id");
 
-                    b.HasIndex("UserID");
+                    b.HasIndex("UserID")
+                        .HasDatabaseName("ix_user_notes_user_id");
 
                     b.ToTable("UserNotes", "ModerationModule");
                 });
@@ -223,42 +273,55 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
 
                     b.Property<long>("AuthorID")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("author_id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<DateTimeOffset?>("ExpiresOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_on");
 
                     b.Property<long?>("MessageID")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("message_id");
 
                     b.Property<string>("Reason")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
 
                     b.Property<long>("ServerID")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("server_id");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
 
                     b.Property<long>("UserID")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id");
 
-                    b.HasKey("ID");
+                    b.HasKey("ID")
+                        .HasName("pk_user_warnings");
 
-                    b.HasIndex("AuthorID");
+                    b.HasIndex("AuthorID")
+                        .HasDatabaseName("ix_user_warnings_author_id");
 
-                    b.HasIndex("ServerID");
+                    b.HasIndex("ServerID")
+                        .HasDatabaseName("ix_user_warnings_server_id");
 
-                    b.HasIndex("UserID");
+                    b.HasIndex("UserID")
+                        .HasDatabaseName("ix_user_warnings_user_id");
 
                     b.ToTable("UserWarnings", "ModerationModule");
                 });
@@ -269,13 +332,15 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
                         .WithMany("KnownUsers")
                         .HasForeignKey("ServerID")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_server_user_servers_server_id");
 
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Users.User", "User")
                         .WithMany()
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_server_user_users_user_id");
 
                     b.Navigation("Server");
 
@@ -288,7 +353,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
                         .WithMany()
                         .HasForeignKey("ServerID")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_server_moderation_settings_servers_server_id");
 
                     b.Navigation("Server");
                 });
@@ -299,19 +365,22 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
                         .WithMany()
                         .HasForeignKey("AuthorID")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_user_bans_users_author_id");
 
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Servers.Server", "Server")
                         .WithMany()
                         .HasForeignKey("ServerID")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_user_bans_servers_server_id");
 
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Users.User", "User")
                         .WithMany()
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_user_bans_users_user_id");
 
                     b.Navigation("Author");
 
@@ -326,19 +395,22 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
                         .WithMany()
                         .HasForeignKey("AuthorID")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_user_notes_users_author_id");
 
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Servers.Server", "Server")
                         .WithMany()
                         .HasForeignKey("ServerID")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_user_notes_servers_server_id");
 
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Users.User", "User")
                         .WithMany()
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_user_notes_users_user_id");
 
                     b.Navigation("Author");
 
@@ -353,19 +425,22 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
                         .WithMany()
                         .HasForeignKey("AuthorID")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_user_warnings_users_author_id");
 
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Servers.Server", "Server")
                         .WithMany()
                         .HasForeignKey("ServerID")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_user_warnings_servers_server_id");
 
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Users.User", "User")
                         .WithMany()
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_user_warnings_users_user_id");
 
                     b.Navigation("Author");
 

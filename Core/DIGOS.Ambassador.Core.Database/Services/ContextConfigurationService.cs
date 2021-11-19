@@ -99,7 +99,8 @@ namespace DIGOS.Ambassador.Core.Database.Services
                 (
                     credentials.GetConnectionString(),
                     b => b.MigrationsHistoryTable(HistoryRepository.DefaultTableName + schema)
-                );
+                )
+                .UseSnakeCaseNamingConvention();
         }
     }
 }
