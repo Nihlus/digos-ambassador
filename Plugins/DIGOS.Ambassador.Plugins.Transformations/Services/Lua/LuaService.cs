@@ -26,6 +26,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
+using DIGOS.Ambassador.Plugins.Transformations.Results;
 using JetBrains.Annotations;
 using Remora.Results;
 using Zio;
@@ -225,25 +226,16 @@ public sealed class LuaService
 
                 if (result is not null && result.EndsWith("timeout!"))
                 {
-                    return new GenericError
-                    (
-                        "Timed out while waiting for the script to complete."
-                    );
+                    return new LuaTimeoutError();
                 }
 
                 var erroringFunction = _getErroringFunctionRegex.Match(result ?? string.Empty).Value;
                 if (!_functionWhitelist.Contains(erroringFunction))
                 {
-                    return new GenericError
-                    (
-                        $"Usage of {erroringFunction} is prohibited."
-                    );
+                    return new LuaSandboxError(erroringFunction);
                 }
 
-                return new GenericError
-                (
-                    $"Lua error: {result}"
-                );
+                return new LuaError(result ?? "No information available.");
             }
         );
     }
