@@ -147,13 +147,15 @@ public class RoleplayArchivalBehaviour : ContinuousBehaviour<RoleplayArchivalBeh
             return Result.FromError(ensureLogged);
         }
 
-        if (roleplay.IsPublic)
+        if (!roleplay.IsPublic)
         {
-            var postResult = await PostArchivedRoleplayAsync(services, feedback, serverSettings, roleplay);
-            if (!postResult.IsSuccess)
-            {
-                return postResult;
-            }
+            return await dedicatedChannels.DeleteChannelAsync(roleplay);
+        }
+
+        var postResult = await PostArchivedRoleplayAsync(services, feedback, serverSettings, roleplay);
+        if (!postResult.IsSuccess)
+        {
+            return postResult;
         }
 
         return await dedicatedChannels.DeleteChannelAsync(roleplay);

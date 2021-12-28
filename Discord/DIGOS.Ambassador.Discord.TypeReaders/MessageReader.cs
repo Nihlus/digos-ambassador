@@ -59,7 +59,7 @@ public class MessageReader : AbstractTypeParser<IMessage>
     }
 
     /// <inheritdoc />
-    public override async ValueTask<Result<IMessage>> TryParseAsync(string value, CancellationToken ct)
+    public override async ValueTask<Result<IMessage>> TryParseAsync(string value, CancellationToken ct = default)
     {
         value = value.Trim();
 

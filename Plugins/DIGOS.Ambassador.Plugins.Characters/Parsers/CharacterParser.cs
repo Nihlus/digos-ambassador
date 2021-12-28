@@ -54,7 +54,7 @@ public sealed class CharacterParser : AbstractTypeParser<Character>
     }
 
     /// <inheritdoc />
-    public override async ValueTask<Result<Character>> TryParseAsync(string value, CancellationToken ct)
+    public override async ValueTask<Result<Character>> TryParseAsync(string value, CancellationToken ct = default)
     {
         value = value.Trim();
 

@@ -43,7 +43,7 @@ public class HumanTimeSpanReader : AbstractTypeParser<TimeSpan>
     );
 
     /// <inheritdoc />
-    public override ValueTask<Result<TimeSpan>> TryParseAsync(string value, CancellationToken ct)
+    public override ValueTask<Result<TimeSpan>> TryParseAsync(string value, CancellationToken ct = default)
     {
         value = value.Trim();
 

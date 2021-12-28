@@ -188,7 +188,7 @@ public class UserCommands : CommandGroup
 
         embedFields.Add(new EmbedField("Timezone", timezoneValue));
 
-        string bioValue = string.IsNullOrEmpty(user.Bio) ? "No bio set." : user.Bio;
+        var bioValue = string.IsNullOrEmpty(user.Bio) ? "No bio set." : user.Bio;
 
         embedFields.Add(new EmbedField("Bio", bioValue));
 

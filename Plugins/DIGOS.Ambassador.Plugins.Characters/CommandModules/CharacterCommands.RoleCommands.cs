@@ -149,7 +149,7 @@ public partial class CharacterCommands
                         ? "open to everyone"
                         : "restricted";
 
-                    string name = guildRole is null
+                    var name = guildRole is null
                         ? $"??? ({r.DiscordID} - this role appears to be deleted.)"
                         : $"{guildRole.Name} ({r.DiscordID})";
 

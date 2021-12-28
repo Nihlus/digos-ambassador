@@ -550,7 +550,7 @@ public sealed class AutoroleService
     /// <param name="args">The constructor arguments for the condition.</param>
     /// <typeparam name="TCondition">The condition type.</typeparam>
     /// <returns>The condition, or null.</returns>
-    public TCondition? CreateConditionProxy<TCondition>(params object[] args)
+    public TCondition CreateConditionProxy<TCondition>(params object[] args)
         where TCondition : AutoroleCondition
     {
         return _database.CreateProxy<TCondition>(args);

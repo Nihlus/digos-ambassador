@@ -55,7 +55,7 @@ public sealed class RoleplayParser : AbstractTypeParser<Roleplay>
     }
 
     /// <inheritdoc />
-    public override async ValueTask<Result<Roleplay>> TryParseAsync(string value, CancellationToken ct)
+    public override async ValueTask<Result<Roleplay>> TryParseAsync(string value, CancellationToken ct = default)
     {
         value = value.Trim();
 
