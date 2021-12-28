@@ -22,7 +22,6 @@
 
 using System;
 using System.Drawing;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -53,7 +52,6 @@ using Remora.Discord.Commands.Services;
 using Remora.Discord.Core;
 using Remora.Discord.Gateway.Extensions;
 using Remora.Discord.Hosting.Extensions;
-using Remora.Plugins.Abstractions;
 using Remora.Plugins.Services;
 using Remora.Results;
 

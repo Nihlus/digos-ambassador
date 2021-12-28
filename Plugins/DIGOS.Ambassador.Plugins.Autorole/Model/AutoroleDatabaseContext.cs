@@ -21,7 +21,6 @@
 //
 
 using DIGOS.Ambassador.Core.Database.Context;
-using DIGOS.Ambassador.Core.Database.Converters;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Statistics;
