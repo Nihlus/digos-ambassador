@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using DIGOS.Ambassador.Core.Errors;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Results;
 
@@ -33,6 +34,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services;
 /// <summary>
 /// Handles runtime registration of available permissions.
 /// </summary>
+[PublicAPI]
 public sealed class PermissionRegistryService
 {
     private readonly Dictionary<Type, IPermission> _registeredPermissions = new Dictionary<Type, IPermission>();

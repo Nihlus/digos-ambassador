@@ -20,11 +20,14 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using JetBrains.Annotations;
+
 namespace DIGOS.Ambassador.Plugins.Permissions.Model;
 
 /// <summary>
 /// Defines the state a recorded permission can be in.
 /// </summary>
+[PublicAPI]
 public enum PermissionState
 {
     /// <summary>

@@ -22,12 +22,14 @@
 
 using System;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Permissions;
 
 /// <summary>
 /// Serves as a base class for permission types.
 /// </summary>
+[PublicAPI]
 public abstract class Permission : IPermission
 {
     /// <inheritdoc />

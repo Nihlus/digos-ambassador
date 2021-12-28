@@ -23,6 +23,7 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Core.Database.Entities;
+using JetBrains.Annotations;
 using Remora.Discord.Core;
 
 namespace DIGOS.Ambassador.Plugins.Permissions.Model;
@@ -30,6 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Model;
 /// <summary>
 /// Represents a record of a permission associated with a role.
 /// </summary>
+[PublicAPI]
 [Table("RolePermissions", Schema = "PermissionModule")]
 public class RolePermission : EFEntity
 {

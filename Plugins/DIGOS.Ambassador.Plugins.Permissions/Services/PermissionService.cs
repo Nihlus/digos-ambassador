@@ -40,6 +40,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services;
 /// <summary>
 /// Encapsulates business logic for permissions.
 /// </summary>
+[PublicAPI]
 public sealed class PermissionService
 {
     private readonly PermissionsDatabaseContext _database;

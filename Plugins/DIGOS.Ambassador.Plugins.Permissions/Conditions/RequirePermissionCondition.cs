@@ -23,6 +23,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
+using JetBrains.Annotations;
 using Remora.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;
@@ -32,6 +33,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Conditions;
 /// <summary>
 /// Marks a command as requiring a certain permission.
 /// </summary>
+[PublicAPI]
 public class RequirePermissionCondition : ICondition<RequirePermissionAttribute>
 {
     private readonly PermissionService _permissions;

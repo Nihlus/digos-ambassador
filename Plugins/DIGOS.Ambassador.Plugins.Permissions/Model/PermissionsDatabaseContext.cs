@@ -31,19 +31,20 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Model;
 /// <summary>
 /// Represents the database model of the dossier plugin.
 /// </summary>
+[PublicAPI]
 public class PermissionsDatabaseContext : AmbassadorDbContext
 {
     private const string SchemaName = "PermissionModule";
 
     /// <summary>
-    /// Gets or sets the table where role-associated permissions are stored.
+    /// Gets the table where role-associated permissions are stored.
     /// </summary>
-    public DbSet<RolePermission> RolePermissions { get; [UsedImplicitly] set; } = null!;
+    public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
 
     /// <summary>
-    /// Gets or sets the table where user-associated permissions are stored.
+    /// Gets the table where user-associated permissions are stored.
     /// </summary>
-    public DbSet<UserPermission> UserPermissions { get; [UsedImplicitly] set; } = null!;
+    public DbSet<UserPermission> UserPermissions => Set<UserPermission>();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PermissionsDatabaseContext"/> class.
