@@ -23,7 +23,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using JetBrains.Annotations;
-using Remora.Discord.API.Json;
+using Remora.Rest.Json.Policies;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages;
 

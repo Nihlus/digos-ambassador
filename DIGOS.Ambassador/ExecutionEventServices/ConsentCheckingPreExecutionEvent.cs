@@ -112,7 +112,12 @@ public class ConsentCheckingPreExecutionEvent : IPreExecutionEvent
                     ];
                 }
 
-                potentialCommands = _commandService.Tree
+                if (!_commandService.TreeAccessor.TryGetNamedTree(null, out var defaultTree))
+                {
+                    return Result.FromSuccess();
+                }
+
+                potentialCommands = defaultTree
                     .Search(content, _tokenizerOptions, _treeSearchOptions)
                     .ToList();
 
@@ -120,8 +125,13 @@ public class ConsentCheckingPreExecutionEvent : IPreExecutionEvent
             }
             case InteractionContext interactionContext:
             {
+                if (!_commandService.TreeAccessor.TryGetNamedTree(null, out var defaultTree))
+                {
+                    return Result.FromSuccess();
+                }
+
                 interactionContext.Data.UnpackInteraction(out var command, out var parameters);
-                potentialCommands = _commandService.Tree
+                potentialCommands = defaultTree
                     .Search(command, parameters, _treeSearchOptions)
                     .ToList();
 

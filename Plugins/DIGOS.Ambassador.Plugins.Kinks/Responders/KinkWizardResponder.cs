@@ -40,8 +40,8 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Feedback.Services;
-using Remora.Discord.Core;
 using Remora.Discord.Gateway.Responders;
+using Remora.Rest.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Kinks.Responders;

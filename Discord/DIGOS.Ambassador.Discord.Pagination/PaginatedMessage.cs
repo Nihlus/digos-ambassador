@@ -23,7 +23,7 @@
 using System.Collections.Generic;
 using DIGOS.Ambassador.Discord.Interactivity.Messages;
 using Remora.Discord.API.Objects;
-using Remora.Discord.Core;
+using Remora.Rest.Core;
 
 namespace DIGOS.Ambassador.Discord.Pagination;
 

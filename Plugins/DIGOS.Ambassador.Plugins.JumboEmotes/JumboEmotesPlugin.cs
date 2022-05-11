@@ -49,7 +49,8 @@ public sealed class JumboEmotesPlugin : PluginDescriptor
     {
         serviceCollection
             .AddParser<EmojiTypeReader>()
-            .AddCommandGroup<JumboCommands>();
+            .AddCommandTree()
+                .WithCommandGroup<JumboCommands>();
 
         return Result.FromSuccess();
     }

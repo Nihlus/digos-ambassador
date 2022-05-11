@@ -29,8 +29,8 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Abstractions.Results;
 using Remora.Discord.API.Objects;
-using Remora.Discord.Core;
-using Remora.Discord.Rest.Results;
+using Remora.Rest.Core;
+using Remora.Rest.Results;
 using Remora.Results;
 using static Remora.Discord.API.Abstractions.Objects.DiscordPermission;
 
@@ -119,12 +119,12 @@ public class DedicatedChannelService
 
         if (!createChannel.IsSuccess)
         {
-            if (createChannel.Error is not DiscordRestResultError rre)
+            if (createChannel.Error is not RestResultError<RestError> rre)
             {
                 return Result<IChannel>.FromError(createChannel);
             }
 
-            switch (rre.DiscordError.Code)
+            switch (rre.Error.Code)
             {
                 case DiscordError.MissingPermission:
                 {
@@ -331,7 +331,7 @@ public class DedicatedChannelService
         var deleteChannel = await _channelAPI.DeleteChannelAsync(channel);
         if (!deleteChannel.IsSuccess)
         {
-            if (deleteChannel.Error is not DiscordRestResultError)
+            if (deleteChannel.Error is not RestResultError<RestError>)
             {
                 return deleteChannel;
             }

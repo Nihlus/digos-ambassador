@@ -34,7 +34,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
-using Remora.Discord.Core;
+using Remora.Rest.Core;
 using Remora.Results;
 using Xunit;
 

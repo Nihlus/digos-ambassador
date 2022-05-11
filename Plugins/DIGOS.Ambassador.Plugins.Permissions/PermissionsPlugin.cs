@@ -72,7 +72,11 @@ public sealed class PermissionsPlugin : PluginDescriptor, IMigratablePlugin
         serviceCollection.AddConfiguredSchemaAwareDbContextPool<PermissionsDatabaseContext>();
 
         serviceCollection.AddCondition<RequirePermissionCondition>();
-        serviceCollection.AddCommandGroup<PermissionCommands>();
+
+        serviceCollection
+            .AddCommandTree()
+                .WithCommandGroup<PermissionCommands>();
+
         serviceCollection.AddParser<HumanizerEnumTypeReader<PermissionTarget>>();
 
         return Result.FromSuccess();

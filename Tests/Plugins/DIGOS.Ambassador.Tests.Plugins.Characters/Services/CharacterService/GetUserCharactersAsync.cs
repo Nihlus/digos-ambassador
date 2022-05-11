@@ -24,7 +24,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
-using Remora.Discord.Core;
+using Remora.Rest.Core;
 using Xunit;
 
 #pragma warning disable SA1600

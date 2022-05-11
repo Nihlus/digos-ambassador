@@ -25,7 +25,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
-using Remora.Discord.Core;
+using Remora.Rest.Core;
 
 namespace DIGOS.Ambassador.Plugins.Core.Model.Servers;
 

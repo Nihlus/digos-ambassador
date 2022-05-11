@@ -22,7 +22,7 @@
 
 using System;
 using System.Threading;
-using Remora.Discord.Core;
+using Remora.Rest.Core;
 
 namespace DIGOS.Ambassador.Discord.Interactivity.Messages;
 

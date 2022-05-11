@@ -89,7 +89,9 @@ public sealed class TransformationsPlugin : PluginDescriptor, IMigratablePlugin
         serviceCollection.AddParser<EnumParser<Chirality>>();
 
         serviceCollection.AddParser<ColourTypeParser>();
-        serviceCollection.AddCommandGroup<TransformationCommands>();
+        serviceCollection
+            .AddCommandTree()
+                .WithCommandGroup<TransformationCommands>();
 
         return Result.FromSuccess();
     }

@@ -27,7 +27,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Tests.Plugins.Moderation.Bases;
-using Remora.Discord.Core;
+using Remora.Rest.Core;
 using Xunit;
 
 namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.ModerationService;

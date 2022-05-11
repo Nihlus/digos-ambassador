@@ -22,7 +22,7 @@
 
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using JetBrains.Annotations;
-using Remora.Discord.Core;
+using Remora.Rest.Core;
 
 namespace DIGOS.Ambassador.Plugins.Core.Model.Entity;
 

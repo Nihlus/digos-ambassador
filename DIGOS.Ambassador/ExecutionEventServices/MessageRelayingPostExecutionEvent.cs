@@ -42,7 +42,6 @@ using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Commands.Services;
-using Remora.Discord.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.ExecutionEventServices;

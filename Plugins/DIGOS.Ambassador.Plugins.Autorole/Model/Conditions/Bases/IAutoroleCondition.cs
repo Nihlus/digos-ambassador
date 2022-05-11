@@ -23,7 +23,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Remora.Discord.Core;
+using Remora.Rest.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;

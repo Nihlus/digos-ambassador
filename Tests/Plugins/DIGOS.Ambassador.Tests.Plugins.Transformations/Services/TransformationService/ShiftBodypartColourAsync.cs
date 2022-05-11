@@ -35,7 +35,7 @@ using DIGOS.Ambassador.Plugins.Transformations.Results;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Commands.Services;
-using Remora.Discord.Core;
+using Remora.Rest.Core;
 using Xunit;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.

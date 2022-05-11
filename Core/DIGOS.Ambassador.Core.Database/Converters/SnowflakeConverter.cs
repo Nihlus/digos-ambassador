@@ -21,7 +21,7 @@
 //
 
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Remora.Discord.Core;
+using Remora.Rest.Core;
 
 namespace DIGOS.Ambassador.Core.Database.Converters;
 
@@ -49,7 +49,7 @@ public class SnowflakeConverter : ValueConverter<Snowflake, long>
         : base
         (
             v => (long)v.Value,
-            v => new Snowflake((ulong)v),
+            v => new Snowflake((ulong)v, 1420070400000), // the discord epoch
             mappingHints
         )
     {

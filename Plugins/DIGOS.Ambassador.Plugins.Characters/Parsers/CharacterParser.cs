@@ -29,7 +29,7 @@ using DIGOS.Ambassador.Plugins.Characters.Services;
 using Remora.Commands.Parsers;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Extensions;
-using Remora.Discord.Core;
+using Remora.Rest.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Characters.Parsers;

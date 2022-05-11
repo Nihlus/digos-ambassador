@@ -49,10 +49,10 @@ using Remora.Discord.Commands.Feedback.Themes;
 using Remora.Discord.Commands.Responders;
 using Remora.Discord.Commands.Results;
 using Remora.Discord.Commands.Services;
-using Remora.Discord.Core;
 using Remora.Discord.Gateway.Extensions;
 using Remora.Discord.Hosting.Extensions;
 using Remora.Plugins.Services;
+using Remora.Rest.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador;
@@ -220,7 +220,7 @@ internal class Program
         }
         else
         {
-            var updateSlash = await slashService.UpdateSlashCommandsAsync(debugServer, cancellationSource.Token);
+            var updateSlash = await slashService.UpdateSlashCommandsAsync(debugServer, ct: cancellationSource.Token);
             if (!updateSlash.IsSuccess)
             {
                 log.LogWarning("Failed to update slash commands: {Reason}", updateSlash.Error.Message);

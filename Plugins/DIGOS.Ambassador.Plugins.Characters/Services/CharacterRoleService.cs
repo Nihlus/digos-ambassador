@@ -33,8 +33,9 @@ using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using Microsoft.EntityFrameworkCore;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Abstractions.Results;
-using Remora.Discord.Core;
-using Remora.Discord.Rest.Results;
+using Remora.Discord.API.Objects;
+using Remora.Rest.Core;
+using Remora.Rest.Results;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Characters.Services;
@@ -275,12 +276,12 @@ public class CharacterRoleService
 
                 if (!removeRole.IsSuccess)
                 {
-                    if (removeRole.Error is not DiscordRestResultError rre)
+                    if (removeRole.Error is not RestResultError<RestError> rre)
                     {
                         return removeRole;
                     }
 
-                    if (rre.DiscordError.Code is not DiscordError.UnknownRole)
+                    if (rre.Error.Code is not DiscordError.UnknownRole)
                     {
                         return removeRole;
                     }
@@ -333,12 +334,12 @@ public class CharacterRoleService
 
         if (!removeRole.IsSuccess)
         {
-            if (removeRole.Error is not DiscordRestResultError rre)
+            if (removeRole.Error is not RestResultError<RestError> rre)
             {
                 return removeRole;
             }
 
-            if (rre.DiscordError.Code is not DiscordError.UnknownRole)
+            if (rre.Error.Code is not DiscordError.UnknownRole)
             {
                 return removeRole;
             }
@@ -405,13 +406,13 @@ public class CharacterRoleService
                 return Result.FromSuccess();
             }
 
-            if (removeRole.Error is not DiscordRestResultError rre)
+            if (removeRole.Error is not RestResultError<RestError> rre)
             {
                 return removeRole;
             }
 
             // It's probably already removed; that's fine
-            return rre.DiscordError.Code is not DiscordError.UnknownRole
+            return rre.Error.Code is not DiscordError.UnknownRole
                 ? removeRole
                 : Result.FromSuccess();
         }
@@ -437,12 +438,12 @@ public class CharacterRoleService
 
             if (!removeRole.IsSuccess)
             {
-                if (removeRole.Error is not DiscordRestResultError rre)
+                if (removeRole.Error is not RestResultError<RestError> rre)
                 {
                     return removeRole;
                 }
 
-                if (rre.DiscordError.Code is not DiscordError.UnknownRole)
+                if (rre.Error.Code is not DiscordError.UnknownRole)
                 {
                     return removeRole;
                 }

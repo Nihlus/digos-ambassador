@@ -31,7 +31,7 @@ using DIGOS.Ambassador.Plugins.Permissions.Model;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Remora.Discord.API.Abstractions.Rest;
-using Remora.Discord.Core;
+using Remora.Rest.Core;
 using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 

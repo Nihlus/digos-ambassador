@@ -73,10 +73,11 @@ public class ModerationPlugin : PluginDescriptor, IMigratablePlugin
             .AddScoped<ChannelLoggingService>();
 
         serviceCollection
-            .AddCommandGroup<BanCommands>()
-            .AddCommandGroup<ModerationCommands>()
-            .AddCommandGroup<NoteCommands>()
-            .AddCommandGroup<WarningCommands>();
+            .AddCommandTree()
+                .WithCommandGroup<BanCommands>()
+                .WithCommandGroup<ModerationCommands>()
+                .WithCommandGroup<NoteCommands>()
+                .WithCommandGroup<WarningCommands>();
 
         serviceCollection.AddResponder<EventLoggingResponder>();
         serviceCollection.AddBehaviour<ExpirationBehaviour>();

@@ -27,7 +27,7 @@ using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using Humanizer;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Discord.API.Abstractions.Rest;
-using Remora.Discord.Core;
+using Remora.Rest.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;

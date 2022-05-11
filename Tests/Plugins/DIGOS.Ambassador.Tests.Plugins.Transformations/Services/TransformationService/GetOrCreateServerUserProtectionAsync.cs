@@ -28,7 +28,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Transformations.Model;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
-using Remora.Discord.Core;
+using Remora.Rest.Core;
 using Xunit;
 
 namespace DIGOS.Ambassador.Tests.Plugins.Transformations;

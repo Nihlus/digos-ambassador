@@ -34,8 +34,9 @@ using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Abstractions.Results;
-using Remora.Discord.Core;
-using Remora.Discord.Rest.Results;
+using Remora.Discord.API.Objects;
+using Remora.Rest.Core;
+using Remora.Rest.Results;
 using Remora.Results;
 
 using Image = DIGOS.Ambassador.Plugins.Characters.Model.Data.Image;
@@ -758,9 +759,9 @@ public class CharacterDiscordService
             return modifyNickname;
         }
 
-        if (modifyNickname.Error is DiscordRestResultError rre)
+        if (modifyNickname.Error is RestResultError<RestError> rre)
         {
-            return rre.DiscordError.Code is not DiscordError.MissingPermission
+            return rre.Error.Code is not DiscordError.MissingPermission
                 ? modifyNickname
                 : new UserError("I don't have permission to set the user's nickname.");
         }

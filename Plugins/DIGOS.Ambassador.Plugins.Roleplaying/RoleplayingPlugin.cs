@@ -73,7 +73,9 @@ public sealed class RoleplayingPlugin : PluginDescriptor, IMigratablePlugin
         serviceCollection.TryAddScoped<DedicatedChannelService>();
         serviceCollection.AddConfiguredSchemaAwareDbContextPool<RoleplayingDatabaseContext>();
 
-        serviceCollection.AddCommandGroup<RoleplayCommands>();
+        serviceCollection
+            .AddCommandTree()
+                .WithCommandGroup<RoleplayCommands>();
 
         serviceCollection.AddParser<RoleplayParser>();
         serviceCollection.AddParser<HumanizerEnumTypeReader<ExportFormat>>();

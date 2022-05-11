@@ -70,7 +70,7 @@ public class AmbassadorInteractionResponder : InteractionResponder
     /// <inheritdoc />
     public override async Task<Result> RespondAsync
     (
-        IInteractionCreate? gatewayEvent,
+        IInteractionCreate gatewayEvent,
         CancellationToken ct = default
     )
     {

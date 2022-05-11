@@ -32,8 +32,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Remora.Behaviours.Bases;
 using Remora.Discord.API.Abstractions.Rest;
-using Remora.Discord.Core;
-using Remora.Discord.Rest.Results;
+using Remora.Discord.API.Objects;
+using Remora.Rest.Core;
+using Remora.Rest.Results;
 using Remora.Results;
 using static Remora.Discord.API.Abstractions.Results.DiscordError;
 
@@ -165,9 +166,9 @@ internal sealed class ExpirationBehaviour : ContinuousBehaviour<ExpirationBehavi
 
             if (!removeBan.IsSuccess)
             {
-                if (removeBan.Error is DiscordRestResultError dre)
+                if (removeBan.Error is RestResultError<RestError> dre)
                 {
-                    switch (dre.DiscordError.Code)
+                    switch (dre.Error.Code)
                     {
                         case MissingPermission:
                         {

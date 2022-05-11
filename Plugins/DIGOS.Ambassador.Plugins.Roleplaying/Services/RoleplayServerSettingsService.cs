@@ -27,7 +27,7 @@ using DIGOS.Ambassador.Core.Errors;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using Microsoft.EntityFrameworkCore;
-using Remora.Discord.Core;
+using Remora.Rest.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Services;

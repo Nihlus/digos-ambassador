@@ -26,7 +26,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Results;
 using Remora.Discord.API.Abstractions.Rest;
-using Remora.Discord.Core;
+using Remora.Rest.Core;
 using Remora.Results;
 using static DIGOS.Ambassador.Plugins.Autorole.Results.AutoroleUpdateStatus;
 

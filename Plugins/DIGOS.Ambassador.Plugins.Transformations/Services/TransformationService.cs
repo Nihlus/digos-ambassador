@@ -40,7 +40,7 @@ using DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters;
 using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using Remora.Discord.Core;
+using Remora.Rest.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Services;

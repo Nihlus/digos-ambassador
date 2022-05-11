@@ -22,7 +22,7 @@
 
 using DIGOS.Ambassador.Core.Database.Converters;
 using Microsoft.EntityFrameworkCore;
-using Remora.Discord.Core;
+using Remora.Rest.Core;
 
 namespace DIGOS.Ambassador.Core.Database.Context;
 

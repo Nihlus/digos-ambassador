@@ -67,9 +67,10 @@ public sealed class CorePlugin : PluginDescriptor, IMigratablePlugin
         serviceCollection.AddConfiguredSchemaAwareDbContextPool<CoreDatabaseContext>();
 
         serviceCollection
-            .AddCommandGroup<PrivacyCommands>()
-            .AddCommandGroup<UserCommands>()
-            .AddCommandGroup<ServerCommands>();
+            .AddCommandTree()
+                .WithCommandGroup<PrivacyCommands>()
+                .WithCommandGroup<UserCommands>()
+                .WithCommandGroup<ServerCommands>();
 
         return Result.FromSuccess();
     }

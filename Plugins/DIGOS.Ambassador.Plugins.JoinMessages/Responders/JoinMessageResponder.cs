@@ -29,7 +29,7 @@ using Remora.Discord.API.Abstractions.Results;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Gateway.Responders;
-using Remora.Discord.Rest.Results;
+using Remora.Rest.Results;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.JoinMessages.Responders;
@@ -119,12 +119,12 @@ public class JoinMessageResponder : IResponder<IGuildMemberAdd>
             return Result.FromSuccess();
         }
 
-        if (sendEmbed.Error is not DiscordRestResultError dre)
+        if (sendEmbed.Error is not RestResultError<RestError> re)
         {
             return Result.FromError(sendEmbed);
         }
 
-        if (dre.DiscordError.Code is not DiscordError.CannotSendMessageToUser)
+        if (re.Error.Code is not DiscordError.CannotSendMessageToUser)
         {
             return Result.FromError(sendEmbed);
         }

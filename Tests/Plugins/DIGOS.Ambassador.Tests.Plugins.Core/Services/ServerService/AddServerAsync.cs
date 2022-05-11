@@ -22,7 +22,7 @@
 
 using System.Linq;
 using System.Threading.Tasks;
-using Remora.Discord.Core;
+using Remora.Rest.Core;
 using Xunit;
 
 #pragma warning disable SA1600

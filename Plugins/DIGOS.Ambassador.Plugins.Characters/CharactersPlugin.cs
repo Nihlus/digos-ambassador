@@ -79,7 +79,9 @@ public sealed class CharactersPlugin : PluginDescriptor, IMigratablePlugin
         serviceCollection.AddConfiguredSchemaAwareDbContextPool<CharactersDatabaseContext>();
 
         serviceCollection.AddParser<CharacterParser>();
-        serviceCollection.AddCommandGroup<CharacterCommands>();
+        serviceCollection
+            .AddCommandTree()
+                .WithCommandGroup<CharacterCommands>();
 
         serviceCollection.AddCondition<RequireEntityOwnerCondition<Character>>();
 

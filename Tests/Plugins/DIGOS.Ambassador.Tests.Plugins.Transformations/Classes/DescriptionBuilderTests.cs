@@ -30,7 +30,7 @@ using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages;
 using Microsoft.Extensions.DependencyInjection;
-using Remora.Discord.Core;
+using Remora.Rest.Core;
 using Xunit;
 
 #pragma warning disable SA1600

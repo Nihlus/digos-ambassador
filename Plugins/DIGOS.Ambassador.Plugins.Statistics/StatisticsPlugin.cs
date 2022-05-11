@@ -49,7 +49,8 @@ public sealed class StatisticsPlugin : PluginDescriptor
     public override Result ConfigureServices(IServiceCollection serviceCollection)
     {
         serviceCollection
-            .AddCommandGroup<StatCommands>();
+            .AddCommandTree()
+                .WithCommandGroup<StatCommands>();
 
         serviceCollection.TryAddInteractivityResponder<PaginatedMessageResponder>();
 

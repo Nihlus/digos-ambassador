@@ -26,7 +26,7 @@
 
 using System.Linq;
 using System.Threading.Tasks;
-using Remora.Discord.Core;
+using Remora.Rest.Core;
 using Xunit;
 
 namespace DIGOS.Ambassador.Tests.Plugins.Transformations;

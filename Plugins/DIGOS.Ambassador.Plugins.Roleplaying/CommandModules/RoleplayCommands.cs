@@ -49,7 +49,6 @@ using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Feedback.Services;
-using Remora.Discord.Core;
 using Remora.Results;
 using FeedbackMessage = Remora.Discord.Commands.Feedback.Messages.FeedbackMessage;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;

@@ -67,7 +67,9 @@ public sealed class KinksPlugin : PluginDescriptor, IMigratablePlugin
         serviceCollection.TryAddInteractivityResponder<PaginatedMessageResponder>();
         serviceCollection.TryAddInteractivityResponder<KinkWizardResponder>();
 
-        serviceCollection.AddCommandGroup<KinkCommands>();
+        serviceCollection
+            .AddCommandTree()
+                .WithCommandGroup<KinkCommands>();
 
         serviceCollection.AddParser<EnumParser<KinkPreference>>();
 
