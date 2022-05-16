@@ -157,7 +157,7 @@ public class Character : EFEntity, IOwnedNamedEntity, IServerEntity
     /// <returns>The description.</returns>
     public string GetDescriptionOrDefault(string defaultDescription = "No description set.")
     {
-        return this.Description ?? defaultDescription;
+        return string.IsNullOrWhiteSpace(this.Description) ? defaultDescription : this.Description;
     }
 
     /// <summary>
@@ -167,7 +167,7 @@ public class Character : EFEntity, IOwnedNamedEntity, IServerEntity
     /// <returns>The description.</returns>
     public string GetSummaryOrDefault(string defaultSummary = "No summary set.")
     {
-        return this.Summary ?? defaultSummary;
+        return string.IsNullOrWhiteSpace(this.Summary) ? defaultSummary : this.Summary;
     }
 
     /// <inheritdoc />
