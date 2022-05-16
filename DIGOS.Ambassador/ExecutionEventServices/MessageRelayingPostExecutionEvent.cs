@@ -31,6 +31,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Errors;
 using DIGOS.Ambassador.Core.Services;
+using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Plugins.Amby.Services;
 using OneOf;
 using Remora.Commands.Results;
@@ -116,23 +117,16 @@ public class MessageRelayingPostExecutionEvent : IPostExecutionEvent
                 : Result.FromSuccess();
         }
 
-        IResult result = commandResult;
-        while (result.Error is ParameterParsingError or ConditionNotSatisfiedError && result.Inner is not null)
-        {
-            result = result.Inner;
-        }
-
+        var result = commandResult.GetMostRelevantResult();
         var error = result.Error;
         switch (error)
         {
             case AmbiguousCommandInvocationError:
-            case UserError:
-            case { } e when
-                e.GetType().IsGenericType && e.GetType().GetGenericTypeDefinition() == typeof(ParsingError<>):
+            case CommandNotFoundError:
             {
                 var sendError = await _feedback.SendContextualErrorAsync
                 (
-                    error.Message,
+                    "No matching command found.",
                     context.User.ID,
                     ct: ct
                 );
@@ -144,11 +138,14 @@ public class MessageRelayingPostExecutionEvent : IPostExecutionEvent
 
                 break;
             }
-            case CommandNotFoundError:
+            case ParameterParsingError:
+            case ConditionNotSatisfiedError:
+            case UserError:
             {
+                var message = result.Inner?.Error!.Message ?? result.Error!.Message;
                 var sendError = await _feedback.SendContextualErrorAsync
                 (
-                    "No matching command found.",
+                    message,
                     context.User.ID,
                     ct: ct
                 );
@@ -241,7 +238,7 @@ public class MessageRelayingPostExecutionEvent : IPostExecutionEvent
                     await sw.WriteLineAsync("### Error");
                     var errorJson = JsonSerializer.Serialize
                     (
-                        result,
+                        commandResult,
                         new JsonSerializerOptions { WriteIndented = true }
                     );
 
@@ -283,6 +280,6 @@ public class MessageRelayingPostExecutionEvent : IPostExecutionEvent
             }
         }
 
-        return Result.FromError(result.Error!);
+        return Result.FromError(commandResult.Error!);
     }
 }
