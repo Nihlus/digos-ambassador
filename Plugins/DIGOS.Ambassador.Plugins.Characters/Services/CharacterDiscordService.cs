@@ -763,7 +763,7 @@ public class CharacterDiscordService
         {
             return rre.Error.Code is not DiscordError.MissingPermission
                 ? modifyNickname
-                : new UserError("I don't have permission to set the user's nickname.");
+                : Result.FromSuccess(); // squelch missing permission errors
         }
 
         if (modifyNickname.Error is not HttpResultError hre)
