@@ -76,6 +76,7 @@ public partial class CharacterCommands : CommandGroup
     private readonly InteractivityService _interactivity;
     private readonly ICommandContext _context;
     private readonly IDiscordRestGuildAPI _guildAPI;
+    private readonly IDiscordRestChannelAPI _channelAPI;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CharacterCommands"/> class.
@@ -87,6 +88,7 @@ public partial class CharacterCommands : CommandGroup
     /// <param name="pronouns">The pronoun service.</param>
     /// <param name="context">The command context.</param>
     /// <param name="guildAPI">The guild API.</param>
+    /// <param name="channelAPI">The channel API.</param>
     public CharacterCommands
     (
         ContentService contentService,
@@ -95,7 +97,8 @@ public partial class CharacterCommands : CommandGroup
         InteractivityService interactivity,
         PronounService pronouns,
         ICommandContext context,
-        IDiscordRestGuildAPI guildAPI
+        IDiscordRestGuildAPI guildAPI,
+        IDiscordRestChannelAPI channelAPI
     )
     {
         _content = contentService;
@@ -105,6 +108,7 @@ public partial class CharacterCommands : CommandGroup
         _pronouns = pronouns;
         _context = context;
         _guildAPI = guildAPI;
+        _channelAPI = channelAPI;
     }
 
     /// <summary>
@@ -195,6 +199,19 @@ public partial class CharacterCommands : CommandGroup
     [RequireContext(ChannelContext.Guild)]
     public async Task<Result> ShowCharacterAsync([AutocompleteProvider("character::any")] Character character)
     {
+        // NSFW check
+        var getChannel = await _channelAPI.GetChannelAsync(_context.ChannelID, this.CancellationToken);
+        if (!getChannel.IsSuccess)
+        {
+            return Result.FromError(getChannel);
+        }
+
+        var channel = getChannel.Entity;
+        if ((channel.IsNsfw.IsDefined(out var isNsfw) || !isNsfw) && character.IsNSFW)
+        {
+            return new UserError("That character is NSFW, but the channel is not... naughty!");
+        }
+
         var createEmbed = await CreateCharacterInfoEmbedAsync(character);
         if (!createEmbed.IsSuccess)
         {
@@ -238,6 +255,15 @@ public partial class CharacterCommands : CommandGroup
             return Result.FromError(getCharacters);
         }
 
+        var getChannel = await _channelAPI.GetChannelAsync(_context.ChannelID, this.CancellationToken);
+        if (!getChannel.IsSuccess)
+        {
+            return Result.FromError(getChannel);
+        }
+
+        var channel = getChannel.Entity;
+        var isChannelNSFW = channel.IsNsfw.IsDefined(out var isNsfw) && isNsfw;
+
         var characters = getCharacters.Entity.ToList();
 
         var pages = await PaginatedEmbedFactory.PagesFromCollectionAsync
@@ -245,13 +271,23 @@ public partial class CharacterCommands : CommandGroup
             characters,
             async c =>
             {
-                var createEmbed = await CreateCharacterInfoEmbedAsync(c);
-                if (!createEmbed.IsSuccess)
+                Embed embed;
+                if (c.IsNSFW && !isChannelNSFW)
                 {
-                    return createEmbed;
+                    embed = new Embed(Description: "Redacted (Character is NSFW, but channel is not)");
+                }
+                else
+                {
+                    var createEmbed = await CreateCharacterInfoEmbedAsync(c);
+                    if (!createEmbed.IsSuccess)
+                    {
+                        return createEmbed;
+                    }
+
+                    embed = createEmbed.Entity;
                 }
 
-                return createEmbed.Entity with
+                return embed with
                 {
                     Title = $"{(_context.User.ID == discordUser.ID ? "Your" : $"<@{discordUser.ID}>'s")} characters"
                 };
