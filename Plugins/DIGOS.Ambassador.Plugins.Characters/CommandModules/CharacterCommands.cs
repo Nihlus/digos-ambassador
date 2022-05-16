@@ -53,6 +53,7 @@ using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
+using Remora.Rest.Core;
 using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
@@ -276,23 +277,22 @@ public partial class CharacterCommands : CommandGroup
     {
         var eb = new Embed { Colour = _feedback.Theme.Secondary };
 
+        Optional<IEmbedAuthor> author = default;
         var getOwner = await _guildAPI.GetGuildMemberAsync(_context.GuildID.Value, character.Owner.DiscordID, ct);
-        if (!getOwner.IsSuccess)
+        if (getOwner.IsSuccess)
         {
-            return Result<Embed>.FromError(getOwner);
-        }
+            var owner = getOwner.Entity;
+            var ownerName = owner.Nickname.IsDefined(out var nickname)
+                ? nickname
+                : owner.User.Value.Username;
 
-        var owner = getOwner.Entity;
-        var ownerName = owner.Nickname.IsDefined(out var nickname)
-            ? nickname
-            : owner.User.Value.Username;
+            var realAuthor = new EmbedAuthor(ownerName);
 
-        var author = new EmbedAuthor(ownerName);
-
-        var getOwnerAvatar = CDN.GetUserAvatarUrl(owner.User.Value);
-        if (getOwnerAvatar.IsSuccess)
-        {
-            author = author with { IconUrl = getOwnerAvatar.Entity.ToString() };
+            var getOwnerAvatar = CDN.GetUserAvatarUrl(owner.User.Value);
+            if (getOwnerAvatar.IsSuccess)
+            {
+                author = realAuthor with { IconUrl = getOwnerAvatar.Entity.ToString() };
+            }
         }
 
         var characterInfoTitle = character.Nickname.IsNullOrWhitespace()

@@ -217,15 +217,7 @@ public class StatCommands : CommandGroup
             new("Owner", $"<@{guild.OwnerID}>"),
         };
 
-        if (guild.MemberCount.HasValue)
-        {
-            fields.Add(new EmbedField("Members", guild.MemberCount.Value.ToString()));
-        }
-        else if (guild.Members.HasValue)
-        {
-            fields.Add(new EmbedField("Members", guild.Members.Value.Count.ToString()));
-        }
-        else if (guild.ApproximateMemberCount.HasValue)
+        if (guild.ApproximateMemberCount.HasValue)
         {
             fields.Add(new EmbedField("Members", $"~{guild.ApproximateMemberCount.Value}"));
         }
