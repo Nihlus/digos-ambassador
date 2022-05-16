@@ -229,7 +229,7 @@ public partial class CharacterCommands : CommandGroup
         var getCharacters = await _characters.GetUserCharactersAsync
         (
             _context.GuildID.Value,
-            _context.User.ID,
+            discordUser.ID,
             this.CancellationToken
         );
 
