@@ -35,6 +35,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Remora.Commands.Extensions;
+using Remora.Discord.Pagination.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
 using Remora.Results;
@@ -59,6 +60,8 @@ public sealed class AutorolePlugin : PluginDescriptor, IMigratablePlugin
     /// <inheritdoc />
     public override Result ConfigureServices(IServiceCollection serviceCollection)
     {
+        serviceCollection.AddPagination();
+
         serviceCollection.TryAddScoped<AutoroleService>();
         serviceCollection.TryAddScoped<AutoroleUpdateService>();
         serviceCollection.TryAddScoped<UserStatisticsService>();

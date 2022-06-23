@@ -45,6 +45,7 @@ using Remora.Behaviours.Extensions;
 using Remora.Commands.Extensions;
 using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Gateway.Extensions;
+using Remora.Discord.Pagination.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
 using Remora.Results;
@@ -67,6 +68,8 @@ public sealed class RoleplayingPlugin : PluginDescriptor, IMigratablePlugin
     /// <inheritdoc />
     public override Result ConfigureServices(IServiceCollection serviceCollection)
     {
+        serviceCollection.AddPagination();
+
         serviceCollection.TryAddScoped<RoleplayService>();
         serviceCollection.TryAddScoped<RoleplayDiscordService>();
         serviceCollection.TryAddScoped<RoleplayServerSettingsService>();

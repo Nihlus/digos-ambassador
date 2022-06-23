@@ -38,6 +38,7 @@ using Remora.Commands.Parsers;
 using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.Gateway;
 using Remora.Discord.Interactivity.Extensions;
+using Remora.Discord.Pagination.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
 using Remora.Results;
@@ -61,6 +62,7 @@ public sealed class KinksPlugin : PluginDescriptor, IMigratablePlugin
     /// <inheritdoc />
     public override Result ConfigureServices(IServiceCollection serviceCollection)
     {
+        serviceCollection.AddPagination();
         serviceCollection.TryAddScoped<KinkService>();
         serviceCollection.AddConfiguredSchemaAwareDbContextPool<KinksDatabaseContext>();
         serviceCollection.AddInteractiveEntity<KinkWizardEntity>();

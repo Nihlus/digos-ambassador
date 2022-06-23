@@ -24,6 +24,7 @@ using DIGOS.Ambassador.Plugins.Statistics;
 using DIGOS.Ambassador.Plugins.Statistics.CommandGroups;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Commands.Extensions;
+using Remora.Discord.Pagination.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
 using Remora.Results;
@@ -46,6 +47,8 @@ public sealed class StatisticsPlugin : PluginDescriptor
     /// <inheritdoc />
     public override Result ConfigureServices(IServiceCollection serviceCollection)
     {
+        serviceCollection.AddPagination();
+
         serviceCollection
             .AddCommandTree()
                 .WithCommandGroup<StatCommands>();

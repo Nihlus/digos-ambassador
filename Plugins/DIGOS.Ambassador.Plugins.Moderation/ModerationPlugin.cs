@@ -37,6 +37,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Remora.Behaviours.Extensions;
 using Remora.Commands.Extensions;
 using Remora.Discord.Gateway.Extensions;
+using Remora.Discord.Pagination.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
 using Remora.Results;
@@ -59,6 +60,8 @@ public class ModerationPlugin : PluginDescriptor, IMigratablePlugin
     /// <inheritdoc />
     public override Result ConfigureServices(IServiceCollection serviceCollection)
     {
+        serviceCollection.AddPagination();
+
         serviceCollection
             .AddConfiguredSchemaAwareDbContextPool<ModerationDatabaseContext>();
 

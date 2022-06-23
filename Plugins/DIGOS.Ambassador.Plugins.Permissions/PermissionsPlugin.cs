@@ -37,6 +37,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Remora.Commands.Extensions;
 using Remora.Discord.Interactivity.Extensions;
+using Remora.Discord.Pagination.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
 using Remora.Results;
@@ -61,7 +62,7 @@ public sealed class PermissionsPlugin : PluginDescriptor, IMigratablePlugin
     public override Result ConfigureServices(IServiceCollection serviceCollection)
     {
         // Dependencies
-        serviceCollection.AddInteractivity();
+        serviceCollection.AddPagination();
 
         // Our stuff
         serviceCollection.TryAddSingleton<PermissionRegistryService>();

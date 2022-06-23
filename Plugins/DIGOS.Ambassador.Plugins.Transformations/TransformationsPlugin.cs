@@ -40,6 +40,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Remora.Commands.Extensions;
 using Remora.Commands.Parsers;
+using Remora.Discord.Pagination.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
 using Remora.Results;
@@ -63,6 +64,8 @@ public sealed class TransformationsPlugin : PluginDescriptor, IMigratablePlugin
     /// <inheritdoc />
     public override Result ConfigureServices(IServiceCollection serviceCollection)
     {
+        serviceCollection.AddPagination();
+
         serviceCollection.TryAddSingleton<TransformationDescriptionBuilder>();
         serviceCollection.TryAddSingleton(services =>
         {
