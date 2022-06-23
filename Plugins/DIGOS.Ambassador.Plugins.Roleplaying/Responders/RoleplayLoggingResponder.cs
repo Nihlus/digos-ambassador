@@ -124,7 +124,12 @@ internal sealed class RoleplayLoggingResponder :
             return Result.FromSuccess();
         }
 
-        return await _roleplays.ConsumeMessageAsync(gatewayEvent);
+        if (!gatewayEvent.GuildID.IsDefined(out var guildID))
+        {
+            return Result.FromSuccess();
+        }
+
+        return await _roleplays.ConsumeMessageAsync(gatewayEvent, guildID);
     }
 
     /// <inheritdoc />
@@ -140,6 +145,11 @@ internal sealed class RoleplayLoggingResponder :
             return Result.FromSuccess();
         }
 
+        if (!gatewayEvent.GuildID.IsDefined(out var guildID))
+        {
+            return Result.FromSuccess();
+        }
+
         // Ignore all changes except text changes
         var isTextUpdate = gatewayEvent.EditedTimestamp.HasValue &&
                            gatewayEvent.EditedTimestamp.Value > DateTimeOffset.UtcNow - 1.Minutes();
@@ -149,7 +159,7 @@ internal sealed class RoleplayLoggingResponder :
             return Result.FromSuccess();
         }
 
-        return await _roleplays.ConsumeMessageAsync(gatewayEvent);
+        return await _roleplays.ConsumeMessageAsync(gatewayEvent, guildID);
     }
 
     private async IAsyncEnumerable<Result<Snowflake>> GetGuildsAsync

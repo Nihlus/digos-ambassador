@@ -74,8 +74,12 @@ public class PaginatedMessageResponder :
             return Result.FromSuccess();
         }
 
-        var data = gatewayEvent.Data.Value ?? throw new InvalidOperationException();
-        var type = data.ComponentType.Value;
+        if (!gatewayEvent.Data.IsDefined(out var oneOf) || !oneOf.TryPickT1(out var data, out _))
+        {
+            return Result.FromSuccess();
+        }
+
+        var type = data.ComponentType;
 
         if (type != ComponentType.Button)
         {
@@ -119,7 +123,7 @@ public class PaginatedMessageResponder :
 
         var userID = user.ID;
 
-        var buttonNonce = data.CustomID.Value ?? throw new InvalidOperationException();
+        var buttonNonce = data.CustomID ?? throw new InvalidOperationException();
 
         try
         {
@@ -254,7 +258,7 @@ public class PaginatedMessageResponder :
             message.ChannelID,
             message.MessageID,
             embeds: new[] { page },
-            components: new Optional<IReadOnlyList<IMessageComponent>>(GetCurrentPageComponents(message)),
+            components: new Optional<IReadOnlyList<IMessageComponent>?>(GetCurrentPageComponents(message)),
             ct: ct
         );
 

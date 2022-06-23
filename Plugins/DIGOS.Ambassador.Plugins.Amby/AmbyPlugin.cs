@@ -51,7 +51,8 @@ public sealed class AmbyPlugin : PluginDescriptor
             .AddSingleton<PortraitService>()
             .AddSingleton<SassService>();
 
-        serviceCollection.AddCommandGroup<AmbyCommands>();
+        serviceCollection.AddCommandTree()
+            .WithCommandGroup<AmbyCommands>();
 
         return Result.FromSuccess();
     }

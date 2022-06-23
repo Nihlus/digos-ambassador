@@ -220,7 +220,12 @@ public class MessageRelayingPostExecutionEvent : IPostExecutionEvent
                         }
                         case InteractionContext interactionContext:
                         {
-                            interactionContext.Data.UnpackInteraction(out var commandPath, out var parameters);
+                            if (!interactionContext.Data.TryPickT0(out var data, out _))
+                            {
+                                return new InvalidOperationError("Failed to get interaction data.");
+                            }
+
+                            data.UnpackInteraction(out var commandPath, out var parameters);
                             command = string.Join(" ", commandPath) +
                                       " " +
                                       string.Join(" ", parameters.Select(kvp => string.Join(" ", kvp.Key, string.Join(" ", kvp.Value))));

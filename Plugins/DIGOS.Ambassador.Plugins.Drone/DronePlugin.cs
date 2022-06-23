@@ -52,7 +52,8 @@ public sealed class DronePlugin : PluginDescriptor
         serviceCollection.TryAddScoped<DroneService>();
         serviceCollection.TryAddSingleton<Random>();
 
-        serviceCollection.AddCommandGroup<DroneCommands>();
+        serviceCollection.AddCommandTree()
+            .WithCommandGroup<DroneCommands>();
 
         return Result.FromSuccess();
     }

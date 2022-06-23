@@ -69,7 +69,8 @@ public sealed class AutorolePlugin : PluginDescriptor, IMigratablePlugin
 
         serviceCollection.AddParser<AutoroleConfigurationParser>();
         serviceCollection.AddParser<EmojiTypeReader>();
-        serviceCollection.AddCommandGroup<AutoroleCommands>();
+        serviceCollection.AddCommandTree()
+            .WithCommandGroup<AutoroleCommands>();
 
         serviceCollection.AddConfiguredSchemaAwareDbContextPool<AutoroleDatabaseContext>();
 

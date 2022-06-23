@@ -118,6 +118,11 @@ public class EventLoggingResponder :
             return Result.FromSuccess();
         }
 
-        return await _channelLogging.NotifyMessageDeletedAsync(message);
+        if (!gatewayEvent.GuildID.IsDefined(out var guildID))
+        {
+            return Result.FromSuccess();
+        }
+
+        return await _channelLogging.NotifyMessageDeletedAsync(message, guildID);
     }
 }

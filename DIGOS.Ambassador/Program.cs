@@ -41,6 +41,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Remora.Behaviours.Services;
 using Remora.Commands.Trees.Nodes;
+using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Caching.Extensions;
 using Remora.Discord.Caching.Services;
@@ -49,6 +50,7 @@ using Remora.Discord.Commands.Feedback.Themes;
 using Remora.Discord.Commands.Responders;
 using Remora.Discord.Commands.Results;
 using Remora.Discord.Commands.Services;
+using Remora.Discord.Gateway;
 using Remora.Discord.Gateway.Extensions;
 using Remora.Discord.Hosting.Extensions;
 using Remora.Plugins.Services;
@@ -113,6 +115,11 @@ internal class Program
             .UseSystemd()
             .ConfigureServices(services =>
             {
+                services.Configure<DiscordGatewayClientOptions>(o =>
+                {
+                    o.Intents |= GatewayIntents.MessageContents;
+                });
+
                 services.Configure<ServiceProviderOptions>(s =>
                 {
                     s.ValidateScopes = true;

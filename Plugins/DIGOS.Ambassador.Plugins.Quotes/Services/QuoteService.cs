@@ -244,10 +244,10 @@ public class QuoteService
         );
     }
 
-    private static string GetJumpUrl(IMessage message)
+    private static string GetJumpUrl(IMessage message, Snowflake? guildID = null)
     {
-        var guildID = message.GuildID.HasValue ? message.GuildID.Value.ToString() : "@me";
-        return $"https://discord.com/channels/{guildID}/{message.ChannelID}/{message.ID}";
+        var location = guildID.HasValue ? guildID.Value.ToString() : "@me";
+        return $"https://discord.com/channels/{location}/{message.ChannelID}/{message.ID}";
     }
 
     /// <summary>

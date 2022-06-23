@@ -592,73 +592,9 @@ public class RoleplayDiscordService
     /// Consumes a message, adding it to the active roleplay in its channel if the author is a participant.
     /// </summary>
     /// <param name="message">The received message.</param>
+    /// <param name="guildID">The ID of the guild in which the message was received.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public async Task<Result> ConsumeMessageAsync(IMessage message)
-    {
-        var checkForActive = await HasActiveRoleplayAsync(message.ChannelID);
-        if (!checkForActive.IsSuccess)
-        {
-            return Result.FromError(checkForActive);
-        }
-
-        if (!checkForActive.Entity)
-        {
-            // There's no roleplay in that channel, so it's fine
-            return Result.FromSuccess();
-        }
-
-        var result = await GetActiveRoleplayAsync(message.ChannelID);
-        if (!result.IsSuccess)
-        {
-            return Result.FromError(result);
-        }
-
-        var roleplay = result.Entity;
-
-        if (!roleplay.HasJoined(message.Author))
-        {
-            return new UserError("The given message was not authored by a participant of the roleplay.");
-        }
-
-        var userNick = message.Author.Username;
-        if (message.GuildID.HasValue)
-        {
-            var getMember = await _guildAPI.GetGuildMemberAsync(message.GuildID.Value, message.Author.ID);
-            if (getMember.IsSuccess)
-            {
-                var member = getMember.Entity;
-                if (member.Nickname.HasValue && member.Nickname.Value is not null)
-                {
-                    userNick = member.Nickname.Value;
-                }
-            }
-        }
-
-        var getAuthor = await _users.GetOrRegisterUserAsync(message.Author.ID);
-        if (!getAuthor.IsSuccess)
-        {
-            return Result.FromError(getAuthor);
-        }
-
-        var author = getAuthor.Entity;
-
-        return await _roleplays.AddOrUpdateMessageInRoleplayAsync
-        (
-            roleplay,
-            author,
-            message.ID,
-            message.Timestamp,
-            userNick,
-            message.Content
-        );
-    }
-
-    /// <summary>
-    /// Consumes a message, adding it to the active roleplay in its channel if the author is a participant.
-    /// </summary>
-    /// <param name="message">The received message.</param>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public async Task<Result> ConsumeMessageAsync(IPartialMessage message)
+    public async Task<Result> ConsumeMessageAsync(IPartialMessage message, Snowflake guildID)
     {
         if (!message.ID.HasValue)
         {
@@ -699,16 +635,13 @@ public class RoleplayDiscordService
         }
 
         var userNick = message.Author.Value.Username;
-        if (message.GuildID.HasValue)
+        var getMember = await _guildAPI.GetGuildMemberAsync(guildID, message.Author.Value.ID);
+        if (getMember.IsSuccess)
         {
-            var getMember = await _guildAPI.GetGuildMemberAsync(message.GuildID.Value, message.Author.Value.ID);
-            if (getMember.IsSuccess)
+            var member = getMember.Entity;
+            if (member.Nickname.HasValue && member.Nickname.Value is not null)
             {
-                var member = getMember.Entity;
-                if (member.Nickname.HasValue && member.Nickname.Value is not null)
-                {
-                    userNick = member.Nickname.Value;
-                }
+                userNick = member.Nickname.Value;
             }
         }
 
@@ -776,7 +709,7 @@ public class RoleplayDiscordService
                     continue;
                 }
 
-                var updateResult = await ConsumeMessageAsync(message);
+                var updateResult = await ConsumeMessageAsync(message, roleplay.Server.DiscordID);
                 if (!updateResult.IsSuccess)
                 {
                     return Result<ulong>.FromError(updateResult);

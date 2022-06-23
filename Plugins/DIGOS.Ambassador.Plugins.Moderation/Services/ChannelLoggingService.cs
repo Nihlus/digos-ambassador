@@ -386,20 +386,15 @@ public sealed class ChannelLoggingService
     /// Posts a notification that a message was deleted.
     /// </summary>
     /// <param name="message">The deleted message.</param>
+    /// <param name="guildID">The ID of the guild in which the message was.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public async Task<Result> NotifyMessageDeletedAsync(IMessage message)
+    public async Task<Result> NotifyMessageDeletedAsync(IMessage message, Snowflake guildID)
     {
         // We don't care about bot messages
         var isNonFeedbackMessage = (message.Author.IsBot.IsDefined(out var isBot) && isBot) ||
                                    (message.Author.IsSystem.IsDefined(out var isSystem) && isSystem);
 
         if (isNonFeedbackMessage)
-        {
-            return Result.FromSuccess();
-        }
-
-        // We don't care about non-guild messages
-        if (!message.GuildID.IsDefined(out var guildID))
         {
             return Result.FromSuccess();
         }
@@ -453,7 +448,7 @@ public sealed class ChannelLoggingService
         var extra = string.Empty;
         if (botPermissions.HasPermission(DiscordPermission.ViewAuditLog))
         {
-            var getMostProbableDeleter = await FindMostProbableDeleterAsync(message);
+            var getMostProbableDeleter = await FindMostProbableDeleterAsync(message, guildID);
             if (!getMostProbableDeleter.IsSuccess)
             {
                 return Result.FromError(getMostProbableDeleter);
@@ -544,13 +539,8 @@ public sealed class ChannelLoggingService
     }
 
     // ReSharper disable once UnusedParameter.Local
-    private async Task<Result<Snowflake>> FindMostProbableDeleterAsync(IMessage message)
+    private async Task<Result<Snowflake>> FindMostProbableDeleterAsync(IMessage message, Snowflake guildID)
     {
-        if (!message.GuildID.IsDefined(out var guildID))
-        {
-            return message.Author.ID;
-        }
-
         var now = Snowflake.CreateTimestampSnowflake();
         var before = now;
         var after = message.ID;

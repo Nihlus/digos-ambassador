@@ -130,7 +130,12 @@ public class ConsentCheckingPreExecutionEvent : IPreExecutionEvent
                     return Result.FromSuccess();
                 }
 
-                interactionContext.Data.UnpackInteraction(out var command, out var parameters);
+                if (!interactionContext.Data.TryPickT0(out var data, out _))
+                {
+                    return Result.FromSuccess();
+                }
+
+                data.UnpackInteraction(out var command, out var parameters);
                 potentialCommands = defaultTree
                     .Search(command, parameters, _treeSearchOptions)
                     .ToList();

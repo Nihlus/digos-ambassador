@@ -90,8 +90,12 @@ public class KinkWizardResponder :
             return Result.FromSuccess();
         }
 
-        var data = gatewayEvent.Data.Value ?? throw new InvalidOperationException();
-        var type = data.ComponentType.Value;
+        if (!gatewayEvent.Data.IsDefined(out var oneOf) || !oneOf.TryPickT1(out var data, out _))
+        {
+            return Result.FromSuccess();
+        }
+
+        var type = data.ComponentType;
 
         if (type != ComponentType.Button)
         {
@@ -135,7 +139,7 @@ public class KinkWizardResponder :
 
         var userID = user.ID;
 
-        var buttonNonce = data.CustomID.Value ?? throw new InvalidOperationException();
+        var buttonNonce = data.CustomID ?? throw new InvalidOperationException();
 
         try
         {
@@ -605,7 +609,7 @@ public class KinkWizardResponder :
             wizard.ChannelID,
             wizard.MessageID,
             embeds: new[] { page },
-            components: new Optional<IReadOnlyList<IMessageComponent>>(wizard.GetCurrentPageComponents()),
+            components: new Optional<IReadOnlyList<IMessageComponent>?>(wizard.GetCurrentPageComponents()),
             ct: ct
         );
 
