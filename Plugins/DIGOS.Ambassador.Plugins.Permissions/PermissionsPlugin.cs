@@ -25,8 +25,6 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
-using DIGOS.Ambassador.Discord.Interactivity.Extensions;
-using DIGOS.Ambassador.Discord.Pagination.Responders;
 using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Plugins.Permissions;
 using DIGOS.Ambassador.Plugins.Permissions.CommandModules;
@@ -38,6 +36,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Remora.Commands.Extensions;
+using Remora.Discord.Interactivity.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
 using Remora.Results;
@@ -63,7 +62,6 @@ public sealed class PermissionsPlugin : PluginDescriptor, IMigratablePlugin
     {
         // Dependencies
         serviceCollection.AddInteractivity();
-        serviceCollection.TryAddInteractivityResponder<PaginatedMessageResponder>();
 
         // Our stuff
         serviceCollection.TryAddSingleton<PermissionRegistryService>();

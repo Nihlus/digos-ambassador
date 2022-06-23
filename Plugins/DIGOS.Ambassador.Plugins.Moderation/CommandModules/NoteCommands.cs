@@ -25,8 +25,6 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Interactivity;
-using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Plugins.Moderation.Permissions;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
 using DIGOS.Ambassador.Plugins.Permissions.Conditions;
@@ -42,6 +40,9 @@ using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
+using Remora.Discord.Interactivity.Services;
+using Remora.Discord.Pagination;
+using Remora.Discord.Pagination.Extensions;
 using Remora.Rest.Core;
 using Remora.Results;
 
@@ -57,7 +58,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules;
 public partial class NoteCommands : CommandGroup
 {
     private readonly NoteService _notes;
-    private readonly InteractivityService _interactivity;
+    private readonly InteractiveMessageService _interactivity;
     private readonly ChannelLoggingService _logging;
     private readonly ICommandContext _context;
     private readonly IDiscordRestUserAPI _userAPI;
@@ -75,7 +76,7 @@ public partial class NoteCommands : CommandGroup
     public NoteCommands
     (
         NoteService notes,
-        InteractivityService interactivity,
+        InteractiveMessageService interactivity,
         ChannelLoggingService logging,
         ICommandContext context,
         IDiscordRestUserAPI userAPI,
@@ -150,18 +151,12 @@ public partial class NoteCommands : CommandGroup
 
         var pages = createPages.Select(p => p.Entity).ToList();
 
-        await _interactivity.SendContextualInteractiveMessageAsync
+        return (Result)await _interactivity.SendContextualPaginatedMessageAsync
         (
-            (channelID, messageID) => new PaginatedMessage
-            (
-                channelID,
-                messageID,
-                _context.User.ID,
-                pages
-            )
+            _context.User.ID,
+            pages,
+            ct: this.CancellationToken
         );
-
-        return Result.FromSuccess();
     }
 
     /// <summary>

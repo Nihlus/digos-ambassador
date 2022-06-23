@@ -24,9 +24,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Interactivity;
-using DIGOS.Ambassador.Discord.Pagination;
-using DIGOS.Ambassador.Discord.Pagination.Extensions;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Permissions;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
@@ -42,6 +39,9 @@ using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
+using Remora.Discord.Interactivity.Services;
+using Remora.Discord.Pagination;
+using Remora.Discord.Pagination.Extensions;
 using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
@@ -59,7 +59,7 @@ public partial class AutoroleCommands : CommandGroup
 {
     private readonly AutoroleService _autoroles;
     private readonly FeedbackService _feedback;
-    private readonly InteractivityService _interactivity;
+    private readonly InteractiveMessageService _interactivity;
     private readonly ICommandContext _context;
     private readonly IDiscordRestGuildAPI _guildAPI;
 
@@ -75,7 +75,7 @@ public partial class AutoroleCommands : CommandGroup
     (
         AutoroleService autoroles,
         FeedbackService feedback,
-        InteractivityService interactivity,
+        InteractiveMessageService interactivity,
         ICommandContext context,
         IDiscordRestGuildAPI guildAPI
     )
@@ -219,10 +219,11 @@ public partial class AutoroleCommands : CommandGroup
 
         var pages = PageFactory.FromFields(conditionFields, pageBase: embed);
 
-        return await _interactivity.SendContextualInteractiveMessageAsync
+        return (Result)await _interactivity.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
-            pages
+            pages,
+            ct: this.CancellationToken
         );
     }
 
@@ -246,10 +247,11 @@ public partial class AutoroleCommands : CommandGroup
             "There are no autoroles configured."
         );
 
-        return await _interactivity.SendContextualInteractiveMessageAsync
+        return (Result)await _interactivity.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
-            pages
+            pages,
+            ct: this.CancellationToken
         );
     }
 
@@ -393,10 +395,11 @@ public partial class AutoroleCommands : CommandGroup
             "There are no users that haven't been confirmed for that role."
         );
 
-        return await _interactivity.SendContextualInteractiveMessageAsync
+        return (Result)await _interactivity.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
-            pages
+            pages,
+            ct: this.CancellationToken
         );
     }
 }

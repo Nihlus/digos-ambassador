@@ -26,9 +26,6 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Interactivity;
-using DIGOS.Ambassador.Discord.Pagination;
-using DIGOS.Ambassador.Discord.Pagination.Extensions;
 using DIGOS.Ambassador.Plugins.Moderation.Permissions;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
 using DIGOS.Ambassador.Plugins.Permissions.Conditions;
@@ -43,6 +40,9 @@ using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
+using Remora.Discord.Interactivity.Services;
+using Remora.Discord.Pagination;
+using Remora.Discord.Pagination.Extensions;
 using Remora.Rest.Core;
 using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
@@ -61,7 +61,7 @@ public partial class WarningCommands : CommandGroup
     private readonly ModerationService _moderation;
     private readonly WarningService _warnings;
     private readonly FeedbackService _feedback;
-    private readonly InteractivityService _interactivity;
+    private readonly InteractiveMessageService _interactivity;
     private readonly ChannelLoggingService _logging;
     private readonly IDiscordRestUserAPI _userAPI;
     private readonly ICommandContext _context;
@@ -81,7 +81,7 @@ public partial class WarningCommands : CommandGroup
         ModerationService moderation,
         WarningService warnings,
         FeedbackService feedback,
-        InteractivityService interactivity,
+        InteractiveMessageService interactivity,
         ChannelLoggingService logging,
         IDiscordRestUserAPI userAPI,
         ICommandContext context
@@ -161,13 +161,12 @@ public partial class WarningCommands : CommandGroup
 
         var pages = createPages.Select(p => p.Entity).ToList();
 
-        await _interactivity.SendContextualInteractiveMessageAsync
+        return (Result)await _interactivity.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
-            pages
+            pages,
+            ct: this.CancellationToken
         );
-
-        return Result.FromSuccess();
     }
 
     /// <summary>

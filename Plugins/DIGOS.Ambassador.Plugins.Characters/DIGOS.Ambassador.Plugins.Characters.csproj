@@ -5,6 +5,21 @@
         <Description>Allows users to create, manage, and use a set of characters.</Description>
     </PropertyGroup>
 
+    <ItemGroup>
+        <Content Include="Content\**\*.*">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Update="CommandModules\CharacterCommands.RoleCommands.cs">
+            <DependentUpon>CharacterCommands.cs</DependentUpon>
+        </Compile>
+        <Compile Update="CommandModules\CharacterCommands.SetCommands.cs">
+            <DependentUpon>CharacterCommands.cs</DependentUpon>
+        </Compile>
+    </ItemGroup>
+
     <!-- Workaround for a problem with EF Core -->
     <ItemGroup>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.6">
@@ -15,28 +30,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Content Include="Content\**\*.*">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Content>
-    </ItemGroup>
-
-    <ItemGroup>
         <ProjectReference Include="..\..\Core\DIGOS.Ambassador.Core.Database\DIGOS.Ambassador.Core.Database.csproj" />
-        <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Pagination\DIGOS.Ambassador.Discord.Pagination.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
         <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Core\DIGOS.Ambassador.Plugins.Core.csproj" />
         <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Permissions\DIGOS.Ambassador.Plugins.Permissions.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <Compile Update="CommandModules\CharacterCommands.RoleCommands.cs">
-            <DependentUpon>CharacterCommands.cs</DependentUpon>
-        </Compile>
-        <Compile Update="CommandModules\CharacterCommands.SetCommands.cs">
-            <DependentUpon>CharacterCommands.cs</DependentUpon>
-        </Compile>
     </ItemGroup>
 
 </Project>

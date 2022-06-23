@@ -25,9 +25,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Interactivity;
-using DIGOS.Ambassador.Discord.Pagination;
-using DIGOS.Ambassador.Discord.Pagination.Extensions;
 using DIGOS.Ambassador.Plugins.Permissions.Conditions;
 using DIGOS.Ambassador.Plugins.Permissions.Extensions;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
@@ -39,6 +36,9 @@ using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
+using Remora.Discord.Interactivity.Services;
+using Remora.Discord.Pagination;
+using Remora.Discord.Pagination.Extensions;
 using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
@@ -51,7 +51,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules;
 [Description("Permission-related commands for granting, revoking and checking user permissions.")]
 public class PermissionCommands : CommandGroup
 {
-    private readonly InteractivityService _interactivity;
+    private readonly InteractiveMessageService _interactivity;
     private readonly PermissionService _permissions;
     private readonly PermissionRegistryService _permissionRegistry;
     private readonly FeedbackService _feedback;
@@ -68,7 +68,7 @@ public class PermissionCommands : CommandGroup
     public PermissionCommands
     (
         PermissionService permissions,
-        InteractivityService interactivity,
+        InteractiveMessageService interactivity,
         PermissionRegistryService permissionRegistry,
         ICommandContext context,
         FeedbackService feedback
@@ -108,12 +108,12 @@ public class PermissionCommands : CommandGroup
             "No permissions available. This is most likely an error."
         );
 
-        return await _interactivity.SendContextualInteractiveMessageAsync
+        return await _interactivity.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
             pages,
             appearance,
-            this.CancellationToken
+            ct: this.CancellationToken
         );
     }
 
@@ -171,12 +171,12 @@ public class PermissionCommands : CommandGroup
             "No permissions set."
         );
 
-        return await _interactivity.SendContextualInteractiveMessageAsync
+        return await _interactivity.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
             pages,
             appearance,
-            this.CancellationToken
+            ct: this.CancellationToken
         );
     }
 

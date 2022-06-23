@@ -8,14 +8,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Remora.Discord.Commands" Version="25.0.2" />
+        <PackageReference Include="Remora.Discord.Commands" Version="25.0.3" />
+        <PackageReference Include="Remora.Discord.Pagination" Version="2.0.27" />
         <PackageReference Include="Remora.Plugins.Abstractions" Version="4.0.4" />
         <PackageReference Include="Remora.Results" Version="7.2.1" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Interactivity\DIGOS.Ambassador.Discord.Interactivity.csproj" />
-        <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Pagination\DIGOS.Ambassador.Discord.Pagination.csproj" />
     </ItemGroup>
 
 </Project>

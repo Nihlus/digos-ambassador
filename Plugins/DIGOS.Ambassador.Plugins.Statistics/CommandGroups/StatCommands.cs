@@ -25,8 +25,6 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Interactivity;
-using DIGOS.Ambassador.Discord.Pagination.Extensions;
 using JetBrains.Annotations;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
@@ -37,6 +35,8 @@ using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Feedback.Services;
+using Remora.Discord.Interactivity.Services;
+using Remora.Discord.Pagination.Extensions;
 using Remora.Rest.Core;
 using Remora.Results;
 
@@ -50,7 +50,7 @@ namespace DIGOS.Ambassador.Plugins.Statistics.CommandGroups;
 public class StatCommands : CommandGroup
 {
     private readonly FeedbackService _feedback;
-    private readonly InteractivityService _interactivity;
+    private readonly InteractiveMessageService _interactivity;
     private readonly ICommandContext _context;
     private readonly IDiscordRestGuildAPI _guildAPI;
     private readonly IDiscordRestUserAPI _userAPI;
@@ -66,7 +66,7 @@ public class StatCommands : CommandGroup
     public StatCommands
     (
         FeedbackService feedback,
-        InteractivityService interactivity,
+        InteractiveMessageService interactivity,
         ICommandContext context,
         IDiscordRestGuildAPI guildAPI,
         IDiscordRestUserAPI userAPI
@@ -123,7 +123,7 @@ public class StatCommands : CommandGroup
             pages.Add(CreateGuildInfoEmbed(getGuild.Entity));
         }
 
-        return await _interactivity.SendContextualInteractiveMessageAsync
+        return (Result)await _interactivity.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
             pages,

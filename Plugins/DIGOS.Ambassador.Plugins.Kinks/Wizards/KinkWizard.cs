@@ -22,161 +22,168 @@
 
 using System;
 using System.Collections.Generic;
-using DIGOS.Ambassador.Discord.Interactivity.Messages;
+using System.Drawing;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Kinks.Model;
+using DIGOS.Ambassador.Plugins.Kinks.Services;
 using Humanizer;
+using Remora.Commands.Results;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
 using Remora.Rest.Core;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Kinks.Wizards;
 
 /// <summary>
 /// Acts as an interactive wizard for interactively setting the kink preferences of users.
 /// </summary>
-internal sealed class KinkWizard : InteractiveMessage
+public sealed class KinkWizard
 {
     /// <summary>
     /// Gets the emoji used to move the wizard to the next page.
     /// </summary>
-    public ButtonComponent Next => new
+    public ButtonComponent Next { get; } = new
     (
         ButtonComponentStyle.Secondary,
-        nameof(this.Next),
+        nameof(Next),
         new PartialEmoji(Name: "\x25B6"),
-        nameof(this.Next).ToLowerInvariant()
+        nameof(Next).ToLowerInvariant()
     );
 
     /// <summary>
     /// Gets the emoji used to move the wizard to the previous page.
     /// </summary>
-    public ButtonComponent Previous => new
+    public ButtonComponent Previous { get; } = new
     (
         ButtonComponentStyle.Secondary,
-        nameof(this.Previous),
+        nameof(Previous),
         new PartialEmoji(Name: "\x25C0"),
-        nameof(this.Previous).ToLowerInvariant()
+        nameof(Previous).ToLowerInvariant()
     );
 
     /// <summary>
     /// Gets the emoji used to move the wizard to the first page.
     /// </summary>
-    public ButtonComponent First => new
+    public ButtonComponent First { get; } = new
     (
         ButtonComponentStyle.Secondary,
-        nameof(this.First),
+        nameof(First),
         new PartialEmoji(Name: "\x23EE"),
-        nameof(this.First).ToLowerInvariant()
+        nameof(First).ToLowerInvariant()
     );
 
     /// <summary>
     /// Gets the emoji used to move the wizard to the last page.
     /// </summary>
-    public ButtonComponent Last => new
+    public ButtonComponent Last { get; } = new
     (
         ButtonComponentStyle.Secondary,
-        nameof(this.Last),
+        nameof(Last),
         new PartialEmoji(Name: "\x23ED"),
-        nameof(this.Last).ToLowerInvariant()
+        nameof(Last).ToLowerInvariant()
     );
 
     /// <summary>
     /// Gets the emoji used to enter a kink category.
     /// </summary>
-    public ButtonComponent EnterCategory => new
+    public ButtonComponent EnterCategory { get; } = new
     (
         ButtonComponentStyle.Primary,
-        nameof(this.EnterCategory).Humanize(),
+        nameof(EnterCategory).Humanize(),
         new PartialEmoji(Name: "\xD83D\xDD22"),
-        nameof(this.EnterCategory).ToLowerInvariant()
+        nameof(EnterCategory).ToLowerInvariant()
     );
 
     /// <summary>
     /// Gets the emoji used to set a kink's preference to <see cref="KinkPreference.Favourite"/>.
     /// </summary>
-    public ButtonComponent Fave => new
+    public ButtonComponent Favourite { get; } = new
     (
         ButtonComponentStyle.Success,
-        nameof(this.Fave),
+        nameof(Favourite),
         new PartialEmoji(Name: "\x2764"),
-        nameof(this.Fave).ToLowerInvariant()
+        nameof(Favourite).ToLowerInvariant()
     );
 
     /// <summary>
     /// Gets the emoji used to set a kink's preference to <see cref="KinkPreference.Like"/>.
     /// </summary>
-    public ButtonComponent Like => new
+    public ButtonComponent Like { get; } = new
     (
         ButtonComponentStyle.Secondary,
-        nameof(this.Like),
+        nameof(Like),
         new PartialEmoji(Name: "\x2705"),
-        nameof(this.Like).ToLowerInvariant()
+        nameof(Like).ToLowerInvariant()
     );
 
     /// <summary>
     /// Gets the emoji used to set a kink's preference to <see cref="KinkPreference.Maybe"/>.
     /// </summary>
-    public ButtonComponent Maybe => new
+    public ButtonComponent Maybe { get; } = new
     (
         ButtonComponentStyle.Secondary,
-        nameof(this.Maybe),
+        nameof(Maybe),
         new PartialEmoji(Name: "\x26A0"),
-        nameof(this.Maybe).ToLowerInvariant()
+        nameof(Maybe).ToLowerInvariant()
     );
 
     /// <summary>
     /// Gets the emoji used to set a kink's preference to <see cref="KinkPreference.No"/>.
     /// </summary>
-    public ButtonComponent Never => new
+    public ButtonComponent No { get; } = new
     (
         ButtonComponentStyle.Danger,
-        nameof(this.Never),
+        nameof(No),
         new PartialEmoji(Name: "\x26D4"),
-        nameof(this.Never).ToLowerInvariant()
+        nameof(No).ToLowerInvariant()
     );
 
     /// <summary>
     /// Gets the emoji used to set a kink's preference to <see cref="KinkPreference.NoPreference"/>.
     /// </summary>
-    public ButtonComponent NoPreference => new
+    public ButtonComponent NoPreference { get; } = new
     (
         ButtonComponentStyle.Secondary,
-        nameof(this.NoPreference).Humanize(),
+        nameof(NoPreference).Humanize(),
         new PartialEmoji(Name: "🤷"),
-        nameof(this.NoPreference).ToLowerInvariant()
+        nameof(NoPreference).ToLowerInvariant()
     );
 
     /// <summary>
     /// Gets the emoji used to move the wizard back out of a category.
     /// </summary>
-    public ButtonComponent Back => new
+    public ButtonComponent Back { get; } = new
     (
         ButtonComponentStyle.Secondary,
-        nameof(this.Back),
+        nameof(Back),
         new PartialEmoji(Name: "\x23EB"),
-        nameof(this.Back).ToLowerInvariant()
+        nameof(Back).ToLowerInvariant()
     );
 
     /// <summary>
     /// Gets the emoji used to exit the wizard.
     /// </summary>
-    public ButtonComponent Exit => new
+    public ButtonComponent Exit { get; } = new
     (
         ButtonComponentStyle.Secondary,
-        nameof(this.Exit),
+        nameof(Exit),
         new PartialEmoji(Name: "\x23F9"),
-        nameof(this.Exit).ToLowerInvariant()
+        nameof(Exit).ToLowerInvariant()
     );
 
     /// <summary>
     /// Gets the emoji used to print a help message.
     /// </summary>
-    public ButtonComponent Info => new
+    public ButtonComponent Info { get; } = new
     (
         ButtonComponentStyle.Primary,
-        nameof(this.Info),
+        nameof(Info),
         new PartialEmoji(Name: "\x2139"),
-        nameof(this.Info).ToLowerInvariant()
+        nameof(Info).ToLowerInvariant()
     );
 
     /// <summary>
@@ -185,24 +192,29 @@ internal sealed class KinkWizard : InteractiveMessage
     public IReadOnlyList<ButtonComponent> Buttons { get; }
 
     /// <summary>
+    /// Gets the ID of the channel the message was sent in.
+    /// </summary>
+    public Snowflake ChannelID { get; }
+
+    /// <summary>
     /// Gets the ID of the source user.
     /// </summary>
     public Snowflake SourceUserID { get; }
 
     /// <summary>
-    /// Gets or sets the available categories.
+    /// Gets the available categories.
     /// </summary>
-    public IReadOnlyList<KinkCategory> Categories { get; internal set; } = new List<KinkCategory>();
+    public IReadOnlyList<KinkCategory> Categories { get; }
 
     /// <summary>
-    /// Gets or sets the internal state of the wizard.
+    /// Gets the internal state of the wizard.
     /// </summary>
-    public KinkWizardState State { get; internal set; }
+    public KinkWizardState State { get; private set; }
 
     /// <summary>
-    /// Gets or sets the ID of the current kink that's displayed.
+    /// Gets the ID of the current kink that's displayed.
     /// </summary>
-    public long? CurrentFListKinkID { get; internal set; }
+    public long? CurrentFListKinkID { get; private set; }
 
     /// <summary>
     /// Gets the current category offset.
@@ -213,17 +225,18 @@ internal sealed class KinkWizard : InteractiveMessage
     /// Initializes a new instance of the <see cref="KinkWizard"/> class.
     /// </summary>
     /// <param name="channelID">The ID of the channel the message is in.</param>
-    /// <param name="messageID">The ID of the message.</param>
     /// <param name="sourceUserID">The ID of the source user.</param>
+    /// <param name="categories">The available kink categories.</param>
     public KinkWizard
     (
         Snowflake channelID,
-        Snowflake messageID,
-        Snowflake sourceUserID
+        Snowflake sourceUserID,
+        IReadOnlyList<KinkCategory> categories
     )
-        : base(channelID, messageID)
     {
+        this.ChannelID = channelID;
         this.SourceUserID = sourceUserID;
+        this.Categories = categories;
 
         this.State = KinkWizardState.CategorySelection;
 
@@ -234,15 +247,113 @@ internal sealed class KinkWizard : InteractiveMessage
             this.First,
             this.Last,
             this.EnterCategory,
-            this.Fave,
+            this.Favourite,
             this.Like,
             this.Maybe,
-            this.Never,
+            this.No,
             this.NoPreference,
             this.Back,
             this.Exit,
             this.Info
         };
+    }
+
+    /// <summary>
+    /// Returns the wizard to the category selection.
+    /// </summary>
+    public void GoToCategorySelection()
+    {
+        if (this.State is KinkWizardState.CategorySelection)
+        {
+            throw new InvalidOperationException("The wizard is already at the category selection.");
+        }
+
+        this.CurrentFListKinkID = null;
+        this.State = KinkWizardState.CategorySelection;
+    }
+
+    /// <summary>
+    /// Advances the wizard to the next kink in the category.
+    /// </summary>
+    /// <param name="kinks">The kink service.</param>
+    /// <param name="ct">The cancellation token for this operation.</param>
+    /// <returns>true if there are more kinks in the category; otherwise, false.</returns>
+    public async Task<Result<bool>> MoveToNextKinkInCategoryAsync(KinkService kinks, CancellationToken ct)
+    {
+        if (this.CurrentFListKinkID is null)
+        {
+            throw new InvalidOperationException();
+        }
+
+        var getNextKinkResult = await kinks.GetNextKinkByCurrentFListIDAsync(this.CurrentFListKinkID.Value, ct);
+        if (!getNextKinkResult.IsSuccess)
+        {
+            return Result<bool>.FromError(getNextKinkResult);
+        }
+
+        var nextKink = getNextKinkResult.Entity;
+        this.CurrentFListKinkID = nextKink?.FListID;
+
+        return nextKink is not null;
+    }
+
+    /// <summary>
+    /// Opens the category of the given name.
+    /// </summary>
+    /// <param name="kinks">The kink service.</param>
+    /// <param name="categoryName">The category name.</param>
+    /// <param name="ct">The cancellation token for this operation.</param>
+    /// <returns>A result which may or may not have succeeded.</returns>
+    public async Task<Result> OpenCategoryAsync(KinkService kinks, string categoryName, CancellationToken ct = default)
+    {
+        if (this.State is not KinkWizardState.CategorySelection)
+        {
+            throw new InvalidOperationException("The wizard is not at the category selection.");
+        }
+
+        var getCategoryResult = this.Categories.Select(c => c.ToString()).BestLevenshteinMatch(categoryName, 0.75);
+        if (!getCategoryResult.IsSuccess)
+        {
+            return (Result)getCategoryResult;
+        }
+
+        if (!Enum.TryParse<KinkCategory>(getCategoryResult.Entity, true, out var category))
+        {
+            return new ParsingError<KinkCategory>("Could not parse kink category.");
+        }
+
+        var getKinkResult = await kinks.GetFirstKinkWithoutPreferenceInCategoryAsync
+        (
+            this.SourceUserID,
+            category,
+            ct
+        );
+
+        if (!getKinkResult.IsSuccess)
+        {
+            return (Result)getKinkResult;
+        }
+
+        Kink kink;
+        if (getKinkResult.Entity is not null)
+        {
+            kink = getKinkResult.Entity;
+        }
+        else
+        {
+            var getFirstKinkResult = await kinks.GetFirstKinkInCategoryAsync(category, ct);
+            if (!getFirstKinkResult.IsSuccess)
+            {
+                return (Result)getFirstKinkResult;
+            }
+
+            kink = getFirstKinkResult.Entity;
+        }
+
+        this.CurrentFListKinkID = kink.FListID;
+        this.State = KinkWizardState.KinkPreference;
+
+        return Result.FromSuccess();
     }
 
     /// <summary>
@@ -282,10 +393,10 @@ internal sealed class KinkWizard : InteractiveMessage
                 (
                     new[]
                     {
-                        this.Fave,
+                        this.Favourite,
                         this.Like,
                         this.Maybe,
-                        this.Never,
+                        this.No,
                         this.NoPreference
                     }
                 ),
@@ -302,6 +413,88 @@ internal sealed class KinkWizard : InteractiveMessage
 
             _ => throw new ArgumentOutOfRangeException()
         };
+    }
+
+    /// <summary>
+    /// Gets an embed that represents the current page.
+    /// </summary>
+    /// <param name="kinks">The kink service.</param>
+    /// <param name="ct">The cancellation token for this operation.</param>
+    /// <returns>The embed.</returns>
+    public async Task<Result<Embed>> GetCurrentPageAsync
+    (
+        KinkService kinks,
+        CancellationToken ct = default
+    )
+    {
+        switch (this.State)
+        {
+            case KinkWizardState.CategorySelection:
+            {
+                var eb = new Embed
+                {
+                    Title = "Category selection",
+                    Colour = Color.MediumPurple
+                };
+
+                if (this.Categories.Any())
+                {
+                    var visibleCategories = this.Categories.Skip(this.CurrentCategoryOffset).Take(3).ToList();
+                    var visibleCategoryFields = visibleCategories.Select
+                        (
+                            c => new EmbedField(c.ToString().Humanize().Transform(To.TitleCase), c.Humanize())
+                        )
+                        .ToList();
+
+                    var offset = this.CurrentCategoryOffset + 1;
+                    eb = eb with
+                    {
+                        Description = "Select from one of the categories below.",
+                        Fields = visibleCategoryFields,
+                        Footer = new EmbedFooter
+                        (
+                            $"Categories {offset}-{offset + visibleCategories.Count - 1} / "
+                            + $"{this.Categories.Count}"
+                        )
+                    };
+                }
+                else
+                {
+                    eb = eb with
+                    {
+                        Description = "There aren't any categories in the database."
+                    };
+                }
+
+                return eb;
+            }
+            case KinkWizardState.KinkPreference:
+            {
+                if (this.CurrentFListKinkID is null)
+                {
+                    throw new InvalidOperationException();
+                }
+
+                var getUserKinkResult = await kinks.GetUserKinkByFListIDAsync
+                (
+                    this.SourceUserID,
+                    this.CurrentFListKinkID.Value,
+                    ct
+                );
+
+                if (!getUserKinkResult.IsSuccess)
+                {
+                    return Result<Embed>.FromError(getUserKinkResult);
+                }
+
+                var userKink = getUserKinkResult.Entity;
+                return kinks.BuildUserKinkInfoEmbedBase(userKink);
+            }
+            default:
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+        }
     }
 
     /// <summary>

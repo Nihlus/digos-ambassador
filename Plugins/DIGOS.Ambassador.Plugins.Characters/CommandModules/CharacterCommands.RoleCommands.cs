@@ -23,9 +23,6 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Interactivity;
-using DIGOS.Ambassador.Discord.Pagination;
-using DIGOS.Ambassador.Discord.Pagination.Extensions;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Permissions;
 using DIGOS.Ambassador.Plugins.Characters.Services;
@@ -42,6 +39,9 @@ using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
+using Remora.Discord.Interactivity.Services;
+using Remora.Discord.Pagination;
+using Remora.Discord.Pagination.Extensions;
 using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
@@ -60,7 +60,7 @@ public partial class CharacterCommands
     {
         private readonly FeedbackService _feedback;
         private readonly CharacterRoleService _characterRoles;
-        private readonly InteractivityService _interactivity;
+        private readonly InteractiveMessageService _interactivity;
         private readonly IDiscordRestGuildAPI _guildAPI;
         private readonly ICommandContext _context;
 
@@ -77,7 +77,7 @@ public partial class CharacterCommands
             FeedbackService feedbackService,
             CharacterRoleService characterRoles,
             ICommandContext context,
-            InteractivityService interactivity,
+            InteractiveMessageService interactivity,
             IDiscordRestGuildAPI guildAPI
         )
         {
@@ -123,7 +123,7 @@ public partial class CharacterCommands
                     Footer = new EmbedFooter("There aren't any character roles available in this server.")
                 };
 
-                return await _interactivity.SendContextualInteractiveMessageAsync
+                return (Result)await _interactivity.SendContextualPaginatedMessageAsync
                 (
                     _context.User.ID,
                     new[] { baseEmbed },
@@ -161,7 +161,7 @@ public partial class CharacterCommands
 
             var pages = PageFactory.FromFields(fields, pageBase: baseEmbed);
 
-            return await _interactivity.SendContextualInteractiveMessageAsync
+            return (Result)await _interactivity.SendContextualPaginatedMessageAsync
             (
                 _context.User.ID,
                 pages,

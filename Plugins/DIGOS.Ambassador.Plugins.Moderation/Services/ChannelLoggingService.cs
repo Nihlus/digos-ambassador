@@ -28,6 +28,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Errors;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
 using DIGOS.Ambassador.Plugins.Quotes.Services;
+using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
@@ -541,7 +542,7 @@ public sealed class ChannelLoggingService
     // ReSharper disable once UnusedParameter.Local
     private async Task<Result<Snowflake>> FindMostProbableDeleterAsync(IMessage message, Snowflake guildID)
     {
-        var now = Snowflake.CreateTimestampSnowflake();
+        var now = Snowflake.CreateTimestampSnowflake(epoch: Constants.DiscordEpoch);
         var before = now;
         var after = message.ID;
 

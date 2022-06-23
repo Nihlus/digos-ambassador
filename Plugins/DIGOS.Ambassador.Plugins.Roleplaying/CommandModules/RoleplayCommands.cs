@@ -27,9 +27,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Errors;
 using DIGOS.Ambassador.Core.Extensions;
-using DIGOS.Ambassador.Discord.Interactivity;
-using DIGOS.Ambassador.Discord.Pagination;
-using DIGOS.Ambassador.Discord.Pagination.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Preconditions;
 using DIGOS.Ambassador.Plugins.Permissions.Conditions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Extensions;
@@ -49,6 +46,9 @@ using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Feedback.Services;
+using Remora.Discord.Interactivity.Services;
+using Remora.Discord.Pagination;
+using Remora.Discord.Pagination.Extensions;
 using Remora.Results;
 using FeedbackMessage = Remora.Discord.Commands.Feedback.Messages.FeedbackMessage;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
@@ -72,7 +72,7 @@ public partial class RoleplayCommands : CommandGroup
     private readonly DedicatedChannelService _dedicatedChannels;
 
     private readonly FeedbackService _feedback;
-    private readonly InteractivityService _interactivity;
+    private readonly InteractiveMessageService _interactivity;
 
     private readonly ICommandContext _context;
 
@@ -90,7 +90,7 @@ public partial class RoleplayCommands : CommandGroup
     (
         RoleplayDiscordService discordRoleplays,
         FeedbackService feedback,
-        InteractivityService interactivity,
+        InteractiveMessageService interactivity,
         DedicatedChannelService dedicatedChannels,
         ICommandContext context,
         IDiscordRestChannelAPI channelAPI,
@@ -191,10 +191,11 @@ public partial class RoleplayCommands : CommandGroup
             "There are no roleplays in the server that you can view."
         );
 
-        return await _interactivity.SendContextualInteractiveMessageAsync
+        return (Result)await _interactivity.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
-            pages
+            pages,
+            ct: this.CancellationToken
         );
     }
 
@@ -225,10 +226,11 @@ public partial class RoleplayCommands : CommandGroup
             "You don't have any roleplays."
         );
 
-        return await _interactivity.SendContextualInteractiveMessageAsync
+        return (Result)await _interactivity.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
-            pages
+            pages,
+            ct: this.CancellationToken
         );
     }
 

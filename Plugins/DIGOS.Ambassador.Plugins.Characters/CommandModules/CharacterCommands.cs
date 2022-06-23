@@ -30,9 +30,6 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Errors;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Discord.Interactivity;
-using DIGOS.Ambassador.Discord.Pagination;
-using DIGOS.Ambassador.Discord.Pagination.Extensions;
 using DIGOS.Ambassador.Plugins.Characters.Extensions;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Permissions;
@@ -53,6 +50,9 @@ using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
+using Remora.Discord.Interactivity.Services;
+using Remora.Discord.Pagination;
+using Remora.Discord.Pagination.Extensions;
 using Remora.Rest.Core;
 using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
@@ -73,7 +73,7 @@ public partial class CharacterCommands : CommandGroup
     private readonly ContentService _content;
     private readonly FeedbackService _feedback;
     private readonly CharacterDiscordService _characters;
-    private readonly InteractivityService _interactivity;
+    private readonly InteractiveMessageService _interactivity;
     private readonly ICommandContext _context;
     private readonly IDiscordRestGuildAPI _guildAPI;
     private readonly IDiscordRestChannelAPI _channelAPI;
@@ -94,7 +94,7 @@ public partial class CharacterCommands : CommandGroup
         ContentService contentService,
         FeedbackService feedbackService,
         CharacterDiscordService characterService,
-        InteractivityService interactivity,
+        InteractiveMessageService interactivity,
         PronounService pronouns,
         ICommandContext context,
         IDiscordRestGuildAPI guildAPI,
@@ -154,14 +154,12 @@ public partial class CharacterCommands : CommandGroup
             pageBase: pageBase
         );
 
-        await _interactivity.SendContextualInteractiveMessageAsync
+        return (Result)await _interactivity.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
             pages,
             ct: this.CancellationToken
         );
-
-        return Result.FromSuccess();
     }
 
     /// <summary>
@@ -295,14 +293,12 @@ public partial class CharacterCommands : CommandGroup
             "You don't have any characters"
         );
 
-        await _interactivity.SendContextualInteractiveMessageAsync
+        return (Result)await _interactivity.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
             pages.Where(p => p.IsSuccess).Select(p => p.Entity).ToList(),
             ct: this.CancellationToken
         );
-
-        return Result.FromSuccess();
     }
 
     private async Task<Result<Embed>> CreateCharacterInfoEmbedAsync
@@ -504,14 +500,12 @@ public partial class CharacterCommands : CommandGroup
 
         pages = pages.Select(p => p with { Title = "Your characters" }).ToList();
 
-        await _interactivity.SendContextualInteractiveMessageAsync
+        return (Result)await _interactivity.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
             pages,
             ct: this.CancellationToken
         );
-
-        return Result.FromSuccess();
     }
 
     /// <summary>
@@ -661,12 +655,12 @@ public partial class CharacterCommands : CommandGroup
             i => new Embed(i.Name, Description: i.Caption, Image: new EmbedImage(i.Url))
         );
 
-        return await _interactivity.SendContextualInteractiveMessageAsync
+        return (Result)await _interactivity.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
             pages.ToList(),
             appearance,
-            this.CancellationToken
+            ct: this.CancellationToken
         );
     }
 
@@ -678,7 +672,7 @@ public partial class CharacterCommands : CommandGroup
     [Command("list-images")]
     [Description("Lists the images in a character's gallery.")]
     [RequireContext(ChannelContext.Guild)]
-    public Task<Result> ListImagesAsync([AutocompleteProvider("character::any")] Character character)
+    public async Task<Result> ListImagesAsync([AutocompleteProvider("character::any")] Character character)
     {
         var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
         (
@@ -690,7 +684,7 @@ public partial class CharacterCommands : CommandGroup
 
         pages = pages.Select(p => p with { Title = "Images in character gallery" }).ToList();
 
-        return _interactivity.SendContextualInteractiveMessageAsync
+        return (Result)await _interactivity.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
             pages,

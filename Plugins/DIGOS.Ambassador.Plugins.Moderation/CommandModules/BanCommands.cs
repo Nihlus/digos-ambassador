@@ -26,8 +26,6 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Interactivity;
-using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Plugins.Moderation.Permissions;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
 using DIGOS.Ambassador.Plugins.Permissions.Conditions;
@@ -41,6 +39,9 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Interactivity.Services;
+using Remora.Discord.Pagination;
+using Remora.Discord.Pagination.Extensions;
 using Remora.Rest.Core;
 using Remora.Results;
 
@@ -60,7 +61,7 @@ public partial class BanCommands : CommandGroup
     private readonly IDiscordRestGuildAPI _guildAPI;
     private readonly ICommandContext _context;
     private readonly IDiscordRestUserAPI _userAPI;
-    private readonly InteractivityService _interactivity;
+    private readonly InteractiveMessageService _interactivity;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BanCommands"/> class.
@@ -77,7 +78,7 @@ public partial class BanCommands : CommandGroup
         ChannelLoggingService logging,
         ICommandContext context,
         IDiscordRestGuildAPI guildAPI,
-        InteractivityService interactivity,
+        InteractiveMessageService interactivity,
         IDiscordRestUserAPI userAPI
     )
     {
@@ -213,18 +214,12 @@ public partial class BanCommands : CommandGroup
 
         var pages = createPages.Select(p => p.Entity).ToList();
 
-        await _interactivity.SendContextualInteractiveMessageAsync
+        return (Result)await _interactivity.SendContextualPaginatedMessageAsync
         (
-            (channelID, messageID) => new PaginatedMessage
-            (
-                channelID,
-                messageID,
-                _context.User.ID,
-                pages
-            )
+            _context.User.ID,
+            pages,
+            ct: this.CancellationToken
         );
-
-        return Result.FromSuccess();
     }
 
     /// <summary>

@@ -25,9 +25,6 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Interactivity;
-using DIGOS.Ambassador.Discord.Pagination;
-using DIGOS.Ambassador.Discord.Pagination.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Services;
@@ -37,6 +34,9 @@ using JetBrains.Annotations;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Interactivity.Services;
+using Remora.Discord.Pagination;
+using Remora.Discord.Pagination.Extensions;
 using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -53,7 +53,7 @@ public partial class TransformationCommands
     public class TransformationListCommands : CommandGroup
     {
         private readonly TransformationService _transformation;
-        private readonly InteractivityService _interactivity;
+        private readonly InteractiveMessageService _interactivity;
         private readonly ICommandContext _context;
 
         /// <summary>
@@ -65,7 +65,7 @@ public partial class TransformationCommands
         public TransformationListCommands
         (
             TransformationService transformation,
-            InteractivityService interactivity,
+            InteractiveMessageService interactivity,
             ICommandContext context
         )
         {
@@ -116,10 +116,11 @@ public partial class TransformationCommands
                     .ToList();
             }
 
-            return await _interactivity.SendContextualInteractiveMessageAsync
+            return (Result)await _interactivity.SendContextualPaginatedMessageAsync
             (
                 _context.User.ID,
-                pages
+                pages,
+                ct: this.CancellationToken
             );
         }
 
@@ -169,7 +170,12 @@ public partial class TransformationCommands
                 )
                 .ToList();
 
-            return await _interactivity.SendContextualInteractiveMessageAsync(_context.User.ID, pages);
+            return (Result)await _interactivity.SendContextualPaginatedMessageAsync
+            (
+                _context.User.ID,
+                pages,
+                ct: this.CancellationToken
+            );
         }
 
         /// <summary>
@@ -203,7 +209,12 @@ public partial class TransformationCommands
                 )
                 .ToList();
 
-            return await _interactivity.SendContextualInteractiveMessageAsync(_context.User.ID, pages);
+            return (Result)await _interactivity.SendContextualPaginatedMessageAsync
+            (
+                _context.User.ID,
+                pages,
+                ct: this.CancellationToken
+            );
         }
 
         /// <summary>
@@ -237,7 +248,12 @@ public partial class TransformationCommands
                 )
                 .ToList();
 
-            return await _interactivity.SendContextualInteractiveMessageAsync(_context.User.ID, pages);
+            return (Result)await _interactivity.SendContextualPaginatedMessageAsync
+            (
+                _context.User.ID,
+                pages,
+                ct: this.CancellationToken
+            );
         }
 
         /// <summary>
@@ -271,7 +287,12 @@ public partial class TransformationCommands
                 )
                 .ToList();
 
-            return await _interactivity.SendContextualInteractiveMessageAsync(_context.User.ID, pages);
+            return (Result)await _interactivity.SendContextualPaginatedMessageAsync
+            (
+                _context.User.ID,
+                pages,
+                ct: this.CancellationToken
+            );
         }
 
         /// <summary>
@@ -304,7 +325,12 @@ public partial class TransformationCommands
                 )
                 .ToList();
 
-            return await _interactivity.SendContextualInteractiveMessageAsync(_context.User.ID, pages);
+            return (Result)await _interactivity.SendContextualPaginatedMessageAsync
+            (
+                _context.User.ID,
+                pages,
+                ct: this.CancellationToken
+            );
         }
     }
 }

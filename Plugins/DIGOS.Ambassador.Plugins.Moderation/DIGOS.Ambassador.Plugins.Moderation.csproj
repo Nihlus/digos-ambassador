@@ -16,12 +16,11 @@
 
     <ItemGroup>
         <PackageReference Include="Remora.Behaviours" Version="6.1.1" />
-        <PackageReference Include="Remora.Discord.Caching" Version="30.0.1" />
+        <PackageReference Include="Remora.Discord.Caching" Version="30.0.2" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\Core\DIGOS.Ambassador.Core.Database\DIGOS.Ambassador.Core.Database.csproj" />
-        <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Pagination\DIGOS.Ambassador.Discord.Pagination.csproj" />
         <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Core\DIGOS.Ambassador.Plugins.Core.csproj" />
         <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Quotes\DIGOS.Ambassador.Plugins.Quotes.csproj" />
     </ItemGroup>

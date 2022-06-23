@@ -27,8 +27,6 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Errors;
-using DIGOS.Ambassador.Discord.Interactivity;
-using DIGOS.Ambassador.Discord.Pagination.Extensions;
 using DIGOS.Ambassador.Plugins.Kinks.FList.Kinks;
 using DIGOS.Ambassador.Plugins.Kinks.Model;
 using DIGOS.Ambassador.Plugins.Kinks.Services;
@@ -37,10 +35,13 @@ using JetBrains.Annotations;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
+using Remora.Discord.Interactivity.Services;
+using Remora.Discord.Pagination.Extensions;
 using Remora.Rest.Json.Policies;
 using Remora.Results;
 
@@ -58,7 +59,7 @@ public class KinkCommands : CommandGroup
     private readonly KinkService _kinks;
     private readonly FeedbackService _feedback;
 
-    private readonly InteractivityService _interactivity;
+    private readonly InteractiveMessageService _interactivity;
     private readonly ICommandContext _context;
 
     /// <summary>
@@ -72,7 +73,7 @@ public class KinkCommands : CommandGroup
     (
         KinkService kinks,
         FeedbackService feedback,
-        InteractivityService interactivity,
+        InteractiveMessageService interactivity,
         ICommandContext context
     )
     {
@@ -159,7 +160,7 @@ public class KinkCommands : CommandGroup
         }
 
         var pages = _kinks.BuildKinkOverlapEmbeds(_context.User.ID, otherUser.ID, overlappingKinks);
-        return await _interactivity.SendContextualInteractiveMessageAsync(_context.User.ID, pages);
+        return await _interactivity.SendContextualPaginatedMessageAsync(_context.User.ID, pages, ct: this.CancellationToken);
     }
 
     /// <summary>
@@ -198,10 +199,11 @@ public class KinkCommands : CommandGroup
         }
 
         var pages = _kinks.BuildPaginatedUserKinkEmbeds(kinksWithPreference);
-        return await _interactivity.SendContextualInteractiveMessageAsync
+        return await _interactivity.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
-            pages
+            pages,
+            ct: this.CancellationToken
         );
     }
 
@@ -241,9 +243,24 @@ public class KinkCommands : CommandGroup
     [Description("Runs an interactive wizard for setting kink preferences.")]
     public async Task<Result> RunKinkWizardAsync()
     {
-        return await _interactivity.SendContextualInteractiveMessageAsync
+        var categories = await _kinks.GetKinkCategoriesAsync(this.CancellationToken);
+        var initialWizard = new KinkWizard(_context.ChannelID, _context.User.ID, categories.ToList());
+
+        var getInitialEmbed = await initialWizard.GetCurrentPageAsync(_kinks, this.CancellationToken);
+        if (!getInitialEmbed.IsDefined(out var initialEmbed))
+        {
+            return (Result)getInitialEmbed;
+        }
+
+        var initialComponents = initialWizard.GetCurrentPageComponents();
+
+        return (Result)await _interactivity.SendInteractiveContextualEmbedWithPersistentDataAsync
         (
-            (c, m) => new KinkWizard(c, m, _context.User.ID)
+            initialEmbed,
+            m => $"kink-wizard::{m.ID.ToString()}",
+            _ => initialWizard,
+            new FeedbackMessageOptions(MessageComponents: new(initialComponents)),
+            ct: this.CancellationToken
         );
     }
 

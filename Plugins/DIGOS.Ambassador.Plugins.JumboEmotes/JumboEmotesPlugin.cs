@@ -20,7 +20,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Plugins.JumboEmotes;
 using DIGOS.Ambassador.Plugins.JumboEmotes.Commands;
 using Microsoft.Extensions.DependencyInjection;
@@ -47,10 +46,8 @@ public sealed class JumboEmotesPlugin : PluginDescriptor
     /// <inheritdoc />
     public override Result ConfigureServices(IServiceCollection serviceCollection)
     {
-        serviceCollection
-            .AddParser<EmojiTypeReader>()
-            .AddCommandTree()
-                .WithCommandGroup<JumboCommands>();
+        serviceCollection.AddCommandTree()
+            .WithCommandGroup<JumboCommands>();
 
         return Result.FromSuccess();
     }

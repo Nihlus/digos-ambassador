@@ -20,8 +20,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using DIGOS.Ambassador.Discord.Interactivity.Extensions;
-using DIGOS.Ambassador.Discord.Pagination.Responders;
 using DIGOS.Ambassador.Plugins.Statistics;
 using DIGOS.Ambassador.Plugins.Statistics.CommandGroups;
 using Microsoft.Extensions.DependencyInjection;
@@ -51,8 +49,6 @@ public sealed class StatisticsPlugin : PluginDescriptor
         serviceCollection
             .AddCommandTree()
                 .WithCommandGroup<StatCommands>();
-
-        serviceCollection.TryAddInteractivityResponder<PaginatedMessageResponder>();
 
         return Result.FromSuccess();
     }

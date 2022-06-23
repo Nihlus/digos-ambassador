@@ -422,7 +422,7 @@ public sealed class KinkService : IQueryService<UserKink>
     /// <param name="ct">The cancellation token in use.</param>
     /// <returns>A retrieval result which may or may not have succeeded.</returns>
     [Pure]
-    public async Task<Result<Kink>> GetFirstKinkWithoutPreferenceInCategoryAsync
+    public async Task<Result<Kink?>> GetFirstKinkWithoutPreferenceInCategoryAsync
     (
         Snowflake user,
         KinkCategory category,
@@ -456,7 +456,7 @@ public sealed class KinkService : IQueryService<UserKink>
         var getKinksResult = await GetKinksByCategoryAsync(category, ct);
         if (!getKinksResult.IsSuccess)
         {
-            return Result<Kink>.FromError(getKinksResult);
+            return Result<Kink?>.FromError(getKinksResult);
         }
 
         var kinks = getKinksResult.Entity;
@@ -467,14 +467,8 @@ public sealed class KinkService : IQueryService<UserKink>
             return kinks[0];
         }
 
-        // Still nothing? Just pick the first one without a preference
-        var firstKinkWithoutPreference = kinks.FirstOrDefault(k => k.FListID != lastKink.Kink.FListID);
-        if (firstKinkWithoutPreference is not null)
-        {
-            return firstKinkWithoutPreference;
-        }
-
-        return new UserError("No kink without a set preference found.");
+        // Still nothing? Just pick the first one without a preference, or return nothing
+        return kinks.FirstOrDefault(k => k.FListID != lastKink.Kink.FListID);
     }
 
     /// <summary>
@@ -502,9 +496,9 @@ public sealed class KinkService : IQueryService<UserKink>
     /// </summary>
     /// <param name="precedingFListID">The F-List ID of the preceding kink.</param>
     /// <param name="ct">The cancellation token in use.</param>
-    /// <returns>A retrieval result which may or may not have succeeded.</returns>
+    /// <returns>The next kink, or null if the kink is the last kink in the category.</returns>
     [Pure]
-    public async Task<Result<Kink>> GetNextKinkByCurrentFListIDAsync
+    public async Task<Result<Kink?>> GetNextKinkByCurrentFListIDAsync
     (
         long precedingFListID,
         CancellationToken ct = default
@@ -513,22 +507,18 @@ public sealed class KinkService : IQueryService<UserKink>
         var getKinkResult = await GetKinkByFListIDAsync(precedingFListID, ct);
         if (!getKinkResult.IsSuccess)
         {
-            return getKinkResult;
+            return Result<Kink?>.FromError(getKinkResult);
         }
 
         var currentKink = getKinkResult.Entity;
         var getKinksResult = await GetKinksByCategoryAsync(currentKink.Category, ct);
         if (!getKinksResult.IsSuccess)
         {
-            return Result<Kink>.FromError(getKinksResult);
+            return Result<Kink?>.FromError(getKinksResult);
         }
 
         var group = getKinksResult.Entity;
-        var nextKink = group.SkipUntil(k => k.FListID == precedingFListID).FirstOrDefault();
-
-        return nextKink is null
-            ? new UserError("The current kink was the last one in the category.")
-            : Result<Kink>.FromSuccess(nextKink);
+        return group.SkipUntil(k => k.FListID == precedingFListID).FirstOrDefault();
     }
 
     /// <summary>

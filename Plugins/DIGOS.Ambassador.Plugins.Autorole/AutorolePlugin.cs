@@ -26,9 +26,6 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
-using DIGOS.Ambassador.Discord.Interactivity.Extensions;
-using DIGOS.Ambassador.Discord.Pagination.Responders;
-using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Plugins.Autorole;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Parsers;
@@ -62,13 +59,11 @@ public sealed class AutorolePlugin : PluginDescriptor, IMigratablePlugin
     /// <inheritdoc />
     public override Result ConfigureServices(IServiceCollection serviceCollection)
     {
-        serviceCollection.TryAddInteractivityResponder<PaginatedMessageResponder>();
         serviceCollection.TryAddScoped<AutoroleService>();
         serviceCollection.TryAddScoped<AutoroleUpdateService>();
         serviceCollection.TryAddScoped<UserStatisticsService>();
 
         serviceCollection.AddParser<AutoroleConfigurationParser>();
-        serviceCollection.AddParser<EmojiTypeReader>();
         serviceCollection.AddCommandTree()
             .WithCommandGroup<AutoroleCommands>();
 
