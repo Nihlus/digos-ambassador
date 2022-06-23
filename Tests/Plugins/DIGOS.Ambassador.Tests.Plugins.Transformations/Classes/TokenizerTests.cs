@@ -33,11 +33,11 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
 
 public class TokenizerTests
 {
-    private const string TokenWithoutData = "@target";
-    private const string TokenWithoutOptionalData = "@colour";
-    private const string TokenWithOptionalData = "@colour|pattern";
+    private const string _tokenWithoutData = "@target";
+    private const string _tokenWithoutOptionalData = "@colour";
+    private const string _tokenWithOptionalData = "@colour|pattern";
 
-    private const string SampleText = "lorem ipsum {@target} dolor {@colour} sit amet {@colour|base}";
+    private const string _sampleText = "lorem ipsum {@target} dolor {@colour} sit amet {@colour|base}";
 
     private readonly IServiceProvider _services;
 
@@ -54,7 +54,7 @@ public class TokenizerTests
         var tokenizer = new TransformationTextTokenizer(_services);
         tokenizer.WithTokenType<TargetToken>();
 
-        Assert.NotNull(tokenizer.ParseToken(0, TokenWithoutData));
+        Assert.NotNull(tokenizer.ParseToken(0, _tokenWithoutData));
     }
 
     [Fact]
@@ -63,7 +63,7 @@ public class TokenizerTests
         var tokenizer = new TransformationTextTokenizer(_services);
         tokenizer.WithTokenType<ColourToken>();
 
-        var token = tokenizer.ParseToken(0, TokenWithoutOptionalData) as ColourToken;
+        var token = tokenizer.ParseToken(0, _tokenWithoutOptionalData) as ColourToken;
 
         Assert.NotNull(token);
         Assert.False(token!.UsePattern);
@@ -75,7 +75,7 @@ public class TokenizerTests
         var tokenizer = new TransformationTextTokenizer(_services);
         tokenizer.WithTokenType<ColourToken>();
 
-        var token = tokenizer.ParseToken(0, TokenWithOptionalData) as ColourToken;
+        var token = tokenizer.ParseToken(0, _tokenWithOptionalData) as ColourToken;
 
         Assert.NotNull(token);
         Assert.True(token!.UsePattern);
@@ -88,7 +88,7 @@ public class TokenizerTests
             .WithTokenType<TargetToken>()
             .WithTokenType<ColourToken>();
 
-        var tokens = tokenizer.GetTokens(SampleText);
+        var tokens = tokenizer.GetTokens(_sampleText);
 
         Assert.Equal(3, tokens.Count);
 
@@ -104,7 +104,7 @@ public class TokenizerTests
             .WithTokenType<TargetToken>()
             .WithTokenType<ColourToken>();
 
-        var tokens = tokenizer.GetTokens(SampleText);
+        var tokens = tokenizer.GetTokens(_sampleText);
 
         Assert.Equal(12, tokens[0].Start);
 
@@ -120,7 +120,7 @@ public class TokenizerTests
             .WithTokenType<TargetToken>()
             .WithTokenType<ColourToken>();
 
-        var tokens = tokenizer.GetTokens(SampleText);
+        var tokens = tokenizer.GetTokens(_sampleText);
 
         Assert.Equal(9, tokens[0].Length);
 

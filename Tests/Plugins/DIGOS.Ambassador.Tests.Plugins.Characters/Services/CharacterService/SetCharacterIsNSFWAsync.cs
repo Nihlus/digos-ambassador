@@ -36,19 +36,19 @@ public partial class CharacterServiceTests
 {
     public class SetCharacterIsNSFWAsync : CharacterServiceTestBase
     {
-        private const bool IsNSFW = false;
+        private const bool _isNSFW = false;
 
         private readonly Character _character;
 
         public SetCharacterIsNSFWAsync()
         {
-            _character = CreateCharacter(isNSFW: IsNSFW);
+            _character = CreateCharacter(isNSFW: _isNSFW);
         }
 
         [Fact]
         public async Task ReturnsUnsuccessfulResultIfIsNSFWIsTheSameAsTheCurrentIsNSFW()
         {
-            var result = await this.CharacterEditor.SetCharacterIsNSFWAsync(_character, IsNSFW);
+            var result = await this.CharacterEditor.SetCharacterIsNSFWAsync(_character, _isNSFW);
 
             Assert.False(result.IsSuccess);
         }

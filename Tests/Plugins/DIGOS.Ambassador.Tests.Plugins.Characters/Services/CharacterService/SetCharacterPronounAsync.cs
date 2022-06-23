@@ -39,7 +39,7 @@ public partial class CharacterServiceTests
 {
     public class SetCharacterPronounsAsync : CharacterServiceTestBase
     {
-        private const string PronounFamily = "Feminine";
+        private const string _pronounFamily = "Feminine";
 
         private readonly Character _character;
 
@@ -48,7 +48,7 @@ public partial class CharacterServiceTests
             this.Services.GetRequiredService<PronounService>().WithPronounProvider(new FemininePronounProvider());
             this.Services.GetRequiredService<PronounService>().WithPronounProvider(new ZeHirPronounProvider());
 
-            _character = CreateCharacter(pronouns: PronounFamily);
+            _character = CreateCharacter(pronouns: _pronounFamily);
         }
 
         [Fact]
@@ -62,7 +62,7 @@ public partial class CharacterServiceTests
         [Fact]
         public async Task ReturnsUnsuccessfulResultIfPronounIsTheSameAsTheCurrentPronoun()
         {
-            var result = await this.CharacterEditor.SetCharacterPronounsAsync(_character, PronounFamily);
+            var result = await this.CharacterEditor.SetCharacterPronounsAsync(_character, _pronounFamily);
 
             Assert.False(result.IsSuccess);
         }

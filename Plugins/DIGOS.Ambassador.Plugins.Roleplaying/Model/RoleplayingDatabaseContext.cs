@@ -21,7 +21,6 @@
 //
 
 using DIGOS.Ambassador.Core.Database.Context;
-using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
@@ -32,24 +31,24 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model;
 /// </summary>
 public class RoleplayingDatabaseContext : AmbassadorDbContext
 {
-    private const string SchemaName = "RoleplayModule";
+    private const string _schemaName = "RoleplayModule";
 
     /// <summary>
     /// Gets or sets the table where roleplays are stored.
     /// </summary>
-    public DbSet<Roleplay> Roleplays { get; [UsedImplicitly] set; } = null!;
+    public DbSet<Roleplay> Roleplays => Set<Roleplay>();
 
     /// <summary>
     /// Gets or sets the table where server settings are stored.
     /// </summary>
-    public DbSet<ServerRoleplaySettings> ServerSettings { get; [UsedImplicitly] set; } = null!;
+    public DbSet<ServerRoleplaySettings> ServerSettings => Set<ServerRoleplaySettings>();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RoleplayingDatabaseContext"/> class.
     /// </summary>
     /// <param name="contextOptions">The context options.</param>
     public RoleplayingDatabaseContext(DbContextOptions<RoleplayingDatabaseContext> contextOptions)
-        : base(SchemaName, contextOptions)
+        : base(_schemaName, contextOptions)
     {
     }
 

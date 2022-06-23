@@ -32,27 +32,27 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model;
 /// </summary>
 public class ModerationDatabaseContext : AmbassadorDbContext
 {
-    private const string SchemaName = "ModerationModule";
+    private const string _schemaName = "ModerationModule";
 
     /// <summary>
     /// Gets the database set of server settings.
     /// </summary>
-    public DbSet<ServerModerationSettings> ServerSettings { get; private set; } = null!;
+    public DbSet<ServerModerationSettings> ServerSettings => Set<ServerModerationSettings>();
 
     /// <summary>
     /// Gets the database set of user notes.
     /// </summary>
-    public DbSet<UserNote> UserNotes { get; private set; } = null!;
+    public DbSet<UserNote> UserNotes => Set<UserNote>();
 
     /// <summary>
     /// Gets the database set of user warnings.
     /// </summary>
-    public DbSet<UserWarning> UserWarnings { get; private set; } = null!;
+    public DbSet<UserWarning> UserWarnings => Set<UserWarning>();
 
     /// <summary>
     /// Gets the database set of user bans.
     /// </summary>
-    public DbSet<UserBan> UserBans { get; private set; } = null!;
+    public DbSet<UserBan> UserBans => Set<UserBan>();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ModerationDatabaseContext"/> class.
@@ -60,7 +60,7 @@ public class ModerationDatabaseContext : AmbassadorDbContext
     /// <param name="contextOptions">The context options.</param>
     [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
     public ModerationDatabaseContext(DbContextOptions<ModerationDatabaseContext> contextOptions)
-        : base(SchemaName, contextOptions)
+        : base(_schemaName, contextOptions)
     {
     }
 }

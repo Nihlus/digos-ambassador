@@ -33,17 +33,17 @@ public partial class CharacterServiceTests
 {
     public class IsNameUniqueForUserAsync : CharacterServiceTestBase
     {
-        private const string CharacterName = "Test";
+        private const string _characterName = "Test";
 
         public IsNameUniqueForUserAsync()
         {
-            CreateCharacter(name: CharacterName);
+            CreateCharacter(name: _characterName);
         }
 
         [Fact]
         public async Task ReturnsFalseIfUserHasACharacterWithThatName()
         {
-            var result = await this.Characters.IsNameUniqueForUserAsync(this.DefaultOwner, this.DefaultServer, CharacterName);
+            var result = await this.Characters.IsNameUniqueForUserAsync(this.DefaultOwner, this.DefaultServer, _characterName);
 
             Assert.False(result);
         }

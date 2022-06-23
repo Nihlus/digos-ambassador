@@ -35,7 +35,7 @@ public partial class CharacterServiceTests
 {
     public class ClearDefaultCharacterAsync : CharacterServiceTestBase
     {
-        private const string CharacterName = "Test";
+        private const string _characterName = "Test";
 
         private readonly Character _character;
 
@@ -45,7 +45,7 @@ public partial class CharacterServiceTests
             (
                 this.DefaultOwner,
                 this.DefaultServer,
-                CharacterName,
+                _characterName,
                 string.Empty,
                 string.Empty,
                 string.Empty,

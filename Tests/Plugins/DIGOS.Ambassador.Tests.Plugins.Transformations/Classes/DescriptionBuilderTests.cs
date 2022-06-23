@@ -41,8 +41,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
 
 public class DescriptionBuilderTests
 {
-    private const string SampleFluentText = "{@f|They have} long {@colour} hair. {@f|Their} name is {@target}. {@f|They are} a DIGOS unit.";
-    private const string ExpectedText = "She has long fluorescent white hair. Her name is Amby. She is a DIGOS unit.";
+    private const string _sampleFluentText = "{@f|They have} long {@colour} hair. {@f|Their} name is {@target}. {@f|They are} a DIGOS unit.";
+    private const string _expectedText = "She has long fluorescent white hair. Her name is Amby. She is a DIGOS unit.";
 
     [Fact]
     public void ReplacesFluentTokensCorrectly()
@@ -68,7 +68,7 @@ public class DescriptionBuilderTests
             hairColour,
             "dummy",
             "dummy",
-            SampleFluentText
+            _sampleFluentText
         )
         {
             Part = Bodypart.Hair,
@@ -91,8 +91,8 @@ public class DescriptionBuilderTests
 
         var descriptionBuilder = new TransformationDescriptionBuilder(serviceProvider, new TransformationText());
 
-        var result = descriptionBuilder.ReplaceTokensWithContent(SampleFluentText, appearance, hairComponent);
+        var result = descriptionBuilder.ReplaceTokensWithContent(_sampleFluentText, appearance, hairComponent);
 
-        Assert.Equal(ExpectedText, result);
+        Assert.Equal(_expectedText, result);
     }
 }

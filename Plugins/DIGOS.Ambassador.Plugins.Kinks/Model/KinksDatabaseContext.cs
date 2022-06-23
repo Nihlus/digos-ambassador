@@ -33,24 +33,24 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Model;
 [PublicAPI]
 public class KinksDatabaseContext : AmbassadorDbContext
 {
-    private const string SchemaName = "KinkModule";
+    private const string _schemaName = "KinkModule";
 
     /// <summary>
     /// Gets or sets the table where kinks are stored.
     /// </summary>
-    public DbSet<Kink> Kinks { get; [UsedImplicitly] set; } = null!;
+    public DbSet<Kink> Kinks => Set<Kink>();
 
     /// <summary>
     /// Gets or sets the table where user kinks are stored.
     /// </summary>
-    public DbSet<UserKink> UserKinks { get; [UsedImplicitly] set; } = null!;
+    public DbSet<UserKink> UserKinks => Set<UserKink>();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="KinksDatabaseContext"/> class.
     /// </summary>
     /// <param name="contextOptions">The context options.</param>
     public KinksDatabaseContext(DbContextOptions<KinksDatabaseContext> contextOptions)
-        : base(SchemaName, contextOptions)
+        : base(_schemaName, contextOptions)
     {
     }
 

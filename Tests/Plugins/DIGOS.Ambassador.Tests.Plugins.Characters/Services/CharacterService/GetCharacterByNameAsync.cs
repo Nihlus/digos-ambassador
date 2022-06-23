@@ -37,7 +37,7 @@ public static partial class CharacterServiceTests
 {
     public class GetCharacterByNameAsync : CharacterServiceTestBase
     {
-        private const string CharacterName = "Test";
+        private const string _characterName = "Test";
 
         private readonly Character _character;
 
@@ -47,7 +47,7 @@ public static partial class CharacterServiceTests
             (
                 this.DefaultOwner,
                 this.DefaultServer,
-                CharacterName,
+                _characterName,
                 string.Empty,
                 string.Empty,
                 string.Empty,
@@ -71,7 +71,7 @@ public static partial class CharacterServiceTests
             (
                 new User(new Snowflake(1)),
                 this.DefaultServer,
-                CharacterName,
+                _characterName,
                 string.Empty,
                 string.Empty,
                 string.Empty,
@@ -79,7 +79,7 @@ public static partial class CharacterServiceTests
                 string.Empty
             );
 
-            var result = await this.Characters.GetCharacterByNameAsync(this.DefaultServer, CharacterName);
+            var result = await this.Characters.GetCharacterByNameAsync(this.DefaultServer, _characterName);
 
             Assert.False(result.IsSuccess);
         }
@@ -87,7 +87,7 @@ public static partial class CharacterServiceTests
         [Fact]
         public async Task ReturnsSuccessfulResultIfASingleCharacterWithThatNameExists()
         {
-            var result = await this.Characters.GetCharacterByNameAsync(this.DefaultServer, CharacterName);
+            var result = await this.Characters.GetCharacterByNameAsync(this.DefaultServer, _characterName);
 
             Assert.True(result.IsSuccess);
         }
@@ -95,7 +95,7 @@ public static partial class CharacterServiceTests
         [Fact]
         public async Task ReturnsCorrectCharacter()
         {
-            var result = await this.Characters.GetCharacterByNameAsync(this.DefaultServer, CharacterName);
+            var result = await this.Characters.GetCharacterByNameAsync(this.DefaultServer, _characterName);
 
             Assert.Same(_character, result.Entity);
         }

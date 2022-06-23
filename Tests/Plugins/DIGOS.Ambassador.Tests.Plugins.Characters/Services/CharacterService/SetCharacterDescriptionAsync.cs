@@ -37,13 +37,13 @@ public partial class CharacterServiceTests
 {
     public class SetCharacterDescriptionAsync : CharacterServiceTestBase
     {
-        private const string Description = "A cool person";
+        private const string _description = "A cool person";
 
         private readonly Character _character;
 
         public SetCharacterDescriptionAsync()
         {
-            _character = CreateCharacter(description: Description);
+            _character = CreateCharacter(description: _description);
         }
 
         [Fact]
@@ -57,7 +57,7 @@ public partial class CharacterServiceTests
         [Fact]
         public async Task ReturnsUnsuccessfulResultIfDescriptionIsTheSameAsTheCurrentDescription()
         {
-            var result = await this.CharacterEditor.SetCharacterDescriptionAsync(_character, Description);
+            var result = await this.CharacterEditor.SetCharacterDescriptionAsync(_character, _description);
 
             Assert.False(result.IsSuccess);
         }

@@ -34,7 +34,7 @@ public static partial class CharacterServiceTests
 {
     public class GetBestMatchingCharacterAsync : CharacterServiceTestBase
     {
-        private const string CharacterName = "Test";
+        private const string _characterName = "Test";
 
         private readonly Character _character;
 
@@ -44,7 +44,7 @@ public static partial class CharacterServiceTests
             (
                 this.DefaultOwner,
                 this.DefaultServer,
-                CharacterName,
+                _characterName,
                 string.Empty,
                 string.Empty,
                 string.Empty,
@@ -104,7 +104,7 @@ public static partial class CharacterServiceTests
         [Fact]
         public async Task ReturnsSuccessfulResultIfOwnerIsNullAndASingleCharacterWithThatNameExists()
         {
-            var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, null, CharacterName);
+            var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, null, _characterName);
 
             Assert.True(result.IsSuccess);
         }
@@ -132,7 +132,7 @@ public static partial class CharacterServiceTests
         [Fact]
         public async Task ReturnsSuccessfulResultIfOwnerIsNotNullAndNameIsNotNullAndOwnerHasACharacterWithThatName()
         {
-            var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, CharacterName);
+            var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, _characterName);
 
             Assert.True(result.IsSuccess);
         }
@@ -144,7 +144,7 @@ public static partial class CharacterServiceTests
         [Fact]
         public async Task ReturnsCorrectCharacterIfOwnerIsNullAndASingleCharacterWithThatNameExists()
         {
-            var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, null, CharacterName);
+            var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, null, _characterName);
 
             Assert.Same(_character, result.Entity);
         }
@@ -172,7 +172,7 @@ public static partial class CharacterServiceTests
         [Fact]
         public async Task ReturnsCorrectCharacterIfOwnerIsNotNullAndNameIsNotNullAndOwnerHasACharacterWithThatName()
         {
-            var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, CharacterName);
+            var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, _characterName);
 
             Assert.Same(_character, result.Entity);
         }

@@ -24,7 +24,6 @@ using DIGOS.Ambassador.Core.Database.Context;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Statistics;
-using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
@@ -35,34 +34,34 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model;
 /// </summary>
 public class AutoroleDatabaseContext : AmbassadorDbContext
 {
-    private const string SchemaName = "AutoroleModule";
+    private const string _schemaName = "AutoroleModule";
 
     /// <summary>
     /// Gets or sets the table where autoroles are stored.
     /// </summary>
-    public DbSet<AutoroleConfiguration> Autoroles { get; [UsedImplicitly] set; } = null!;
+    public DbSet<AutoroleConfiguration> Autoroles => Set<AutoroleConfiguration>();
 
     /// <summary>
     /// Gets or sets the table where user statistics are stored.
     /// </summary>
-    public DbSet<UserStatistics> UserStatistics { get; [UsedImplicitly] set; } = null!;
+    public DbSet<UserStatistics> UserStatistics => Set<UserStatistics>();
 
     /// <summary>
     /// Gets or sets the table where autorole confirmations are stored.
     /// </summary>
-    public DbSet<AutoroleConfirmation> AutoroleConfirmations { get; [UsedImplicitly] set; } = null!;
+    public DbSet<AutoroleConfirmation> AutoroleConfirmations => Set<AutoroleConfirmation>();
 
     /// <summary>
     /// Gets or sets the table where autorole server settings are stored.
     /// </summary>
-    public DbSet<AutoroleServerSettings> AutoroleServerSettings { get; [UsedImplicitly] set; } = null!;
+    public DbSet<AutoroleServerSettings> AutoroleServerSettings => Set<AutoroleServerSettings>();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AutoroleDatabaseContext"/> class.
     /// </summary>
     /// <param name="contextOptions">The context options.</param>
     public AutoroleDatabaseContext(DbContextOptions<AutoroleDatabaseContext> contextOptions)
-        : base(SchemaName, contextOptions)
+        : base(_schemaName, contextOptions)
     {
     }
 

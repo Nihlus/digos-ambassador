@@ -35,32 +35,32 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model;
 [PublicAPI]
 public class TransformationsDatabaseContext : AmbassadorDbContext
 {
-    private const string SchemaName = "TransformationModule";
+    private const string _schemaName = "TransformationModule";
 
     /// <summary>
-    /// Gets or sets the table where transformation species are stored.
+    /// Gets the table where transformation species are stored.
     /// </summary>
-    public DbSet<Species> Species { get; [UsedImplicitly] set; } = null!;
+    public DbSet<Species> Species => Set<Species>();
 
     /// <summary>
-    /// Gets or sets the table where transformations are stored.
+    /// Gets the table where transformations are stored.
     /// </summary>
-    public DbSet<Transformation> Transformations { get; [UsedImplicitly] set; } = null!;
+    public DbSet<Transformation> Transformations => Set<Transformation>();
 
     /// <summary>
-    /// Gets or sets the table where global transformation protections are stored.
+    /// Gets the table where global transformation protections are stored.
     /// </summary>
-    public DbSet<GlobalUserProtection> GlobalUserProtections { get; [UsedImplicitly] set; } = null!;
+    public DbSet<GlobalUserProtection> GlobalUserProtections => Set<GlobalUserProtection>();
 
     /// <summary>
-    /// Gets or sets the table where server-specific transformation protections are stored.
+    /// Gets the table where server-specific transformation protections are stored.
     /// </summary>
-    public DbSet<ServerUserProtection> ServerUserProtections { get; [UsedImplicitly] set; } = null!;
+    public DbSet<ServerUserProtection> ServerUserProtections => Set<ServerUserProtection>();
 
     /// <summary>
-    /// Gets or sets the table where appearance configurations are stored.
+    /// Gets the table where appearance configurations are stored.
     /// </summary>
-    public DbSet<Appearance> Appearances { get; [UsedImplicitly] set; } = null!;
+    public DbSet<Appearance> Appearances => Set<Appearance>();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TransformationsDatabaseContext"/> class.
@@ -71,7 +71,7 @@ public class TransformationsDatabaseContext : AmbassadorDbContext
     (
         DbContextOptions<TransformationsDatabaseContext> contextOptions
     )
-        : base(SchemaName, contextOptions)
+        : base(_schemaName, contextOptions)
     {
     }
 
@@ -81,15 +81,15 @@ public class TransformationsDatabaseContext : AmbassadorDbContext
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<Transformation>()
-            .OwnsOne(t => t.DefaultBaseColour, od => od.ToTable("DefaultBaseColours", SchemaName))
-            .OwnsOne(t => t.DefaultPatternColour, od => od.ToTable("DefaultPatternColours", SchemaName));
+            .OwnsOne(t => t.DefaultBaseColour, od => od.ToTable("DefaultBaseColours", _schemaName))
+            .OwnsOne(t => t.DefaultPatternColour, od => od.ToTable("DefaultPatternColours", _schemaName));
 
         modelBuilder.Entity<Appearance>().OwnsMany(a => a.Components, ao =>
         {
-            ao.ToTable("AppearanceComponents", SchemaName);
+            ao.ToTable("AppearanceComponents", _schemaName);
 
-            ao.OwnsOne(c => c.BaseColour, od => od.ToTable("BaseColours", SchemaName));
-            ao.OwnsOne(c => c.PatternColour, od => od.ToTable("PatternColours", SchemaName));
+            ao.OwnsOne(c => c.BaseColour, od => od.ToTable("BaseColours", _schemaName));
+            ao.OwnsOne(c => c.PatternColour, od => od.ToTable("PatternColours", _schemaName));
 
             ao.Property<long>("ID");
             ao.HasKey("ID");

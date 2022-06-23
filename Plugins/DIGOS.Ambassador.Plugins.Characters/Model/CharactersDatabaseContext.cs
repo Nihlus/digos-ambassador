@@ -22,7 +22,6 @@
 
 using DIGOS.Ambassador.Core.Database.Context;
 using DIGOS.Ambassador.Plugins.Characters.Model.Data;
-using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
@@ -33,29 +32,29 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model;
 /// </summary>
 public class CharactersDatabaseContext : AmbassadorDbContext
 {
-    private const string SchemaName = "CharacterModule";
+    private const string _schemaName = "CharacterModule";
 
     /// <summary>
     /// Gets or sets the table where characters are stored.
     /// </summary>
-    public DbSet<Character> Characters { get; [UsedImplicitly] set; } = null!;
+    public DbSet<Character> Characters => Set<Character>();
 
     /// <summary>
     /// Gets or sets the table where images are stored.
     /// </summary>
-    public DbSet<Image> Images { get; [UsedImplicitly] set; } = null!;
+    public DbSet<Image> Images => Set<Image>();
 
     /// <summary>
     /// Gets or sets the table where character roles are stored.
     /// </summary>
-    public DbSet<CharacterRole> CharacterRoles { get; [UsedImplicitly] set; } = null!;
+    public DbSet<CharacterRole> CharacterRoles => Set<CharacterRole>();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CharactersDatabaseContext"/> class.
     /// </summary>
     /// <param name="contextOptions">The context options.</param>
     public CharactersDatabaseContext(DbContextOptions<CharactersDatabaseContext> contextOptions)
-        : base(SchemaName, contextOptions)
+        : base(_schemaName, contextOptions)
     {
     }
 }

@@ -37,13 +37,13 @@ public partial class CharacterServiceTests
 {
     public class SetCharacterAvatarAsync : CharacterServiceTestBase
     {
-        private const string AvatarURL = "http://fake.com/avatar.png";
+        private const string _avatarURL = "http://fake.com/avatar.png";
 
         private readonly Character _character;
 
         public SetCharacterAvatarAsync()
         {
-            _character = CreateCharacter(avatarUrl: AvatarURL);
+            _character = CreateCharacter(avatarUrl: _avatarURL);
         }
 
         [Fact]
@@ -57,7 +57,7 @@ public partial class CharacterServiceTests
         [Fact]
         public async Task ReturnsUnsuccessfulResultIfAvatarURLIsTheSameAsTheCurrentURL()
         {
-            var result = await this.CharacterEditor.SetCharacterAvatarAsync(_character, AvatarURL);
+            var result = await this.CharacterEditor.SetCharacterAvatarAsync(_character, _avatarURL);
 
             Assert.False(result.IsSuccess);
         }

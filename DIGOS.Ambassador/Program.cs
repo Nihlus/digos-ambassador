@@ -29,6 +29,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using DIGOS.Ambassador.Core.Services;
+using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.ExecutionEventServices;
 using DIGOS.Ambassador.Responders;
 using log4net;
@@ -40,6 +41,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Remora.Behaviours.Services;
+using Remora.Commands.Extensions;
 using Remora.Commands.Trees.Nodes;
 using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.API.Abstractions.Objects;
@@ -166,6 +168,10 @@ internal class Program
                 // Override the default responders
                 services.Replace(ServiceDescriptor.Scoped<CommandResponder, AmbassadorCommandResponder>());
                 services.Replace(ServiceDescriptor.Scoped<InteractionResponder, AmbassadorInteractionResponder>());
+
+                services
+                    .AddParser<MessageReader>()
+                    .AddParser<HumanTimeSpanReader>();
 
                 var configurePlugins = plugins.ConfigureServices(services);
                 if (!configurePlugins.IsSuccess)

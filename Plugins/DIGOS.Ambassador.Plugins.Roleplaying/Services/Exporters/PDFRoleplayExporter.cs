@@ -40,10 +40,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters;
 /// </summary>
 internal sealed class PDFRoleplayExporter : RoleplayExporterBase
 {
-    private const float DefaultParagraphSpacing = 8.0f;
-    private static readonly Font StandardFont = new(Font.HELVETICA, 11.0f);
-    private static readonly Font ItalicFont = new(Font.HELVETICA, 11.0f, Font.ITALIC);
-    private static readonly Font TitleFont = new(Font.HELVETICA, 48.0f, Font.BOLD);
+    private const float _defaultParagraphSpacing = 8.0f;
+    private static readonly Font _standardFont = new(Font.HELVETICA, 11.0f);
+    private static readonly Font _italicFont = new(Font.HELVETICA, 11.0f, Font.ITALIC);
+    private static readonly Font _titleFont = new(Font.HELVETICA, 48.0f, Font.BOLD);
 
     /// <inheritdoc />
     public override async Task<ExportedRoleplay> ExportAsync(IServiceProvider services, Roleplay roleplay)
@@ -152,11 +152,11 @@ internal sealed class PDFRoleplayExporter : RoleplayExporterBase
     /// <returns>The resulting paragraph.</returns>
     private Paragraph CreateTitle(string title)
     {
-        var chunk = new Chunk(title, TitleFont);
+        var chunk = new Chunk(title, _titleFont);
 
         var para = new Paragraph(chunk)
         {
-            SpacingAfter = DefaultParagraphSpacing
+            SpacingAfter = _defaultParagraphSpacing
         };
 
         return para;
@@ -166,16 +166,16 @@ internal sealed class PDFRoleplayExporter : RoleplayExporterBase
     {
         var paragraph = new Paragraph
         {
-            SpacingAfter = DefaultParagraphSpacing
+            SpacingAfter = _defaultParagraphSpacing
         };
 
-        var participantsTitleChunk = new Chunk("Participants: \n", StandardFont);
+        var participantsTitleChunk = new Chunk("Participants: \n", _standardFont);
         paragraph.Add(participantsTitleChunk);
 
         foreach (var participantName in participantNames)
         {
             var content = $"{participantName}\n";
-            var participantChunk = new Chunk(content, ItalicFont);
+            var participantChunk = new Chunk(content, _italicFont);
 
             paragraph.Add(participantChunk);
         }
@@ -185,11 +185,11 @@ internal sealed class PDFRoleplayExporter : RoleplayExporterBase
 
     private Paragraph CreateMessage(string author, string contents)
     {
-        var authorChunk = new Chunk($"{author} \n", ItalicFont);
+        var authorChunk = new Chunk($"{author} \n", _italicFont);
 
         var para = new Paragraph
         {
-            SpacingAfter = DefaultParagraphSpacing
+            SpacingAfter = _defaultParagraphSpacing
         };
 
         para.Add(authorChunk);
@@ -215,9 +215,9 @@ internal sealed class PDFRoleplayExporter : RoleplayExporterBase
             if (i % 2 == 1)
             {
                 var subPara = new Paragraph();
-                var spacingChunk = new Chunk("\n", StandardFont);
+                var spacingChunk = new Chunk("\n", _standardFont);
 
-                var chunk = new Chunk($"{splits[i]}", ItalicFont);
+                var chunk = new Chunk($"{splits[i]}", _italicFont);
                 chunk.SetBackground(BaseColor.LightGray, 4, 4, 4, 4);
 
                 subPara.Add(spacingChunk);
@@ -228,7 +228,7 @@ internal sealed class PDFRoleplayExporter : RoleplayExporterBase
             }
             else
             {
-                var chunk = new Chunk(splits[i], StandardFont);
+                var chunk = new Chunk(splits[i], _standardFont);
                 paragraph.Add(chunk);
             }
         }

@@ -38,7 +38,7 @@ namespace DIGOS.Ambassador.Discord.TypeReaders;
 /// </summary>
 public class MessageReader : AbstractTypeParser<IMessage>
 {
-    private static readonly Regex Pattern = new
+    private static readonly Regex _pattern = new
     (
         @"(?<!<)https?://(?:(?:ptb|canary)\.)?discord(?:app)?\.com/channels/(?<GuildId>\d+)/(?<ChannelId>\d+)/(?<MessageId>\d+)(?!>)",
         RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant
@@ -63,7 +63,7 @@ public class MessageReader : AbstractTypeParser<IMessage>
     {
         value = value.Trim();
 
-        var match = Pattern.Match(value);
+        var match = _pattern.Match(value);
         if (!match.Success)
         {
             if (!Snowflake.TryParse(value, out var parsedID))

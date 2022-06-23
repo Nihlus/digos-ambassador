@@ -34,7 +34,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Model;
 [PublicAPI]
 public class PermissionsDatabaseContext : AmbassadorDbContext
 {
-    private const string SchemaName = "PermissionModule";
+    private const string _schemaName = "PermissionModule";
 
     /// <summary>
     /// Gets the table where role-associated permissions are stored.
@@ -52,7 +52,7 @@ public class PermissionsDatabaseContext : AmbassadorDbContext
     /// <param name="contextOptions">The context options.</param>
     [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
     public PermissionsDatabaseContext(DbContextOptions<PermissionsDatabaseContext> contextOptions)
-        : base(SchemaName, contextOptions)
+        : base(_schemaName, contextOptions)
     {
     }
 }

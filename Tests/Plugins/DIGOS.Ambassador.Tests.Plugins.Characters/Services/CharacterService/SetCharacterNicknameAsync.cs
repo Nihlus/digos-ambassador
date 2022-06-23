@@ -37,13 +37,13 @@ public partial class CharacterServiceTests
 {
     public class SetCharacterNicknameAsync : CharacterServiceTestBase
     {
-        private const string Nickname = "Nicke";
+        private const string _nickname = "Nicke";
 
         private readonly Character _character;
 
         public SetCharacterNicknameAsync()
         {
-            _character = CreateCharacter(nickname: Nickname);
+            _character = CreateCharacter(nickname: _nickname);
         }
 
         [Fact]
@@ -57,7 +57,7 @@ public partial class CharacterServiceTests
         [Fact]
         public async Task ReturnsUnsuccessfulResultIfNicknameIsTheSameAsTheCurrentNickname()
         {
-            var result = await this.CharacterEditor.SetCharacterNicknameAsync(_character, Nickname);
+            var result = await this.CharacterEditor.SetCharacterNicknameAsync(_character, _nickname);
 
             Assert.False(result.IsSuccess);
         }

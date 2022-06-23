@@ -23,7 +23,6 @@
 using DIGOS.Ambassador.Core.Database.Context;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
-using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
@@ -34,22 +33,22 @@ namespace DIGOS.Ambassador.Plugins.Core.Model;
 /// </summary>
 public class CoreDatabaseContext : AmbassadorDbContext
 {
-    private const string SchemaName = "Core";
+    private const string _schemaName = "Core";
 
     /// <summary>
     /// Gets or sets the table where the user information is stored.
     /// </summary>
-    public DbSet<User> Users { get; [UsedImplicitly] set; } = null!;
+    public DbSet<User> Users => Set<User>();
 
     /// <summary>
     /// Gets or sets the table where server-specific settings are stored.
     /// </summary>
-    public DbSet<Server> Servers { get; [UsedImplicitly] set; } = null!;
+    public DbSet<Server> Servers => Set<Server>();
 
     /// <summary>
     /// Gets or sets the table where user consents are stored.
     /// </summary>
-    public DbSet<UserConsent> UserConsents { get; [UsedImplicitly] set; } = null!;
+    public DbSet<UserConsent> UserConsents => Set<UserConsent>();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CoreDatabaseContext"/> class.
@@ -59,7 +58,7 @@ public class CoreDatabaseContext : AmbassadorDbContext
     (
         DbContextOptions<CoreDatabaseContext> contextOptions
     )
-        : base(SchemaName, contextOptions)
+        : base(_schemaName, contextOptions)
     {
     }
 

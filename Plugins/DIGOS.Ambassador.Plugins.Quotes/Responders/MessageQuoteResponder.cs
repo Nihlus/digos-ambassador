@@ -42,7 +42,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Responders;
 /// </summary>
 public class MessageQuoteResponder : IResponder<IMessageCreate>, IResponder<IMessageUpdate>
 {
-    private static readonly Regex Pattern = new
+    private static readonly Regex _pattern = new
     (
         @"(?<!<)https?://(?:(?:ptb|canary)\.)?discord(?:app)?\.com/channels/(?<GuildId>\d+)/(?<ChannelId>\d+)/(?<MessageId>\d+)(?!>)",
         RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant
@@ -128,7 +128,7 @@ public class MessageQuoteResponder : IResponder<IMessageCreate>, IResponder<IMes
         CancellationToken ct = default
     )
     {
-        var matches = Pattern.Matches(content);
+        var matches = _pattern.Matches(content);
         if (matches.Count == 0)
         {
             return Result.FromSuccess();

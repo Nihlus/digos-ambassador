@@ -36,15 +36,15 @@ public partial class CharacterServiceTests
 {
     public class SetCharacterNameAsync : CharacterServiceTestBase
     {
-        private const string CharacterName = "Test";
-        private const string AnotherCharacterName = "Test2";
+        private const string _characterName = "Test";
+        private const string _anotherCharacterName = "Test2";
 
         private readonly Character _character;
 
         public SetCharacterNameAsync()
         {
-            _character = CreateCharacter(name: CharacterName);
-            CreateCharacter(name: AnotherCharacterName);
+            _character = CreateCharacter(name: _characterName);
+            CreateCharacter(name: _anotherCharacterName);
         }
 
         [Fact]
@@ -58,7 +58,7 @@ public partial class CharacterServiceTests
         [Fact]
         public async Task ReturnsUnsuccessfulResultIfCharacterAlreadyHasThatName()
         {
-            var result = await this.CharacterEditor.SetCharacterNameAsync(_character, CharacterName);
+            var result = await this.CharacterEditor.SetCharacterNameAsync(_character, _characterName);
 
             Assert.False(result.IsSuccess);
         }
@@ -66,7 +66,7 @@ public partial class CharacterServiceTests
         [Fact]
         public async Task ReturnsUnsuccessfulResultIfNameIsNotUnique()
         {
-            var result = await this.CharacterEditor.SetCharacterNameAsync(_character, AnotherCharacterName);
+            var result = await this.CharacterEditor.SetCharacterNameAsync(_character, _anotherCharacterName);
 
             Assert.False(result.IsSuccess);
         }
