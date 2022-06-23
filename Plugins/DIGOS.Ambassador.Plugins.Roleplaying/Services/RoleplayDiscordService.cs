@@ -621,6 +621,17 @@ public class RoleplayDiscordService
             return new InvalidOperationError("Unable to process messages without authors.");
         }
 
+        var hasActive = await HasActiveRoleplayAsync(message.ChannelID.Value);
+        if (!hasActive.IsSuccess)
+        {
+            return Result.FromError(hasActive);
+        }
+
+        if (!hasActive.Entity)
+        {
+            return Result.FromSuccess();
+        }
+
         var result = await GetActiveRoleplayAsync(message.ChannelID.Value);
         if (!result.IsSuccess)
         {
