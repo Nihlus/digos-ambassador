@@ -84,7 +84,7 @@ public static partial class ServerServiceTests
         [Fact]
         public async Task CanSetDescription()
         {
-            var newDescription = "oogabooga";
+            const string newDescription = "oogabooga";
             var result = await this.Servers.SetDescriptionAsync(_server, newDescription);
 
             Assert.True(result.IsSuccess);

@@ -32,17 +32,17 @@ public static class StringExtensions
     /// <summary>
     /// Ellipsizes the given string, truncating it with the ellipsis character if required.
     /// </summary>
-    /// <param name="this">The base value.</param>
+    /// <param name="value">The base value.</param>
     /// <param name="length">The maximum length.</param>
     /// <returns>The ellipsized string.</returns>
-    [return: NotNullIfNotNull("this")]
-    public static string? Ellipsize(this string? @this, int length)
+    [return: NotNullIfNotNull("value")]
+    public static string? Ellipsize(this string? value, int length)
     {
-        if (@this is null)
+        if (value is null)
         {
             return null;
         }
 
-        return @this.Length <= length ? @this : @this.Substring(0, length - 1) + (char)0x2026;
+        return value.Length <= length ? value : value[..(length - 1)] + (char)0x2026;
     }
 }

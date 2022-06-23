@@ -26,6 +26,7 @@ using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Tests.TestBases;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -37,6 +38,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core;
 /// <summary>
 /// Serves as a test base for owned entity service tests.
 /// </summary>
+[PublicAPI]
 public abstract class OwnedEntityServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
 {
     /// <summary>

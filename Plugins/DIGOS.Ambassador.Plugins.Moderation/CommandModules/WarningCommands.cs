@@ -196,12 +196,9 @@ public partial class WarningCommands : CommandGroup
         }
 
         var deleteWarning = await _warnings.DeleteWarningAsync(warning);
-        if (!deleteWarning.IsSuccess)
-        {
-            return Result<FeedbackMessage>.FromError(deleteWarning);
-        }
-
-        return new FeedbackMessage("Warning deleted.", _feedback.Theme.Secondary);
+        return deleteWarning.IsSuccess
+            ? new FeedbackMessage("Warning deleted.", _feedback.Theme.Secondary)
+            : Result<FeedbackMessage>.FromError(deleteWarning);
     }
 
     /// <summary>
@@ -271,11 +268,8 @@ public partial class WarningCommands : CommandGroup
             _context.User.ID
         );
 
-        return !sendAlert.IsSuccess
-            ? Result<FeedbackMessage>.FromError(sendAlert)
-            : new FeedbackMessage
-            (
-                $"Warning added (ID {warning.ID}): {warning.Reason}.", _feedback.Theme.Secondary
-            );
+        return sendAlert.IsSuccess
+            ? new FeedbackMessage($"Warning added (ID {warning.ID}): {warning.Reason}.", _feedback.Theme.Secondary)
+            : Result<FeedbackMessage>.FromError(sendAlert);
     }
 }

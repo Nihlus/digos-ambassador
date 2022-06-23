@@ -30,7 +30,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Extensions;
 /// </summary>
 public static class ContentServiceExtensions
 {
-    private static string DefaultAvatar { get; } = "avatars/Discord_DIGOS.png";
+    private static string DefaultAvatar => "avatars/Discord_DIGOS.png";
 
     /// <summary>
     /// Gets the default avatar URI for characters.

@@ -56,7 +56,7 @@ public class GlobalUserProtection : EFEntity
     /// <summary>
     /// Gets the list of users that are listed in this protection entry.
     /// </summary>
-    public virtual List<UserProtectionEntry> UserListing { get; private set; } = new List<UserProtectionEntry>();
+    public virtual List<UserProtectionEntry> UserListing { get; private set; } = new();
 
     /// <summary>
     /// Gets the list of users that are allowed to transform the owner.

@@ -30,6 +30,7 @@ using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Kinks.Model;
 using DIGOS.Ambassador.Plugins.Kinks.Services;
 using Humanizer;
+using JetBrains.Annotations;
 using Remora.Commands.Results;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
@@ -41,6 +42,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards;
 /// <summary>
 /// Acts as an interactive wizard for interactively setting the kink preferences of users.
 /// </summary>
+[PublicAPI]
 public sealed class KinkWizard
 {
     /// <summary>
@@ -382,7 +384,7 @@ public sealed class KinkWizard
                     {
                         this.Info,
                         this.EnterCategory,
-                        this.Exit,
+                        this.Exit
                     }
                 )
             },
@@ -406,7 +408,7 @@ public sealed class KinkWizard
                     {
                         this.Info,
                         this.Back,
-                        this.Exit,
+                        this.Exit
                     }
                 )
             },
@@ -492,7 +494,7 @@ public sealed class KinkWizard
             }
             default:
             {
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(this.State));
             }
         }
     }

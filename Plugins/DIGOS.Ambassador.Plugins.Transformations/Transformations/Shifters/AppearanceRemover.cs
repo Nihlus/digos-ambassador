@@ -237,20 +237,14 @@ internal abstract class AppearanceRemover : IAppearanceRemover
         Chirality chirality
     )
     {
-        switch (result.Action)
+        return result.Action switch
         {
-            case ShiftBodypartAction.Remove:
-            {
-                return GetRemoveMessageAsync(bodypart, chirality);
-            }
-            case ShiftBodypartAction.Nothing:
-            {
-                throw new InvalidOperationException("Can't build a message for something that didn't happen.");
-            }
-            default:
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-        }
+            ShiftBodypartAction.Remove => GetRemoveMessageAsync(bodypart, chirality),
+            ShiftBodypartAction.Nothing => throw new InvalidOperationException
+            (
+                "Can't build a message for something that didn't happen."
+            ),
+            _ => throw new ArgumentOutOfRangeException(nameof(result.Action))
+        };
     }
 }

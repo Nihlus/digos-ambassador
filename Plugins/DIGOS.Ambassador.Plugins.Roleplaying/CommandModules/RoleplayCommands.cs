@@ -361,7 +361,7 @@ public partial class RoleplayCommands : CommandGroup
             return Result<FeedbackMessage>.FromError(invitePlayerResult);
         }
 
-        var roleplayName = roleplay.Name.Contains(" ") ? roleplay.Name.Quote() : roleplay.Name;
+        var roleplayName = roleplay.Name.Contains(' ') ? roleplay.Name.Quote() : roleplay.Name;
         var message = new Embed
         {
             Colour = _feedback.Theme.Secondary,
@@ -465,7 +465,7 @@ public partial class RoleplayCommands : CommandGroup
         Roleplay roleplay
     )
     {
-        var getDedicatedChannelResult = _dedicatedChannels.GetDedicatedChannel(roleplay);
+        var getDedicatedChannelResult = DedicatedChannelService.GetDedicatedChannel(roleplay);
         if (getDedicatedChannelResult.IsSuccess)
         {
             var existingDedicatedChannel = getDedicatedChannelResult.Entity;
@@ -678,7 +678,7 @@ public partial class RoleplayCommands : CommandGroup
         [AutocompleteProvider("roleplay::any")] Roleplay roleplay
     )
     {
-        var getDedicatedChannelResult = _dedicatedChannels.GetDedicatedChannel(roleplay);
+        var getDedicatedChannelResult = DedicatedChannelService.GetDedicatedChannel(roleplay);
         if (!getDedicatedChannelResult.IsSuccess)
         {
             return new UserError
@@ -729,7 +729,7 @@ public partial class RoleplayCommands : CommandGroup
         Roleplay roleplay
     )
     {
-        var getDedicatedChannelResult = _dedicatedChannels.GetDedicatedChannel
+        var getDedicatedChannelResult = DedicatedChannelService.GetDedicatedChannel
         (
             roleplay
         );
@@ -909,7 +909,7 @@ public partial class RoleplayCommands : CommandGroup
         {
             MessageContext messageContext => messageContext.MessageID,
             InteractionContext interactionContext => interactionContext.ID,
-            _ => throw new ArgumentOutOfRangeException()
+            _ => throw new ArgumentOutOfRangeException(nameof(_context))
         };
 
         var getMessageBatch = await _channelAPI.GetChannelMessagesAsync(_context.ChannelID, before: before);
@@ -926,7 +926,7 @@ public partial class RoleplayCommands : CommandGroup
             .Select(m => m!)
             .ToList();
 
-        var getDedicatedChannel = _dedicatedChannels.GetDedicatedChannel(roleplay);
+        var getDedicatedChannel = DedicatedChannelService.GetDedicatedChannel(roleplay);
         if (!getDedicatedChannel.IsSuccess)
         {
             return Result.FromError(getDedicatedChannel);

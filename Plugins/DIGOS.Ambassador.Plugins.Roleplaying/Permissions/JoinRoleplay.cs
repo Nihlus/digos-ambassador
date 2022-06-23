@@ -31,7 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions;
 public sealed class JoinRoleplay : Permission
 {
     /// <inheritdoc />
-    public override Guid UniqueIdentifier { get; } = new Guid("BD392170-B566-4D34-8A91-4794D374D1A7");
+    public override Guid UniqueIdentifier { get; } = new("BD392170-B566-4D34-8A91-4794D374D1A7");
 
     /// <inheritdoc />
     public override string FriendlyName => nameof(JoinRoleplay);

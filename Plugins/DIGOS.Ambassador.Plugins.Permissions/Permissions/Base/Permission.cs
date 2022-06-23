@@ -50,24 +50,12 @@ public abstract class Permission : IPermission
     /// <inheritdoc/>
     public bool IsGrantedByDefaultTo(PermissionTarget target)
     {
-        switch (target)
+        return target switch
         {
-            case PermissionTarget.Self:
-            {
-                return this.IsGrantedByDefaultToSelf;
-            }
-            case PermissionTarget.Other:
-            {
-                return this.IsGrantedByDefaultToOthers;
-            }
-            case PermissionTarget.All:
-            {
-                return this.IsGrantedByDefaultToSelf && this.IsGrantedByDefaultToOthers;
-            }
-            default:
-            {
-                throw new ArgumentOutOfRangeException(nameof(target), target, null);
-            }
-        }
+            PermissionTarget.Self => this.IsGrantedByDefaultToSelf,
+            PermissionTarget.Other => this.IsGrantedByDefaultToOthers,
+            PermissionTarget.All => this.IsGrantedByDefaultToSelf && this.IsGrantedByDefaultToOthers,
+            _ => throw new ArgumentOutOfRangeException(nameof(target), target, null)
+        };
     }
 }

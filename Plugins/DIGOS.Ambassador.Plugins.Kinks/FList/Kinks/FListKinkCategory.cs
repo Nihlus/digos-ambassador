@@ -21,12 +21,14 @@
 //
 
 using System.Text.Json.Serialization;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Kinks.FList.Kinks;
 
 /// <summary>
 /// Represents a JSON kink category from the F-list API.
 /// </summary>
+[PublicAPI]
 internal class FListKinkCategory
 {
     /// <summary>

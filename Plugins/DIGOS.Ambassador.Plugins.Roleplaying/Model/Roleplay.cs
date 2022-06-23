@@ -40,6 +40,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model;
 /// Represents a saved roleplay.
 /// </summary>
 [Table("Roleplays", Schema = "RoleplayModule")]
+[PublicAPI]
 public class Roleplay : EFEntity, IOwnedNamedEntity, IServerEntity
 {
     /// <inheritdoc />

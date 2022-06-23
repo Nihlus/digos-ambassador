@@ -44,7 +44,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services;
 public sealed class ChannelLoggingService
 {
     private readonly ModerationService _moderation;
-    private readonly QuoteService _quotes;
     private readonly FeedbackService _feedback;
 
     private readonly IDiscordRestGuildAPI _guildAPI;
@@ -56,7 +55,6 @@ public sealed class ChannelLoggingService
     /// </summary>
     /// <param name="moderation">The moderation service.</param>
     /// <param name="feedback">The feedback service.</param>
-    /// <param name="quotes">The quote service.</param>
     /// <param name="guildAPI">The guild API.</param>
     /// <param name="auditLogAPI">The audit log API.</param>
     /// <param name="userAPI">The user API.</param>
@@ -64,7 +62,6 @@ public sealed class ChannelLoggingService
     (
         ModerationService moderation,
         FeedbackService feedback,
-        QuoteService quotes,
         IDiscordRestGuildAPI guildAPI,
         IDiscordRestAuditLogAPI auditLogAPI,
         IDiscordRestUserAPI userAPI
@@ -72,7 +69,6 @@ public sealed class ChannelLoggingService
     {
         _moderation = moderation;
         _feedback = feedback;
-        _quotes = quotes;
         _guildAPI = guildAPI;
         _auditLogAPI = auditLogAPI;
         _userAPI = userAPI;
@@ -479,7 +475,7 @@ public sealed class ChannelLoggingService
             Description = $"A message was deleted from <#{message.ChannelID}>{extra}."
         };
 
-        var quote = _quotes.CreateMessageQuote(message, self.ID);
+        var quote = QuoteService.CreateMessageQuote(message, self.ID);
 
         var sendResult = await _feedback.SendEmbedAsync(channel, eb);
         if (!sendResult.IsSuccess)

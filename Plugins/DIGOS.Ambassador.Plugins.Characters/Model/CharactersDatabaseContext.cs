@@ -35,17 +35,17 @@ public class CharactersDatabaseContext : AmbassadorDbContext
     private const string _schemaName = "CharacterModule";
 
     /// <summary>
-    /// Gets or sets the table where characters are stored.
+    /// Gets the table where characters are stored.
     /// </summary>
     public DbSet<Character> Characters => Set<Character>();
 
     /// <summary>
-    /// Gets or sets the table where images are stored.
+    /// Gets the table where images are stored.
     /// </summary>
     public DbSet<Image> Images => Set<Image>();
 
     /// <summary>
-    /// Gets or sets the table where character roles are stored.
+    /// Gets the table where character roles are stored.
     /// </summary>
     public DbSet<CharacterRole> CharacterRoles => Set<CharacterRole>();
 

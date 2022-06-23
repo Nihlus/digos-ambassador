@@ -47,7 +47,7 @@ public static partial class ServerServiceTests
         [Fact]
         public void ReturnsErrorIfDescriptionIsNull()
         {
-            var result = this.Servers.GetDescription(_server);
+            var result = Ambassador.Plugins.Core.Services.Servers.ServerService.GetDescription(_server);
 
             Assert.False(result.IsSuccess);
         }
@@ -57,7 +57,7 @@ public static partial class ServerServiceTests
         {
             _server.Description = string.Empty;
 
-            var result = this.Servers.GetDescription(_server);
+            var result = Ambassador.Plugins.Core.Services.Servers.ServerService.GetDescription(_server);
 
             Assert.False(result.IsSuccess);
         }
@@ -67,7 +67,7 @@ public static partial class ServerServiceTests
         {
             _server.Description = "      ";
 
-            var result = this.Servers.GetDescription(_server);
+            var result = Ambassador.Plugins.Core.Services.Servers.ServerService.GetDescription(_server);
 
             Assert.False(result.IsSuccess);
         }
@@ -78,7 +78,7 @@ public static partial class ServerServiceTests
             const string expected = "oogabooga";
             _server.Description = expected;
 
-            var result = this.Servers.GetDescription(_server);
+            var result = Ambassador.Plugins.Core.Services.Servers.ServerService.GetDescription(_server);
 
             Assert.True(result.IsSuccess);
             Assert.Equal(expected, result.Entity);

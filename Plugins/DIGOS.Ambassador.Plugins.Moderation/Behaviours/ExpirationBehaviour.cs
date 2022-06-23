@@ -214,7 +214,7 @@ internal sealed class ExpirationBehaviour : ContinuousBehaviour<ExpirationBehavi
         return Result.FromSuccess();
     }
 
-    private async IAsyncEnumerable<Result<Snowflake>> GetGuildsAsync
+    private static async IAsyncEnumerable<Result<Snowflake>> GetGuildsAsync
     (
         IDiscordRestUserAPI userAPI,
         [EnumeratorCancellation] CancellationToken ct = default

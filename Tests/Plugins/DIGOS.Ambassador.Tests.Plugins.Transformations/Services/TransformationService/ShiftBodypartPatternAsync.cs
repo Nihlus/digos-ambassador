@@ -41,10 +41,10 @@ public partial class TransformationServiceTests
 {
     public class ShiftBodypartPatternAsync : TransformationServiceTestBase
     {
-        private readonly Snowflake _guild = new Snowflake(0);
+        private readonly Snowflake _guild = new(0);
 
-        private readonly Snowflake _owner = new Snowflake(1);
-        private readonly Snowflake _invoker = new Snowflake(2);
+        private readonly Snowflake _owner = new(1);
+        private readonly Snowflake _invoker = new(2);
 
         private readonly Pattern _newPattern;
         private readonly Colour _newPatternColour;

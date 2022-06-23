@@ -185,10 +185,7 @@ public sealed class KinkService : IQueryService<UserKink>
     /// <param name="kinks">The kinks.</param>
     /// <returns>A paginated embed.</returns>
     [Pure]
-    public List<Embed> BuildPaginatedUserKinkEmbeds
-    (
-        IEnumerable<UserKink> kinks
-    )
+    public List<Embed> BuildPaginatedUserKinkEmbeds(IEnumerable<UserKink> kinks)
     {
         return
             (
@@ -462,13 +459,10 @@ public sealed class KinkService : IQueryService<UserKink>
         var kinks = getKinksResult.Entity;
 
         // The user doesn't have any set kinks in this category; grab the first one
-        if (lastKink is null)
-        {
-            return kinks[0];
-        }
-
         // Still nothing? Just pick the first one without a preference, or return nothing
-        return kinks.FirstOrDefault(k => k.FListID != lastKink.Kink.FListID);
+        return lastKink is null
+            ? kinks[0]
+            : kinks.FirstOrDefault(k => k.FListID != lastKink.Kink.FListID);
     }
 
     /// <summary>

@@ -66,7 +66,7 @@ public class Appearance : EFEntity
     /// <summary>
     /// Gets the parts that compose this appearance.
     /// </summary>
-    public virtual List<AppearanceComponent> Components { get; private set; } = new List<AppearanceComponent>();
+    public virtual List<AppearanceComponent> Components { get; private set; } = new();
 
     /// <summary>
     /// Gets a character's height (in meters).

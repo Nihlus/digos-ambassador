@@ -71,16 +71,14 @@ public class EventLoggingResponder :
             return Result.FromSuccess();
         }
 
-        var newMember = gatewayEvent;
-
-        if (oldMember.Nickname != newMember.Nickname)
+        if (oldMember.Nickname != gatewayEvent.Nickname)
         {
             var notifyResult = await _channelLogging.NotifyUserNicknameChangedAsync
             (
                 gatewayEvent.GuildID,
                 gatewayEvent.User.ID,
                 oldMember.Nickname,
-                newMember.Nickname
+                gatewayEvent.Nickname
             );
 
             if (!notifyResult.IsSuccess)
@@ -94,14 +92,14 @@ public class EventLoggingResponder :
             return Result.FromSuccess();
         }
 
-        if (oldUser.Discriminator != newMember.User.Discriminator)
+        if (oldUser.Discriminator != gatewayEvent.User.Discriminator)
         {
             return await _channelLogging.NotifyUserDiscriminatorChangedAsync
             (
                 gatewayEvent.GuildID,
                 gatewayEvent.User.ID,
                 oldUser.Discriminator,
-                newMember.User.Discriminator,
+                gatewayEvent.User.Discriminator,
                 ct
             );
         }

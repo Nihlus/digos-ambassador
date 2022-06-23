@@ -45,6 +45,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users;
 /// <summary>
 /// Handles privacy-related logic.
 /// </summary>
+[PublicAPI]
 public sealed class PrivacyService
 {
     private readonly CoreDatabaseContext _database;
@@ -90,20 +91,20 @@ public sealed class PrivacyService
         {
             Colour = _feedback.Theme.Warning,
             Description =
-                "Hello there! This appears to be the first time you're using the bot (or you've not granted your " +
-                "consent for it to store potentially sensitive or identifiable data about you).\n" +
-                "\n" +
-                "In order to use Amby and her commands, you need to give her your consent to store various data " +
-                "about you. We need this consent in order to be compliant with data regulations in the European " +
-                "Union (and it'd be rude not to ask!).\n" +
-                "\n" +
-                "In short, if you use the bot, we're going to be storing " +
-                "stuff like your Discord ID, some messages, server IDs, etc. You can - and should! - read the " +
-                "full privacy policy before you agree to anything. It's not very long (3 pages) and shouldn't take " +
-                "more than five minutes to read through.\n" +
-                "\n" +
-                "Once you've read it, you can grant consent by running the `!privacy grant-consent` command over DM. " +
-                "If you don't want to consent to anything, just don't use the bot :smiley:"
+                "Hello there! This appears to be the first time you're using the bot (or you've not granted your "
+                + "consent for it to store potentially sensitive or identifiable data about you).\n"
+                + "\n"
+                + "In order to use Amby and her commands, you need to give her your consent to store various data "
+                + "about you. We need this consent in order to be compliant with data regulations in the European "
+                + "Union (and it'd be rude not to ask!).\n"
+                + "\n"
+                + "In short, if you use the bot, we're going to be storing "
+                + "stuff like your Discord ID, some messages, server IDs, etc. You can - and should! - read the "
+                + "full privacy policy before you agree to anything. It's not very long (3 pages) and shouldn't take "
+                + "more than five minutes to read through.\n"
+                + "\n"
+                + "Once you've read it, you can grant consent by running the `!privacy grant-consent` command over DM. "
+                + "If you don't want to consent to anything, just don't use the bot :smiley:"
         };
 
         var openDM = await _userAPI.CreateDMAsync(discordUser, ct);
@@ -117,10 +118,11 @@ public sealed class PrivacyService
             }
         }
 
-        var warningMessage = "I was unable to send you some initial privacy policy information for " +
-                             "first-time users of the bot. In order to use the bot, please read the " +
-                             "privacy policy (which can be requested by running the `!privacy policy` command) " +
-                             "and agree to it by sending `!privacy grant-consent` to the bot over DM.";
+        const string warningMessage = "I was unable to send you some initial privacy policy information for "
+                                      + "first-time users of the bot. In order to use the bot, please read the "
+                                      + "privacy policy (which can be requested by running the `!privacy policy` "
+                                      + "command) and agree to it by sending `!privacy grant-consent` to the bot over"
+                                      + " DM.";
 
         var sendWarning = await _feedback.SendContextualWarningAsync(warningMessage, discordUser, ct: ct);
         return !sendWarning.IsSuccess
@@ -142,8 +144,8 @@ public sealed class PrivacyService
             var embed = new Embed
             {
                 Colour = _feedback.Theme.FaultOrDanger,
-                Description = "Oops. Something went wrong, and I couldn't grab the privacy policy. Please report " +
-                              "this to the developer, don't agree to anything, and read it online instead.",
+                Description = "Oops. Something went wrong, and I couldn't grab the privacy policy. Please report "
+                              + "this to the developer, don't agree to anything, and read it online instead.",
                 Fields = new[] { new EmbedField("Privacy Policy", _content.PrivacyPolicyUri.ToString()) }
             };
 

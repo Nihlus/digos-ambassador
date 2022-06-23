@@ -34,7 +34,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations;
 /// </summary>
 public sealed class TransformationTextTokenizer
 {
-    private readonly Dictionary<string, Type> _availableTokens = new Dictionary<string, Type>();
+    private readonly Dictionary<string, Type> _availableTokens = new();
 
     private readonly IServiceProvider _services;
 
@@ -175,8 +175,8 @@ public sealed class TransformationTextTokenizer
         if (tokenText.Contains('|'))
         {
             var splitter = tokenText.LastIndexOf('|');
-            identifier = tokenText.Substring(0, splitter);
-            data = tokenText.Substring(splitter + 1);
+            identifier = tokenText[..splitter];
+            data = tokenText[(splitter + 1)..];
         }
         else
         {

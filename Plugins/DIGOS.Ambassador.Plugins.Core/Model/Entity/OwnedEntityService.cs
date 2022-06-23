@@ -67,7 +67,7 @@ public sealed class OwnedEntityService
     /// <param name="entityName">The entity name to check.</param>
     /// <returns>true if the name is unique; otherwise, false.</returns>
     [Pure]
-    public bool IsEntityNameUniqueForUser
+    public static bool IsEntityNameUniqueForUser
     (
         IReadOnlyCollection<IOwnedNamedEntity> userEntities,
         string entityName

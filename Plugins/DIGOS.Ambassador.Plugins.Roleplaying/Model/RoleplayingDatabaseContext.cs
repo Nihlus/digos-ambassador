@@ -34,12 +34,12 @@ public class RoleplayingDatabaseContext : AmbassadorDbContext
     private const string _schemaName = "RoleplayModule";
 
     /// <summary>
-    /// Gets or sets the table where roleplays are stored.
+    /// Gets the table where roleplays are stored.
     /// </summary>
     public DbSet<Roleplay> Roleplays => Set<Roleplay>();
 
     /// <summary>
-    /// Gets or sets the table where server settings are stored.
+    /// Gets the table where server settings are stored.
     /// </summary>
     public DbSet<ServerRoleplaySettings> ServerSettings => Set<ServerRoleplaySettings>();
 

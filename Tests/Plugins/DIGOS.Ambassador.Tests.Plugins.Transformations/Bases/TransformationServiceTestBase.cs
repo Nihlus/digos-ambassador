@@ -33,6 +33,7 @@ using DIGOS.Ambassador.Plugins.Transformations.Model;
 using DIGOS.Ambassador.Plugins.Transformations.Services;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using DIGOS.Ambassador.Tests.TestBases;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -44,6 +45,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations;
 /// <summary>
 /// Serves as a test base for transformation service tests.
 /// </summary>
+[PublicAPI]
 public abstract class TransformationServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
 {
     /// <summary>

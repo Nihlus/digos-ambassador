@@ -92,7 +92,7 @@ public partial class AutoroleCommands
             long count
         )
         {
-            var getCondition = _autoroles.GetCondition<MessageCountInChannelCondition>
+            var getCondition = Services.AutoroleService.GetCondition<MessageCountInChannelCondition>
             (
                 autorole,
                 conditionID

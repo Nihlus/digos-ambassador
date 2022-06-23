@@ -137,9 +137,9 @@ public partial class CharacterCommands : CommandGroup
         }
 
         var fields = pronounProviders.Select(CreatePronounField);
-        var description = "Each field below represents a pronoun that can be used with a character. The title of " +
-                          "each field is the pronoun family that you use when selecting the pronoun, and below it" +
-                          "is a short example of how it might be used.";
+        const string description = "Each field below represents a pronoun that can be used with a character. The "
+                                   + "title of each field is the pronoun family that you use when selecting the "
+                                   + "pronoun, and below it is a short example of how it might be used.";
 
         var pageBase = new Embed
         {

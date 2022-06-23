@@ -31,11 +31,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Permissions;
 public class DeleteAutorole : Permission
 {
     /// <inheritdoc />
-    public override Guid UniqueIdentifier { get; } = new Guid("177728EE-4DD6-4F01-8D0A-B29E4ED84501");
+    public override Guid UniqueIdentifier { get; } = new("177728EE-4DD6-4F01-8D0A-B29E4ED84501");
 
     /// <inheritdoc/>
-    public override string FriendlyName { get; } = nameof(DeleteAutorole);
+    public override string FriendlyName => nameof(DeleteAutorole);
 
     /// <inheritdoc/>
-    public override string Description { get; } = "Allows you to delete autoroles.";
+    public override string Description => "Allows you to delete autoroles.";
 }

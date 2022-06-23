@@ -30,6 +30,7 @@ using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Statistics;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Remora.Results;
@@ -39,6 +40,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services;
 /// <summary>
 /// Business logic class for user statistics.
 /// </summary>
+[PublicAPI]
 public sealed class UserStatisticsService
 {
     private readonly AutoroleDatabaseContext _database;

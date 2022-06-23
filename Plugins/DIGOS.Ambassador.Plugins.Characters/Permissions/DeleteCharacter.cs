@@ -31,7 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Permissions;
 public sealed class DeleteCharacter : Permission
 {
     /// <inheritdoc />
-    public override Guid UniqueIdentifier { get; } = new Guid("511A9A88-4797-41D9-939E-C5DDD5479C1E");
+    public override Guid UniqueIdentifier { get; } = new("511A9A88-4797-41D9-939E-C5DDD5479C1E");
 
     /// <inheritdoc />
     public override string FriendlyName => nameof(DeleteCharacter);

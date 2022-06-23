@@ -37,22 +37,22 @@ public class AutoroleDatabaseContext : AmbassadorDbContext
     private const string _schemaName = "AutoroleModule";
 
     /// <summary>
-    /// Gets or sets the table where autoroles are stored.
+    /// Gets the table where autoroles are stored.
     /// </summary>
     public DbSet<AutoroleConfiguration> Autoroles => Set<AutoroleConfiguration>();
 
     /// <summary>
-    /// Gets or sets the table where user statistics are stored.
+    /// Gets the table where user statistics are stored.
     /// </summary>
     public DbSet<UserStatistics> UserStatistics => Set<UserStatistics>();
 
     /// <summary>
-    /// Gets or sets the table where autorole confirmations are stored.
+    /// Gets the table where autorole confirmations are stored.
     /// </summary>
     public DbSet<AutoroleConfirmation> AutoroleConfirmations => Set<AutoroleConfirmation>();
 
     /// <summary>
-    /// Gets or sets the table where autorole server settings are stored.
+    /// Gets the table where autorole server settings are stored.
     /// </summary>
     public DbSet<AutoroleServerSettings> AutoroleServerSettings => Set<AutoroleServerSettings>();
 
@@ -115,7 +115,7 @@ public class AutoroleDatabaseContext : AmbassadorDbContext
             .IsUnique();
     }
 
-    private void ConfigureTimeSinceEventCondition<TTimeSinceEventCondition>(ModelBuilder modelBuilder)
+    private static void ConfigureTimeSinceEventCondition<TTimeSinceEventCondition>(ModelBuilder modelBuilder)
         where TTimeSinceEventCondition : TimeSinceEventCondition<TTimeSinceEventCondition>
     {
         modelBuilder.Entity<TTimeSinceEventCondition>()
@@ -128,7 +128,7 @@ public class AutoroleDatabaseContext : AmbassadorDbContext
             .HasColumnName(nameof(TimeSinceEventCondition<TTimeSinceEventCondition>.RequiredTime));
     }
 
-    private void ConfigureMessageCountCondition<TMessageCountCondition>(ModelBuilder modelBuilder)
+    private static void ConfigureMessageCountCondition<TMessageCountCondition>(ModelBuilder modelBuilder)
         where TMessageCountCondition : MessageCountInSourceCondition<TMessageCountCondition>
     {
         modelBuilder.Entity<TMessageCountCondition>()

@@ -125,7 +125,7 @@ public class RoleplayArchivalBehaviour : ContinuousBehaviour<RoleplayArchivalBeh
         return Result.FromSuccess();
     }
 
-    private async Task<Result> ArchiveRoleplayAsync
+    private static async Task<Result> ArchiveRoleplayAsync
     (
         IServiceProvider services,
         FeedbackService feedback,
@@ -160,7 +160,7 @@ public class RoleplayArchivalBehaviour : ContinuousBehaviour<RoleplayArchivalBeh
         return await dedicatedChannels.DeleteChannelAsync(roleplay);
     }
 
-    private async Task<Result> PostArchivedRoleplayAsync
+    private static async Task<Result> PostArchivedRoleplayAsync
     (
         IServiceProvider services,
         FeedbackService feedback,
@@ -212,7 +212,7 @@ public class RoleplayArchivalBehaviour : ContinuousBehaviour<RoleplayArchivalBeh
             : Result.FromError(send);
     }
 
-    private async Task<Result> NotifyOwnerAsync(FeedbackService feedback, Roleplay roleplay)
+    private static async Task<Result> NotifyOwnerAsync(FeedbackService feedback, Roleplay roleplay)
     {
         var notification = new Embed
         {

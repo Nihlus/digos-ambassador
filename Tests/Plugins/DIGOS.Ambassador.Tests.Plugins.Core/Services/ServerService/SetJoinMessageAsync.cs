@@ -84,7 +84,7 @@ public static partial class ServerServiceTests
         [Fact]
         public async Task CanSetJoinMessage()
         {
-            var newJoinMessage = "oogabooga";
+            const string newJoinMessage = "oogabooga";
             var result = await this.Servers.SetJoinMessageAsync(_server, newJoinMessage);
 
             Assert.True(result.IsSuccess);

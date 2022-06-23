@@ -166,7 +166,7 @@ public sealed class UserService
         CancellationToken ct = default
     )
     {
-        if (timezoneOffset < -12 || timezoneOffset > 14)
+        if (timezoneOffset is < -12 or > 14)
         {
             return new UserError($"{timezoneOffset} is not a valid offset.");
         }

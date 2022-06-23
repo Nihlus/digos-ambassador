@@ -88,7 +88,7 @@ public partial class AutoroleCommands
             IRole role
         )
         {
-            var getCondition = _autoroles.GetCondition<RoleCondition>
+            var getCondition = Services.AutoroleService.GetCondition<RoleCondition>
             (
                 autorole,
                 conditionID

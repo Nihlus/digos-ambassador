@@ -31,7 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Permissions;
 public sealed class ManageNotes : Permission
 {
     /// <inheritdoc />
-    public override Guid UniqueIdentifier { get; } = new Guid("8FB711F2-336E-44C8-9E94-FBA4BAF1255D");
+    public override Guid UniqueIdentifier { get; } = new("8FB711F2-336E-44C8-9E94-FBA4BAF1255D");
 
     /// <inheritdoc />
     public override string FriendlyName => nameof(ManageNotes);

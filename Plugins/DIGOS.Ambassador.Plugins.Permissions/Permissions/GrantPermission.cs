@@ -32,7 +32,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions;
 public sealed class GrantPermission : Permission
 {
     /// <inheritdoc />
-    public override Guid UniqueIdentifier { get; } = new Guid("E87BCAC2-094B-4576-B554-FC5C1F943401");
+    public override Guid UniqueIdentifier { get; } = new("E87BCAC2-094B-4576-B554-FC5C1F943401");
 
     /// <inheritdoc />
     public override string FriendlyName => nameof(GrantPermission);

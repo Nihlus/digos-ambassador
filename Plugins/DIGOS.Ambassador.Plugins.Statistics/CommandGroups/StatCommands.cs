@@ -175,7 +175,7 @@ public class StatCommands : CommandGroup
     /// </summary>
     /// <param name="guild">The guild.</param>
     /// <returns>The embed.</returns>
-    private Embed CreateGuildInfoEmbed(IGuild guild)
+    private static Embed CreateGuildInfoEmbed(IGuild guild)
     {
         var eb = new Embed();
 
@@ -214,7 +214,7 @@ public class StatCommands : CommandGroup
 
         var fields = new List<EmbedField>
         {
-            new("Owner", $"<@{guild.OwnerID}>"),
+            new("Owner", $"<@{guild.OwnerID}>")
         };
 
         if (guild.ApproximateMemberCount.HasValue)

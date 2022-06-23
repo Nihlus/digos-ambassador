@@ -114,7 +114,7 @@ public class AppearanceComponent
         {
             BaseColour = Colour.CopyFrom(other.BaseColour),
             Pattern = other.Pattern,
-            PatternColour = other.PatternColour is null ? null : Colour.CopyFrom(other.PatternColour),
+            PatternColour = other.PatternColour is null ? null : Colour.CopyFrom(other.PatternColour)
         };
     }
 

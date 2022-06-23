@@ -38,5 +38,5 @@ public enum Pattern
     Checkered,
     Splotchy,
     Patchy,
-    Banded,
+    Banded
 }

@@ -68,7 +68,7 @@ public static partial class CharacterServiceTests
         [Fact]
         public async Task ReturnsUnsuccessfulResultIfOwnerIsNullAndNoACharacterWithThatNameExists()
         {
-            var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, null, "NonExistant");
+            var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, null, "NonExistent");
 
             Assert.False(result.IsSuccess);
         }
@@ -92,7 +92,7 @@ public static partial class CharacterServiceTests
         [Fact]
         public async Task ReturnsUnsuccessfulResultIfOwnerIsNotNullAndNameIsNotNullAndUserDoesNotHaveACharacterWithThatName()
         {
-            var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, "NonExistant");
+            var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, "NonExistent");
 
             Assert.False(result.IsSuccess);
         }

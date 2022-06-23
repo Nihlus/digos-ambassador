@@ -41,7 +41,7 @@ public abstract class AmbassadorDbContext : DbContext
     /// </summary>
     /// <param name="schema">The schema managed by the context.</param>
     /// <param name="contextOptions">The context options.</param>
-    public AmbassadorDbContext(string schema, DbContextOptions contextOptions)
+    protected AmbassadorDbContext(string schema, DbContextOptions contextOptions)
         : base(contextOptions)
     {
         this.Schema = schema;

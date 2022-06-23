@@ -31,13 +31,13 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Permissions;
 public class ShowAutoroleServerSettings : Permission
 {
     /// <inheritdoc />
-    public override Guid UniqueIdentifier { get; } = new Guid("5407D2B9-2F36-46A4-AD2F-6E6DF152F5F4");
+    public override Guid UniqueIdentifier { get; } = new("5407D2B9-2F36-46A4-AD2F-6E6DF152F5F4");
 
     /// <inheritdoc/>
-    public override string FriendlyName { get; } = nameof(ShowAutoroleServerSettings);
+    public override string FriendlyName => nameof(ShowAutoroleServerSettings);
 
     /// <inheritdoc/>
-    public override string Description { get; } = "Allows you to view autoroles.";
+    public override string Description => "Allows you to view autoroles.";
 
     /// <inheritdoc />
     public override bool IsGrantedByDefaultToSelf => true;

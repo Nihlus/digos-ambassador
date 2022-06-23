@@ -160,7 +160,7 @@ public sealed class ServerService
     /// <param name="server">The server.</param>
     /// <returns>A retrieval result which may or may not have succeeded.</returns>
     [Pure]
-    public Result<string> GetDescription(Server server)
+    public static Result<string> GetDescription(Server server)
     {
         return server.Description.IsNullOrWhitespace()
             ? new UserError("No description set.")
@@ -219,7 +219,7 @@ public sealed class ServerService
     /// <param name="server">The server.</param>
     /// <returns>A retrieval result which may or may not have succeeded.</returns>
     [Pure]
-    public Result<string> GetJoinMessage(Server server)
+    public static Result<string> GetJoinMessage(Server server)
     {
         return server.JoinMessage.IsNullOrWhitespace()
             ? new UserError("No join message set.")

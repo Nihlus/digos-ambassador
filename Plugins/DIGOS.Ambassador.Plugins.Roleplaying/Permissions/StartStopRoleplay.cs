@@ -31,7 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions;
 public sealed class StartStopRoleplay : Permission
 {
     /// <inheritdoc />
-    public override Guid UniqueIdentifier { get; } = new Guid("2B59B3EB-F4F7-4150-BB36-B55AE2D5C6D7");
+    public override Guid UniqueIdentifier { get; } = new("2B59B3EB-F4F7-4150-BB36-B55AE2D5C6D7");
 
     /// <inheritdoc />
     public override string FriendlyName => nameof(StartStopRoleplay);

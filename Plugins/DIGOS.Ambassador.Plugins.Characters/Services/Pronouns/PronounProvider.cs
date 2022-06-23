@@ -28,7 +28,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
 /// <summary>
 /// Provides pronouns.
 /// </summary>
-[UsedImplicitly]
+[MeansImplicitUse(ImplicitUseKindFlags.InstantiatedNoFixedConstructorSignature, ImplicitUseTargetFlags.WithInheritors)]
 public abstract class PronounProvider : IPronounProvider
 {
     /// <inheritdoc />
@@ -52,40 +52,16 @@ public abstract class PronounProvider : IPronounProvider
     /// <inheritdoc />
     public string GetForm(PronounForm form)
     {
-        switch (form)
+        return form switch
         {
-            case PronounForm.Subject:
-            {
-                return GetSubjectForm();
-            }
-            case PronounForm.SubjectVerb:
-            {
-                return GetSubjectForm(true);
-            }
-            case PronounForm.Object:
-            {
-                return GetObjectForm();
-            }
-            case PronounForm.PossessiveAdjective:
-            {
-                return GetPossessiveAdjectiveForm();
-            }
-            case PronounForm.Possessive:
-            {
-                return GetPossessiveForm();
-            }
-            case PronounForm.PossessiveVerb:
-            {
-                return GetPossessiveForm(true);
-            }
-            case PronounForm.Reflexive:
-            {
-                return GetReflexiveForm();
-            }
-            default:
-            {
-                throw new ArgumentOutOfRangeException(nameof(form), form, null);
-            }
-        }
+            PronounForm.Subject => GetSubjectForm(),
+            PronounForm.SubjectVerb => GetSubjectForm(true),
+            PronounForm.Object => GetObjectForm(),
+            PronounForm.PossessiveAdjective => GetPossessiveAdjectiveForm(),
+            PronounForm.Possessive => GetPossessiveForm(),
+            PronounForm.PossessiveVerb => GetPossessiveForm(true),
+            PronounForm.Reflexive => GetReflexiveForm(),
+            _ => throw new ArgumentOutOfRangeException(nameof(form), form, null)
+        };
     }
 }

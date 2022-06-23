@@ -35,8 +35,8 @@ public partial class TransformationServiceTests
 {
     public class WhitelistUserAsync : TransformationServiceTestBase
     {
-        private readonly Snowflake _user = new Snowflake(0);
-        private readonly Snowflake _whitelistedUser = new Snowflake(1);
+        private readonly Snowflake _user = new(0);
+        private readonly Snowflake _whitelistedUser = new(1);
 
         [Fact]
         public async Task CanWhitelistUser()

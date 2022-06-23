@@ -574,25 +574,16 @@ public sealed class TransformationService
         }
 
         var globalProtection = getGlobalProtectionResult.Entity;
-        switch (localProtection.Type)
+        return localProtection.Type switch
         {
-            case ProtectionType.Blacklist:
-            {
-                return globalProtection.Blacklist.All(u => u.DiscordID != invokingUser)
-                    ? Result.FromSuccess()
-                    : new UserError("You're on that user's blacklist.");
-            }
-            case ProtectionType.Whitelist:
-            {
-                return globalProtection.Whitelist.Any(u => u.DiscordID == invokingUser)
-                    ? Result.FromSuccess()
-                    : new UserError("You're not on that user's whitelist.");
-            }
-            default:
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-        }
+            ProtectionType.Blacklist => globalProtection.Blacklist.All(u => u.DiscordID != invokingUser)
+                ? Result.FromSuccess()
+                : new UserError("You're on that user's blacklist."),
+            ProtectionType.Whitelist => globalProtection.Whitelist.Any(u => u.DiscordID == invokingUser)
+                ? Result.FromSuccess()
+                : new UserError("You're not on that user's whitelist."),
+            _ => throw new ArgumentOutOfRangeException(nameof(localProtection.Type))
+        };
     }
 
     /// <summary>

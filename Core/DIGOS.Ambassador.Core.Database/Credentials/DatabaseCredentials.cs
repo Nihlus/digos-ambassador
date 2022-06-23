@@ -21,12 +21,14 @@
 //
 
 using System.Diagnostics.CodeAnalysis;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Core.Database.Credentials;
 
 /// <summary>
 /// Represents a set of configured database credentials.
 /// </summary>
+[PublicAPI]
 public class DatabaseCredentials
 {
     /// <summary>

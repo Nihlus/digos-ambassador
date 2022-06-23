@@ -65,7 +65,14 @@ public class ServerCommands : CommandGroup
     /// <param name="context">The command context.</param>
     /// <param name="guildAPI">The guild API.</param>
     /// <param name="channelAPI">The channel API.</param>
-    public ServerCommands(FeedbackService feedback, ServerService servers, ICommandContext context, IDiscordRestGuildAPI guildAPI, IDiscordRestChannelAPI channelAPI)
+    public ServerCommands
+    (
+        FeedbackService feedback,
+        ServerService servers,
+        ICommandContext context,
+        IDiscordRestGuildAPI guildAPI,
+        IDiscordRestChannelAPI channelAPI
+    )
     {
         _feedback = feedback;
         _servers = servers;
@@ -139,7 +146,7 @@ public class ServerCommands : CommandGroup
             }
         }
 
-        var getDescription = _servers.GetDescription(server);
+        var getDescription = ServerService.GetDescription(server);
         embed = embed with
         {
             Description = getDescription.IsSuccess
@@ -177,7 +184,7 @@ public class ServerCommands : CommandGroup
 
         var server = getServerResult.Entity;
 
-        var getJoinMessageResult = _servers.GetJoinMessage(server);
+        var getJoinMessageResult = ServerService.GetJoinMessage(server);
         if (!getJoinMessageResult.IsSuccess)
         {
             return getJoinMessageResult;
@@ -221,12 +228,9 @@ public class ServerCommands : CommandGroup
         var server = getServerResult.Entity;
 
         var result = await _servers.ClearJoinMessageAsync(server);
-        if (!result.IsSuccess)
-        {
-            return Result<FeedbackMessage>.FromError(result);
-        }
-
-        return new FeedbackMessage("Join message cleared.", _feedback.Theme.Secondary);
+        return result.IsSuccess
+            ? new FeedbackMessage("Join message cleared.", _feedback.Theme.Secondary)
+            : Result<FeedbackMessage>.FromError(result);
     }
 
     /// <summary>
@@ -272,12 +276,9 @@ public class ServerCommands : CommandGroup
             var server = getServerResult.Entity;
 
             var result = await _servers.SetDescriptionAsync(server, newDescription);
-            if (!result.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(result);
-            }
-
-            return new FeedbackMessage("Server description set.", _feedback.Theme.Secondary);
+            return result.IsSuccess
+                ? new FeedbackMessage("Server description set.", _feedback.Theme.Secondary)
+                : Result<FeedbackMessage>.FromError(result);
         }
 
         /// <summary>
@@ -299,12 +300,9 @@ public class ServerCommands : CommandGroup
             var server = getServerResult.Entity;
 
             var result = await _servers.SetJoinMessageAsync(server, newJoinMessage);
-            if (!result.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(result);
-            }
-
-            return new FeedbackMessage("Server first-join message set.", _feedback.Theme.Secondary);
+            return result.IsSuccess
+                ? new FeedbackMessage("Server first-join message set.", _feedback.Theme.Secondary)
+                : Result<FeedbackMessage>.FromError(result);
         }
 
         /// <summary>

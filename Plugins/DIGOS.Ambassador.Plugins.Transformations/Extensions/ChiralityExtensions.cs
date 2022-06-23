@@ -35,17 +35,17 @@ public static class ChiralityExtensions
     /// <summary>
     /// Gets the inverse chirality of the given chirality.
     /// </summary>
-    /// <param name="this">The chirality.</param>
+    /// <param name="chirality">The chirality.</param>
     /// <returns>The inverse chirality.</returns>
     [Pure]
-    public static Chirality Opposite(this Chirality @this)
+    public static Chirality Opposite(this Chirality chirality)
     {
-        switch (@this)
+        return chirality switch
         {
-            case Chirality.Left: return Chirality.Right;
-            case Chirality.Right: return Chirality.Left;
-            case Chirality.Center: return Chirality.Center;
-            default: throw new ArgumentOutOfRangeException(nameof(@this), @this, "Unknown chirality.");
-        }
+            Chirality.Left => Chirality.Right,
+            Chirality.Right => Chirality.Left,
+            Chirality.Center => Chirality.Center,
+            _ => throw new ArgumentOutOfRangeException(nameof(chirality), chirality, "Unknown chirality.")
+        };
     }
 }

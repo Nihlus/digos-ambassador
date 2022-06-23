@@ -83,7 +83,7 @@ public class LuaServiceTests
         [Fact]
         public async Task CanAccessPassedVariables()
         {
-            var variable = 10;
+            const int variable = 10;
             const string code = "return variable";
 
             var result = await _lua.ExecuteSnippetAsync(code, (nameof(variable), variable));

@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Net.Http;
@@ -41,6 +42,7 @@ using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Interactivity.Services;
 using Remora.Discord.Pagination.Extensions;
+using Remora.Rest.Core;
 using Remora.Rest.Json.Policies;
 using Remora.Results;
 
@@ -258,7 +260,7 @@ public class KinkCommands : CommandGroup
             initialEmbed,
             m => $"kink-wizard::{m.ID.ToString()}",
             _ => initialWizard,
-            new FeedbackMessageOptions(MessageComponents: new(initialComponents)),
+            new FeedbackMessageOptions(MessageComponents: new Optional<IReadOnlyList<IMessageComponent>>(initialComponents)),
             ct: this.CancellationToken
         );
     }

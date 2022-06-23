@@ -31,7 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Permissions;
 public sealed class EditUserInfo : Permission
 {
     /// <inheritdoc />
-    public override Guid UniqueIdentifier { get; } = new Guid("CCDFAC99-4A25-4A37-A4E8-93C7F0C54323");
+    public override Guid UniqueIdentifier { get; } = new("CCDFAC99-4A25-4A37-A4E8-93C7F0C54323");
 
     /// <inheritdoc />
     public override string FriendlyName => nameof(EditUserInfo);

@@ -88,12 +88,9 @@ public partial class NoteCommands
             var note = getNote.Entity;
 
             var setContents = await _notes.SetNoteContentsAsync(note, newContents);
-            if (!setContents.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(setContents);
-            }
-
-            return new FeedbackMessage("Note contents updated.", _feedback.Theme.Secondary);
+            return setContents.IsSuccess
+                ? new FeedbackMessage("Note contents updated.", _feedback.Theme.Secondary)
+                : Result<FeedbackMessage>.FromError(setContents);
         }
     }
 }

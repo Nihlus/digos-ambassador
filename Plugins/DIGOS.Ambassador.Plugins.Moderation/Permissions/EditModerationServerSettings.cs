@@ -31,7 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Permissions;
 public sealed class EditModerationServerSettings : Permission
 {
     /// <inheritdoc />
-    public override Guid UniqueIdentifier { get; } = new Guid("A41141B7-1010-43DA-9372-2866B1CB78F7");
+    public override Guid UniqueIdentifier { get; } = new("A41141B7-1010-43DA-9372-2866B1CB78F7");
 
     /// <inheritdoc />
     public override string FriendlyName => nameof(EditModerationServerSettings);

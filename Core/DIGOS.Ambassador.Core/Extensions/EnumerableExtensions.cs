@@ -30,7 +30,7 @@ using Remora.Results;
 namespace DIGOS.Ambassador.Core.Extensions;
 
 /// <summary>
-/// Extensions for enumerables.
+/// Extensions for <see cref="IEnumerable{T}"/>.
 /// </summary>
 public static class EnumerableExtensions
 {

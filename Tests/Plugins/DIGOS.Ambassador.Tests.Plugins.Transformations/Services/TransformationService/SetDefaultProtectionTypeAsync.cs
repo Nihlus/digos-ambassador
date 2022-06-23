@@ -36,12 +36,12 @@ public partial class TransformationServiceTests
 {
     public class SetDefaultProtectionTypeAsync : TransformationServiceTestBase
     {
-        private readonly Snowflake _user = new Snowflake(0);
+        private readonly Snowflake _user = new(0);
 
         [Fact]
         public async Task CanSetType()
         {
-            var expected = ProtectionType.Whitelist;
+            const ProtectionType expected = ProtectionType.Whitelist;
             var result = await this.Transformations.SetDefaultProtectionTypeAsync
             (
                 _user,
@@ -55,7 +55,7 @@ public partial class TransformationServiceTests
         [Fact]
         public async Task ReturnsUnsuccessfulResultIfSameTypeIsAlreadySet()
         {
-            var currentType = ProtectionType.Blacklist;
+            const ProtectionType currentType = ProtectionType.Blacklist;
             var result = await this.Transformations.SetDefaultProtectionTypeAsync
             (
                 _user,

@@ -41,7 +41,7 @@ public partial class OwnedEntityServiceTests
             var entityMock = new Mock<IOwnedNamedEntity>();
             entityMock.Setup(e => e.Name).Returns("Test");
 
-            var result = this.Entities.IsEntityNameUniqueForUser(new List<IOwnedNamedEntity>(), "Test2");
+            var result = OwnedEntityService.IsEntityNameUniqueForUser(new List<IOwnedNamedEntity>(), "Test2");
 
             Assert.True(result);
         }
@@ -53,7 +53,7 @@ public partial class OwnedEntityServiceTests
             entityMock.Setup(e => e.Name).Returns("Test");
 
             var collection = new List<IOwnedNamedEntity> { entityMock.Object };
-            var result = this.Entities.IsEntityNameUniqueForUser(collection, "Test2");
+            var result = OwnedEntityService.IsEntityNameUniqueForUser(collection, "Test2");
 
             Assert.True(result);
         }
@@ -65,7 +65,7 @@ public partial class OwnedEntityServiceTests
             entityMock.Setup(e => e.Name).Returns("Test");
 
             var collection = new List<IOwnedNamedEntity> { entityMock.Object };
-            var result = this.Entities.IsEntityNameUniqueForUser(collection, "Test");
+            var result = OwnedEntityService.IsEntityNameUniqueForUser(collection, "Test");
 
             Assert.False(result);
         }
@@ -77,7 +77,7 @@ public partial class OwnedEntityServiceTests
             entityMock.Setup(e => e.Name).Returns("Test");
 
             var collection = new List<IOwnedNamedEntity> { entityMock.Object };
-            var result = this.Entities.IsEntityNameUniqueForUser(collection, "TEST");
+            var result = OwnedEntityService.IsEntityNameUniqueForUser(collection, "TEST");
 
             Assert.False(result);
         }

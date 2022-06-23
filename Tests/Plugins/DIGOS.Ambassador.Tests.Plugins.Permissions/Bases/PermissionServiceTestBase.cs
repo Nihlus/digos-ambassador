@@ -66,7 +66,7 @@ public abstract class PermissionServiceTestBase : DatabaseProvidingTestBase, IAs
         guildMock.SetupGet(g => g.OwnerID).Returns(new Snowflake(3));
 
         var guildMemberMock = new Mock<IGuildMember>();
-        guildMemberMock.SetupGet(g => g.Roles).Returns(new List<Snowflake> { new Snowflake(2) });
+        guildMemberMock.SetupGet(g => g.Roles).Returns(new List<Snowflake> { new(2) });
 
         var guildAPIMock = new Mock<IDiscordRestGuildAPI>();
         guildAPIMock

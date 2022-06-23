@@ -34,6 +34,7 @@ using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Tests.TestBases;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -47,6 +48,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters;
 /// <summary>
 /// Serves as a test base for character service tests.
 /// </summary>
+[PublicAPI]
 public abstract class CharacterServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
 {
     /// <summary>
@@ -73,16 +75,6 @@ public abstract class CharacterServiceTestBase : DatabaseProvidingTestBase, IAsy
     /// Gets the character service object.
     /// </summary>
     protected ICharacterEditor CharacterEditor { get; private set; } = null!;
-
-    /// <summary>
-    /// Gets the user service.
-    /// </summary>
-    protected UserService Users { get; private set; } = null!;
-
-    /// <summary>
-    /// Gets the server service.
-    /// </summary>
-    protected ServerService Servers { get; private set; } = null!;
 
     /// <summary>
     /// Creates a character in the database with the given settings.
@@ -167,7 +159,7 @@ public abstract class CharacterServiceTestBase : DatabaseProvidingTestBase, IAsy
         this.Characters = serviceProvider.GetRequiredService<ICharacterService>();
         this.CharacterEditor = serviceProvider.GetRequiredService<ICharacterEditor>();
 
-        this.Users = serviceProvider.GetRequiredService<UserService>();
+        serviceProvider.GetRequiredService<UserService>();
 
         this.DefaultOwner = this.Database.CreateProxy<User>(new Snowflake(0));
         this.Database.Update(this.DefaultOwner);

@@ -150,7 +150,7 @@ internal sealed class PDFRoleplayExporter : RoleplayExporterBase
     /// </summary>
     /// <param name="title">The title.</param>
     /// <returns>The resulting paragraph.</returns>
-    private Paragraph CreateTitle(string title)
+    private static Paragraph CreateTitle(string title)
     {
         var chunk = new Chunk(title, _titleFont);
 
@@ -162,7 +162,7 @@ internal sealed class PDFRoleplayExporter : RoleplayExporterBase
         return para;
     }
 
-    private Paragraph CreateParticipantList(IEnumerable<string> participantNames)
+    private static Paragraph CreateParticipantList(IEnumerable<string> participantNames)
     {
         var paragraph = new Paragraph
         {
@@ -183,7 +183,7 @@ internal sealed class PDFRoleplayExporter : RoleplayExporterBase
         return paragraph;
     }
 
-    private Paragraph CreateMessage(string author, string contents)
+    private static Paragraph CreateMessage(string author, string contents)
     {
         var authorChunk = new Chunk($"{author} \n", _italicFont);
 
@@ -200,7 +200,7 @@ internal sealed class PDFRoleplayExporter : RoleplayExporterBase
         return para;
     }
 
-    private Paragraph FormatContentString(string contents)
+    private static Paragraph FormatContentString(string contents)
     {
         var splits = contents.Split(new[] { "```" }, StringSplitOptions.None).Select(s => s.TrimStart('\n')).ToList();
         var paragraph = new Paragraph();

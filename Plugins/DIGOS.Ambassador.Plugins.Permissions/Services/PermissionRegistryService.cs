@@ -37,7 +37,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services;
 [PublicAPI]
 public sealed class PermissionRegistryService
 {
-    private readonly Dictionary<Type, IPermission> _registeredPermissions = new Dictionary<Type, IPermission>();
+    private readonly Dictionary<Type, IPermission> _registeredPermissions = new();
 
     /// <summary>
     /// Gets the permissions that have been registered in the service.

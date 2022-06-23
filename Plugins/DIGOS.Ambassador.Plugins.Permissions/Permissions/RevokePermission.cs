@@ -32,7 +32,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions;
 public sealed class RevokePermission : Permission
 {
     /// <inheritdoc />
-    public override Guid UniqueIdentifier { get; } = new Guid("6BD7972F-FB72-41F4-9BC2-B2FC67A362FB");
+    public override Guid UniqueIdentifier { get; } = new("6BD7972F-FB72-41F4-9BC2-B2FC67A362FB");
 
     /// <inheritdoc />
     public override string FriendlyName => nameof(RevokePermission);

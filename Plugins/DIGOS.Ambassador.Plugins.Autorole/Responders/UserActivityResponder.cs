@@ -77,7 +77,7 @@ public class UserActivityResponder :
 
         var user = gatewayEvent.Author.ID;
 
-        return await UpdateTimestampAndRelevantAutorolesAsync(ct, guildID, user);
+        return await UpdateTimestampAndRelevantAutorolesAsync(guildID, user, ct);
     }
 
     /// <inheritdoc />
@@ -90,7 +90,7 @@ public class UserActivityResponder :
 
         var user = gatewayEvent.UserID;
 
-        return await UpdateTimestampAndRelevantAutorolesAsync(ct, guildID, user);
+        return await UpdateTimestampAndRelevantAutorolesAsync(guildID, user, ct);
     }
 
     /// <inheritdoc />
@@ -103,7 +103,7 @@ public class UserActivityResponder :
 
         var user = gatewayEvent.UserID;
 
-        return await UpdateTimestampAndRelevantAutorolesAsync(ct, guildID, user);
+        return await UpdateTimestampAndRelevantAutorolesAsync(guildID, user, ct);
     }
 
     /// <inheritdoc />
@@ -116,7 +116,7 @@ public class UserActivityResponder :
 
         var user = gatewayEvent.UserID;
 
-        return await UpdateTimestampAndRelevantAutorolesAsync(ct, guildID, user);
+        return await UpdateTimestampAndRelevantAutorolesAsync(guildID, user, ct);
     }
 
     /// <inheritdoc />
@@ -129,7 +129,7 @@ public class UserActivityResponder :
 
         var user = gatewayEvent.UserID;
 
-        return await UpdateTimestampAndRelevantAutorolesAsync(ct, guildID, user);
+        return await UpdateTimestampAndRelevantAutorolesAsync(guildID, user, ct);
     }
 
     /// <inheritdoc />
@@ -142,10 +142,15 @@ public class UserActivityResponder :
 
         var user = gatewayEvent.User.ID.Value;
 
-        return await UpdateTimestampAndRelevantAutorolesAsync(ct, guildID, user);
+        return await UpdateTimestampAndRelevantAutorolesAsync(guildID, user, ct);
     }
 
-    private async Task<Result> UpdateTimestampAndRelevantAutorolesAsync(CancellationToken ct, Snowflake guild, Snowflake user)
+    private async Task<Result> UpdateTimestampAndRelevantAutorolesAsync
+    (
+        Snowflake guild,
+        Snowflake user,
+        CancellationToken ct = default
+    )
     {
         {
             using var timestampTransaction = TransactionFactory.Create(ReadCommitted);

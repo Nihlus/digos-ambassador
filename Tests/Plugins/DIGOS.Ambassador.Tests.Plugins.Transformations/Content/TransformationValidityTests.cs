@@ -38,7 +38,7 @@ public class TransformationValidityTests : TransformationValidityTestBase
     [ClassData(typeof(TransformationDataProvider))]
     public void TransformationFileIsValid(string transformationFile)
     {
-        var result = this.Verifier.VerifyFile<Transformation>(transformationFile);
+        var result = TransformationFileVerifier.VerifyFile<Transformation>(transformationFile);
 
         Assert.True(result.IsSuccess, result.IsSuccess ? string.Empty : result.Error.Message);
     }
@@ -102,7 +102,7 @@ public class TransformationValidityTests : TransformationValidityTestBase
     public void TransformationHasCorrectlyMarkedAdultStatus(string transformationFile)
     {
         var transformation = Deserialize<Transformation>(transformationFile);
-        if (transformation.Part == Bodypart.Penis || transformation.Part == Bodypart.Vagina)
+        if (transformation.Part is Bodypart.Penis or Bodypart.Vagina)
         {
             Assert.True(transformation.IsNSFW);
         }

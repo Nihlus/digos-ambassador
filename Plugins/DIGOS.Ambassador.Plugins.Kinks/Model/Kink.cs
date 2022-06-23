@@ -111,9 +111,9 @@ public class Kink : EFEntity, IEquatable<Kink>
         unchecked
         {
             var hashCode = (int)this.Category;
-            hashCode = (hashCode * 397) ^ (int)this.FListID;
-            hashCode = (hashCode * 397) ^ this.Name.GetHashCode();
-            hashCode = (hashCode * 397) ^ this.Description.GetHashCode();
+            hashCode = hashCode * 397 ^ (int)this.FListID;
+            hashCode = hashCode * 397 ^ this.Name.GetHashCode();
+            hashCode = hashCode * 397 ^ this.Description.GetHashCode();
             return hashCode;
         }
     }

@@ -90,12 +90,9 @@ public partial class BanCommands
             var ban = getBan.Entity;
 
             var setContents = await _bans.SetBanReasonAsync(ban, newReason);
-            if (!setContents.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(setContents);
-            }
-
-            return new FeedbackMessage("Ban reason updated.", _feedback.Theme.Secondary);
+            return setContents.IsSuccess
+                ? new FeedbackMessage("Ban reason updated.", _feedback.Theme.Secondary)
+                : Result<FeedbackMessage>.FromError(setContents);
         }
 
         /// <summary>
@@ -118,12 +115,9 @@ public partial class BanCommands
             var ban = getBan.Entity;
 
             var setMessage = await _bans.SetBanContextMessageAsync(ban, newMessage.ID);
-            if (!setMessage.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(setMessage);
-            }
-
-            return new FeedbackMessage("Ban context message updated.", _feedback.Theme.Secondary);
+            return setMessage.IsSuccess
+                ? new FeedbackMessage("Ban context message updated.", _feedback.Theme.Secondary)
+                : Result<FeedbackMessage>.FromError(setMessage);
         }
 
         /// <summary>
@@ -148,12 +142,9 @@ public partial class BanCommands
             var newExpiration = ban.CreatedAt.Add(newDuration);
 
             var setExpiration = await _bans.SetBanExpiryDateAsync(ban, newExpiration);
-            if (!setExpiration.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(setExpiration);
-            }
-
-            return new FeedbackMessage("Ban duration updated.", _feedback.Theme.Secondary);
+            return setExpiration.IsSuccess
+                ? new FeedbackMessage("Ban duration updated.", _feedback.Theme.Secondary)
+                : Result<FeedbackMessage>.FromError(setExpiration);
         }
     }
 }

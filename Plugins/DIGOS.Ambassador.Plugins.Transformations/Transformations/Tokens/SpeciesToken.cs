@@ -39,10 +39,13 @@ public sealed class SpeciesToken : ReplaceableTextToken<SpeciesToken>
     {
         var speciesShares = new Dictionary<string, int>();
 
-        foreach (var characterComponent in appearance.Components)
-        {
-            var speciesName = characterComponent.Transformation.Species.Name;
+        var speciesNames = appearance.Components.Select
+        (
+            characterComponent => characterComponent.Transformation.Species.Name
+        );
 
+        foreach (var speciesName in speciesNames)
+        {
             if (speciesShares.ContainsKey(speciesName))
             {
                 speciesShares[speciesName]++;

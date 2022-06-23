@@ -21,7 +21,6 @@
 //
 
 using System.IO;
-using System.Linq;
 using DIGOS.Ambassador.Plugins.Transformations.Model;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
@@ -44,7 +43,7 @@ public class TransformationFileVerifier
     /// <param name="file">The path to the file.</param>
     /// <typeparam name="T">The class to verify the file as.</typeparam>
     /// <returns>A condition result, which may or may not have succeeded.</returns>
-    public Result VerifyFile<T>(string file)
+    public static Result VerifyFile<T>(string file)
     {
         using var sr = new StreamReader(File.OpenRead(file));
         var builder = new DeserializerBuilder()
@@ -73,34 +72,5 @@ public class TransformationFileVerifier
         }
 
         return Result.FromSuccess();
-    }
-
-    /// <summary>
-    /// Verifies all yaml files in the given directory.
-    /// </summary>
-    /// <param name="directory">The directory to load files from.</param>
-    /// <returns>A condition result, which may or may not have succeeded.</returns>
-    public Result VerifyFilesInDirectory(string directory)
-    {
-        var files = Directory.EnumerateFiles(directory, "*.yml", SearchOption.AllDirectories).Where(p => !p.EndsWith("Species.yml")).ToList();
-
-        if (files.Count <= 0)
-        {
-            return new NotFoundError("No files to verify in input directory.");
-        }
-
-        foreach (var file in files)
-        {
-            var verificationResult = VerifyFile<Transformation>(file);
-            if (!verificationResult.IsSuccess)
-            {
-                return verificationResult;
-            }
-        }
-
-        var speciesPath = Path.Combine(directory, "Species.yml");
-        return !File.Exists(speciesPath)
-            ? Result.FromSuccess()
-            : VerifyFile<Species>(speciesPath);
     }
 }

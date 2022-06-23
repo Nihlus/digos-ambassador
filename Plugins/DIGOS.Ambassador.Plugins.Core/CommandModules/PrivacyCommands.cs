@@ -99,12 +99,9 @@ public class PrivacyCommands : CommandGroup
     public async Task<Result<FeedbackMessage>> GrantConsentAsync()
     {
         var grantResult = await _privacy.GrantUserConsentAsync(_context.User.ID);
-        if (!grantResult.IsSuccess)
-        {
-            return Result<FeedbackMessage>.FromError(grantResult);
-        }
-
-        return new FeedbackMessage("Thank you! Enjoy using the bot :smiley:", _feedback.Theme.Secondary);
+        return grantResult.IsSuccess
+            ? new FeedbackMessage("Thank you! Enjoy using the bot :smiley:", _feedback.Theme.Secondary)
+            : Result<FeedbackMessage>.FromError(grantResult);
     }
 
     /// <summary>
@@ -125,9 +122,9 @@ public class PrivacyCommands : CommandGroup
 
         return new FeedbackMessage
         (
-            "Consent revoked - no more information will be stored about you from now on. If you would like to " +
-            "delete your existing data, or get a copy of it, please contact the privacy contact individual (use " +
-            "!privacy contact to get their contact information).",
+            "Consent revoked - no more information will be stored about you from now on. If you would like to "
+            + "delete your existing data, or get a copy of it, please contact the privacy contact individual (use "
+            + "!privacy contact to get their contact information).",
             _feedback.Theme.Secondary
         );
     }
@@ -152,7 +149,7 @@ public class PrivacyCommands : CommandGroup
             Fields = new[]
             {
                 new EmbedField("Email", "jarl.gullberg@gmail.com", true),
-                new EmbedField("Discord", "Jax#7487", true),
+                new EmbedField("Discord", "Jax#7487", true)
             },
             Footer = new EmbedFooter
             (

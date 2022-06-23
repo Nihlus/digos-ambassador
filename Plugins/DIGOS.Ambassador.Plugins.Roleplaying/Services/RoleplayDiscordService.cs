@@ -30,6 +30,7 @@ using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using Humanizer;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
@@ -42,6 +43,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services;
 /// Contains high-level business logic that can be used in Discord commands to consistently interact with roleplays.
 /// The purpose of this class is to coordinate Discord-specific logic with platform-agnostic functionality.
 /// </summary>
+[PublicAPI]
 public class RoleplayDiscordService
 {
     private readonly RoleplayService _roleplays;
@@ -300,7 +302,7 @@ public class RoleplayDiscordService
     /// <returns>A modification result which may or may not have succeeded.</returns>
     public async Task<Result> StartRoleplayAsync(Snowflake currentChannelID, Roleplay roleplay)
     {
-        var getDedicatedChannelResult = _dedicatedChannels.GetDedicatedChannel(roleplay);
+        var getDedicatedChannelResult = DedicatedChannelService.GetDedicatedChannel(roleplay);
 
         // Identify the channel to start the RP in. Preference is given to the roleplay's dedicated channel.
         var channelID = getDedicatedChannelResult.IsSuccess ? getDedicatedChannelResult.Entity : currentChannelID;
@@ -539,37 +541,40 @@ public class RoleplayDiscordService
         string? roleplayName
     )
     {
-        switch (roleplayOwnerID)
+        while (true)
         {
-            case null when roleplayName is null:
+            switch (roleplayOwnerID)
+            {
+                case null when roleplayName is null:
+                {
+                    return await GetActiveRoleplayAsync(channelID);
+                }
+                case null:
+                {
+                    return await _roleplays.GetNamedRoleplayAsync(roleplayName, guildID);
+                }
+            }
+
+            if (roleplayName.IsNullOrWhitespace())
             {
                 return await GetActiveRoleplayAsync(channelID);
             }
-            case null:
+
+            var getUserRoleplay = await _roleplays.GetUserRoleplayByNameAsync
+            (
+                guildID,
+                roleplayOwnerID.Value,
+                roleplayName
+            );
+
+            if (getUserRoleplay.IsSuccess)
             {
-                return await _roleplays.GetNamedRoleplayAsync(roleplayName, guildID);
+                return getUserRoleplay;
             }
-        }
 
-        if (roleplayName.IsNullOrWhitespace())
-        {
-            return await GetActiveRoleplayAsync(channelID);
-        }
-
-        var getUserRoleplay = await _roleplays.GetUserRoleplayByNameAsync
-        (
-            guildID,
-            roleplayOwnerID.Value,
-            roleplayName
-        );
-
-        if (!getUserRoleplay.IsSuccess)
-        {
             // Search again, but this time globally
-            return await GetBestMatchingRoleplayAsync(channelID, guildID, null, roleplayName);
+            roleplayOwnerID = null;
         }
-
-        return getUserRoleplay;
     }
 
     /// <summary>

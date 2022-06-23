@@ -177,11 +177,6 @@ public class ConsentCheckingPreExecutionEvent : IPreExecutionEvent
             ct
         );
 
-        if (!deleteOriginal.IsSuccess)
-        {
-            return deleteOriginal;
-        }
-
-        return new NoConsentError();
+        return deleteOriginal.IsSuccess ? new NoConsentError() : deleteOriginal;
     }
 }

@@ -59,7 +59,7 @@ public static partial class CharacterServiceTests
         [Fact]
         public async Task ReturnsUnsuccessfulResultIfNoCharacterWithThatNameExists()
         {
-            var result = await this.Characters.GetCharacterByNameAsync(this.DefaultServer, "NonExistant");
+            var result = await this.Characters.GetCharacterByNameAsync(this.DefaultServer, "NonExistent");
 
             Assert.False(result.IsSuccess);
         }

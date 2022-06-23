@@ -62,7 +62,7 @@ public class SpeciesValidityTests : TransformationValidityTests
     [ClassData(typeof(SpeciesDataProvider))]
     public void SpeciesFileIsValid(string speciesFile)
     {
-        var result = this.Verifier.VerifyFile<Species>(speciesFile);
+        var result = TransformationFileVerifier.VerifyFile<Species>(speciesFile);
 
         // Guarding ErrorReason here, since it throws if the result was successful.
         Assert.True(result.IsSuccess, result.IsSuccess ? string.Empty : result.Error.Message);

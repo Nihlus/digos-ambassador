@@ -31,7 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions;
 public sealed class KickRoleplayMember : Permission
 {
     /// <inheritdoc />
-    public override Guid UniqueIdentifier { get; } = new Guid("DB14E9B1-DE8B-4B3D-BE25-A117191073C3");
+    public override Guid UniqueIdentifier { get; } = new("DB14E9B1-DE8B-4B3D-BE25-A117191073C3");
 
     /// <inheritdoc />
     public override string FriendlyName => nameof(KickRoleplayMember);

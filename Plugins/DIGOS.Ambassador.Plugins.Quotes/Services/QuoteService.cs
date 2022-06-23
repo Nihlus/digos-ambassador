@@ -43,7 +43,7 @@ public class QuoteService
     /// <param name="message">The message to quote.</param>
     /// <param name="quotingUser">The user that is quoting the message.</param>
     /// <returns>The quote.</returns>
-    public Embed CreateMessageQuote(IMessage message, Snowflake quotingUser)
+    public static Embed CreateMessageQuote(IMessage message, Snowflake quotingUser)
     {
         var eb = new Embed();
 
@@ -92,7 +92,7 @@ public class QuoteService
     /// <param name="message">The quoted message.</param>
     /// <param name="embed">The embed to add the information to.</param>
     /// <returns>true if information was added; otherwise, false.</returns>
-    private Embed AddAttachmentInfo(IMessage message, Embed embed)
+    private static Embed AddAttachmentInfo(IMessage message, Embed embed)
     {
         var firstAttachment = message.Attachments.FirstOrDefault();
         if (firstAttachment is null)
@@ -124,7 +124,7 @@ public class QuoteService
     /// </summary>
     /// <param name="message">The quoted message.</param>
     /// <param name="embed">The embed to add the information to.</param>
-    private Embed AddActivity(IMessage message, Embed embed)
+    private static Embed AddActivity(IMessage message, Embed embed)
     {
         if (!message.Activity.HasValue)
         {
@@ -154,14 +154,14 @@ public class QuoteService
     /// </summary>
     /// <param name="message">The quoted message.</param>
     /// <param name="embed">The embed to add the information to.</param>
-    private Embed AddOtherEmbed(IMessage message, Embed embed)
+    private static Embed AddOtherEmbed(IMessage message, Embed embed)
     {
         if (!message.Embeds.Any())
         {
             return embed;
         }
 
-        var firstEmbed = message.Embeds.First();
+        var firstEmbed = message.Embeds[0];
         if (!firstEmbed.Type.HasValue)
         {
             return embed;
@@ -173,7 +173,7 @@ public class QuoteService
             fields.AddRange(embed.Fields.Value);
         }
 
-        fields.Add(new EmbedField("Embed Type", message.Embeds.First().Type.Value.ToString()));
+        fields.Add(new EmbedField("Embed Type", message.Embeds[0].Type.Value.ToString()));
 
         return embed with
         {
@@ -186,7 +186,7 @@ public class QuoteService
     /// </summary>
     /// <param name="message">The quoted message.</param>
     /// <param name="embed">The embed to add the content to.</param>
-    private Embed AddContent(IMessage message, Embed embed)
+    private static Embed AddContent(IMessage message, Embed embed)
     {
         if (string.IsNullOrWhiteSpace(message.Content))
         {
@@ -206,7 +206,7 @@ public class QuoteService
     /// <param name="message">The quoted message.</param>
     /// <param name="quotingUser">The quoting user.</param>
     /// <param name="embed">The embed to add the information to.</param>
-    private Embed AddMeta
+    private static Embed AddMeta
     (
         IMessage message,
         Snowflake quotingUser,
@@ -236,7 +236,7 @@ public class QuoteService
 
     private static EmbedField CreateQuoteMarkerField(IMessage message, Snowflake quotingUser)
     {
-        return new
+        return new EmbedField
         (
             "Quoted by",
             $"<@{quotingUser}> from **[<#{message.ChannelID}>]({GetJumpUrl(message)})**",

@@ -56,7 +56,7 @@ public static partial class CharacterServiceTests
         [Fact]
         public async Task ReturnsUnsuccessfulResultIfOwnerDoesNotHaveACharacterWithThatName()
         {
-            var result = await this.Characters.GetUserCharacterByNameAsync(this.DefaultOwner, this.DefaultServer, "NonExistant");
+            var result = await this.Characters.GetUserCharacterByNameAsync(this.DefaultOwner, this.DefaultServer, "NonExistent");
 
             Assert.False(result.IsSuccess);
         }

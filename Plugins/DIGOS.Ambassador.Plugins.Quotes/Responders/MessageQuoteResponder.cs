@@ -49,16 +49,13 @@ public class MessageQuoteResponder : IResponder<IMessageCreate>, IResponder<IMes
     );
 
     private readonly IDiscordRestChannelAPI _channelAPI;
-    private readonly QuoteService _quotes;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MessageQuoteResponder"/> class.
     /// </summary>
-    /// <param name="quotes">The feedback service.</param>
     /// <param name="channelAPI">The Discord channel API.</param>
-    public MessageQuoteResponder(QuoteService quotes, IDiscordRestChannelAPI channelAPI)
+    public MessageQuoteResponder(IDiscordRestChannelAPI channelAPI)
     {
-        _quotes = quotes;
         _channelAPI = channelAPI;
     }
 
@@ -168,7 +165,7 @@ public class MessageQuoteResponder : IResponder<IMessageCreate>, IResponder<IMes
 
         var embeds = quotedMessages.Select
         (
-            m => _quotes.CreateMessageQuote(m, quoterID) with { Timestamp = m.Timestamp }
+            m => QuoteService.CreateMessageQuote(m, quoterID) with { Timestamp = m.Timestamp }
         );
 
         foreach (var embed in embeds)
@@ -188,7 +185,7 @@ public class MessageQuoteResponder : IResponder<IMessageCreate>, IResponder<IMes
     /// </summary>
     /// <param name="message">The message.</param>
     /// <returns>true if the message is a quoted message; otherwise, false.</returns>
-    private bool IsQuote(IMessage message)
+    private static bool IsQuote(IMessage message)
     {
         foreach (var embed in message.Embeds)
         {
@@ -211,7 +208,7 @@ public class MessageQuoteResponder : IResponder<IMessageCreate>, IResponder<IMes
     /// </summary>
     /// <param name="message">The message.</param>
     /// <returns>true if the message is a quoted message; otherwise, false.</returns>
-    private bool IsQuote(IPartialMessage message)
+    private static bool IsQuote(IPartialMessage message)
     {
         if (!message.Embeds.IsDefined(out var embeds))
         {

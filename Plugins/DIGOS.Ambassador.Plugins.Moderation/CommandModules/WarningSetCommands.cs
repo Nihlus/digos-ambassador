@@ -90,12 +90,9 @@ public partial class WarningCommands
             var warning = getWarning.Entity;
 
             var setContents = await _warnings.SetWarningReasonAsync(warning, newReason);
-            if (!setContents.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(setContents);
-            }
-
-            return new FeedbackMessage("Warning reason updated.", _feedback.Theme.Secondary);
+            return setContents.IsSuccess
+                ? new FeedbackMessage("Warning reason updated.", _feedback.Theme.Secondary)
+                : Result<FeedbackMessage>.FromError(setContents);
         }
 
         /// <summary>
@@ -118,12 +115,9 @@ public partial class WarningCommands
             var warning = getWarning.Entity;
 
             var setMessage = await _warnings.SetWarningContextMessageAsync(warning, newMessage.ID);
-            if (!setMessage.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(setMessage);
-            }
-
-            return new FeedbackMessage("Warning context message updated.", _feedback.Theme.Secondary);
+            return setMessage.IsSuccess
+                ? new FeedbackMessage("Warning context message updated.", _feedback.Theme.Secondary)
+                : Result<FeedbackMessage>.FromError(setMessage);
         }
 
         /// <summary>
@@ -148,12 +142,9 @@ public partial class WarningCommands
             var newExpiration = warning.CreatedAt.Add(newDuration);
 
             var setExpiration = await _warnings.SetWarningExpiryDateAsync(warning, newExpiration);
-            if (!setExpiration.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(setExpiration);
-            }
-
-            return new FeedbackMessage("Warning duration updated.", _feedback.Theme.Secondary);
+            return setExpiration.IsSuccess
+                ? new FeedbackMessage("Warning duration updated.", _feedback.Theme.Secondary)
+                : Result<FeedbackMessage>.FromError(setExpiration);
         }
     }
 }

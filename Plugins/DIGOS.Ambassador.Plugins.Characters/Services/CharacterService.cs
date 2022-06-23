@@ -194,39 +194,42 @@ public sealed class CharacterService : ICharacterService, ICharacterEditor
         CancellationToken ct = default
     )
     {
-        name = name?.Trim();
-
-        server = _database.NormalizeReference(server);
-        if (user is not null)
+        while (true)
         {
-            user = _database.NormalizeReference(user);
-        }
+            name = name?.Trim();
 
-        switch (user)
-        {
-            case null when name is null:
+            server = _database.NormalizeReference(server);
+            if (user is not null)
             {
-                return new UserError("No user and no name specified.");
+                user = _database.NormalizeReference(user);
             }
-            case null:
+
+            switch (user)
             {
-                return await GetCharacterByNameAsync(server, name, ct);
+                case null when name is null:
+                {
+                    return new UserError("No user and no name specified.");
+                }
+                case null:
+                {
+                    return await GetCharacterByNameAsync(server, name, ct);
+                }
             }
-        }
 
-        if (name.IsNullOrWhitespace())
-        {
-            return await GetCurrentCharacterAsync(user, server, ct);
-        }
+            if (name.IsNullOrWhitespace())
+            {
+                return await GetCurrentCharacterAsync(user, server, ct);
+            }
 
-        var getUserCharacter = await GetUserCharacterByNameAsync(user, server, name, ct);
-        if (!getUserCharacter.IsSuccess)
-        {
+            var getUserCharacter = await GetUserCharacterByNameAsync(user, server, name, ct);
+            if (getUserCharacter.IsSuccess)
+            {
+                return getUserCharacter;
+            }
+
             // Search again, but this time globally
-            return await GetBestMatchingCharacterAsync(server, null, name, ct);
+            user = null;
         }
-
-        return getUserCharacter;
     }
 
     /// <inheritdoc />
@@ -511,12 +514,12 @@ public sealed class CharacterService : ICharacterService, ICharacterEditor
             return new UserError("The character already has that name.");
         }
 
-        if (name.Contains("\""))
+        if (name.Contains('"'))
         {
             return new UserError("The name may not contain double quotes.");
         }
 
-        if (name.Contains(":"))
+        if (name.Contains(':'))
         {
             return new UserError("The name may not contain colons.");
         }
@@ -762,7 +765,7 @@ public sealed class CharacterService : ICharacterService, ICharacterEditor
             ct
         );
 
-        return _ownedEntities.IsEntityNameUniqueForUser(userCharacters, characterName);
+        return OwnedEntityService.IsEntityNameUniqueForUser(userCharacters, characterName);
     }
 
     /// <inheritdoc />

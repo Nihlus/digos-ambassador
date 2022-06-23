@@ -71,7 +71,7 @@ public class DescriptionBuilderTests
             _sampleFluentText
         )
         {
-            Part = Bodypart.Hair,
+            Part = Bodypart.Hair
         };
 
         var hairComponent = AppearanceComponent.CreateFrom(hairTransformation);

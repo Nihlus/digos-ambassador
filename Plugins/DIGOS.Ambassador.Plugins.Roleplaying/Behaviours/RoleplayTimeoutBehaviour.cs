@@ -113,7 +113,7 @@ internal sealed class RoleplayTimeoutBehaviour : ContinuousBehaviour<RoleplayTim
     /// <param name="feedback">The feedback service.</param>
     /// <param name="roleplay">The roleplay.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    private async Task<Result> NotifyOwnerAsync(FeedbackService feedback, Roleplay roleplay)
+    private static async Task<Result> NotifyOwnerAsync(FeedbackService feedback, Roleplay roleplay)
     {
         var notification = new Embed
         {

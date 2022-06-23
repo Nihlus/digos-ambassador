@@ -68,7 +68,7 @@ public static class LevenshteinDistance
             for (var j = 1; j <= m; j++)
             {
                 // Step 5
-                var cost = (t[j - 1] == s[i - 1]) ? 0 : 1;
+                var cost = t[j - 1] == s[i - 1] ? 0 : 1;
 
                 // Step 6
                 d[i, j] = Math.Min

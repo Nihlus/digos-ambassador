@@ -62,7 +62,7 @@ public static class ContentServiceExtensions
         "avatar-2.0-shifted-315.png",
         "avatar-2.0-shifted-360.png",
         "avatar-2.0-shifted-45.png",
-        "avatar-2.0-shifted-90.png",
+        "avatar-2.0-shifted-90.png"
     };
 
     /// <summary>

@@ -38,28 +38,13 @@ internal static class ExportFormatExtensions
     /// <exception cref="NotImplementedException">Thrown if the format has not been implemented.</exception>
     public static string GetFileExtension(this ExportFormat format)
     {
-        switch (format)
+        return format switch
         {
-            case ExportFormat.PDF:
-            {
-                return "pdf";
-            }
-            case ExportFormat.Plaintext:
-            {
-                return "txt";
-            }
-            case ExportFormat.JSON:
-            {
-                return "json";
-            }
-            case ExportFormat.ODT:
-            {
-                return "odt";
-            }
-            default:
-            {
-                throw new NotImplementedException();
-            }
-        }
+            ExportFormat.PDF => "pdf",
+            ExportFormat.Plaintext => "txt",
+            ExportFormat.JSON => "json",
+            ExportFormat.ODT => "odt",
+            _ => throw new NotImplementedException()
+        };
     }
 }

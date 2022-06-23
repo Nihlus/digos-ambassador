@@ -34,12 +34,12 @@ public static class ListExtensions
     /// <summary>
     /// Holds an entropy source for this extension set.
     /// </summary>
-    private static readonly Random Random = new Random();
+    private static readonly Random _random = new();
 
     /// <summary>
     /// Holds a locking object for the entropy source.
     /// </summary>
-    private static readonly object RandomLock = new object();
+    private static readonly object _randomLock = new();
 
     /// <summary>
     /// Picks a random value from the list.
@@ -50,9 +50,9 @@ public static class ListExtensions
     [Pure]
     public static T PickRandom<T>(this IReadOnlyList<T> list)
     {
-        lock (RandomLock)
+        lock (_randomLock)
         {
-            return list[Random.Next(0, list.Count)];
+            return list[_random.Next(0, list.Count)];
         }
     }
 }

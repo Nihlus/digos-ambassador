@@ -37,11 +37,11 @@ public static partial class PermissionServiceTests
 {
     public class HasPermissionAsync : PermissionServiceTestBase
     {
-        private readonly Snowflake _discordGuild = new Snowflake(0);
-        private readonly Snowflake _discordUser = new Snowflake(1);
-        private readonly Snowflake _discordRole = new Snowflake(2);
+        private readonly Snowflake _discordGuild = new(0);
+        private readonly Snowflake _discordUser = new(1);
+        private readonly Snowflake _discordRole = new(2);
 
-        private readonly Snowflake _discordGuildOwner = new Snowflake(3);
+        private readonly Snowflake _discordGuildOwner = new(3);
 
         private readonly IPermission _permission = new TestPermission();
 

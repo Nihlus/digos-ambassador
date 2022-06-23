@@ -31,7 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Permissions;
 public sealed class TransferCharacter : Permission
 {
     /// <inheritdoc />
-    public override Guid UniqueIdentifier { get; } = new Guid("8299FDCB-8DA1-44E1-BFC0-310FDCC76121");
+    public override Guid UniqueIdentifier { get; } = new("8299FDCB-8DA1-44E1-BFC0-310FDCC76121");
 
     /// <inheritdoc />
     public override string FriendlyName => nameof(TransferCharacter);

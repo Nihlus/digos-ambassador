@@ -73,7 +73,8 @@ public class UserCommands : CommandGroup
     /// <param name="context">The command context.</param>
     /// <param name="channelAPI">The channel API.</param>
     /// <param name="guildAPI">The guild API.</param>
-    public UserCommands(UserService users, ICommandContext context, IDiscordRestChannelAPI channelAPI, IDiscordRestGuildAPI guildAPI)
+    public UserCommands
+        (UserService users, ICommandContext context, IDiscordRestChannelAPI channelAPI, IDiscordRestGuildAPI guildAPI)
     {
         _users = users;
         _context = context;
@@ -261,12 +262,9 @@ public class UserCommands : CommandGroup
             var user = getUserResult.Entity;
 
             var setBioResult = await _users.SetUserBioAsync(user, bio);
-            if (!setBioResult.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(setBioResult);
-            }
-
-            return new FeedbackMessage("Bio updated.", _feedback.Theme.Secondary);
+            return setBioResult.IsSuccess
+                ? new FeedbackMessage("Bio updated.", _feedback.Theme.Secondary)
+                : Result<FeedbackMessage>.FromError(setBioResult);
         }
 
         /// <summary>
@@ -290,12 +288,9 @@ public class UserCommands : CommandGroup
             var user = getUserResult.Entity;
 
             var setTimezoneResult = await _users.SetUserTimezoneAsync(user, timezone);
-            if (!setTimezoneResult.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(setTimezoneResult);
-            }
-
-            return new FeedbackMessage("Timezone updated.", _feedback.Theme.Secondary);
+            return setTimezoneResult.IsSuccess
+                ? new FeedbackMessage("Timezone updated.", _feedback.Theme.Secondary)
+                : Result<FeedbackMessage>.FromError(setTimezoneResult);
         }
     }
 }

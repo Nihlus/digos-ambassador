@@ -36,12 +36,12 @@ public class KinksDatabaseContext : AmbassadorDbContext
     private const string _schemaName = "KinkModule";
 
     /// <summary>
-    /// Gets or sets the table where kinks are stored.
+    /// Gets the table where kinks are stored.
     /// </summary>
     public DbSet<Kink> Kinks => Set<Kink>();
 
     /// <summary>
-    /// Gets or sets the table where user kinks are stored.
+    /// Gets the table where user kinks are stored.
     /// </summary>
     public DbSet<UserKink> UserKinks => Set<UserKink>();
 

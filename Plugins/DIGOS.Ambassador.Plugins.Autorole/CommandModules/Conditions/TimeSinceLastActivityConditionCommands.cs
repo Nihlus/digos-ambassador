@@ -87,7 +87,7 @@ public partial class AutoroleCommands
             TimeSpan time
         )
         {
-            var getCondition = _autoroles.GetCondition<TimeSinceLastActivityCondition>
+            var getCondition = Services.AutoroleService.GetCondition<TimeSinceLastActivityCondition>
             (
                 autorole,
                 conditionID

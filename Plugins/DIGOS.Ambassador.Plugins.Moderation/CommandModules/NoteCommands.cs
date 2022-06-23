@@ -209,11 +209,8 @@ public partial class NoteCommands : CommandGroup
         }
 
         var deleteNote = await _notes.DeleteNoteAsync(note);
-        if (!deleteNote.IsSuccess)
-        {
-            return Result<FeedbackMessage>.FromError(deleteNote);
-        }
-
-        return new FeedbackMessage("Note deleted.", _feedback.Theme.Secondary);
+        return deleteNote.IsSuccess
+            ? new FeedbackMessage("Note deleted.", _feedback.Theme.Secondary)
+            : Result<FeedbackMessage>.FromError(deleteNote);
     }
 }

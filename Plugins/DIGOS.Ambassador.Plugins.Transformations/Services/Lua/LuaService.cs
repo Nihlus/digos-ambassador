@@ -102,13 +102,13 @@ public sealed class LuaService
         "math.tan",
         "math.tanh",
         "os.clock",
-        "os.time",
+        "os.time"
     };
 
     private readonly ContentService _contentService;
 
     private readonly Regex _getErroringFunctionRegex =
-        new Regex("(?<=\\((?>global)|(?>field )(?> \')).+(?=\'\\))", RegexOptions.Compiled);
+        new("(?<=\\((?>global)|(?>field )(?> \')).+(?=\'\\))", RegexOptions.Compiled);
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LuaService"/> class.
@@ -136,10 +136,7 @@ public sealed class LuaService
             envBuilder.WithEntry(name);
         }
 
-        foreach (var function in _functionWhitelist)
-        {
-            envBuilder = envBuilder.WithEntry(function);
-        }
+        envBuilder = _functionWhitelist.Aggregate(envBuilder, (current, function) => current.WithEntry(function));
 
         state.DoString($"{envBuilder.Build()}");
 
@@ -218,7 +215,7 @@ public sealed class LuaService
                 lua.DoString("output = tostring(result)");
 
                 var result = lua["output"] as string;
-                var ranSuccessfully = lua["status"] is bool b && b;
+                var ranSuccessfully = lua["status"] is true;
                 if (result is not null && ranSuccessfully)
                 {
                     return Result<string>.FromSuccess(result);

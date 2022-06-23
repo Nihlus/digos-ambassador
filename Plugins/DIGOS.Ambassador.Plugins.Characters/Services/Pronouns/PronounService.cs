@@ -63,10 +63,9 @@ public sealed class PronounService
 
         foreach (var type in pronounProviderTypes)
         {
-            var pronounProvider = Activator.CreateInstance(type) as IPronounProvider;
-            if (pronounProvider is null)
+            if (Activator.CreateInstance(type) is not IPronounProvider pronounProvider)
             {
-                continue;
+                throw new InvalidOperationException();
             }
 
             WithPronounProvider(pronounProvider);

@@ -92,7 +92,7 @@ public partial class AutoroleCommands
             IEmoji emote
         )
         {
-            var getCondition = _autoroles.GetCondition<ReactionCondition>
+            var getCondition = Services.AutoroleService.GetCondition<ReactionCondition>
             (
                 autorole,
                 conditionID

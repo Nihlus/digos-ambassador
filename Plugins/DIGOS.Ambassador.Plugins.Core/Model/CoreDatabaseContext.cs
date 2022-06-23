@@ -36,17 +36,17 @@ public class CoreDatabaseContext : AmbassadorDbContext
     private const string _schemaName = "Core";
 
     /// <summary>
-    /// Gets or sets the table where the user information is stored.
+    /// Gets the table where the user information is stored.
     /// </summary>
     public DbSet<User> Users => Set<User>();
 
     /// <summary>
-    /// Gets or sets the table where server-specific settings are stored.
+    /// Gets the table where server-specific settings are stored.
     /// </summary>
     public DbSet<Server> Servers => Set<Server>();
 
     /// <summary>
-    /// Gets or sets the table where user consents are stored.
+    /// Gets the table where user consents are stored.
     /// </summary>
     public DbSet<UserConsent> UserConsents => Set<UserConsent>();
 

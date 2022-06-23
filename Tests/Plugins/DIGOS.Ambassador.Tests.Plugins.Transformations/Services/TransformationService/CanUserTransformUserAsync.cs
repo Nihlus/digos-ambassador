@@ -35,10 +35,10 @@ public partial class TransformationServiceTests
 {
     public class CanUserTransformUserAsync : TransformationServiceTestBase
     {
-        private readonly Snowflake _user = new Snowflake(0);
-        private readonly Snowflake _targetUser = new Snowflake(1);
+        private readonly Snowflake _user = new(0);
+        private readonly Snowflake _targetUser = new(1);
 
-        private readonly Snowflake _guild = new Snowflake(0);
+        private readonly Snowflake _guild = new(0);
 
         [Fact]
         public async Task ReturnsUnsuccessfulResultIfTargetUserHasNotOptedIn()

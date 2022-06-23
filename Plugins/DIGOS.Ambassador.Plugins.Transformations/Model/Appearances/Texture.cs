@@ -40,5 +40,5 @@ public enum Texture
     Rubbery,
     Soft,
     Silky,
-    Hard,
+    Hard
 }

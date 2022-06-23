@@ -80,12 +80,9 @@ public partial class ModerationCommands
         public async Task<Result<FeedbackMessage>> SetModerationLogChannelAsync(IChannel channel)
         {
             var setChannel = await _moderation.SetModerationLogChannelAsync(_context.GuildID.Value, channel.ID);
-            if (!setChannel.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(setChannel);
-            }
-
-            return new FeedbackMessage("Channel set.", _feedback.Theme.Secondary);
+            return setChannel.IsSuccess
+                ? new FeedbackMessage("Channel set.", _feedback.Theme.Secondary)
+                : Result<FeedbackMessage>.FromError(setChannel);
         }
 
         /// <summary>
@@ -99,12 +96,9 @@ public partial class ModerationCommands
         public async Task<Result<FeedbackMessage>> SetMonitoringChannelAsync(IChannel channel)
         {
             var setChannel = await _moderation.SetMonitoringChannelAsync(_context.GuildID.Value, channel.ID);
-            if (!setChannel.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(setChannel);
-            }
-
-            return new FeedbackMessage("Channel set.", _feedback.Theme.Secondary);
+            return setChannel.IsSuccess
+                ? new FeedbackMessage("Channel set.", _feedback.Theme.Secondary)
+                : Result<FeedbackMessage>.FromError(setChannel);
         }
 
         /// <summary>
@@ -118,12 +112,9 @@ public partial class ModerationCommands
         public async Task<Result<FeedbackMessage>> SetWarningThresholdAsync(int threshold)
         {
             var setChannel = await _moderation.SetWarningThresholdAsync(_context.GuildID.Value, threshold);
-            if (!setChannel.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(setChannel);
-            }
-
-            return new FeedbackMessage("Threshold set.", _feedback.Theme.Secondary);
+            return setChannel.IsSuccess
+                ? new FeedbackMessage("Threshold set.", _feedback.Theme.Secondary)
+                : Result<FeedbackMessage>.FromError(setChannel);
         }
     }
 }

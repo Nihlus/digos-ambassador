@@ -31,7 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Permissions;
 public sealed class ManageWarnings : Permission
 {
     /// <inheritdoc />
-    public override Guid UniqueIdentifier { get; } = new Guid("76E0384E-AC3A-42E1-A6DC-CB717AB5BD96");
+    public override Guid UniqueIdentifier { get; } = new("76E0384E-AC3A-42E1-A6DC-CB717AB5BD96");
 
     /// <inheritdoc />
     public override string FriendlyName => nameof(ManageWarnings);

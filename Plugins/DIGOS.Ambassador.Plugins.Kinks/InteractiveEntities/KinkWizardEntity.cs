@@ -127,7 +127,7 @@ public class KinkWizardEntity : InMemoryPersistentInteractiveEntity<KinkWizard>,
         {
             KinkWizardState.CategorySelection => await ConsumeCategoryInteractionAsync(button, ct),
             KinkWizardState.KinkPreference => await ConsumePreferenceInteractionAsync(button, ct),
-            _ => throw new ArgumentOutOfRangeException()
+            _ => throw new ArgumentOutOfRangeException(nameof(this.Data.State))
         };
     }
 
@@ -150,7 +150,7 @@ public class KinkWizardEntity : InMemoryPersistentInteractiveEntity<KinkWizard>,
             _ when button == this.Data.Maybe => KinkPreference.Maybe,
             _ when button == this.Data.No => KinkPreference.No,
             _ when button == this.Data.NoPreference => KinkPreference.NoPreference,
-            _ => throw new ArgumentOutOfRangeException()
+            _ => throw new ArgumentOutOfRangeException(nameof(button))
         };
 
         var setPreference = await SetCurrentKinkPreference(preference);
@@ -346,7 +346,7 @@ public class KinkWizardEntity : InMemoryPersistentInteractiveEntity<KinkWizard>,
             }
             default:
             {
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(this.Data.State));
             }
         }
 

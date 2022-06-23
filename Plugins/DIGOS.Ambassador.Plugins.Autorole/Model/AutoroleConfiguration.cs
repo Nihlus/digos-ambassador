@@ -26,6 +26,7 @@ using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
+using JetBrains.Annotations;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Rest.Core;
 
@@ -68,6 +69,7 @@ public class AutoroleConfiguration : EFEntity
     /// Initializes a new instance of the <see cref="AutoroleConfiguration"/> class.
     /// </summary>
     [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
+    [UsedImplicitly]
     protected AutoroleConfiguration()
     {
     }

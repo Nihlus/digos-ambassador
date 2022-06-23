@@ -31,7 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Permissions;
 public sealed class ShowServerInfo : Permission
 {
     /// <inheritdoc />
-    public override Guid UniqueIdentifier { get; } = new Guid("9704A16F-D05E-48D6-8749-EB76E43DD7B6");
+    public override Guid UniqueIdentifier { get; } = new("9704A16F-D05E-48D6-8749-EB76E43DD7B6");
 
     /// <inheritdoc />
     public override string FriendlyName => nameof(ShowServerInfo);

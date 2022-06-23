@@ -31,11 +31,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Permissions;
 public class EditAutorole : Permission
 {
     /// <inheritdoc />
-    public override Guid UniqueIdentifier { get; } = new Guid("7D1B4C74-51CA-4866-824F-A3B1925E8F4D");
+    public override Guid UniqueIdentifier { get; } = new("7D1B4C74-51CA-4866-824F-A3B1925E8F4D");
 
     /// <inheritdoc/>
-    public override string FriendlyName { get; } = nameof(EditAutorole);
+    public override string FriendlyName => nameof(EditAutorole);
 
     /// <inheritdoc/>
-    public override string Description { get; } = "Allows you to edit autoroles.";
+    public override string Description => "Allows you to edit autoroles.";
 }

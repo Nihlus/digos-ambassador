@@ -30,7 +30,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua;
 /// </summary>
 public sealed class MetaTableBuilder
 {
-    private readonly List<string> _entries = new List<string>();
+    private readonly List<string> _entries = new();
 
     /// <summary>
     /// Adds a unique entry to the builder.
@@ -64,32 +64,39 @@ public sealed class MetaTableBuilder
         return metatable.Format(pretty);
     }
 
-    private void PopulateSubNodes
+    private static void PopulateSubNodes
     (
         TableNode parent,
         string value,
         string originalValue
     )
     {
-        var components = value.Split('.');
-        if (components.Length == 1)
+        while (true)
         {
-            var valueNode = new ValueNode<string>(value, originalValue);
+            var components = value.Split('.');
+            if (components.Length == 1)
+            {
+                var valueNode = new ValueNode<string>(value, originalValue);
 
-            parent.Value.Add(valueNode);
-            return;
-        }
+                parent.Value.Add(valueNode);
+                return;
+            }
 
-        var childNode = parent.Value.FirstOrDefault(t => t.Name == components.First());
-        if (childNode is null)
-        {
-            childNode = new TableNode(components.First(), new List<INode>());
-            parent.Value.Add(childNode);
-        }
+            var childNode = parent.Value.FirstOrDefault(t => t.Name == components.First());
+            if (childNode is null)
+            {
+                childNode = new TableNode(components.First(), new List<INode>());
+                parent.Value.Add(childNode);
+            }
 
-        if (childNode is TableNode childTable)
-        {
-            PopulateSubNodes(childTable, string.Join(".", components.Skip(1)), originalValue);
+            if (childNode is TableNode childTable)
+            {
+                parent = childTable;
+                value = string.Join(".", components.Skip(1));
+                continue;
+            }
+
+            break;
         }
     }
 }

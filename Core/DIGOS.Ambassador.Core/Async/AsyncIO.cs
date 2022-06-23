@@ -36,14 +36,14 @@ public static class AsyncIO
     /// This is the same default buffer size as
     /// <see cref="StreamReader"/> and <see cref="FileStream"/>.
     /// </summary>
-    private const int DefaultBufferSize = 4096;
+    private const int _defaultBufferSize = 4096;
 
     /// <summary>
     /// Indicates that
     /// 1. The file is to be used for asynchronous reading.
     /// 2. The file is to be accessed sequentially from beginning to end.
     /// </summary>
-    private const FileOptions DefaultOptions = FileOptions.Asynchronous | FileOptions.SequentialScan;
+    private const FileOptions _defaultOptions = FileOptions.Asynchronous | FileOptions.SequentialScan;
 
     /// <summary>
     /// Asynchronously reads all lines from the given file.
@@ -67,8 +67,8 @@ public static class AsyncIO
             FileMode.Open,
             FileAccess.Read,
             FileShare.Read,
-            DefaultBufferSize,
-            DefaultOptions
+            _defaultBufferSize,
+            _defaultOptions
         );
 
         return await ReadAllLinesAsync(stream, encoding);
@@ -91,10 +91,9 @@ public static class AsyncIO
         encoding ??= Encoding.UTF8;
 
         var lines = new List<string>();
-        using var reader = new StreamReader(stream, encoding, false, DefaultBufferSize, leaveOpen);
+        using var reader = new StreamReader(stream, encoding, false, _defaultBufferSize, leaveOpen);
 
-        string? line;
-        while ((line = await reader.ReadLineAsync()) != null)
+        while (await reader.ReadLineAsync() is { } line)
         {
             lines.Add(line);
         }
@@ -120,8 +119,8 @@ public static class AsyncIO
             FileMode.Open,
             FileAccess.Read,
             FileShare.Read,
-            DefaultBufferSize,
-            DefaultOptions
+            _defaultBufferSize,
+            _defaultOptions
         );
 
         return await ReadAllTextAsync(stream, encoding);
@@ -143,7 +142,7 @@ public static class AsyncIO
     {
         encoding ??= Encoding.UTF8;
 
-        using var reader = new StreamReader(stream, encoding, false, DefaultBufferSize, leaveOpen);
+        using var reader = new StreamReader(stream, encoding, false, _defaultBufferSize, leaveOpen);
         return await reader.ReadToEndAsync();
     }
 }

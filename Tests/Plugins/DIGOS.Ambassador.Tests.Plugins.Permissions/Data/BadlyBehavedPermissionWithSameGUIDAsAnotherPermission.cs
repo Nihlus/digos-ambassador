@@ -31,7 +31,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions.Data;
 public class BadlyBehavedPermissionWithSameGUIDAsAnotherPermission : Permission
 {
     /// <inheritdoc />
-    public override Guid UniqueIdentifier { get; } = new Guid("522DD3BD-BBEA-4C5F-AB95-2A04DBCB606B");
+    public override Guid UniqueIdentifier { get; } = new("522DD3BD-BBEA-4C5F-AB95-2A04DBCB606B");
 
     /// <inheritdoc />
     public override string FriendlyName => nameof(TestPermission);

@@ -91,7 +91,7 @@ public class JoinMessageResponder : IResponder<IGuildMemberAdd>
             return Result.FromSuccess();
         }
 
-        var getJoinMessageResult = _servers.GetJoinMessage(server);
+        var getJoinMessageResult = ServerService.GetJoinMessage(server);
         if (!getJoinMessageResult.IsSuccess)
         {
             return Result.FromError(getJoinMessageResult);

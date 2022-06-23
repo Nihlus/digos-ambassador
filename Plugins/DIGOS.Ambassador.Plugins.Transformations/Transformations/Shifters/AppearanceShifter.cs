@@ -260,24 +260,15 @@ internal abstract class AppearanceShifter : IAppearanceShifter
         Chirality chirality
     )
     {
-        switch (result.Action)
+        return result.Action switch
         {
-            case ShiftBodypartAction.Add:
-            {
-                return GetAddMessageAsync(bodypart, chirality);
-            }
-            case ShiftBodypartAction.Shift:
-            {
-                return GetShiftMessageAsync(bodypart, chirality);
-            }
-            case ShiftBodypartAction.Nothing:
-            {
-                throw new InvalidOperationException("Can't build a message for something that didn't happen.");
-            }
-            default:
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-        }
+            ShiftBodypartAction.Add => GetAddMessageAsync(bodypart, chirality),
+            ShiftBodypartAction.Shift => GetShiftMessageAsync(bodypart, chirality),
+            ShiftBodypartAction.Nothing => throw new InvalidOperationException
+            (
+                "Can't build a message for something that didn't happen."
+            ),
+            _ => throw new ArgumentOutOfRangeException(nameof(result.Action))
+        };
     }
 }

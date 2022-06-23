@@ -22,6 +22,7 @@
 
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
+using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using Remora.Rest.Core;
 using Xunit;
 
@@ -47,7 +48,7 @@ public static partial class ServerServiceTests
         [Fact]
         public void ReturnsErrorIfJoinMessageIsNull()
         {
-            var result = this.Servers.GetJoinMessage(_server);
+            var result = ServerService.GetJoinMessage(_server);
 
             Assert.False(result.IsSuccess);
         }
@@ -57,7 +58,7 @@ public static partial class ServerServiceTests
         {
             _server.JoinMessage = string.Empty;
 
-            var result = this.Servers.GetJoinMessage(_server);
+            var result = ServerService.GetJoinMessage(_server);
 
             Assert.False(result.IsSuccess);
         }
@@ -67,7 +68,7 @@ public static partial class ServerServiceTests
         {
             _server.JoinMessage = "      ";
 
-            var result = this.Servers.GetJoinMessage(_server);
+            var result = ServerService.GetJoinMessage(_server);
 
             Assert.False(result.IsSuccess);
         }
@@ -78,7 +79,7 @@ public static partial class ServerServiceTests
             const string expected = "oogabooga";
             _server.JoinMessage = expected;
 
-            var result = this.Servers.GetJoinMessage(_server);
+            var result = ServerService.GetJoinMessage(_server);
 
             Assert.True(result.IsSuccess);
             Assert.Equal(expected, result.Entity);

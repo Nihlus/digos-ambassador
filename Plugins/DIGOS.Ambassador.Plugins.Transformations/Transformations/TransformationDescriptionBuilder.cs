@@ -42,7 +42,7 @@ public sealed class TransformationDescriptionBuilder
 {
     private readonly TransformationTextTokenizer _tokenizer;
 
-    private readonly Regex _sentenceSpacingRegex = new Regex
+    private readonly Regex _sentenceSpacingRegex = new
     (
         "(?<=\\w)\\.(?=\\w)",
         RegexOptions.Compiled | RegexOptions.Multiline | RegexOptions.IgnoreCase
@@ -236,7 +236,7 @@ public sealed class TransformationDescriptionBuilder
     /// <param name="appearanceConfiguration">The character and its appearances.</param>
     /// <param name="component">The chiral component.</param>
     /// <returns>true if the parts are the same species; otherwise, false.</returns>
-    private bool AreChiralPartsTheSameSpecies
+    private static bool AreChiralPartsTheSameSpecies
     (
         Appearance appearanceConfiguration,
         AppearanceComponent component
@@ -256,7 +256,7 @@ public sealed class TransformationDescriptionBuilder
     /// <param name="appearance">The appearance.</param>
     /// <param name="component">The chiral component.</param>
     /// <returns>true if the parts have the same pattern; otherwise, false.</returns>
-    private bool DoChiralPartsHaveTheSamePattern
+    private static bool DoChiralPartsHaveTheSamePattern
     (
         Appearance appearance,
         AppearanceComponent component
@@ -386,125 +386,29 @@ public sealed class TransformationDescriptionBuilder
     [Pure]
     public string BuildRemoveMessage(Appearance appearanceConfiguration, Bodypart bodypart)
     {
-        string removalText;
-        switch (bodypart)
+        var removalText = bodypart switch
         {
-            case Bodypart.Hair:
-            {
-                removalText = _transformationText.Messages.Removal.Single.Hair.PickRandom();
-                break;
-            }
-            case Bodypart.Face:
-            {
-                removalText = _transformationText.Messages.Removal.Single.Face.PickRandom();
-                break;
-            }
-            case Bodypart.Ear:
-            {
-                removalText = _transformationText.Messages.Removal.Single.Ear.PickRandom();
-                break;
-            }
-            case Bodypart.Eye:
-            {
-                removalText = _transformationText.Messages.Removal.Single.Eye.PickRandom();
-                break;
-            }
-            case Bodypart.Teeth:
-            {
-                removalText = _transformationText.Messages.Removal.Single.Teeth.PickRandom();
-                break;
-            }
-            case Bodypart.Leg:
-            {
-                removalText = _transformationText.Messages.Removal.Single.Leg.PickRandom();
-                break;
-            }
-            case Bodypart.Arm:
-            {
-                removalText = _transformationText.Messages.Removal.Single.Arm.PickRandom();
-                break;
-            }
-            case Bodypart.Tail:
-            {
-                removalText = _transformationText.Messages.Removal.Single.Tail.PickRandom();
-                break;
-            }
-            case Bodypart.Wing:
-            {
-                removalText = _transformationText.Messages.Removal.Single.Wing.PickRandom();
-                break;
-            }
-            case Bodypart.Penis:
-            {
-                removalText = _transformationText.Messages.Removal.Single.Penis.PickRandom();
-                break;
-            }
-            case Bodypart.Vagina:
-            {
-                removalText = _transformationText.Messages.Removal.Single.Vagina.PickRandom();
-                break;
-            }
-            case Bodypart.Head:
-            {
-                removalText = _transformationText.Messages.Removal.Single.Head.PickRandom();
-                break;
-            }
-            case Bodypart.Body:
-            {
-                removalText = _transformationText.Messages.Removal.Single.Body.PickRandom();
-                break;
-            }
-            default:
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-        }
-
-        return ReplaceTokensWithContent(removalText, appearanceConfiguration, null);
-    }
-
-    /// <summary>
-    /// Builds a removal message for the given character if the given transformation were to be applied.
-    /// </summary>
-    /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
-    /// <param name="bodypart">The bodypart to build the message from.</param>
-    /// <returns>The removal message.</returns>
-    [Pure]
-    public string BuildUniformRemoveMessage(Appearance appearanceConfiguration, Bodypart bodypart)
-    {
-        string removalText;
-        switch (bodypart)
-        {
-            case Bodypart.Leg:
-            {
-                removalText = _transformationText.Messages.Removal.Uniform.Legs.PickRandom();
-                break;
-            }
-            case Bodypart.Arm:
-            {
-                removalText = _transformationText.Messages.Removal.Uniform.Arms.PickRandom();
-                break;
-            }
-            case Bodypart.Wing:
-            {
-                removalText = _transformationText.Messages.Removal.Uniform.Wings.PickRandom();
-                break;
-            }
-            case Bodypart.Ear:
-            {
-                removalText = _transformationText.Messages.Removal.Uniform.Ears.PickRandom();
-                break;
-            }
-            case Bodypart.Eye:
-            {
-                removalText = _transformationText.Messages.Removal.Uniform.Eyes.PickRandom();
-                break;
-            }
-            default:
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-        }
+            Bodypart.Hair => _transformationText.Messages.Removal.Single.Hair.PickRandom(),
+            Bodypart.Face => _transformationText.Messages.Removal.Single.Face.PickRandom(),
+            Bodypart.Ear => _transformationText.Messages.Removal.Single.Ear.PickRandom(),
+            Bodypart.Eye => _transformationText.Messages.Removal.Single.Eye.PickRandom(),
+            Bodypart.Teeth => _transformationText.Messages.Removal.Single.Teeth.PickRandom(),
+            Bodypart.Leg => _transformationText.Messages.Removal.Single.Leg.PickRandom(),
+            Bodypart.Arm => _transformationText.Messages.Removal.Single.Arm.PickRandom(),
+            Bodypart.Tail => _transformationText.Messages.Removal.Single.Tail.PickRandom(),
+            Bodypart.Wing => _transformationText.Messages.Removal.Single.Wing.PickRandom(),
+            Bodypart.Penis => _transformationText.Messages.Removal.Single.Penis.PickRandom(),
+            Bodypart.Vagina => _transformationText.Messages.Removal.Single.Vagina.PickRandom(),
+            Bodypart.Head => _transformationText.Messages.Removal.Single.Head.PickRandom(),
+            Bodypart.Body => _transformationText.Messages.Removal.Single.Body.PickRandom(),
+            Bodypart.Ears => _transformationText.Messages.Removal.Uniform.Ears.PickRandom(),
+            Bodypart.Eyes => _transformationText.Messages.Removal.Uniform.Eyes.PickRandom(),
+            Bodypart.Arms => _transformationText.Messages.Removal.Uniform.Arms.PickRandom(),
+            Bodypart.Legs => _transformationText.Messages.Removal.Uniform.Legs.PickRandom(),
+            Bodypart.Wings => _transformationText.Messages.Removal.Uniform.Wings.PickRandom(),
+            Bodypart.Full => "{@target}'s entire body vanishes with a poof.",
+            _ => throw new ArgumentOutOfRangeException(nameof(bodypart))
+        };
 
         return ReplaceTokensWithContent(removalText, appearanceConfiguration, null);
     }

@@ -44,10 +44,10 @@ public partial class TransformationServiceTests
 {
     public class ShiftBodypartAsync : TransformationServiceTestBase
     {
-        private readonly Snowflake _guild = new Snowflake(1);
+        private readonly Snowflake _guild = new(1);
 
-        private readonly Snowflake _owner = new Snowflake(2);
-        private readonly Snowflake _invoker = new Snowflake(3);
+        private readonly Snowflake _owner = new(2);
+        private readonly Snowflake _invoker = new(3);
 
         private Character _character = null!;
 

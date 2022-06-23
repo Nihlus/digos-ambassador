@@ -31,7 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions;
 public sealed class TransferRoleplay : Permission
 {
     /// <inheritdoc />
-    public override Guid UniqueIdentifier { get; } = new Guid("8ED46D73-5666-440B-825D-2D107E75BA7B");
+    public override Guid UniqueIdentifier { get; } = new("8ED46D73-5666-440B-825D-2D107E75BA7B");
 
     /// <inheritdoc />
     public override string FriendlyName => nameof(TransferRoleplay);

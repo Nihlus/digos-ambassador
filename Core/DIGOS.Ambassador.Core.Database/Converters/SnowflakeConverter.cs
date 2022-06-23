@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Remora.Rest.Core;
 
@@ -28,6 +29,7 @@ namespace DIGOS.Ambassador.Core.Database.Converters;
 /// <summary>
 /// Converts <see cref="Snowflake"/> instances to and from a database provider representation.
 /// </summary>
+[PublicAPI]
 public class SnowflakeConverter : ValueConverter<Snowflake, long>
 {
     /// <summary>

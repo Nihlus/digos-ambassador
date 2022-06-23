@@ -32,6 +32,7 @@ using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Remora.Results;
@@ -41,6 +42,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services;
 /// <summary>
 /// Handles business logic for autoroles.
 /// </summary>
+[PublicAPI]
 public sealed class AutoroleService
 {
     private readonly AutoroleDatabaseContext _database;
@@ -296,7 +298,7 @@ public sealed class AutoroleService
     /// <param name="conditionID">The ID of the condition.</param>
     /// <typeparam name="TCondition">The type of the condition.</typeparam>
     /// <returns>A retrieval result which may or may not have succeeded.</returns>
-    public Result<TCondition> GetCondition<TCondition>
+    public static Result<TCondition> GetCondition<TCondition>
     (
         AutoroleConfiguration autorole,
         long conditionID

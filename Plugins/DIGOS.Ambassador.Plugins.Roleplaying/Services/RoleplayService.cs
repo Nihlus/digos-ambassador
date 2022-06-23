@@ -42,6 +42,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services;
 /// <summary>
 /// Acts as an interface for accessing, enabling, and disabling ongoing roleplays.
 /// </summary>
+[PublicAPI]
 public sealed class RoleplayService : IQueryService<Roleplay>
 {
     private readonly RoleplayingDatabaseContext _database;
@@ -285,7 +286,7 @@ public sealed class RoleplayService : IQueryService<Roleplay>
             ct
         );
 
-        return _ownedEntities.IsEntityNameUniqueForUser(userRoleplays.ToList(), roleplayName);
+        return OwnedEntityService.IsEntityNameUniqueForUser(userRoleplays.ToList(), roleplayName);
     }
 
     /// <summary>
@@ -587,7 +588,7 @@ public sealed class RoleplayService : IQueryService<Roleplay>
             return new UserError("You need to provide a name.");
         }
 
-        if (newRoleplayName.Contains("\""))
+        if (newRoleplayName.Contains('"'))
         {
             return new UserError("The name may not contain double quotes.");
         }

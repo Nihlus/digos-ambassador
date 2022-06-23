@@ -180,5 +180,5 @@ public enum KinkCategory
     /// Kinks that relate to bodily waste.
     /// </summary>
     [Description("Kinks that relate to bodily waste.")]
-    WatersportsAndScat = 51,
+    WatersportsAndScat = 51
 }

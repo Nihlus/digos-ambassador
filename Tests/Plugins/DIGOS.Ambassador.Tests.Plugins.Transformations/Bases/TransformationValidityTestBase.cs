@@ -38,7 +38,7 @@ public class TransformationValidityTestBase
     /// <summary>
     /// Gets an instance of a file verifier.
     /// </summary>
-    protected TransformationFileVerifier Verifier { get; } = new TransformationFileVerifier();
+    protected TransformationFileVerifier Verifier { get; } = new();
 
     /// <summary>
     /// Deserializes a transformation object from the given file. The file is assumed to exist and be valid.
@@ -46,7 +46,7 @@ public class TransformationValidityTestBase
     /// <param name="file">The file.</param>
     /// <typeparam name="T">The transformation object type.</typeparam>
     /// <returns>The object.</returns>
-    protected T Deserialize<T>(string file)
+    protected static T Deserialize<T>(string file)
     {
         using var sr = new StreamReader(File.OpenRead(file));
         var builder = new DeserializerBuilder()

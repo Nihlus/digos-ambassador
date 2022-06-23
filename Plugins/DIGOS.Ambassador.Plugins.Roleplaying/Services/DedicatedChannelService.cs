@@ -25,6 +25,7 @@ using System.Numerics;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Errors;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
+using JetBrains.Annotations;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Abstractions.Results;
@@ -39,6 +40,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services;
 /// <summary>
 /// Business logic for managing dedicated roleplay channels.
 /// </summary>
+[PublicAPI]
 public class DedicatedChannelService
 {
     private readonly RoleplayingDatabaseContext _database;
@@ -124,29 +126,14 @@ public class DedicatedChannelService
                 return Result<IChannel>.FromError(createChannel);
             }
 
-            switch (rre.Error.Code)
+            return rre.Error.Code switch
             {
-                case DiscordError.MissingPermission:
-                {
-                    return new UserError
-                    (
-                        "I don't have permission to manage channels, so I can't create dedicated RP channels."
-                    );
-                }
-                /*
-                case DiscordError.MaxChannelsInCategory:
-                {
-                    return new UserError
-                    (
-                        "The server's roleplaying category has reached its maximum number of channels. Try " +
-                        "contacting the server's owners and either removing some old roleplays or setting up " +
-                        "a new category."
-                    );
-                }
-                */
-            }
-
-            return Result<IChannel>.FromError(createChannel);
+                DiscordError.MissingPermission => new UserError
+                (
+                    "I don't have permission to manage channels, so I can't create dedicated RP channels."
+                ),
+                _ => Result<IChannel>.FromError(createChannel)
+            };
         }
 
         var dedicatedChannel = createChannel.Entity;
@@ -348,7 +335,7 @@ public class DedicatedChannelService
     /// </summary>
     /// <param name="roleplay">The roleplay.</param>
     /// <returns>A retrieval result which may or may not have succeeded.</returns>
-    public Result<Snowflake> GetDedicatedChannel(Roleplay roleplay)
+    public static Result<Snowflake> GetDedicatedChannel(Roleplay roleplay)
     {
         if (roleplay.DedicatedChannelID is null)
         {
