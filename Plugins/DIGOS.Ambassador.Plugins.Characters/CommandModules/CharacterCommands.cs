@@ -50,7 +50,6 @@ using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
-using Remora.Discord.Interactivity.Services;
 using Remora.Discord.Pagination;
 using Remora.Discord.Pagination.Extensions;
 using Remora.Rest.Core;
@@ -73,7 +72,6 @@ public partial class CharacterCommands : CommandGroup
     private readonly ContentService _content;
     private readonly FeedbackService _feedback;
     private readonly CharacterDiscordService _characters;
-    private readonly InteractiveMessageService _interactivity;
     private readonly ICommandContext _context;
     private readonly IDiscordRestGuildAPI _guildAPI;
     private readonly IDiscordRestChannelAPI _channelAPI;
@@ -84,7 +82,6 @@ public partial class CharacterCommands : CommandGroup
     /// <param name="contentService">The content service.</param>
     /// <param name="feedbackService">The feedback service.</param>
     /// <param name="characterService">The character service.</param>
-    /// <param name="interactivity">The interactivity service.</param>
     /// <param name="pronouns">The pronoun service.</param>
     /// <param name="context">The command context.</param>
     /// <param name="guildAPI">The guild API.</param>
@@ -94,7 +91,6 @@ public partial class CharacterCommands : CommandGroup
         ContentService contentService,
         FeedbackService feedbackService,
         CharacterDiscordService characterService,
-        InteractiveMessageService interactivity,
         PronounService pronouns,
         ICommandContext context,
         IDiscordRestGuildAPI guildAPI,
@@ -104,7 +100,6 @@ public partial class CharacterCommands : CommandGroup
         _content = contentService;
         _feedback = feedbackService;
         _characters = characterService;
-        _interactivity = interactivity;
         _pronouns = pronouns;
         _context = context;
         _guildAPI = guildAPI;
@@ -154,7 +149,7 @@ public partial class CharacterCommands : CommandGroup
             pageBase: pageBase
         );
 
-        return (Result)await _interactivity.SendContextualPaginatedMessageAsync
+        return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
             pages,
@@ -293,7 +288,7 @@ public partial class CharacterCommands : CommandGroup
             "You don't have any characters"
         );
 
-        return (Result)await _interactivity.SendContextualPaginatedMessageAsync
+        return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
             pages.Where(p => p.IsSuccess).Select(p => p.Entity).ToList(),
@@ -500,7 +495,7 @@ public partial class CharacterCommands : CommandGroup
 
         pages = pages.Select(p => p with { Title = "Your characters" }).ToList();
 
-        return (Result)await _interactivity.SendContextualPaginatedMessageAsync
+        return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
             pages,
@@ -655,7 +650,7 @@ public partial class CharacterCommands : CommandGroup
             i => new Embed(i.Name, Description: i.Caption, Image: new EmbedImage(i.Url))
         );
 
-        return (Result)await _interactivity.SendContextualPaginatedMessageAsync
+        return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
             pages.ToList(),
@@ -684,7 +679,7 @@ public partial class CharacterCommands : CommandGroup
 
         pages = pages.Select(p => p with { Title = "Images in character gallery" }).ToList();
 
-        return (Result)await _interactivity.SendContextualPaginatedMessageAsync
+        return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
             pages,

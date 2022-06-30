@@ -39,7 +39,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
-using Remora.Discord.Interactivity.Services;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Pagination;
 using Remora.Discord.Pagination.Extensions;
 using Remora.Rest.Core;
@@ -61,7 +61,7 @@ public partial class BanCommands : CommandGroup
     private readonly IDiscordRestGuildAPI _guildAPI;
     private readonly ICommandContext _context;
     private readonly IDiscordRestUserAPI _userAPI;
-    private readonly InteractiveMessageService _interactivity;
+    private readonly FeedbackService _feedback;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BanCommands"/> class.
@@ -70,7 +70,7 @@ public partial class BanCommands : CommandGroup
     /// <param name="logging">The logging service.</param>
     /// <param name="context">The command context.</param>
     /// <param name="guildAPI">The guild API.</param>
-    /// <param name="interactivity">The interactivity service.</param>
+    /// <param name="feedback">The feedback service.</param>
     /// <param name="userAPI">The user API.</param>
     public BanCommands
     (
@@ -78,7 +78,7 @@ public partial class BanCommands : CommandGroup
         ChannelLoggingService logging,
         ICommandContext context,
         IDiscordRestGuildAPI guildAPI,
-        InteractiveMessageService interactivity,
+        FeedbackService feedback,
         IDiscordRestUserAPI userAPI
     )
     {
@@ -86,7 +86,7 @@ public partial class BanCommands : CommandGroup
         _logging = logging;
         _context = context;
         _guildAPI = guildAPI;
-        _interactivity = interactivity;
+        _feedback = feedback;
         _userAPI = userAPI;
     }
 
@@ -214,7 +214,7 @@ public partial class BanCommands : CommandGroup
 
         var pages = createPages.Select(p => p.Entity).ToList();
 
-        return (Result)await _interactivity.SendContextualPaginatedMessageAsync
+        return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
             pages,

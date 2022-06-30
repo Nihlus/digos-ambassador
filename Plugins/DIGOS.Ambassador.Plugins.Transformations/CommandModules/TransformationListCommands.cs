@@ -34,7 +34,7 @@ using JetBrains.Annotations;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.Commands.Contexts;
-using Remora.Discord.Interactivity.Services;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Pagination;
 using Remora.Discord.Pagination.Extensions;
 using Remora.Results;
@@ -53,24 +53,24 @@ public partial class TransformationCommands
     public class TransformationListCommands : CommandGroup
     {
         private readonly TransformationService _transformation;
-        private readonly InteractiveMessageService _interactivity;
+        private readonly FeedbackService _feedback;
         private readonly ICommandContext _context;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TransformationListCommands"/> class.
         /// </summary>
         /// <param name="transformation">The transformation service.</param>
-        /// <param name="interactivity">The interactivity service.</param>
+        /// <param name="feedback">The interactivity service.</param>
         /// <param name="context">The command context.</param>
         public TransformationListCommands
         (
             TransformationService transformation,
-            InteractiveMessageService interactivity,
+            FeedbackService feedback,
             ICommandContext context
         )
         {
             _transformation = transformation;
-            _interactivity = interactivity;
+            _feedback = feedback;
             _context = context;
         }
 
@@ -93,30 +93,30 @@ public partial class TransformationCommands
             );
 
             pages = pages.Select
-                (
-                    p =>
-                        p with
-                        {
-                            Title = "Available species",
-                            Colour = Color.MediumPurple
-                        }
-                )
-                .ToList();
+            (
+                p =>
+                    p with
+                    {
+                        Title = "Available species",
+                        Colour = Color.MediumPurple
+                    }
+            )
+            .ToList();
 
             if (availableSpecies.Any())
             {
                 pages = pages.Select
-                    (
-                        p =>
-                            p with
-                            {
-                                Description = "Use the name inside the parens when transforming body parts."
-                            }
-                    )
-                    .ToList();
+                (
+                    p =>
+                        p with
+                        {
+                            Description = "Use the name inside the parens when transforming body parts."
+                        }
+                )
+                .ToList();
             }
 
-            return (Result)await _interactivity.SendContextualPaginatedMessageAsync
+            return (Result)await _feedback.SendContextualPaginatedMessageAsync
             (
                 _context.User.ID,
                 pages,
@@ -160,17 +160,17 @@ public partial class TransformationCommands
             );
 
             pages = pages.Select
-                (
-                    p =>
-                        p with
-                        {
-                            Title = "Available bodyparts",
-                            Colour = Color.MediumPurple
-                        }
-                )
-                .ToList();
+            (
+                p =>
+                    p with
+                    {
+                        Title = "Available bodyparts",
+                        Colour = Color.MediumPurple
+                    }
+            )
+            .ToList();
 
-            return (Result)await _interactivity.SendContextualPaginatedMessageAsync
+            return (Result)await _feedback.SendContextualPaginatedMessageAsync
             (
                 _context.User.ID,
                 pages,
@@ -199,17 +199,17 @@ public partial class TransformationCommands
             );
 
             pages = pages.Select
-                (
-                    p =>
-                        p with
-                        {
-                            Title = "Available colours",
-                            Colour = Color.MediumPurple
-                        }
-                )
-                .ToList();
+            (
+                p =>
+                    p with
+                    {
+                        Title = "Available colours",
+                        Colour = Color.MediumPurple
+                    }
+            )
+            .ToList();
 
-            return (Result)await _interactivity.SendContextualPaginatedMessageAsync
+            return (Result)await _feedback.SendContextualPaginatedMessageAsync
             (
                 _context.User.ID,
                 pages,
@@ -238,17 +238,17 @@ public partial class TransformationCommands
             );
 
             pages = pages.Select
-                (
-                    p =>
-                        p with
-                        {
-                            Title = "Available colour modifiers",
-                            Colour = Color.MediumPurple
-                        }
-                )
-                .ToList();
+            (
+                p =>
+                    p with
+                    {
+                        Title = "Available colour modifiers",
+                        Colour = Color.MediumPurple
+                    }
+            )
+            .ToList();
 
-            return (Result)await _interactivity.SendContextualPaginatedMessageAsync
+            return (Result)await _feedback.SendContextualPaginatedMessageAsync
             (
                 _context.User.ID,
                 pages,
@@ -277,17 +277,17 @@ public partial class TransformationCommands
             );
 
             pages = pages.Select
-                (
-                    p =>
-                        p with
-                        {
-                            Title = "Available patterns",
-                            Colour = Color.MediumPurple
-                        }
-                )
-                .ToList();
+            (
+                p =>
+                    p with
+                    {
+                        Title = "Available patterns",
+                        Colour = Color.MediumPurple
+                    }
+            )
+            .ToList();
 
-            return (Result)await _interactivity.SendContextualPaginatedMessageAsync
+            return (Result)await _feedback.SendContextualPaginatedMessageAsync
             (
                 _context.User.ID,
                 pages,
@@ -314,18 +314,18 @@ public partial class TransformationCommands
             );
 
             pages = pages.Select
-                (
-                    p =>
-                        p with
-                        {
-                            Title = "Available transformations",
-                            Description = "Use the name inside the parens when transforming body parts.",
-                            Colour = Color.MediumPurple
-                        }
-                )
-                .ToList();
+            (
+                p =>
+                    p with
+                    {
+                        Title = "Available transformations",
+                        Description = "Use the name inside the parens when transforming body parts.",
+                        Colour = Color.MediumPurple
+                    }
+            )
+            .ToList();
 
-            return (Result)await _interactivity.SendContextualPaginatedMessageAsync
+            return (Result)await _feedback.SendContextualPaginatedMessageAsync
             (
                 _context.User.ID,
                 pages,

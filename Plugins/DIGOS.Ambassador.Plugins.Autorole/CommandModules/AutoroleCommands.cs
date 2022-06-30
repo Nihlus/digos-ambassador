@@ -39,7 +39,6 @@ using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
-using Remora.Discord.Interactivity.Services;
 using Remora.Discord.Pagination;
 using Remora.Discord.Pagination.Extensions;
 using Remora.Results;
@@ -59,7 +58,6 @@ public partial class AutoroleCommands : CommandGroup
 {
     private readonly AutoroleService _autoroles;
     private readonly FeedbackService _feedback;
-    private readonly InteractiveMessageService _interactivity;
     private readonly ICommandContext _context;
     private readonly IDiscordRestGuildAPI _guildAPI;
 
@@ -68,21 +66,18 @@ public partial class AutoroleCommands : CommandGroup
     /// </summary>
     /// <param name="autoroles">The autorole service.</param>
     /// <param name="feedback">The feedback service.</param>
-    /// <param name="interactivity">The interactivity service.</param>
     /// <param name="context">The command context.</param>
     /// <param name="guildAPI">The guild API.</param>
     public AutoroleCommands
     (
         AutoroleService autoroles,
         FeedbackService feedback,
-        InteractiveMessageService interactivity,
         ICommandContext context,
         IDiscordRestGuildAPI guildAPI
     )
     {
         _autoroles = autoroles;
         _feedback = feedback;
-        _interactivity = interactivity;
         _context = context;
         _guildAPI = guildAPI;
     }
@@ -219,7 +214,7 @@ public partial class AutoroleCommands : CommandGroup
 
         var pages = PageFactory.FromFields(conditionFields, pageBase: embed);
 
-        return (Result)await _interactivity.SendContextualPaginatedMessageAsync
+        return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
             pages,
@@ -247,7 +242,7 @@ public partial class AutoroleCommands : CommandGroup
             "There are no autoroles configured."
         );
 
-        return (Result)await _interactivity.SendContextualPaginatedMessageAsync
+        return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
             pages,
@@ -395,7 +390,7 @@ public partial class AutoroleCommands : CommandGroup
             "There are no users that haven't been confirmed for that role."
         );
 
-        return (Result)await _interactivity.SendContextualPaginatedMessageAsync
+        return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
             pages,

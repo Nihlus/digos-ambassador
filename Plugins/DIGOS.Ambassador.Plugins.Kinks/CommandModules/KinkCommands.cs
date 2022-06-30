@@ -21,7 +21,6 @@
 //
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Net.Http;
@@ -55,12 +54,11 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules;
 /// </summary>
 [Group("kink")]
 [Description("Commands for viewing and configuring user kinks.")]
-public class KinkCommands : CommandGroup
+internal class KinkCommands : CommandGroup
 {
     private readonly KinkService _kinks;
     private readonly FeedbackService _feedback;
-
-    private readonly InteractiveMessageService _interactivity;
+    private readonly InMemoryDataService<Snowflake, KinkWizard> _dataService;
     private readonly ICommandContext _context;
 
     /// <summary>
@@ -68,19 +66,19 @@ public class KinkCommands : CommandGroup
     /// </summary>
     /// <param name="kinks">The application's kink service.</param>
     /// <param name="feedback">The application's feedback service.</param>
-    /// <param name="interactivity">The interactivity service.</param>
+    /// <param name="dataService">The in-memory data service.</param>
     /// <param name="context">The command context.</param>
     public KinkCommands
     (
         KinkService kinks,
         FeedbackService feedback,
-        InteractiveMessageService interactivity,
+        InMemoryDataService<Snowflake, KinkWizard> dataService,
         ICommandContext context
     )
     {
         _kinks = kinks;
         _feedback = feedback;
-        _interactivity = interactivity;
+        _dataService = dataService;
         _context = context;
     }
 
@@ -161,7 +159,7 @@ public class KinkCommands : CommandGroup
         }
 
         var pages = _kinks.BuildKinkOverlapEmbeds(_context.User.ID, otherUser.ID, overlappingKinks);
-        return await _interactivity.SendContextualPaginatedMessageAsync(_context.User.ID, pages, ct: this.CancellationToken);
+        return await _feedback.SendContextualPaginatedMessageAsync(_context.User.ID, pages, ct: this.CancellationToken);
     }
 
     /// <summary>
@@ -200,7 +198,7 @@ public class KinkCommands : CommandGroup
         }
 
         var pages = _kinks.BuildPaginatedUserKinkEmbeds(kinksWithPreference);
-        return await _interactivity.SendContextualPaginatedMessageAsync
+        return await _feedback.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
             pages,
@@ -245,7 +243,12 @@ public class KinkCommands : CommandGroup
     public async Task<Result> RunKinkWizardAsync()
     {
         var categories = await _kinks.GetKinkCategoriesAsync(this.CancellationToken);
-        var initialWizard = new KinkWizard(_context.ChannelID, _context.User.ID, categories.ToList());
+        var initialWizard = new KinkWizard
+        (
+            _context.User.ID,
+            categories.ToList(),
+            _context is InteractionContext
+        );
 
         var getInitialEmbed = await initialWizard.GetCurrentPageAsync(_kinks, this.CancellationToken);
         if (!getInitialEmbed.IsDefined(out var initialEmbed))
@@ -255,14 +258,22 @@ public class KinkCommands : CommandGroup
 
         var initialComponents = initialWizard.GetCurrentPageComponents();
 
-        return (Result)await _interactivity.SendInteractiveContextualEmbedWithPersistentDataAsync
+        var send = await _feedback.SendContextualEmbedAsync
         (
             initialEmbed,
-            m => $"kink-wizard::{m.ID.ToString()}",
-            _ => initialWizard,
-            new FeedbackMessageOptions(MessageComponents: new Optional<IReadOnlyList<IMessageComponent>>(initialComponents)),
+            new FeedbackMessageOptions(MessageComponents: new(initialComponents)),
             ct: this.CancellationToken
         );
+
+        if (!send.IsSuccess)
+        {
+            return (Result)send;
+        }
+
+        var messageID = send.Entity.ID;
+        return _dataService.TryAddData(messageID, initialWizard)
+            ? Result.FromSuccess()
+            : new InvalidOperationError("Failed to add the in-memory data for the kink wizard. Bug?");
     }
 
     /// <summary>

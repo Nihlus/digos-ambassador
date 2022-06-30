@@ -40,7 +40,6 @@ using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
-using Remora.Discord.Interactivity.Services;
 using Remora.Discord.Pagination;
 using Remora.Discord.Pagination.Extensions;
 using Remora.Rest.Core;
@@ -61,7 +60,6 @@ public partial class WarningCommands : CommandGroup
     private readonly ModerationService _moderation;
     private readonly WarningService _warnings;
     private readonly FeedbackService _feedback;
-    private readonly InteractiveMessageService _interactivity;
     private readonly ChannelLoggingService _logging;
     private readonly IDiscordRestUserAPI _userAPI;
     private readonly ICommandContext _context;
@@ -72,7 +70,6 @@ public partial class WarningCommands : CommandGroup
     /// <param name="moderation">The moderation service.</param>
     /// <param name="warnings">The warning service.</param>
     /// <param name="feedback">The feedback service.</param>
-    /// <param name="interactivity">The interactivity service.</param>
     /// <param name="logging">The logging service.</param>
     /// <param name="userAPI">The user API.</param>
     /// <param name="context">The command context.</param>
@@ -81,7 +78,6 @@ public partial class WarningCommands : CommandGroup
         ModerationService moderation,
         WarningService warnings,
         FeedbackService feedback,
-        InteractiveMessageService interactivity,
         ChannelLoggingService logging,
         IDiscordRestUserAPI userAPI,
         ICommandContext context
@@ -90,7 +86,6 @@ public partial class WarningCommands : CommandGroup
         _moderation = moderation;
         _warnings = warnings;
         _feedback = feedback;
-        _interactivity = interactivity;
         _logging = logging;
         _userAPI = userAPI;
         _context = context;
@@ -161,7 +156,7 @@ public partial class WarningCommands : CommandGroup
 
         var pages = createPages.Select(p => p.Entity).ToList();
 
-        return (Result)await _interactivity.SendContextualPaginatedMessageAsync
+        return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
             pages,

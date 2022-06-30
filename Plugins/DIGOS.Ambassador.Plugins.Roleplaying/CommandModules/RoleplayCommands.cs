@@ -46,7 +46,6 @@ using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Feedback.Services;
-using Remora.Discord.Interactivity.Services;
 using Remora.Discord.Pagination;
 using Remora.Discord.Pagination.Extensions;
 using Remora.Results;
@@ -67,13 +66,9 @@ public partial class RoleplayCommands : CommandGroup
 {
     private readonly IServiceProvider _services;
     private readonly IDiscordRestChannelAPI _channelAPI;
-
     private readonly RoleplayDiscordService _discordRoleplays;
     private readonly DedicatedChannelService _dedicatedChannels;
-
     private readonly FeedbackService _feedback;
-    private readonly InteractiveMessageService _interactivity;
-
     private readonly ICommandContext _context;
 
     /// <summary>
@@ -81,7 +76,6 @@ public partial class RoleplayCommands : CommandGroup
     /// </summary>
     /// <param name="discordRoleplays">The roleplay service.</param>
     /// <param name="feedback">The user feedback service.</param>
-    /// <param name="interactivity">The interactivity service.</param>
     /// <param name="dedicatedChannels">The dedicated channel service.</param>
     /// <param name="context">The command context.</param>
     /// <param name="channelAPI">The channel API.</param>
@@ -90,7 +84,6 @@ public partial class RoleplayCommands : CommandGroup
     (
         RoleplayDiscordService discordRoleplays,
         FeedbackService feedback,
-        InteractiveMessageService interactivity,
         DedicatedChannelService dedicatedChannels,
         ICommandContext context,
         IDiscordRestChannelAPI channelAPI,
@@ -99,7 +92,6 @@ public partial class RoleplayCommands : CommandGroup
     {
         _discordRoleplays = discordRoleplays;
         _feedback = feedback;
-        _interactivity = interactivity;
         _dedicatedChannels = dedicatedChannels;
         _context = context;
         _channelAPI = channelAPI;
@@ -191,7 +183,7 @@ public partial class RoleplayCommands : CommandGroup
             "There are no roleplays in the server that you can view."
         );
 
-        return (Result)await _interactivity.SendContextualPaginatedMessageAsync
+        return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
             pages,
@@ -226,7 +218,7 @@ public partial class RoleplayCommands : CommandGroup
             "You don't have any roleplays."
         );
 
-        return (Result)await _interactivity.SendContextualPaginatedMessageAsync
+        return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
             pages,

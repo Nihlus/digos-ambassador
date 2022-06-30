@@ -36,7 +36,6 @@ using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
-using Remora.Discord.Interactivity.Services;
 using Remora.Discord.Pagination;
 using Remora.Discord.Pagination.Extensions;
 using Remora.Results;
@@ -51,7 +50,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules;
 [Description("Permission-related commands for granting, revoking and checking user permissions.")]
 public class PermissionCommands : CommandGroup
 {
-    private readonly InteractiveMessageService _interactivity;
     private readonly PermissionService _permissions;
     private readonly PermissionRegistryService _permissionRegistry;
     private readonly FeedbackService _feedback;
@@ -61,21 +59,18 @@ public class PermissionCommands : CommandGroup
     /// Initializes a new instance of the <see cref="PermissionCommands"/> class.
     /// </summary>
     /// <param name="permissions">The permission service.</param>
-    /// <param name="interactivity">The interactivity service.</param>
     /// <param name="permissionRegistry">The permission registry service.</param>
     /// <param name="context">The command context.</param>
     /// <param name="feedback">The feedback service.</param>
     public PermissionCommands
     (
         PermissionService permissions,
-        InteractiveMessageService interactivity,
         PermissionRegistryService permissionRegistry,
         ICommandContext context,
         FeedbackService feedback
     )
     {
         _permissions = permissions;
-        _interactivity = interactivity;
         _permissionRegistry = permissionRegistry;
         _context = context;
         _feedback = feedback;
@@ -108,7 +103,7 @@ public class PermissionCommands : CommandGroup
             "No permissions available. This is most likely an error."
         );
 
-        return await _interactivity.SendContextualPaginatedMessageAsync
+        return await _feedback.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
             pages,
@@ -171,7 +166,7 @@ public class PermissionCommands : CommandGroup
             "No permissions set."
         );
 
-        return await _interactivity.SendContextualPaginatedMessageAsync
+        return await _feedback.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
             pages,

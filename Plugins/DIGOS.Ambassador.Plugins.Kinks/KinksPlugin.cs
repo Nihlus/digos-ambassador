@@ -26,9 +26,10 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Plugins.Kinks;
 using DIGOS.Ambassador.Plugins.Kinks.CommandModules;
-using DIGOS.Ambassador.Plugins.Kinks.InteractiveEntities;
+using DIGOS.Ambassador.Plugins.Kinks.Interactions;
 using DIGOS.Ambassador.Plugins.Kinks.Model;
 using DIGOS.Ambassador.Plugins.Kinks.Services;
+using DIGOS.Ambassador.Plugins.Kinks.Wizards;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -38,9 +39,11 @@ using Remora.Commands.Parsers;
 using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.Gateway;
 using Remora.Discord.Interactivity.Extensions;
+using Remora.Discord.Interactivity.Services;
 using Remora.Discord.Pagination.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
+using Remora.Rest.Core;
 using Remora.Results;
 
 [assembly: RemoraPlugin(typeof(KinksPlugin))]
@@ -65,7 +68,8 @@ public sealed class KinksPlugin : PluginDescriptor, IMigratablePlugin
         serviceCollection.AddPagination();
         serviceCollection.TryAddScoped<KinkService>();
         serviceCollection.AddConfiguredSchemaAwareDbContextPool<KinksDatabaseContext>();
-        serviceCollection.AddInteractiveEntity<KinkWizardEntity>();
+        serviceCollection.AddSingleton(InMemoryDataService<Snowflake, KinkWizard>.Instance);
+        serviceCollection.AddInteractionGroup<KinkWizardInteractions>();
 
         serviceCollection
             .AddCommandTree()

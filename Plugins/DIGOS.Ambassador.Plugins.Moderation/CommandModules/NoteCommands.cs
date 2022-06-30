@@ -40,7 +40,6 @@ using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
-using Remora.Discord.Interactivity.Services;
 using Remora.Discord.Pagination;
 using Remora.Discord.Pagination.Extensions;
 using Remora.Rest.Core;
@@ -58,7 +57,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules;
 public partial class NoteCommands : CommandGroup
 {
     private readonly NoteService _notes;
-    private readonly InteractiveMessageService _interactivity;
     private readonly ChannelLoggingService _logging;
     private readonly ICommandContext _context;
     private readonly IDiscordRestUserAPI _userAPI;
@@ -68,7 +66,6 @@ public partial class NoteCommands : CommandGroup
     /// Initializes a new instance of the <see cref="NoteCommands"/> class.
     /// </summary>
     /// <param name="notes">The moderation service.</param>
-    /// <param name="interactivity">The interactivity service.</param>
     /// <param name="logging">The logging service.</param>
     /// <param name="context">The command context.</param>
     /// <param name="userAPI">The user API.</param>
@@ -76,7 +73,6 @@ public partial class NoteCommands : CommandGroup
     public NoteCommands
     (
         NoteService notes,
-        InteractiveMessageService interactivity,
         ChannelLoggingService logging,
         ICommandContext context,
         IDiscordRestUserAPI userAPI,
@@ -84,7 +80,6 @@ public partial class NoteCommands : CommandGroup
     )
     {
         _notes = notes;
-        _interactivity = interactivity;
         _logging = logging;
         _context = context;
         _userAPI = userAPI;
@@ -151,7 +146,7 @@ public partial class NoteCommands : CommandGroup
 
         var pages = createPages.Select(p => p.Entity).ToList();
 
-        return (Result)await _interactivity.SendContextualPaginatedMessageAsync
+        return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
             _context.User.ID,
             pages,

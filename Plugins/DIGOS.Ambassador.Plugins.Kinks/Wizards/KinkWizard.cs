@@ -30,10 +30,10 @@ using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Kinks.Model;
 using DIGOS.Ambassador.Plugins.Kinks.Services;
 using Humanizer;
-using JetBrains.Annotations;
 using Remora.Commands.Results;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
+using Remora.Discord.Interactivity;
 using Remora.Rest.Core;
 using Remora.Results;
 
@@ -42,8 +42,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards;
 /// <summary>
 /// Acts as an interactive wizard for interactively setting the kink preferences of users.
 /// </summary>
-[PublicAPI]
-public sealed class KinkWizard
+internal sealed class KinkWizard
 {
     /// <summary>
     /// Gets the emoji used to move the wizard to the next page.
@@ -53,7 +52,7 @@ public sealed class KinkWizard
         ButtonComponentStyle.Secondary,
         nameof(Next),
         new PartialEmoji(Name: "\x25B6"),
-        nameof(Next).ToLowerInvariant()
+        CustomIDHelpers.CreateButtonID(nameof(Next).Kebaberize(), "kink-wizard")
     );
 
     /// <summary>
@@ -64,7 +63,7 @@ public sealed class KinkWizard
         ButtonComponentStyle.Secondary,
         nameof(Previous),
         new PartialEmoji(Name: "\x25C0"),
-        nameof(Previous).ToLowerInvariant()
+        CustomIDHelpers.CreateButtonID(nameof(Previous).Kebaberize(), "kink-wizard")
     );
 
     /// <summary>
@@ -75,7 +74,7 @@ public sealed class KinkWizard
         ButtonComponentStyle.Secondary,
         nameof(First),
         new PartialEmoji(Name: "\x23EE"),
-        nameof(First).ToLowerInvariant()
+        CustomIDHelpers.CreateButtonID(nameof(First).Kebaberize(), "kink-wizard")
     );
 
     /// <summary>
@@ -86,18 +85,7 @@ public sealed class KinkWizard
         ButtonComponentStyle.Secondary,
         nameof(Last),
         new PartialEmoji(Name: "\x23ED"),
-        nameof(Last).ToLowerInvariant()
-    );
-
-    /// <summary>
-    /// Gets the emoji used to enter a kink category.
-    /// </summary>
-    public ButtonComponent EnterCategory { get; } = new
-    (
-        ButtonComponentStyle.Primary,
-        nameof(EnterCategory).Humanize(),
-        new PartialEmoji(Name: "\xD83D\xDD22"),
-        nameof(EnterCategory).ToLowerInvariant()
+        CustomIDHelpers.CreateButtonID(nameof(Last).Kebaberize(), "kink-wizard")
     );
 
     /// <summary>
@@ -108,7 +96,7 @@ public sealed class KinkWizard
         ButtonComponentStyle.Success,
         nameof(Favourite),
         new PartialEmoji(Name: "\x2764"),
-        nameof(Favourite).ToLowerInvariant()
+        CustomIDHelpers.CreateButtonID(nameof(Favourite).Kebaberize(), "kink-wizard")
     );
 
     /// <summary>
@@ -119,7 +107,7 @@ public sealed class KinkWizard
         ButtonComponentStyle.Secondary,
         nameof(Like),
         new PartialEmoji(Name: "\x2705"),
-        nameof(Like).ToLowerInvariant()
+        CustomIDHelpers.CreateButtonID(nameof(Like).Kebaberize(), "kink-wizard")
     );
 
     /// <summary>
@@ -130,7 +118,7 @@ public sealed class KinkWizard
         ButtonComponentStyle.Secondary,
         nameof(Maybe),
         new PartialEmoji(Name: "\x26A0"),
-        nameof(Maybe).ToLowerInvariant()
+        CustomIDHelpers.CreateButtonID(nameof(Maybe).Kebaberize(), "kink-wizard")
     );
 
     /// <summary>
@@ -141,7 +129,7 @@ public sealed class KinkWizard
         ButtonComponentStyle.Danger,
         nameof(No),
         new PartialEmoji(Name: "\x26D4"),
-        nameof(No).ToLowerInvariant()
+        CustomIDHelpers.CreateButtonID(nameof(No).Kebaberize(), "kink-wizard")
     );
 
     /// <summary>
@@ -152,7 +140,7 @@ public sealed class KinkWizard
         ButtonComponentStyle.Secondary,
         nameof(NoPreference).Humanize(),
         new PartialEmoji(Name: "🤷"),
-        nameof(NoPreference).ToLowerInvariant()
+        CustomIDHelpers.CreateButtonID(nameof(NoPreference).Kebaberize(), "kink-wizard")
     );
 
     /// <summary>
@@ -163,7 +151,7 @@ public sealed class KinkWizard
         ButtonComponentStyle.Secondary,
         nameof(Back),
         new PartialEmoji(Name: "\x23EB"),
-        nameof(Back).ToLowerInvariant()
+        CustomIDHelpers.CreateButtonID(nameof(Back).Kebaberize(), "kink-wizard")
     );
 
     /// <summary>
@@ -174,7 +162,7 @@ public sealed class KinkWizard
         ButtonComponentStyle.Secondary,
         nameof(Exit),
         new PartialEmoji(Name: "\x23F9"),
-        nameof(Exit).ToLowerInvariant()
+        CustomIDHelpers.CreateButtonID(nameof(Exit).Kebaberize(), "kink-wizard")
     );
 
     /// <summary>
@@ -185,18 +173,8 @@ public sealed class KinkWizard
         ButtonComponentStyle.Primary,
         nameof(Info),
         new PartialEmoji(Name: "\x2139"),
-        nameof(Info).ToLowerInvariant()
+        CustomIDHelpers.CreateButtonID(nameof(Info).Kebaberize(), "kink-wizard")
     );
-
-    /// <summary>
-    /// Gets the buttons that the wizard responds to.
-    /// </summary>
-    public IReadOnlyList<ButtonComponent> Buttons { get; }
-
-    /// <summary>
-    /// Gets the ID of the channel the message was sent in.
-    /// </summary>
-    public Snowflake ChannelID { get; }
 
     /// <summary>
     /// Gets the ID of the source user.
@@ -207,6 +185,11 @@ public sealed class KinkWizard
     /// Gets the available categories.
     /// </summary>
     public IReadOnlyList<KinkCategory> Categories { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether the wizard was created through an interaction.
+    /// </summary>
+    public bool WasCreatedWithInteraction { get; }
 
     /// <summary>
     /// Gets the internal state of the wizard.
@@ -226,38 +209,21 @@ public sealed class KinkWizard
     /// <summary>
     /// Initializes a new instance of the <see cref="KinkWizard"/> class.
     /// </summary>
-    /// <param name="channelID">The ID of the channel the message is in.</param>
     /// <param name="sourceUserID">The ID of the source user.</param>
     /// <param name="categories">The available kink categories.</param>
+    /// <param name="wasCreatedWithInteraction">Indicates whether the wizard was created via an interaction.</param>
     public KinkWizard
     (
-        Snowflake channelID,
         Snowflake sourceUserID,
-        IReadOnlyList<KinkCategory> categories
+        IReadOnlyList<KinkCategory> categories,
+        bool wasCreatedWithInteraction
     )
     {
-        this.ChannelID = channelID;
         this.SourceUserID = sourceUserID;
         this.Categories = categories;
+        this.WasCreatedWithInteraction = wasCreatedWithInteraction;
 
         this.State = KinkWizardState.CategorySelection;
-
-        this.Buttons = new List<ButtonComponent>
-        {
-            this.Next,
-            this.Previous,
-            this.First,
-            this.Last,
-            this.EnterCategory,
-            this.Favourite,
-            this.Like,
-            this.Maybe,
-            this.No,
-            this.NoPreference,
-            this.Back,
-            this.Exit,
-            this.Info
-        };
     }
 
     /// <summary>
@@ -382,8 +348,31 @@ public sealed class KinkWizard
                 (
                     new[]
                     {
+                        new SelectMenuComponent
+                        (
+                            CustomIDHelpers.CreateSelectMenuID("category-selection", "kink-wizard"),
+                            this.Categories.Skip(this.CurrentCategoryOffset).Take(3)
+                            .Select
+                            (
+                                c => new SelectOption
+                                (
+                                    c.ToString()
+                                        .Titleize(),
+                                    c.ToString()
+                                )
+                            )
+                            .ToList(),
+                            Placeholder: "Select category",
+                            MinValues: 1,
+                            MaxValues: 1
+                        )
+                    }
+                ),
+                new ActionRowComponent
+                (
+                    new[]
+                    {
                         this.Info,
-                        this.EnterCategory,
                         this.Exit
                     }
                 )
