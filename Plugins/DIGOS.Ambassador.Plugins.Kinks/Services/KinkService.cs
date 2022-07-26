@@ -520,20 +520,33 @@ public sealed class KinkService : IQueryService<UserKink>
     /// </summary>
     /// <param name="newKinks">The new kinks.</param>
     /// <param name="ct">The cancellation token in use.</param>
-    /// <returns>The number of updated kinks.</returns>
+    /// <returns>The number of updated rows in the database.</returns>
     public async Task<int> UpdateKinksAsync
     (
         IEnumerable<Kink> newKinks,
         CancellationToken ct = default
     )
     {
-        var alteredKinks = newKinks
-            .Select(kink => _database.Kinks.Update(kink))
-            .Count(entry => entry.State != EntityState.Unchanged);
+        var enumeratedKinks = newKinks.ToList();
 
-        await _database.SaveChangesAsync(ct);
+        // TODO: this is bad practice, but works as a poor man's upsert
+        var existingKinks = await _database.Kinks.AsNoTracking().ToListAsync(ct);
+        foreach (var existingKink in existingKinks)
+        {
+            var newData = enumeratedKinks.SingleOrDefault(k => k.FListID == existingKink.FListID);
+            if (newData is null)
+            {
+                // gone?
+                _database.Kinks.Remove(existingKink);
+                continue;
+            }
 
-        return alteredKinks;
+            newData.ID = existingKink.ID;
+        }
+
+        _database.Kinks.UpdateRange(enumeratedKinks);
+
+        return await _database.SaveChangesAsync(ct);
     }
 
     /// <inheritdoc />
