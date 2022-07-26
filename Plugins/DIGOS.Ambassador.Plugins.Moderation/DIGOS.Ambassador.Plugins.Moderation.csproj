@@ -7,7 +7,7 @@
 
     <!-- Workaround for a problem with EF Core -->
     <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.6">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.7">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -16,7 +16,7 @@
 
     <ItemGroup>
         <PackageReference Include="Remora.Behaviours" Version="6.1.1" />
-        <PackageReference Include="Remora.Discord.Caching" Version="30.0.4" />
+        <PackageReference Include="Remora.Discord.Caching" Version="30.0.5" />
     </ItemGroup>
 
     <ItemGroup>

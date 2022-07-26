@@ -6,13 +6,13 @@
 
     <ItemGroup>
         <PackageReference Include="EFCore.NamingConventions" Version="6.0.0" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.6">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.7">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>compile; runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Remora.Rest.Core" Version="2.0.2" />
         <PackageReference Include="Remora.Results" Version="7.2.1" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="6.0.6" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="6.0.7" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.5" />
     </ItemGroup>
 
