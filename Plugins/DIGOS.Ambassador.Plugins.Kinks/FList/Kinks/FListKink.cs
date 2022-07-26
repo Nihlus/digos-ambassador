@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Net;
 using System.Text.Json.Serialization;
 
 namespace DIGOS.Ambassador.Plugins.Kinks.FList.Kinks;
@@ -53,8 +54,8 @@ internal class FListKink
     /// <param name="name">The name of the kink.</param>
     public FListKink(string description, uint kinkId, string name)
     {
-        this.Description = description;
+        this.Description = WebUtility.HtmlDecode(description);
         this.KinkId = kinkId;
-        this.Name = name;
+        this.Name = WebUtility.HtmlDecode(name);
     }
 }

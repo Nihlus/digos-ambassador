@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Net.Http;
@@ -293,8 +294,6 @@ internal class KinkCommands : CommandGroup
             return Result<FeedbackMessage>.FromError(send);
         }
 
-        var updatedKinkCount = 0;
-
         // Get the latest JSON from F-list
         string json;
         using (var web = new HttpClient())
@@ -328,6 +327,8 @@ internal class KinkCommands : CommandGroup
             return new UserError($"Received an error from F-List: {kinkCollection.Error}");
         }
 
+        var newKinks = new List<Kink>();
+
         foreach (var (categoryName, category) in kinkCollection.KinkCategories)
         {
             if (!Enum.TryParse<KinkCategory>(categoryName, out var kinkCategory))
@@ -335,13 +336,15 @@ internal class KinkCommands : CommandGroup
                 return new UserError("Failed to parse kink category.");
             }
 
-            updatedKinkCount += await _kinks.UpdateKinksAsync(category.Kinks.Select
+            newKinks.AddRange(category.Kinks.Select
             (
                 k => new Kink(k.Name, k.Description, k.KinkId, kinkCategory)
             ));
         }
 
-        return new FeedbackMessage($"Done. {updatedKinkCount} kinks updated.", _feedback.Theme.Secondary);
+        await _kinks.UpdateKinksAsync(newKinks);
+
+        return new FeedbackMessage($"Done.", _feedback.Theme.Secondary);
     }
 
     /// <summary>

@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Net;
 using System.Text.Json.Serialization;
 using JetBrains.Annotations;
 
@@ -49,7 +50,7 @@ internal class FListKinkCategory
     /// <param name="kinks">The retrieved kinks.</param>
     public FListKinkCategory(string group, FListKink[] kinks)
     {
-        this.Group = group;
+        this.Group = WebUtility.HtmlDecode(group);
         this.Kinks = kinks;
     }
 }
