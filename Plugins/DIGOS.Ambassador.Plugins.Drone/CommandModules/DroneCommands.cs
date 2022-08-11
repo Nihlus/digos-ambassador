@@ -34,6 +34,7 @@ using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
+using Remora.Rest.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Drone.CommandModules;
@@ -44,6 +45,7 @@ namespace DIGOS.Ambassador.Plugins.Drone.CommandModules;
 [Description("Contains some commands to perform actions with drones.")]
 public class DroneCommands : CommandGroup
 {
+    private readonly Snowflake _ambyID = new Snowflake(135347310845624320ul);
     private readonly ContentService _content;
     private readonly DroneService _drone;
     private readonly FeedbackService _feedback;
@@ -87,9 +89,12 @@ public class DroneCommands : CommandGroup
             throw new InvalidOperationException();
         }
 
+        var isAmbyInvoking = _context.User.ID == _ambyID;
         var droneMessage = user.ID == _context.User.ID
             ? _content.GetRandomSelfDroneMessage()
-            : _content.GetRandomTurnTheTablesMessage();
+            : isAmbyInvoking
+                ? _content.GetRandomTargetedMessage()
+                : _content.GetRandomTurnTheTablesMessage();
 
         var sendMessage = await _feedback.SendContextualNeutralAsync
         (
@@ -103,10 +108,14 @@ public class DroneCommands : CommandGroup
             return Result<FeedbackMessage>.FromError(sendMessage);
         }
 
+        var targetUser = isAmbyInvoking
+            ? user.ID
+            : _context.User.ID;
+
         var droneResult = await _drone.DroneUserAsync
         (
             _context.GuildID.Value,
-            _context.User.ID,
+            targetUser,
             this.CancellationToken
         );
 

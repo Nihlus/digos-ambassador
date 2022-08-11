@@ -77,6 +77,17 @@ public static class ContentServiceExtensions
     };
 
     /// <summary>
+    /// Gets some targeted droning messages.
+    /// </summary>
+    private static string[] TargetedMessages { get; } =
+    {
+        "Open wide~",
+        "Oh, you're going to look *great* in purple.",
+        "I hope you've cleared your calendar. You're going to be in a pod for a *long* time~",
+        "Nice face. Shame it'll be all hidden away soon enough~"
+    };
+
+    /// <summary>
     /// Gets some turning-the-tables messages.
     /// </summary>
     private static string[] TurnTheTablesMessages { get; } =
@@ -175,6 +186,16 @@ public static class ContentServiceExtensions
     public static string GetRandomSelfDroneMessage(this ContentService @this)
     {
         return SelfDroneMessages.PickRandom();
+    }
+
+    /// <summary>
+    /// Gets a random message from a selection of messages where Amby drones the target.
+    /// </summary>
+    /// <param name="this">The content service.</param>
+    /// <returns>The message.</returns>
+    public static string GetRandomTargetedMessage(this ContentService @this)
+    {
+        return TargetedMessages.PickRandom();
     }
 
     /// <summary>
