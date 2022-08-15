@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Remora.Sdk/1.0.0-preview6">
 
     <PropertyGroup>
         <Description>Additional generic type readers for Discord.</Description>

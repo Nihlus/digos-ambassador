@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Remora.Sdk/1.0.0-preview6">
 
     <ItemGroup>
         <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Characters\DIGOS.Ambassador.Plugins.Characters.csproj" />

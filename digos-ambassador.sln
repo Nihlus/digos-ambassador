@@ -8,8 +8,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "metadata", ".\", "{F1A57014
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 		README.md = README.md
-		stylecop.json = stylecop.json
-		stylecop.ruleset = stylecop.ruleset
 		Directory.Build.props = Directory.Build.props
 	EndProjectSection
 EndProject
@@ -19,9 +17,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DIGOS.Ambassador.Tests", "Tests\DIGOS.Ambassador.Tests\DIGOS.Ambassador.Tests.csproj", "{60C5B2AC-336F-45FA-87CC-B18265F073F7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{1EDC2213-9E6B-4F55-974F-6466F48B4385}"
-ProjectSection(SolutionItems) = preProject
-	Tests\Directory.Build.props = Tests\Directory.Build.props
-EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{4A182B87-C1AD-49B5-A162-86AEFACCE002}"
 EndProject

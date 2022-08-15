@@ -1,14 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Remora.Tests.Sdk/1.0.0-preview6">
 
     <PropertyGroup>
         <IsPackable>false</IsPackable>
     </PropertyGroup>
-    
+
     <ItemGroup>
         <ProjectReference Include="..\..\..\Plugins\DIGOS.Ambassador.Plugins.Amby\DIGOS.Ambassador.Plugins.Amby.csproj" />
         <ProjectReference Include="..\..\DIGOS.Ambassador.Tests\DIGOS.Ambassador.Tests.csproj" />
     </ItemGroup>
-    
+
     <ItemGroup>
       <PackageReference Include="Remora.Results" Version="7.2.1" />
       <PackageReference Update="xunit.runner.visualstudio" Version="2.4.5">
