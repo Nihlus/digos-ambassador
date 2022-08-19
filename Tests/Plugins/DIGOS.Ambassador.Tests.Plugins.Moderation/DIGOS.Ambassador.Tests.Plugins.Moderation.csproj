@@ -1,4 +1,4 @@
-<Project Sdk="Remora.Tests.Sdk/1.0.0-preview6">
+<Project Sdk="Remora.Tests.Sdk/1.0.0">
 
     <PropertyGroup>
         <IsPackable>false</IsPackable>
@@ -11,10 +11,6 @@
 
     <ItemGroup>
       <PackageReference Include="Remora.Results" Version="7.2.1" />
-      <PackageReference Update="xunit.runner.visualstudio" Version="2.4.5">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
     </ItemGroup>
 
 </Project>
