@@ -7,6 +7,7 @@
 
     <!-- Workaround for a problem with EF Core -->
     <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.8">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -43,12 +44,6 @@
         <Compile Update="CommandModules\WarningSetCommands.cs">
             <DependentUpon>WarningCommands.cs</DependentUpon>
         </Compile>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Reference Include="Microsoft.Extensions.Hosting.Abstractions">
-        <HintPath>..\..\..\..\..\..\.nuget\packages\microsoft.extensions.hosting.abstractions\6.0.0\lib\netstandard2.1\Microsoft.Extensions.Hosting.Abstractions.dll</HintPath>
-      </Reference>
     </ItemGroup>
 
 </Project>
