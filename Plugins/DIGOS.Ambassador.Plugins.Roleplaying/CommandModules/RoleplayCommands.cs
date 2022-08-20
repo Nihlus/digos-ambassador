@@ -64,12 +64,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules;
 [Description("Commands for interacting with and managing channel roleplays.")]
 public partial class RoleplayCommands : CommandGroup
 {
-    private readonly IServiceProvider _services;
     private readonly IDiscordRestChannelAPI _channelAPI;
     private readonly RoleplayDiscordService _discordRoleplays;
     private readonly DedicatedChannelService _dedicatedChannels;
     private readonly FeedbackService _feedback;
     private readonly ICommandContext _context;
+    private readonly PDFRoleplayExporter _pdfExporter;
+    private readonly PlaintextRoleplayExporter _plaintextExporter;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RoleplayCommands"/> class.
@@ -79,7 +80,8 @@ public partial class RoleplayCommands : CommandGroup
     /// <param name="dedicatedChannels">The dedicated channel service.</param>
     /// <param name="context">The command context.</param>
     /// <param name="channelAPI">The channel API.</param>
-    /// <param name="services">The available services.</param>
+    /// <param name="pdfExporter">The PDF roleplay exporter.</param>
+    /// <param name="plaintextExporter">The plaintext roleplay exporter.</param>
     public RoleplayCommands
     (
         RoleplayDiscordService discordRoleplays,
@@ -87,7 +89,8 @@ public partial class RoleplayCommands : CommandGroup
         DedicatedChannelService dedicatedChannels,
         ICommandContext context,
         IDiscordRestChannelAPI channelAPI,
-        IServiceProvider services
+        PDFRoleplayExporter pdfExporter,
+        PlaintextRoleplayExporter plaintextExporter
     )
     {
         _discordRoleplays = discordRoleplays;
@@ -95,7 +98,8 @@ public partial class RoleplayCommands : CommandGroup
         _dedicatedChannels = dedicatedChannels;
         _context = context;
         _channelAPI = channelAPI;
-        _services = services;
+        _pdfExporter = pdfExporter;
+        _plaintextExporter = plaintextExporter;
     }
 
     /// <summary>
@@ -620,12 +624,12 @@ public partial class RoleplayCommands : CommandGroup
         {
             case ExportFormat.PDF:
             {
-                exporter = new PDFRoleplayExporter();
+                exporter = _pdfExporter;
                 break;
             }
             case ExportFormat.Plaintext:
             {
-                exporter = new PlaintextRoleplayExporter();
+                exporter = _plaintextExporter;
                 break;
             }
             default:
@@ -643,7 +647,7 @@ public partial class RoleplayCommands : CommandGroup
             return Result<FeedbackMessage>.FromError(send);
         }
 
-        using var output = await exporter.ExportAsync(_services, roleplay);
+        using var output = await exporter.ExportAsync(roleplay);
         var fileData = new FileData
         (
             $"{output.Title}.{output.Format.GetFileExtension()}",

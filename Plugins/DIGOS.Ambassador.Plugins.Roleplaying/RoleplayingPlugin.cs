@@ -30,7 +30,6 @@ using DIGOS.Ambassador.Plugins.Core.Preconditions;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
 using DIGOS.Ambassador.Plugins.Roleplaying;
 using DIGOS.Ambassador.Plugins.Roleplaying.Autocomplete;
-using DIGOS.Ambassador.Plugins.Roleplaying.Behaviours;
 using DIGOS.Ambassador.Plugins.Roleplaying.CommandModules;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using DIGOS.Ambassador.Plugins.Roleplaying.Preconditions;
@@ -41,7 +40,6 @@ using DIGOS.Ambassador.Plugins.Roleplaying.TypeReaders;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Remora.Behaviours.Extensions;
 using Remora.Commands.Extensions;
 using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Gateway.Extensions;
@@ -70,6 +68,9 @@ public sealed class RoleplayingPlugin : PluginDescriptor, IMigratablePlugin
     {
         serviceCollection.AddPagination();
 
+        serviceCollection.AddTransient<PDFRoleplayExporter>();
+        serviceCollection.AddTransient<PlaintextRoleplayExporter>();
+
         serviceCollection.TryAddScoped<RoleplayService>();
         serviceCollection.TryAddScoped<RoleplayDiscordService>();
         serviceCollection.TryAddScoped<RoleplayServerSettingsService>();
@@ -91,9 +92,11 @@ public sealed class RoleplayingPlugin : PluginDescriptor, IMigratablePlugin
         serviceCollection.AddAutocompleteProvider<JoinedRoleplayAutocompleteProvider>();
         serviceCollection.AddAutocompleteProvider<NotJoinedRoleplayAutocompleteProvider>();
 
-        serviceCollection
-            .AddBehaviour<RoleplayArchivalBehaviour>()
-            .AddBehaviour<RoleplayTimeoutBehaviour>();
+        serviceCollection.AddHostedService<HostedRoleplayArchivalService>()
+            .AddScoped<HostedRoleplayArchivalService.ScopedRoleplayArchivalService>();
+
+        serviceCollection.AddHostedService<HostedRoleplayTimeoutService>()
+            .AddScoped<HostedRoleplayTimeoutService.ScopedRoleplayTimeoutService>();
 
         serviceCollection
             .AddResponder<RoleplayLoggingResponder>();

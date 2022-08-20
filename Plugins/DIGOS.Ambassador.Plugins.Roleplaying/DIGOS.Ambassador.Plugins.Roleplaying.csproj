@@ -10,7 +10,6 @@
     <ItemGroup>
         <PackageReference Include="Humanizer.Core" Version="2.14.1" />
         <PackageReference Include="iTextSharp.LGPLv2.Core" Version="1.8.0" />
-        <PackageReference Include="Remora.Behaviours" Version="6.1.1" />
         <PackageReference Include="Remora.Results" Version="7.2.1" />
     </ItemGroup>
 
@@ -35,6 +34,12 @@
       <Compile Update="CommandModules\RoleplaySetCommands.cs">
         <DependentUpon>RoleplayCommands.cs</DependentUpon>
       </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Microsoft.Extensions.Hosting.Abstractions">
+        <HintPath>..\..\..\..\..\..\.nuget\packages\microsoft.extensions.hosting.abstractions\6.0.0\lib\netstandard2.1\Microsoft.Extensions.Hosting.Abstractions.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

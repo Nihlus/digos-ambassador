@@ -40,7 +40,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Remora.Behaviours.Services;
 using Remora.Commands.Extensions;
 using Remora.Commands.Trees.Nodes;
 using Remora.Discord.API.Abstractions.Gateway.Commands;
@@ -129,8 +128,6 @@ internal class Program
                 });
 
                 services.Configure<CommandResponderOptions>(o => o.Prefix = "!");
-
-                services.AddSingleton<BehaviourService>();
 
                 services
                     .AddSingleton(pluginService)
@@ -292,11 +289,7 @@ internal class Program
             return;
         }
 
-        var behaviourService = hostServices.GetRequiredService<BehaviourService>();
-        await behaviourService.StartBehavioursAsync();
-
         await host.RunAsync(cancellationSource.Token);
-        await behaviourService.StopBehavioursAsync();
     }
 
     private static string GetCommandLocation(IChildNode node)

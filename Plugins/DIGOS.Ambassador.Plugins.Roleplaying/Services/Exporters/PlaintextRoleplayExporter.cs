@@ -25,7 +25,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
-using Microsoft.Extensions.DependencyInjection;
 using Remora.Discord.API.Abstractions.Rest;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters;
@@ -33,16 +32,25 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters;
 /// <summary>
 /// Exports roleplays in plaintext format.
 /// </summary>
-internal sealed class PlaintextRoleplayExporter : RoleplayExporterBase
+public sealed class PlaintextRoleplayExporter : IRoleplayExporter
 {
-    /// <inheritdoc />
-    public override async Task<ExportedRoleplay> ExportAsync(IServiceProvider services, Roleplay roleplay)
-    {
-        var guildAPI = services.GetRequiredService<IDiscordRestGuildAPI>();
+    private readonly IDiscordRestGuildAPI _guildAPI;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PlaintextRoleplayExporter"/> class.
+    /// </summary>
+    /// <param name="guildAPI">The guild API.</param>
+    public PlaintextRoleplayExporter(IDiscordRestGuildAPI guildAPI)
+    {
+        _guildAPI = guildAPI;
+    }
+
+    /// <inheritdoc />
+    public async Task<ExportedRoleplay> ExportAsync(Roleplay roleplay)
+    {
         var ownerNickname = $"Unknown user ({roleplay.Owner.DiscordID})";
 
-        var getOwner = await guildAPI.GetGuildMemberAsync(roleplay.Server.DiscordID, roleplay.Owner.DiscordID);
+        var getOwner = await _guildAPI.GetGuildMemberAsync(roleplay.Server.DiscordID, roleplay.Owner.DiscordID);
         if (!getOwner.IsSuccess)
         {
             var messageByUser = roleplay.Messages.FirstOrDefault
@@ -78,7 +86,7 @@ internal sealed class PlaintextRoleplayExporter : RoleplayExporterBase
                 (
                     async p =>
                     {
-                        var getParticipant = await guildAPI.GetGuildMemberAsync
+                        var getParticipant = await _guildAPI.GetGuildMemberAsync
                         (
                             roleplay.Server.DiscordID,
                             p.User.DiscordID

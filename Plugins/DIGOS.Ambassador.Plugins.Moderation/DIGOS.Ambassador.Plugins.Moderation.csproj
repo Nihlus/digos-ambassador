@@ -15,7 +15,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Remora.Behaviours" Version="6.1.1" />
         <PackageReference Include="Remora.Discord.Caching" Version="30.0.6" />
     </ItemGroup>
 
@@ -44,6 +43,12 @@
         <Compile Update="CommandModules\WarningSetCommands.cs">
             <DependentUpon>WarningCommands.cs</DependentUpon>
         </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Microsoft.Extensions.Hosting.Abstractions">
+        <HintPath>..\..\..\..\..\..\.nuget\packages\microsoft.extensions.hosting.abstractions\6.0.0\lib\netstandard2.1\Microsoft.Extensions.Hosting.Abstractions.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

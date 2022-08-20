@@ -29,7 +29,6 @@ using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
-using Microsoft.Extensions.DependencyInjection;
 using Remora.Discord.API.Abstractions.Rest;
 using Document = iTextSharp.text.Document;
 
@@ -38,18 +37,27 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters;
 /// <summary>
 /// Exports roleplays in PDF format.
 /// </summary>
-internal sealed class PDFRoleplayExporter : RoleplayExporterBase
+public sealed class PDFRoleplayExporter : IRoleplayExporter
 {
     private const float _defaultParagraphSpacing = 8.0f;
     private static readonly Font _standardFont = new(Font.HELVETICA, 11.0f);
     private static readonly Font _italicFont = new(Font.HELVETICA, 11.0f, Font.ITALIC);
     private static readonly Font _titleFont = new(Font.HELVETICA, 48.0f, Font.BOLD);
 
-    /// <inheritdoc />
-    public override async Task<ExportedRoleplay> ExportAsync(IServiceProvider services, Roleplay roleplay)
-    {
-        var guildAPI = services.GetRequiredService<IDiscordRestGuildAPI>();
+    private readonly IDiscordRestGuildAPI _guildAPI;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PDFRoleplayExporter"/> class.
+    /// </summary>
+    /// <param name="guildAPI">The guild API.</param>
+    public PDFRoleplayExporter(IDiscordRestGuildAPI guildAPI)
+    {
+        _guildAPI = guildAPI;
+    }
+
+    /// <inheritdoc />
+    public async Task<ExportedRoleplay> ExportAsync(Roleplay roleplay)
+    {
         // Create our document
         var pdfDoc = new Document();
 
@@ -62,7 +70,7 @@ internal sealed class PDFRoleplayExporter : RoleplayExporterBase
 
             var ownerNickname = $"Unknown user ({roleplay.Owner.DiscordID})";
 
-            var getOwner = await guildAPI.GetGuildMemberAsync(roleplay.Server.DiscordID, roleplay.Owner.DiscordID);
+            var getOwner = await _guildAPI.GetGuildMemberAsync(roleplay.Server.DiscordID, roleplay.Owner.DiscordID);
             if (!getOwner.IsSuccess)
             {
                 var messageByUser = roleplay.Messages.FirstOrDefault
@@ -96,7 +104,7 @@ internal sealed class PDFRoleplayExporter : RoleplayExporterBase
                 (
                     async p =>
                     {
-                        var getParticipant = await guildAPI.GetGuildMemberAsync
+                        var getParticipant = await _guildAPI.GetGuildMemberAsync
                         (
                             roleplay.Server.DiscordID,
                             p.User.DiscordID

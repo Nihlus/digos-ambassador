@@ -108,9 +108,9 @@ public sealed class ChannelLoggingService
     /// Posts a notification that a user was unbanned.
     /// </summary>
     /// <param name="ban">The ban.</param>
-    /// <param name="rescinderID">The person who rescinded the ban.</param>
+    /// <param name="rescinderID">The person who rescinded the ban, or null if it expired.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public async Task<Result> NotifyUserUnbannedAsync(UserBan ban, Snowflake rescinderID)
+    public async Task<Result> NotifyUserUnbannedAsync(UserBan ban, Snowflake? rescinderID)
     {
         var getChannel = await GetModerationLogChannelAsync(ban.Server.DiscordID);
         if (!getChannel.IsSuccess)
@@ -118,18 +118,11 @@ public sealed class ChannelLoggingService
             return Result.FromError(getChannel);
         }
 
-        var getSelf = await _userAPI.GetCurrentUserAsync();
-        if (!getSelf.IsSuccess)
-        {
-            return Result.FromError(getSelf);
-        }
-
-        var self = getSelf.Entity;
-        var channel = getChannel.Entity;
-
-        var whoDidIt = rescinderID == self.ID
+        var whoDidIt = rescinderID is null
             ? "(expired)"
             : $"by <@{rescinderID}>";
+
+        var channel = getChannel.Entity;
 
         var eb = new Embed
         {
@@ -178,9 +171,9 @@ public sealed class ChannelLoggingService
     /// Posts a notification that a warning was rescinded.
     /// </summary>
     /// <param name="warning">The warning.</param>
-    /// <param name="rescinderID">The person who rescinded the warning.</param>
+    /// <param name="rescinderID">The person who rescinded the warning, or null if it expired.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public async Task<Result> NotifyUserWarningRemovedAsync(UserWarning warning, Snowflake rescinderID)
+    public async Task<Result> NotifyUserWarningRemovedAsync(UserWarning warning, Snowflake? rescinderID)
     {
         var getChannel = await GetModerationLogChannelAsync(warning.Server.DiscordID);
         if (!getChannel.IsSuccess)
@@ -188,18 +181,11 @@ public sealed class ChannelLoggingService
             return Result.FromError(getChannel);
         }
 
-        var getSelf = await _userAPI.GetCurrentUserAsync();
-        if (!getSelf.IsSuccess)
-        {
-            return Result.FromError(getSelf);
-        }
-
-        var self = getSelf.Entity;
-        var channel = getChannel.Entity;
-
-        var whoDidIt = rescinderID == self.ID
+        var whoDidIt = rescinderID is null
             ? "(expired)"
             : $"by <@{rescinderID}>";
+
+        var channel = getChannel.Entity;
 
         var eb = new Embed
         {

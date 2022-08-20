@@ -26,7 +26,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Plugins.Moderation;
-using DIGOS.Ambassador.Plugins.Moderation.Behaviours;
 using DIGOS.Ambassador.Plugins.Moderation.CommandModules;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
 using DIGOS.Ambassador.Plugins.Moderation.Responders;
@@ -34,7 +33,6 @@ using DIGOS.Ambassador.Plugins.Moderation.Services;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Remora.Behaviours.Extensions;
 using Remora.Commands.Extensions;
 using Remora.Discord.Gateway.Extensions;
 using Remora.Discord.Pagination.Extensions;
@@ -79,8 +77,10 @@ public class ModerationPlugin : PluginDescriptor, IMigratablePlugin
                 .WithCommandGroup<NoteCommands>()
                 .WithCommandGroup<WarningCommands>();
 
+        serviceCollection.AddHostedService<HostedExpirationService>();
+        serviceCollection.AddScoped<HostedExpirationService.ScopedExpirationService>();
+
         serviceCollection.AddResponder<EventLoggingResponder>();
-        serviceCollection.AddBehaviour<ExpirationBehaviour>();
 
         return Result.FromSuccess();
     }

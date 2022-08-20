@@ -66,7 +66,7 @@ public class TokenizerTests
         var token = tokenizer.ParseToken(0, _tokenWithoutOptionalData) as ColourToken;
 
         Assert.NotNull(token);
-        Assert.False(token!.UsePattern);
+        Assert.False(token.UsePattern);
     }
 
     [Fact]
@@ -78,7 +78,7 @@ public class TokenizerTests
         var token = tokenizer.ParseToken(0, _tokenWithOptionalData) as ColourToken;
 
         Assert.NotNull(token);
-        Assert.True(token!.UsePattern);
+        Assert.True(token.UsePattern);
     }
 
     [Fact]
