@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Remora.Sdk/1.0.0">
 
   <PropertyGroup>
-    <Version>6.3.0</Version>
+    <Version>6.3.1</Version>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
