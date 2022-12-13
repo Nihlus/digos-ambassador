@@ -3,8 +3,8 @@
         <LegalAuthor>Jarl Gullberg</LegalAuthor>
         <LegalEmail>jarl.gullberg@gmail.com</LegalEmail>
         <LegalLicense>AGPL-3.0-or-later</LegalLicense>
-        <LibraryFrameworks>net6.0</LibraryFrameworks>
-        <ExecutableFrameworks>net6.0</ExecutableFrameworks>
+        <LibraryFrameworks>net7.0</LibraryFrameworks>
+        <ExecutableFrameworks>net7.0</ExecutableFrameworks>
     </PropertyGroup>
 
     <!-- NuGet-related properties -->

@@ -1,14 +1,14 @@
-﻿<Project Sdk="Remora.Sdk/1.0.0">
+﻿<Project Sdk="Remora.Sdk/2.1.0">
 
     <PropertyGroup>
         <Description>Core concepts and shared classes for both the bot itself and its plugins.</Description>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
-        <PackageReference Include="morelinq" Version="3.3.2" />
-        <PackageReference Include="Remora.Results" Version="7.2.1" />
-        <PackageReference Include="Zio" Version="0.15.0" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+        <PackageReference Include="morelinq" />
+        <PackageReference Include="Remora.Results" />
+        <PackageReference Include="Zio" />
     </ItemGroup>
 
 </Project>

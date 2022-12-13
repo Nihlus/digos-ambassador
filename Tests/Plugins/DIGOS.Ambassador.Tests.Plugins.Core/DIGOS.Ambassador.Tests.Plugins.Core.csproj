@@ -1,4 +1,4 @@
-<Project Sdk="Remora.Tests.Sdk/1.0.0">
+<Project Sdk="Remora.Tests.Sdk/2.0.3">
 
     <PropertyGroup>
         <IsPackable>false</IsPackable>
@@ -10,8 +10,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Moq" Version="4.18.2" />
-      <PackageReference Include="Remora.Results" Version="7.2.1" />
+      <PackageReference Include="Moq" />
+      <PackageReference Include="Remora.Results" />
     </ItemGroup>
 
 </Project>

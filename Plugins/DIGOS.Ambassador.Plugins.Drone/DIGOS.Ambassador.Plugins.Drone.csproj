@@ -1,11 +1,11 @@
-<Project Sdk="Remora.Sdk/1.0.0">
+<Project Sdk="Remora.Sdk/2.1.0">
 
     <ItemGroup>
         <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Characters\DIGOS.Ambassador.Plugins.Characters.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Remora.Results" Version="7.2.1" />
+      <PackageReference Include="Remora.Results" />
     </ItemGroup>
 
 </Project>
