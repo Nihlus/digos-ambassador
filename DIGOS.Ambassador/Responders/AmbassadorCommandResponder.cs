@@ -68,13 +68,13 @@ public class AmbassadorCommandResponder : CommandResponder
     protected override async Task<Result> ExecuteCommandAsync
     (
         string content,
-        ICommandContext commandContext,
+        MessageContext operationContext,
         CancellationToken ct = default
     )
     {
         using var transaction = TransactionFactory.Create();
 
-        var executionResult = await base.ExecuteCommandAsync(content, commandContext, ct);
+        var executionResult = await base.ExecuteCommandAsync(content, operationContext, ct);
         if (executionResult.IsSuccess)
         {
             transaction.Complete();

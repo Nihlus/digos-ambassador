@@ -58,23 +58,28 @@ public sealed class CharacterParser : AbstractTypeParser<Character>
     {
         value = value.Trim();
 
-        if (!_context.GuildID.IsDefined(out var guildID))
+        if (!_context.TryGetGuildID(out var guildID))
         {
             return new UserError("Characters can only be parsed in the context of a guild.");
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
         }
 
         // Special case
         if (string.Equals(value, "current", StringComparison.OrdinalIgnoreCase))
         {
-            return await _characterService.GetCurrentCharacterAsync(guildID, _context.User.ID, ct);
+            return await _characterService.GetCurrentCharacterAsync(guildID.Value, userID.Value, ct);
         }
 
         if (!value.Contains(':'))
         {
             return await _characterService.GetBestMatchingCharacterAsync
             (
-                guildID,
-                _context.User.ID,
+                guildID.Value,
+                userID.Value,
                 value,
                 ct
             );
@@ -102,7 +107,7 @@ public sealed class CharacterParser : AbstractTypeParser<Character>
 
         return await _characterService.GetBestMatchingCharacterAsync
         (
-            _context.GuildID.Value,
+            guildID.Value,
             parsedUser,
             rawName,
             ct

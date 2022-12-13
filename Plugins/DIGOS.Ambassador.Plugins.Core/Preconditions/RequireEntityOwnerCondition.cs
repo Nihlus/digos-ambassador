@@ -20,12 +20,14 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Errors;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using Remora.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Core.Preconditions;
@@ -56,7 +58,12 @@ public class RequireEntityOwnerCondition<TEntity> : ICondition<RequireEntityOwne
         CancellationToken ct = default
     )
     {
-        return data.IsOwner(_context.User.ID)
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        return data.IsOwner(userID.Value)
             ? new ValueTask<Result>(Result.FromSuccess())
             : new ValueTask<Result>(new UserError("You don't have permission to do that."));
     }

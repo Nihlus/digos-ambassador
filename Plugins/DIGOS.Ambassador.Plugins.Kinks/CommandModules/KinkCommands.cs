@@ -36,8 +36,10 @@ using JetBrains.Annotations;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Interactivity.Services;
@@ -61,6 +63,7 @@ internal class KinkCommands : CommandGroup
     private readonly FeedbackService _feedback;
     private readonly InMemoryDataService<Snowflake, KinkWizard> _dataService;
     private readonly ICommandContext _context;
+    private readonly IDiscordRestUserAPI _userAPI;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="KinkCommands"/> class.
@@ -69,18 +72,21 @@ internal class KinkCommands : CommandGroup
     /// <param name="feedback">The application's feedback service.</param>
     /// <param name="dataService">The in-memory data service.</param>
     /// <param name="context">The command context.</param>
+    /// <param name="userAPI">The user API.</param>
     public KinkCommands
     (
         KinkService kinks,
         FeedbackService feedback,
         InMemoryDataService<Snowflake, KinkWizard> dataService,
-        ICommandContext context
+        ICommandContext context,
+        IDiscordRestUserAPI userAPI
     )
     {
         _kinks = kinks;
         _feedback = feedback;
         _dataService = dataService;
         _context = context;
+        _userAPI = userAPI;
     }
 
     /// <summary>
@@ -92,6 +98,11 @@ internal class KinkCommands : CommandGroup
     [Description("Shows information about the named kink.")]
     public async Task<IResult> ShowKinkAsync(string kinkName)
     {
+        if (!_context.TryGetChannelID(out var channelID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var getKinkInfoResult = await _kinks.GetKinkByNameAsync(kinkName);
         if (!getKinkInfoResult.IsSuccess)
         {
@@ -101,7 +112,7 @@ internal class KinkCommands : CommandGroup
         var kink = getKinkInfoResult.Entity;
         var display = _kinks.BuildKinkInfoEmbed(kink);
 
-        return await _feedback.SendPrivateEmbedAsync(_context.ChannelID, display);
+        return await _feedback.SendPrivateEmbedAsync(channelID.Value, display);
     }
 
     /// <summary>
@@ -114,7 +125,26 @@ internal class KinkCommands : CommandGroup
     [Description("Shows the user's preference for the named kink.")]
     public async Task<IResult> ShowKinkPreferenceAsync(string kinkName, IUser? user = null)
     {
-        user ??= _context.User;
+        if (!_context.TryGetChannelID(out var channelID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (user is null)
+        {
+            if (!_context.TryGetUserID(out var userID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            var getUser = await _userAPI.GetUserAsync(userID.Value, this.CancellationToken);
+            if (!getUser.IsSuccess)
+            {
+                return getUser;
+            }
+
+            user = getUser.Entity;
+        }
 
         var getUserKinkResult = await _kinks.GetUserKinkByNameAsync(user.ID, kinkName);
         if (!getUserKinkResult.IsSuccess)
@@ -125,7 +155,7 @@ internal class KinkCommands : CommandGroup
         var userKink = getUserKinkResult.Entity;
         var display = _kinks.BuildUserKinkInfoEmbedBase(userKink);
 
-        return await _feedback.SendPrivateEmbedAsync(_context.ChannelID, display);
+        return await _feedback.SendPrivateEmbedAsync(channelID.Value, display);
     }
 
     /// <summary>
@@ -137,6 +167,11 @@ internal class KinkCommands : CommandGroup
     [Description("Shows the kinks which overlap between you and the given user.")]
     public async Task<IResult> ShowKinkOverlap(IUser otherUser)
     {
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var overlappingKinks = await _kinks.QueryDatabaseAsync
         (
             q =>
@@ -145,7 +180,7 @@ internal class KinkCommands : CommandGroup
                     .Where(k => k.User.DiscordID == otherUser.ID);
 
                 return q
-                    .Where(k => k.User.DiscordID == _context.User.ID)
+                    .Where(k => k.User.DiscordID == userID.Value)
                     .Where
                     (
                         k => otherUserKinks
@@ -156,11 +191,18 @@ internal class KinkCommands : CommandGroup
 
         if (!overlappingKinks.Any())
         {
-            return Result<FeedbackMessage>.FromSuccess(new FeedbackMessage("You don't overlap anywhere.", _feedback.Theme.Secondary));
+            return Result<FeedbackMessage>.FromSuccess
+            (
+                new FeedbackMessage
+                (
+                    "You don't overlap anywhere.",
+                    _feedback.Theme.Secondary
+                )
+            );
         }
 
-        var pages = _kinks.BuildKinkOverlapEmbeds(_context.User.ID, otherUser.ID, overlappingKinks);
-        return await _feedback.SendContextualPaginatedMessageAsync(_context.User.ID, pages, ct: this.CancellationToken);
+        var pages = _kinks.BuildKinkOverlapEmbeds(userID.Value, otherUser.ID, overlappingKinks);
+        return await _feedback.SendContextualPaginatedMessageAsync(userID.Value, pages, ct: this.CancellationToken);
     }
 
     /// <summary>
@@ -177,7 +219,21 @@ internal class KinkCommands : CommandGroup
         IUser? user = null
     )
     {
-        user ??= _context.User;
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (user is null)
+        {
+            var getUser = await _userAPI.GetUserAsync(userID.Value, this.CancellationToken);
+            if (!getUser.IsSuccess)
+            {
+                return getUser;
+            }
+
+            user = getUser.Entity;
+        }
 
         var kinksWithPreference = await _kinks.QueryDatabaseAsync
         (
@@ -201,7 +257,7 @@ internal class KinkCommands : CommandGroup
         var pages = _kinks.BuildPaginatedUserKinkEmbeds(kinksWithPreference);
         return await _feedback.SendContextualPaginatedMessageAsync
         (
-            _context.User.ID,
+            userID.Value,
             pages,
             ct: this.CancellationToken
         );
@@ -221,7 +277,12 @@ internal class KinkCommands : CommandGroup
         KinkPreference preference
     )
     {
-        var getUserKinkResult = await _kinks.GetUserKinkByNameAsync(_context.User.ID, kinkName);
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var getUserKinkResult = await _kinks.GetUserKinkByNameAsync(userID.Value, kinkName);
         if (!getUserKinkResult.IsSuccess)
         {
             return Result<FeedbackMessage>.FromError(getUserKinkResult);
@@ -243,10 +304,15 @@ internal class KinkCommands : CommandGroup
     [Description("Runs an interactive wizard for setting kink preferences.")]
     public async Task<Result> RunKinkWizardAsync()
     {
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var categories = await _kinks.GetKinkCategoriesAsync(this.CancellationToken);
         var initialWizard = new KinkWizard
         (
-            _context.User.ID,
+            userID.Value,
             categories.ToList(),
             _context is InteractionContext
         );
@@ -288,7 +354,12 @@ internal class KinkCommands : CommandGroup
     [RequireOwner]
     public async Task<Result<FeedbackMessage>> UpdateKinkDatabaseAsync()
     {
-        var send = await _feedback.SendContextualNeutralAsync("Updating kinks...", _context.User.ID);
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var send = await _feedback.SendContextualNeutralAsync("Updating kinks...", userID.Value);
         if (!send.IsSuccess)
         {
             return Result<FeedbackMessage>.FromError(send);
@@ -355,7 +426,12 @@ internal class KinkCommands : CommandGroup
     [Description("Resets all your kink preferences.")]
     public async Task<Result<FeedbackMessage>> ResetKinksAsync()
     {
-        var resetResult = await _kinks.ResetUserKinksAsync(_context.User.ID);
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var resetResult = await _kinks.ResetUserKinksAsync(userID.Value);
         return resetResult.IsSuccess
             ? new FeedbackMessage("Preferences reset.", _feedback.Theme.Secondary)
             : Result<FeedbackMessage>.FromError(resetResult);

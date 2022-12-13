@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Moderation.Permissions;
@@ -30,6 +31,7 @@ using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
@@ -79,7 +81,12 @@ public partial class NoteCommands
         [RequireContext(ChannelContext.Guild)]
         public async Task<Result<FeedbackMessage>> SetNoteContentsAsync(long noteID, string newContents)
         {
-            var getNote = await _notes.GetNoteAsync(_context.GuildID.Value, noteID);
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            var getNote = await _notes.GetNoteAsync(guildID.Value, noteID);
             if (!getNote.IsSuccess)
             {
                 return Result<FeedbackMessage>.FromError(getNote);

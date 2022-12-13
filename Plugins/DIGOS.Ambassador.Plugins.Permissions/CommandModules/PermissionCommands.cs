@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -34,6 +35,7 @@ using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Pagination;
@@ -84,6 +86,11 @@ public class PermissionCommands : CommandGroup
     [Description("Lists all available permissions.")]
     public async Task<IResult> ListPermissionsAsync()
     {
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var availablePermissions = _permissionRegistry.RegisteredPermissions
             .OrderBy(p => p.GetType().Name)
             .ThenBy(p => p.FriendlyName)
@@ -105,7 +112,7 @@ public class PermissionCommands : CommandGroup
 
         return await _feedback.SendContextualPaginatedMessageAsync
         (
-            _context.User.ID,
+            userID.Value,
             pages,
             appearance,
             ct: this.CancellationToken
@@ -122,9 +129,19 @@ public class PermissionCommands : CommandGroup
     [RequireContext(ChannelContext.Guild)]
     public async Task<IResult> ListGrantedPermissionsAsync(IUser discordUser)
     {
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var userPermissions = await _permissions.GetApplicableUserPermissionsAsync
         (
-            _context.GuildID.Value,
+            guildID.Value,
             discordUser.ID
         );
 
@@ -168,7 +185,7 @@ public class PermissionCommands : CommandGroup
 
         return await _feedback.SendContextualPaginatedMessageAsync
         (
-            _context.User.ID,
+            userID.Value,
             pages,
             appearance,
             ct: this.CancellationToken
@@ -193,6 +210,11 @@ public class PermissionCommands : CommandGroup
         PermissionTarget grantedTarget = PermissionTarget.Self
     )
     {
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var getPermissionResult = _permissionRegistry.GetPermission(permissionName);
         if (!getPermissionResult.IsSuccess)
         {
@@ -202,7 +224,7 @@ public class PermissionCommands : CommandGroup
         var permission = getPermissionResult.Entity;
         var grantPermissionResult = await _permissions.GrantPermissionAsync
         (
-            _context.GuildID.Value,
+            guildID.Value,
             discordUser.ID,
             permission,
             grantedTarget,
@@ -282,6 +304,11 @@ public class PermissionCommands : CommandGroup
         PermissionTarget revokedTarget = PermissionTarget.Self
     )
     {
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var getPermissionResult = _permissionRegistry.GetPermission(permissionName);
         if (!getPermissionResult.IsSuccess)
         {
@@ -291,7 +318,7 @@ public class PermissionCommands : CommandGroup
         var permission = getPermissionResult.Entity;
         var revokePermissionResult = await _permissions.RevokePermissionAsync
         (
-            _context.GuildID.Value,
+            guildID.Value,
             discordUser.ID,
             permission,
             revokedTarget

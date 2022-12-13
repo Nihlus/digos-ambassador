@@ -42,6 +42,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Rest.Core;
@@ -109,6 +110,11 @@ public class UserCommands : CommandGroup
     /// <param name="user">The stored information about the user.</param>
     private async Task<Result> ShowUserInfoAsync(IUser discordUser, User user)
     {
+        if (!_context.TryGetChannelID(out var channelID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var embedFields = new List<IEmbedField>();
 
         var getUserAvatar = CDN.GetUserAvatarUrl(discordUser);
@@ -130,11 +136,11 @@ public class UserCommands : CommandGroup
             Fields = embedFields
         };
 
-        if (_context.GuildID.IsDefined(out var guildID))
+        if (_context.TryGetGuildID(out var guildID))
         {
             var getMember = await _guildAPI.GetGuildMemberAsync
             (
-                guildID,
+                guildID.Value,
                 discordUser.ID,
                 this.CancellationToken
             );
@@ -147,7 +153,7 @@ public class UserCommands : CommandGroup
             var member = getMember.Entity;
             if (member.Roles.Count > 0)
             {
-                var getRoles = await _guildAPI.GetGuildRolesAsync(guildID, this.CancellationToken);
+                var getRoles = await _guildAPI.GetGuildRolesAsync(guildID.Value, this.CancellationToken);
                 if (!getRoles.IsSuccess)
                 {
                     return Result.FromError(getRoles);
@@ -210,7 +216,7 @@ public class UserCommands : CommandGroup
 
         var sendEmbed = await _channelAPI.CreateMessageAsync
         (
-            _context.ChannelID,
+            channelID.Value,
             embeds: new[] { embed },
             ct: this.CancellationToken
         );

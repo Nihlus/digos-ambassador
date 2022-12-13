@@ -24,7 +24,6 @@ using System;
 using System.Drawing;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
@@ -41,7 +40,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Remora.Commands.Extensions;
-using Remora.Commands.Trees.Nodes;
 using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Caching.Extensions;
@@ -49,7 +47,6 @@ using Remora.Discord.Caching.Services;
 using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Themes;
 using Remora.Discord.Commands.Responders;
-using Remora.Discord.Commands.Results;
 using Remora.Discord.Commands.Services;
 using Remora.Discord.Gateway;
 using Remora.Discord.Gateway.Extensions;
@@ -166,9 +163,7 @@ internal class Program
                 services.Replace(ServiceDescriptor.Scoped<CommandResponder, AmbassadorCommandResponder>());
                 services.Replace(ServiceDescriptor.Scoped<InteractionResponder, AmbassadorInteractionResponder>());
 
-                services
-                    .AddParser<MessageReader>()
-                    .AddParser<HumanTimeSpanReader>();
+                services.AddParser<HumanTimeSpanReader>();
 
                 var configurePlugins = plugins.ConfigureServices(services);
                 if (!configurePlugins.IsSuccess)
@@ -205,36 +200,10 @@ internal class Program
 
         var slashService = hostServices.GetRequiredService<SlashService>();
 
-        var checkSlashSupport = slashService.SupportsSlashCommands();
-        if (!checkSlashSupport.IsSuccess)
+        var updateSlash = await slashService.UpdateSlashCommandsAsync(debugServer, ct: cancellationSource.Token);
+        if (!updateSlash.IsSuccess)
         {
-            var error = checkSlashSupport.Error;
-            if (error is UnsupportedFeatureError ufe)
-            {
-                var location = ufe.Node is not null
-                    ? GetCommandLocation(ufe.Node)
-                    : "unknown";
-
-                log.LogWarning
-                (
-                    "The registered commands of the bot don't support slash commands: {Reason} ({Location})",
-                    error.Message,
-                    location
-                );
-            }
-            else
-            {
-                log.LogError("Failed to check slash command compatibility: {Reason}", error.Message);
-                return;
-            }
-        }
-        else
-        {
-            var updateSlash = await slashService.UpdateSlashCommandsAsync(debugServer, ct: cancellationSource.Token);
-            if (!updateSlash.IsSuccess)
-            {
-                log.LogWarning("Failed to update slash commands: {Reason}", updateSlash.Error.Message);
-            }
+            log.LogWarning("Failed to update slash commands: {Reason}", updateSlash.Error.Message);
         }
 
         log.LogInformation("Initializing plugins...");
@@ -290,34 +259,5 @@ internal class Program
         }
 
         await host.RunAsync(cancellationSource.Token);
-    }
-
-    private static string GetCommandLocation(IChildNode node)
-    {
-        var sb = new StringBuilder();
-
-        switch (node)
-        {
-            case GroupNode group:
-            {
-                IParentNode current = group;
-                while (current is IChildNode child)
-                {
-                    sb.Insert(0, "::");
-                    sb.Insert(0, child.Key);
-                    current = child.Parent;
-                }
-                break;
-            }
-            case CommandNode command:
-            {
-                sb.Append(command.GroupType.FullName);
-                sb.Append("::");
-                sb.Append(command.CommandMethod.Name);
-                break;
-            }
-        }
-
-        return sb.ToString();
     }
 }

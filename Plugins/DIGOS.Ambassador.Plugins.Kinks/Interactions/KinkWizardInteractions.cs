@@ -120,7 +120,12 @@ internal class KinkWizardInteractions : InteractionGroup
 
     private async Task<Result> SetCurrentKinkPreference(KinkPreference preference)
     {
-        var leaseData = await _dataService.LeaseDataAsync(_context.Message.Value.ID, this.CancellationToken);
+        if (!_context.Interaction.Message.IsDefined(out var message))
+        {
+            throw new NotSupportedException();
+        }
+
+        var leaseData = await _dataService.LeaseDataAsync(message.ID, this.CancellationToken);
         if (!leaseData.IsSuccess)
         {
             return (Result)leaseData;
@@ -220,7 +225,12 @@ internal class KinkWizardInteractions : InteractionGroup
     [SelectMenu("category-selection")]
     public async Task<Result> EnterCategoryClickedAsync(IReadOnlyList<string> values)
     {
-        var leaseData = await _dataService.LeaseDataAsync(_context.Message.Value.ID, this.CancellationToken);
+        if (!_context.Interaction.Message.IsDefined(out var message))
+        {
+            throw new NotSupportedException();
+        }
+
+        var leaseData = await _dataService.LeaseDataAsync(message.ID, this.CancellationToken);
         if (!leaseData.IsSuccess)
         {
             return (Result)leaseData;
@@ -271,7 +281,12 @@ internal class KinkWizardInteractions : InteractionGroup
     [Button("exit")]
     public async Task<Result> ExitClickedAsync()
     {
-        var leaseData = await _dataService.LeaseDataAsync(_context.Message.Value.ID, this.CancellationToken);
+        if (!_context.Interaction.Message.IsDefined(out var message))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var leaseData = await _dataService.LeaseDataAsync(message.ID, this.CancellationToken);
         if (!leaseData.IsSuccess)
         {
             return (Result)leaseData;
@@ -285,13 +300,12 @@ internal class KinkWizardInteractions : InteractionGroup
         {
             return await _interactionAPI.DeleteOriginalInteractionResponseAsync
             (
-                _context.ApplicationID,
-                _context.Token,
+                _context.Interaction.ApplicationID,
+                _context.Interaction.Token,
                 this.CancellationToken
             );
         }
 
-        var message = _context.Message.Value;
         return await _channelAPI.DeleteMessageAsync(message.ChannelID, message.ID, ct: this.CancellationToken);
     }
 
@@ -302,7 +316,12 @@ internal class KinkWizardInteractions : InteractionGroup
     [Button("info")]
     public async Task<Result> HelpClickedAsync()
     {
-        var leaseData = await _dataService.LeaseDataAsync(_context.Message.Value.ID, this.CancellationToken);
+        if (!_context.Interaction.Message.IsDefined(out var message))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var leaseData = await _dataService.LeaseDataAsync(message.ID, this.CancellationToken);
         if (!leaseData.IsSuccess)
         {
             return (Result)leaseData;
@@ -334,7 +353,12 @@ internal class KinkWizardInteractions : InteractionGroup
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     private async Task<Result> NavigateAsync(Func<KinkWizard, bool> navigator)
     {
-        var leaseData = await _dataService.LeaseDataAsync(_context.Message.Value.ID, this.CancellationToken);
+        if (!_context.Interaction.Message.IsDefined(out var message))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var leaseData = await _dataService.LeaseDataAsync(message.ID, this.CancellationToken);
         if (!leaseData.IsSuccess)
         {
             return (Result)leaseData;
@@ -434,11 +458,13 @@ internal class KinkWizardInteractions : InteractionGroup
     /// </summary>
     /// <param name="data">The wizard's state.</param>
     /// <returns>A result which may or may not have succeeded.</returns>
-    private async Task<Result> UpdateAsync
-    (
-        KinkWizard data
-    )
+    private async Task<Result> UpdateAsync(KinkWizard data)
     {
+        if (!_context.Interaction.Message.IsDefined(out var message))
+        {
+            throw new InvalidOperationException();
+        }
+
         var getPage = await data.GetCurrentPageAsync(_kinks, this.CancellationToken);
         if (!getPage.IsSuccess)
         {
@@ -451,15 +477,14 @@ internal class KinkWizardInteractions : InteractionGroup
         {
             return (Result)await _interactionAPI.EditOriginalInteractionResponseAsync
             (
-                _context.ApplicationID,
-                _context.Token,
+                _context.Interaction.ApplicationID,
+                _context.Interaction.Token,
                 embeds: new[] { page },
                 components: new Optional<IReadOnlyList<IMessageComponent>?>(data.GetCurrentPageComponents()),
                 ct: this.CancellationToken
             );
         }
 
-        var message = _context.Message.Value;
         return (Result)await _channelAPI.EditMessageAsync
         (
             message.ChannelID,

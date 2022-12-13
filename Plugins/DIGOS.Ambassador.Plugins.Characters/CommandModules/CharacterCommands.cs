@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -48,6 +49,7 @@ using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Pagination;
@@ -75,6 +77,7 @@ public partial class CharacterCommands : CommandGroup
     private readonly ICommandContext _context;
     private readonly IDiscordRestGuildAPI _guildAPI;
     private readonly IDiscordRestChannelAPI _channelAPI;
+    private readonly IDiscordRestUserAPI _userAPI;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CharacterCommands"/> class.
@@ -86,6 +89,7 @@ public partial class CharacterCommands : CommandGroup
     /// <param name="context">The command context.</param>
     /// <param name="guildAPI">The guild API.</param>
     /// <param name="channelAPI">The channel API.</param>
+    /// <param name="userAPI">The user API.</param>
     public CharacterCommands
     (
         ContentService contentService,
@@ -94,7 +98,8 @@ public partial class CharacterCommands : CommandGroup
         PronounService pronouns,
         ICommandContext context,
         IDiscordRestGuildAPI guildAPI,
-        IDiscordRestChannelAPI channelAPI
+        IDiscordRestChannelAPI channelAPI,
+        IDiscordRestUserAPI userAPI
     )
     {
         _content = contentService;
@@ -104,6 +109,7 @@ public partial class CharacterCommands : CommandGroup
         _context = context;
         _guildAPI = guildAPI;
         _channelAPI = channelAPI;
+        _userAPI = userAPI;
     }
 
     /// <summary>
@@ -114,6 +120,11 @@ public partial class CharacterCommands : CommandGroup
     [Description("Shows available pronoun families that can be used with characters.")]
     public async Task<Result> ShowAvailablePronounFamiliesAsync()
     {
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         EmbedField CreatePronounField(IPronounProvider pronounProvider)
         {
             var value = $"{pronounProvider.GetSubjectForm()} ate {pronounProvider.GetPossessiveAdjectiveForm()} " +
@@ -151,7 +162,7 @@ public partial class CharacterCommands : CommandGroup
 
         return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
-            _context.User.ID,
+            userID.Value,
             pages,
             ct: this.CancellationToken
         );
@@ -166,10 +177,20 @@ public partial class CharacterCommands : CommandGroup
     [RequireContext(ChannelContext.Guild)]
     public async Task<Result> ShowCharacterAsync()
     {
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var retrieveCurrentCharacterResult = await _characters.GetCurrentCharacterAsync
         (
-            _context.GuildID.Value,
-            _context.User.ID,
+            guildID.Value,
+            userID.Value,
             this.CancellationToken
         );
 
@@ -192,8 +213,13 @@ public partial class CharacterCommands : CommandGroup
     [RequireContext(ChannelContext.Guild)]
     public async Task<Result> ShowCharacterAsync([AutocompleteProvider("character::any")] Character character)
     {
+        if (!_context.TryGetChannelID(out var channelID))
+        {
+            throw new InvalidOperationException();
+        }
+
         // NSFW check
-        var getChannel = await _channelAPI.GetChannelAsync(_context.ChannelID, this.CancellationToken);
+        var getChannel = await _channelAPI.GetChannelAsync(channelID.Value, this.CancellationToken);
         if (!getChannel.IsSuccess)
         {
             return Result.FromError(getChannel);
@@ -224,7 +250,21 @@ public partial class CharacterCommands : CommandGroup
     [Command("view-characters")]
     [Description("Shows a gallery of all your characters.")]
     [RequireContext(ChannelContext.Guild)]
-    public Task<Result> ShowCharactersAsync() => ShowCharactersAsync(_context.User);
+    public async Task<Result> ShowCharactersAsync()
+    {
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var getUser = await _userAPI.GetUserAsync(userID.Value, this.CancellationToken);
+        if (!getUser.IsSuccess)
+        {
+            return (Result)getUser;
+        }
+
+        return await ShowCharactersAsync(getUser.Entity);
+    }
 
     /// <summary>
     /// Shows a gallery of all the user's characters.
@@ -236,9 +276,24 @@ public partial class CharacterCommands : CommandGroup
     [RequireContext(ChannelContext.Guild)]
     public async Task<Result> ShowCharactersAsync(IUser discordUser)
     {
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetChannelID(out var channelID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var getCharacters = await _characters.GetUserCharactersAsync
         (
-            _context.GuildID.Value,
+            guildID.Value,
             discordUser.ID,
             this.CancellationToken
         );
@@ -248,7 +303,7 @@ public partial class CharacterCommands : CommandGroup
             return Result.FromError(getCharacters);
         }
 
-        var getChannel = await _channelAPI.GetChannelAsync(_context.ChannelID, this.CancellationToken);
+        var getChannel = await _channelAPI.GetChannelAsync(channelID.Value, this.CancellationToken);
         if (!getChannel.IsSuccess)
         {
             return Result.FromError(getChannel);
@@ -282,7 +337,7 @@ public partial class CharacterCommands : CommandGroup
 
                 return embed with
                 {
-                    Title = $"{(_context.User.ID == discordUser.ID ? "Your" : $"<@{discordUser.ID}>'s")} characters"
+                    Title = $"{(userID == discordUser.ID ? "Your" : $"<@{discordUser.ID}>'s")} characters"
                 };
             },
             "You don't have any characters"
@@ -290,7 +345,7 @@ public partial class CharacterCommands : CommandGroup
 
         return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
-            _context.User.ID,
+            userID.Value,
             pages.Where(p => p.IsSuccess).Select(p => p.Entity).ToList(),
             ct: this.CancellationToken
         );
@@ -302,10 +357,15 @@ public partial class CharacterCommands : CommandGroup
         CancellationToken ct = default
     )
     {
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var eb = new Embed { Colour = _feedback.Theme.Secondary };
 
         Optional<IEmbedAuthor> author = default;
-        var getOwner = await _guildAPI.GetGuildMemberAsync(_context.GuildID.Value, character.Owner.DiscordID, ct);
+        var getOwner = await _guildAPI.GetGuildMemberAsync(guildID.Value, character.Owner.DiscordID, ct);
         if (getOwner.IsSuccess)
         {
             var owner = getOwner.Entity;
@@ -364,7 +424,7 @@ public partial class CharacterCommands : CommandGroup
         // Override the colour if a role is set
         if (character.Role is not null)
         {
-            var getGuildRoles = await _guildAPI.GetGuildRolesAsync(_context.GuildID.Value, this.CancellationToken);
+            var getGuildRoles = await _guildAPI.GetGuildRolesAsync(guildID.Value, this.CancellationToken);
             if (!getGuildRoles.IsSuccess)
             {
                 return Result<Embed>.FromError(getGuildRoles);
@@ -411,12 +471,22 @@ public partial class CharacterCommands : CommandGroup
         string? characterAvatarUrl = null
     )
     {
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         characterAvatarUrl ??= _content.GetDefaultAvatarUri().ToString();
 
         var createCharacterResult = await _characters.CreateCharacterAsync
         (
-            _context.GuildID.Value,
-            _context.User.ID,
+            guildID.Value,
+            userID.Value,
             characterName,
             characterAvatarUrl,
             characterNickname,
@@ -427,7 +497,11 @@ public partial class CharacterCommands : CommandGroup
 
         return !createCharacterResult.IsSuccess
             ? Result<FeedbackMessage>.FromError(createCharacterResult)
-            : new FeedbackMessage($"Character \"{createCharacterResult.Entity.Name}\" created.", _feedback.Theme.Secondary);
+            : new FeedbackMessage
+            (
+                $"Character \"{createCharacterResult.Entity.Name}\" created.",
+                _feedback.Theme.Secondary
+            );
     }
 
     /// <summary>
@@ -446,10 +520,20 @@ public partial class CharacterCommands : CommandGroup
         Character character
     )
     {
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var deleteResult = await _characters.DeleteCharacterAsync
         (
-            _context.GuildID.Value,
-            _context.User.ID,
+            guildID.Value,
+            userID.Value,
             character,
             this.CancellationToken
         );
@@ -469,11 +553,30 @@ public partial class CharacterCommands : CommandGroup
     [RequireContext(ChannelContext.Guild)]
     public async Task<Result> ListOwnedCharactersAsync(IUser? discordUser = null)
     {
-        discordUser ??= _context.User;
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (discordUser is null)
+        {
+            var getUser = await _userAPI.GetUserAsync(userID.Value, this.CancellationToken);
+            if (!getUser.IsSuccess)
+            {
+                return (Result)getUser;
+            }
+
+            discordUser = getUser.Entity;
+        }
 
         var getCharacters = await _characters.GetUserCharactersAsync
         (
-            _context.GuildID.Value,
+            guildID.Value,
             discordUser.ID,
             this.CancellationToken
         );
@@ -497,7 +600,7 @@ public partial class CharacterCommands : CommandGroup
 
         return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
-            _context.User.ID,
+            userID.Value,
             pages,
             ct: this.CancellationToken
         );
@@ -512,10 +615,20 @@ public partial class CharacterCommands : CommandGroup
     [RequireContext(ChannelContext.Guild)]
     public async Task<Result<FeedbackMessage>> AssumeRandomCharacterFormAsync()
     {
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var getRandom = await _characters.GetRandomUserCharacterAsync
         (
-            _context.GuildID.Value,
-            _context.User.ID,
+            guildID.Value,
+            userID.Value,
             this.CancellationToken
         );
 
@@ -544,10 +657,28 @@ public partial class CharacterCommands : CommandGroup
         Character character
     )
     {
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var getUser = await _userAPI.GetUserAsync(userID.Value, this.CancellationToken);
+        if (!getUser.IsSuccess)
+        {
+            return Result<FeedbackMessage>.FromError(getUser);
+        }
+
+        var user = getUser.Entity;
+
         var makeCurrent = await _characters.MakeCharacterCurrentAsync
         (
-            _context.GuildID.Value,
-            _context.User.ID,
+            guildID.Value,
+            userID.Value,
             character,
             this.CancellationToken
         );
@@ -559,7 +690,7 @@ public partial class CharacterCommands : CommandGroup
 
         return new FeedbackMessage
         (
-            $"{_context.User.Username} shimmers and morphs into {character.Name}.",
+            $"{user.Username} shimmers and morphs into {character.Name}.",
             _feedback.Theme.Secondary
         );
     }
@@ -573,10 +704,20 @@ public partial class CharacterCommands : CommandGroup
     [RequireContext(ChannelContext.Guild)]
     public async Task<Result<FeedbackMessage>> ClearDefaultCharacterAsync()
     {
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var result = await _characters.ClearDefaultCharacterAsync
         (
-            _context.GuildID.Value,
-            _context.User.ID,
+            guildID.Value,
+            userID.Value,
             this.CancellationToken
         );
 
@@ -594,11 +735,21 @@ public partial class CharacterCommands : CommandGroup
     [RequireContext(ChannelContext.Guild)]
     public async Task<Result<FeedbackMessage>> ClearCharacterFormAsync()
     {
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         // First, let's try dropping to a default form instead.
         var getDefaultCharacter = await _characters.GetDefaultCharacterAsync
         (
-            _context.GuildID.Value,
-            _context.User.ID,
+            guildID.Value,
+            userID.Value,
             this.CancellationToken
         );
 
@@ -610,8 +761,8 @@ public partial class CharacterCommands : CommandGroup
 
         var result = await _characters.ClearCurrentCharacterAsync
         (
-            _context.GuildID.Value,
-            _context.User.ID,
+            guildID.Value,
+            userID.Value,
             this.CancellationToken
         );
 
@@ -634,6 +785,11 @@ public partial class CharacterCommands : CommandGroup
         Character character
     )
     {
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         if (character.Images.Count <= 0)
         {
             return new UserError("There are no images in that character's gallery.");
@@ -652,7 +808,7 @@ public partial class CharacterCommands : CommandGroup
 
         return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
-            _context.User.ID,
+            userID.Value,
             pages.ToList(),
             appearance,
             ct: this.CancellationToken
@@ -669,6 +825,11 @@ public partial class CharacterCommands : CommandGroup
     [RequireContext(ChannelContext.Guild)]
     public async Task<Result> ListImagesAsync([AutocompleteProvider("character::any")] Character character)
     {
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
         (
             character.Images,
@@ -681,7 +842,7 @@ public partial class CharacterCommands : CommandGroup
 
         return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
-            _context.User.ID,
+            userID.Value,
             pages,
             ct: this.CancellationToken
         );
@@ -822,10 +983,20 @@ public partial class CharacterCommands : CommandGroup
         Character character
     )
     {
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var transferResult = await _characters.TransferCharacterOwnershipAsync
         (
-            _context.GuildID.Value,
-            _context.User.ID,
+            guildID.Value,
+            userID.Value,
             character,
             this.CancellationToken
         );

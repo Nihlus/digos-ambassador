@@ -90,7 +90,12 @@ public class ConsentCheckingPreExecutionEvent : IPreExecutionEvent
     /// <inheritdoc />
     public async Task<Result> BeforeExecutionAsync(ICommandContext context, CancellationToken ct = default)
     {
-        var hasConsented = await _privacy.HasUserConsentedAsync(context.User.ID, ct);
+        if (!context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var hasConsented = await _privacy.HasUserConsentedAsync(userID.Value, ct);
 
         IReadOnlyList<BoundCommandNode> potentialCommands;
         switch (context)
@@ -130,12 +135,17 @@ public class ConsentCheckingPreExecutionEvent : IPreExecutionEvent
                     return Result.FromSuccess();
                 }
 
-                if (!interactionContext.Data.TryPickT0(out var data, out _))
+                if (!interactionContext.Interaction.Data.IsDefined(out var data))
                 {
                     return Result.FromSuccess();
                 }
 
-                data.UnpackInteraction(out var command, out var parameters);
+                if (!data.TryPickT0(out var commandData, out _))
+                {
+                    return Result.FromSuccess();
+                }
+
+                commandData.UnpackInteraction(out var command, out var parameters);
                 potentialCommands = defaultTree
                     .Search(command, parameters, _treeSearchOptions)
                     .ToList();
@@ -158,7 +168,7 @@ public class ConsentCheckingPreExecutionEvent : IPreExecutionEvent
             return Result.FromSuccess();
         }
 
-        var requestConsent = await _privacy.RequestConsentAsync(context.User.ID, ct);
+        var requestConsent = await _privacy.RequestConsentAsync(userID.Value, ct);
         if (!requestConsent.IsSuccess)
         {
             return requestConsent;
@@ -172,8 +182,8 @@ public class ConsentCheckingPreExecutionEvent : IPreExecutionEvent
 
         var deleteOriginal = await _interactionAPI.DeleteOriginalInteractionResponseAsync
         (
-            deletionContext.ApplicationID,
-            deletionContext.Token,
+            deletionContext.Interaction.ApplicationID,
+            deletionContext.Interaction.Token,
             ct
         );
 

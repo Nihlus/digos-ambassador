@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Characters.Services;
@@ -31,6 +32,7 @@ using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
@@ -83,10 +85,20 @@ public partial class TransformationCommands
         [RequireContext(ChannelContext.Guild)]
         public async Task<Result<FeedbackMessage>> SetCurrentAppearanceAsDefaultAsync()
         {
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            if (!_context.TryGetUserID(out var userID))
+            {
+                throw new InvalidOperationException();
+            }
+
             var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync
             (
-                _context.GuildID.Value,
-                _context.User.ID
+                guildID.Value,
+                userID.Value
             );
 
             if (!getCurrentCharacterResult.IsSuccess)
@@ -120,7 +132,12 @@ public partial class TransformationCommands
         [RequireContext(ChannelContext.Guild)]
         public async Task<Result<FeedbackMessage>> SetDefaultOptInOrOutOfTransformationsAsync(bool shouldOptIn = true)
         {
-            var setDefaultOptInResult = await _transformation.SetDefaultOptInAsync(_context.User.ID, shouldOptIn);
+            if (!_context.TryGetUserID(out var userID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            var setDefaultOptInResult = await _transformation.SetDefaultOptInAsync(userID.Value, shouldOptIn);
             if (!setDefaultOptInResult.IsSuccess)
             {
                 return Result<FeedbackMessage>.FromError(setDefaultOptInResult);
@@ -142,9 +159,14 @@ public partial class TransformationCommands
         [Description("Sets your default protection type for transformations on servers you join.")]
         public async Task<Result<FeedbackMessage>> SetDefaultProtectionTypeAsync(ProtectionType protectionType)
         {
+            if (!_context.TryGetUserID(out var userID))
+            {
+                throw new InvalidOperationException();
+            }
+
             var setProtectionTypeResult = await _transformation.SetDefaultProtectionTypeAsync
             (
-                _context.User.ID,
+                userID.Value,
                 protectionType
             );
 
@@ -170,10 +192,20 @@ public partial class TransformationCommands
         [RequireContext(ChannelContext.Guild)]
         public async Task<Result<FeedbackMessage>> SetProtectionTypeAsync(ProtectionType protectionType)
         {
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            if (!_context.TryGetUserID(out var userID))
+            {
+                throw new InvalidOperationException();
+            }
+
             var setProtectionTypeResult = await _transformation.SetServerProtectionTypeAsync
             (
-                _context.User.ID,
-                _context.GuildID.Value,
+                userID.Value,
+                guildID.Value,
                 protectionType
             );
 

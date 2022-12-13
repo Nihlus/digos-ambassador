@@ -66,7 +66,7 @@ public class EventLoggingResponder :
     public async Task<Result> RespondAsync(IGuildMemberUpdate gatewayEvent, CancellationToken ct = default)
     {
         var oldMemberKey = KeyHelpers.CreateGuildMemberKey(gatewayEvent.GuildID, gatewayEvent.User.ID);
-        if (!_cache.TryGetValue(oldMemberKey, out IGuildMember oldMember))
+        if (!_cache.TryGetValue(oldMemberKey, out IGuildMember? oldMember) || oldMember is null)
         {
             return Result.FromSuccess();
         }
@@ -111,7 +111,7 @@ public class EventLoggingResponder :
     public async Task<Result> RespondAsync(IMessageDelete gatewayEvent, CancellationToken ct = default)
     {
         var messageKey = KeyHelpers.CreateMessageCacheKey(gatewayEvent.ChannelID, gatewayEvent.ID);
-        if (!_cache.TryGetValue(messageKey, out IMessage message))
+        if (!_cache.TryGetValue(messageKey, out IMessage? message) || message is null)
         {
             return Result.FromSuccess();
         }

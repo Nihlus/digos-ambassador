@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -30,6 +31,7 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Autocomplete;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 
 namespace DIGOS.Ambassador.Plugins.Characters.Autocomplete;
 
@@ -38,7 +40,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Autocomplete;
 /// </summary>
 public class AnyCharacterAutocompleteProvider : IAutocompleteProvider
 {
-    private readonly InteractionContext _context;
+    private readonly IInteractionContext _context;
     private readonly CharactersDatabaseContext _database;
 
     /// <inheritdoc />
@@ -49,7 +51,7 @@ public class AnyCharacterAutocompleteProvider : IAutocompleteProvider
     /// </summary>
     /// <param name="context">The interaction context.</param>
     /// <param name="database">The database context.</param>
-    public AnyCharacterAutocompleteProvider(InteractionContext context, CharactersDatabaseContext database)
+    public AnyCharacterAutocompleteProvider(IInteractionContext context, CharactersDatabaseContext database)
     {
         _context = context;
         _database = database;
@@ -63,13 +65,20 @@ public class AnyCharacterAutocompleteProvider : IAutocompleteProvider
         CancellationToken ct = default
     )
     {
-        var scopedCharacters = _context.GuildID.HasValue
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new NotSupportedException();
+        }
+
+        _ = _context.TryGetGuildID(out var guildID);
+
+        var scopedCharacters = guildID is not null
             ? _database.Characters
-                .Where(c => c.Server.DiscordID == _context.GuildID.Value)
+                .Where(c => c.Server.DiscordID == guildID)
             : _database.Characters;
 
         var suggestedCharacters = await scopedCharacters
-            .OrderByDescending(r => r.Owner.DiscordID == _context.User.ID)
+            .OrderByDescending(r => r.Owner.DiscordID == userID)
             .ThenBy(c => EF.Functions.FuzzyStringMatchLevenshtein(c.Name, userInput))
             .Take(25)
             .Select(c => new { c.Nickname, c.Name })

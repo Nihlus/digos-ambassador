@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -34,6 +35,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Pagination.Extensions;
 using Remora.Rest.Core;
@@ -84,7 +86,12 @@ public class StatCommands : CommandGroup
     [RequireContext(ChannelContext.Guild)]
     public async Task<IResult> ShowServerStatsAsync()
     {
-        var getGuild = await _guildAPI.GetGuildAsync(_context.GuildID.Value, ct: this.CancellationToken);
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var getGuild = await _guildAPI.GetGuildAsync(guildID.Value, ct: this.CancellationToken);
         if (!getGuild.IsSuccess)
         {
             return getGuild;
@@ -107,6 +114,11 @@ public class StatCommands : CommandGroup
     [RequireOwner]
     public async Task<IResult> ShowServersStatsAsync()
     {
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var pages = new List<Embed>();
         await foreach (var getGuild in GetGuildsAsync(this.CancellationToken))
         {
@@ -120,7 +132,7 @@ public class StatCommands : CommandGroup
 
         return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
-            _context.User.ID,
+            userID.Value,
             pages,
             ct: this.CancellationToken
         );

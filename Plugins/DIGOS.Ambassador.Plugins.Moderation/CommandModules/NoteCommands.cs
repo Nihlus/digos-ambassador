@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -38,6 +39,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Pagination;
@@ -96,7 +98,17 @@ public partial class NoteCommands : CommandGroup
     [RequireContext(ChannelContext.Guild)]
     public async Task<IResult> ListNotesAsync(IUser user)
     {
-        var notes = await _notes.GetNotesAsync(_context.GuildID.Value, user.ID);
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var notes = await _notes.GetNotesAsync(guildID.Value, user.ID);
 
         var createPages = await PaginatedEmbedFactory.PagesFromCollectionAsync
         (
@@ -148,7 +160,7 @@ public partial class NoteCommands : CommandGroup
 
         return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
-            _context.User.ID,
+            userID.Value,
             pages,
             ct: this.CancellationToken
         );
@@ -165,7 +177,17 @@ public partial class NoteCommands : CommandGroup
     [RequireContext(ChannelContext.Guild)]
     public async Task<Result<FeedbackMessage>> AddNoteAsync(IUser user, string content)
     {
-        var addNote = await _notes.CreateNoteAsync(_context.User.ID, user.ID, _context.GuildID.Value, content);
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var addNote = await _notes.CreateNoteAsync(userID.Value, user.ID, guildID.Value, content);
         if (!addNote.IsSuccess)
         {
             return Result<FeedbackMessage>.FromError(addNote);
@@ -187,7 +209,17 @@ public partial class NoteCommands : CommandGroup
     [RequireContext(ChannelContext.Guild)]
     public async Task<Result<FeedbackMessage>> DeleteNoteAsync(long noteID)
     {
-        var getNote = await _notes.GetNoteAsync(_context.GuildID.Value, noteID);
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var getNote = await _notes.GetNoteAsync(guildID.Value, noteID);
         if (!getNote.IsSuccess)
         {
             return Result<FeedbackMessage>.FromError(getNote);
@@ -197,7 +229,7 @@ public partial class NoteCommands : CommandGroup
 
         // This has to be done before the warning is actually deleted - otherwise, the lazy loader is removed and
         // navigation properties can't be evaluated
-        var notifyResult = await _logging.NotifyUserNoteRemovedAsync(note, _context.User.ID);
+        var notifyResult = await _logging.NotifyUserNoteRemovedAsync(note, userID.Value);
         if (!notifyResult.IsSuccess)
         {
             return Result<FeedbackMessage>.FromError(notifyResult);

@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -35,6 +36,7 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -78,6 +80,11 @@ public class JumboCommands : CommandGroup
     [Description("Sends a jumbo version of the given emote to the chat, if available.")]
     public async Task<Result> JumboAsync(IEmoji emoji)
     {
+        if (!_context.TryGetChannelID(out var channelID))
+        {
+            throw new InvalidOperationException();
+        }
+
         string emoteUrl;
         if (emoji.ID is not null)
         {
@@ -148,7 +155,7 @@ public class JumboCommands : CommandGroup
 
         var sendEmoji = await _channelAPI.CreateMessageAsync
         (
-            _context.ChannelID,
+            channelID.Value,
             embeds: new[] { embed },
             ct: this.CancellationToken
         );

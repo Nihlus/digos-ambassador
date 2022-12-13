@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Core.Extensions;
@@ -34,6 +35,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
@@ -91,13 +93,23 @@ public class ServerCommands : CommandGroup
     [RequirePermission(typeof(ShowServerInfo), PermissionTarget.Self)]
     public async Task<IResult> ShowServerAsync()
     {
-        var getServerResult = await _servers.GetOrRegisterServerAsync(_context.GuildID.Value);
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetChannelID(out var channelID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var getServerResult = await _servers.GetOrRegisterServerAsync(guildID.Value);
         if (!getServerResult.IsSuccess)
         {
             return getServerResult;
         }
 
-        var getGuild = await _guildAPI.GetGuildAsync(_context.GuildID.Value, ct: this.CancellationToken);
+        var getGuild = await _guildAPI.GetGuildAsync(guildID.Value, ct: this.CancellationToken);
         if (!getGuild.IsSuccess)
         {
             return getGuild;
@@ -156,7 +168,7 @@ public class ServerCommands : CommandGroup
 
         var sendResult = await _channelAPI.CreateMessageAsync
         (
-            _context.ChannelID,
+            channelID.Value,
             embeds: new[] { embed },
             ct: this.CancellationToken
         );
@@ -176,7 +188,17 @@ public class ServerCommands : CommandGroup
     [RequirePermission(typeof(ShowServerInfo), PermissionTarget.Self)]
     public async Task<IResult> ShowJoinMessageAsync()
     {
-        var getServerResult = await _servers.GetOrRegisterServerAsync(_context.GuildID.Value);
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetChannelID(out var channelID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var getServerResult = await _servers.GetOrRegisterServerAsync(guildID.Value);
         if (!getServerResult.IsSuccess)
         {
             return getServerResult;
@@ -199,7 +221,7 @@ public class ServerCommands : CommandGroup
 
         var sendResult = await _channelAPI.CreateMessageAsync
         (
-            _context.ChannelID,
+            channelID.Value,
             embeds: new[] { embed },
             ct: this.CancellationToken
         );
@@ -219,7 +241,12 @@ public class ServerCommands : CommandGroup
     [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
     public async Task<Result<FeedbackMessage>> ClearJoinMessageAsync()
     {
-        var getServerResult = await _servers.GetOrRegisterServerAsync(_context.GuildID.Value);
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var getServerResult = await _servers.GetOrRegisterServerAsync(guildID.Value);
         if (!getServerResult.IsSuccess)
         {
             return Result<FeedbackMessage>.FromError(getServerResult);
@@ -267,7 +294,12 @@ public class ServerCommands : CommandGroup
         [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
         public async Task<Result<FeedbackMessage>> SetDescriptionAsync(string newDescription)
         {
-            var getServerResult = await _servers.GetOrRegisterServerAsync(_context.GuildID.Value);
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            var getServerResult = await _servers.GetOrRegisterServerAsync(guildID.Value);
             if (!getServerResult.IsSuccess)
             {
                 return Result<FeedbackMessage>.FromError(getServerResult);
@@ -291,7 +323,12 @@ public class ServerCommands : CommandGroup
         [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
         public async Task<Result<FeedbackMessage>> SetJoinMessageAsync(string newJoinMessage)
         {
-            var getServerResult = await _servers.GetOrRegisterServerAsync(_context.GuildID.Value);
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            var getServerResult = await _servers.GetOrRegisterServerAsync(guildID.Value);
             if (!getServerResult.IsSuccess)
             {
                 return Result<FeedbackMessage>.FromError(getServerResult);
@@ -315,7 +352,12 @@ public class ServerCommands : CommandGroup
         [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
         public async Task<Result<FeedbackMessage>> SetIsNSFWAsync(bool isNsfw)
         {
-            var getServerResult = await _servers.GetOrRegisterServerAsync(_context.GuildID.Value);
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            var getServerResult = await _servers.GetOrRegisterServerAsync(guildID.Value);
             if (!getServerResult.IsSuccess)
             {
                 return Result<FeedbackMessage>.FromError(getServerResult);
@@ -346,7 +388,12 @@ public class ServerCommands : CommandGroup
         [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
         public async Task<Result<FeedbackMessage>> SetSendJoinMessagesAsync(bool sendJoinMessage)
         {
-            var getServerResult = await _servers.GetOrRegisterServerAsync(_context.GuildID.Value);
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            var getServerResult = await _servers.GetOrRegisterServerAsync(guildID.Value);
             if (!getServerResult.IsSuccess)
             {
                 return Result<FeedbackMessage>.FromError(getServerResult);

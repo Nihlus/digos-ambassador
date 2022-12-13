@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -30,6 +31,7 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Autocomplete;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Autocomplete;
 
@@ -63,13 +65,19 @@ public class AnyRoleplayAutocompleteProvider : IAutocompleteProvider
         CancellationToken ct = default
     )
     {
-        var scopedRoleplays = _context.GuildID.HasValue
+        _ = _context.TryGetGuildID(out var guildID);
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var scopedRoleplays = guildID is not null
             ? _database.Roleplays
-                .Where(r => r.Server.DiscordID == _context.GuildID.Value)
+                .Where(r => r.Server.DiscordID == guildID.Value)
             : _database.Roleplays;
 
         var suggestedRoleplays = await scopedRoleplays
-            .OrderByDescending(r => r.Owner.DiscordID == _context.User.ID)
+            .OrderByDescending(r => r.Owner.DiscordID == userID.Value)
             .ThenBy(r => EF.Functions.FuzzyStringMatchLevenshtein(r.Name, userInput))
             .Take(25)
             .Select(r => r.Name)

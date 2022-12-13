@@ -34,6 +34,7 @@ using JetBrains.Annotations;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Pagination;
 using Remora.Discord.Pagination.Extensions;
@@ -82,6 +83,11 @@ public partial class TransformationCommands
         [Description("Lists the available transformation species.")]
         public async Task<Result> ListAvailableTransformationsAsync()
         {
+            if (!_context.TryGetUserID(out var userID))
+            {
+                throw new InvalidOperationException();
+            }
+
             var availableSpecies = await _transformation.GetAvailableSpeciesAsync();
 
             var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
@@ -118,7 +124,7 @@ public partial class TransformationCommands
 
             return (Result)await _feedback.SendContextualPaginatedMessageAsync
             (
-                _context.User.ID,
+                userID.Value,
                 pages,
                 ct: this.CancellationToken
             );
@@ -132,6 +138,11 @@ public partial class TransformationCommands
         [Description("Lists the available bodyparts.")]
         public async Task<Result> ListAvailableBodypartsAsync()
         {
+            if (!_context.TryGetUserID(out var userID))
+            {
+                throw new InvalidOperationException();
+            }
+
             var parts = Enum.GetValues(typeof(Bodypart))
                 .Cast<Bodypart>()
                 .OrderBy(b => b)
@@ -172,7 +183,7 @@ public partial class TransformationCommands
 
             return (Result)await _feedback.SendContextualPaginatedMessageAsync
             (
-                _context.User.ID,
+                userID.Value,
                 pages,
                 ct: this.CancellationToken
             );
@@ -186,6 +197,11 @@ public partial class TransformationCommands
         [Description("Lists the available colours.")]
         public async Task<Result> ListAvailableShadesAsync()
         {
+            if (!_context.TryGetUserID(out var userID))
+            {
+                throw new InvalidOperationException();
+            }
+
             var parts = Enum.GetValues(typeof(Shade))
                 .Cast<Shade>()
                 .OrderBy(s => s)
@@ -211,7 +227,7 @@ public partial class TransformationCommands
 
             return (Result)await _feedback.SendContextualPaginatedMessageAsync
             (
-                _context.User.ID,
+                userID.Value,
                 pages,
                 ct: this.CancellationToken
             );
@@ -225,6 +241,11 @@ public partial class TransformationCommands
         [Description("Lists the available colour modifiers.")]
         public async Task<Result> ListAvailableShadeModifiersAsync()
         {
+            if (!_context.TryGetUserID(out var userID))
+            {
+                throw new InvalidOperationException();
+            }
+
             var parts = Enum.GetValues(typeof(ShadeModifier))
                 .Cast<ShadeModifier>()
                 .OrderBy(sm => sm)
@@ -250,7 +271,7 @@ public partial class TransformationCommands
 
             return (Result)await _feedback.SendContextualPaginatedMessageAsync
             (
-                _context.User.ID,
+                userID.Value,
                 pages,
                 ct: this.CancellationToken
             );
@@ -264,6 +285,11 @@ public partial class TransformationCommands
         [Description("Lists the available patterns.")]
         public async Task<Result> ListAvailablePatternsAsync()
         {
+            if (!_context.TryGetUserID(out var userID))
+            {
+                throw new InvalidOperationException();
+            }
+
             var parts = Enum.GetValues(typeof(Pattern))
                 .Cast<Pattern>()
                 .OrderBy(c => c)
@@ -289,7 +315,7 @@ public partial class TransformationCommands
 
             return (Result)await _feedback.SendContextualPaginatedMessageAsync
             (
-                _context.User.ID,
+                userID.Value,
                 pages,
                 ct: this.CancellationToken
             );
@@ -304,6 +330,11 @@ public partial class TransformationCommands
         [Description("Lists the available transformations for a given bodypart.")]
         public async Task<Result> ListAvailableTransformationsAsync(Bodypart bodyPart)
         {
+            if (!_context.TryGetUserID(out var userID))
+            {
+                throw new InvalidOperationException();
+            }
+
             var transformations = await _transformation.GetAvailableTransformationsAsync(bodyPart);
 
             var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
@@ -327,7 +358,7 @@ public partial class TransformationCommands
 
             return (Result)await _feedback.SendContextualPaginatedMessageAsync
             (
-                _context.User.ID,
+                userID.Value,
                 pages,
                 ct: this.CancellationToken
             );

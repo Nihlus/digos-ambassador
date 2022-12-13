@@ -348,7 +348,7 @@ internal sealed class KinkWizard
                 (
                     new[]
                     {
-                        new SelectMenuComponent
+                        new StringSelectComponent
                         (
                             CustomIDHelpers.CreateSelectMenuID("category-selection", "kink-wizard"),
                             this.Categories.Skip(this.CurrentCategoryOffset).Take(3)

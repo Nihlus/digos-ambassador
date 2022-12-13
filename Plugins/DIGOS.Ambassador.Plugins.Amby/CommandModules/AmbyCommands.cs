@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Errors;
@@ -32,6 +33,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
@@ -88,7 +90,21 @@ public class AmbyCommands : CommandGroup
     [Command("contact")]
     [Description("Instructs Amby to contact you over DM.")]
     [RequireContext(ChannelContext.Guild)]
-    public async Task<Result<FeedbackMessage>> ContactSelfAsync() => await ContactUserAsync(_context.User);
+    public async Task<Result<FeedbackMessage>> ContactSelfAsync()
+    {
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var getUser = await _userAPI.GetUserAsync(userID.Value, this.CancellationToken);
+        if (!getUser.IsSuccess)
+        {
+            return Result<FeedbackMessage>.FromError(getUser);
+        }
+
+        return await ContactUserAsync(getUser.Entity);
+    }
 
     /// <summary>
     /// Instructs Amby to contact a user over DM.
@@ -146,7 +162,12 @@ public class AmbyCommands : CommandGroup
     [Description("Sasses the user in a DIGOS fashion.")]
     public async Task<Result<FeedbackMessage>> SassAsync()
     {
-        var getChannel = await _channelAPI.GetChannelAsync(_context.ChannelID, this.CancellationToken);
+        if (!_context.TryGetChannelID(out var channelID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var getChannel = await _channelAPI.GetChannelAsync(channelID.Value, this.CancellationToken);
         if (!getChannel.IsSuccess)
         {
             return Result<FeedbackMessage>.FromError(getChannel);
@@ -230,6 +251,11 @@ public class AmbyCommands : CommandGroup
     [Description("Boops the user.")]
     public async Task<Result<FeedbackMessage>> BoopAsync(IUser target)
     {
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var getSelf = await _userAPI.GetCurrentUserAsync();
         if (!getSelf.IsSuccess)
         {
@@ -246,12 +272,12 @@ public class AmbyCommands : CommandGroup
         var sendAnnoyed = await _feedback.SendContextualNeutralAsync
         (
             "...seriously?",
-            _context.User.ID,
+            userID.Value,
             ct: this.CancellationToken
         );
 
         return sendAnnoyed.IsSuccess
-            ? new FeedbackMessage($"*boops <@{_context.User.ID}>*", _feedback.Theme.Secondary)
+            ? new FeedbackMessage($"*boops <@{userID}>*", _feedback.Theme.Secondary)
             : Result<FeedbackMessage>.FromError(sendAnnoyed);
     }
 
@@ -264,6 +290,11 @@ public class AmbyCommands : CommandGroup
     [Description("Baps the user.")]
     public async Task<Result<FeedbackMessage>> BapAsync(IUser target)
     {
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var getSelf = await _userAPI.GetCurrentUserAsync();
         if (!getSelf.IsSuccess)
         {
@@ -280,12 +311,12 @@ public class AmbyCommands : CommandGroup
         var sendAnnoyed = await _feedback.SendContextualNeutralAsync
         (
             "...seriously?",
-            _context.User.ID,
+            userID.Value,
             ct: this.CancellationToken
         );
 
         return sendAnnoyed.IsSuccess
-            ? new FeedbackMessage($"**baps <@{_context.User.ID}>**", _feedback.Theme.Secondary)
+            ? new FeedbackMessage($"**baps <@{userID}>**", _feedback.Theme.Secondary)
             : Result<FeedbackMessage>.FromError(sendAnnoyed);
     }
 
@@ -297,6 +328,11 @@ public class AmbyCommands : CommandGroup
     [Description("Shows some information about Amby's metaworkings.")]
     public async Task<IResult> InfoAsync()
     {
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var eb = new Embed
         {
             Colour = _feedback.Theme.Secondary,
@@ -325,6 +361,6 @@ public class AmbyCommands : CommandGroup
                 "- Amby"
         };
 
-        return await _feedback.SendPrivateEmbedAsync(_context.User.ID, eb);
+        return await _feedback.SendPrivateEmbedAsync(userID.Value, eb);
     }
 }

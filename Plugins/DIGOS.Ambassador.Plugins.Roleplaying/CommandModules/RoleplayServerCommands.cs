@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Permissions.Conditions;
@@ -31,6 +32,7 @@ using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
@@ -81,7 +83,12 @@ public partial class RoleplayCommands
         [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
         public async Task<Result<FeedbackMessage>> ClearDedicatedRoleplayChannelCategory()
         {
-            var result = await _serverSettings.SetDedicatedChannelCategoryAsync(_context.GuildID.Value, null);
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            var result = await _serverSettings.SetDedicatedChannelCategoryAsync(guildID.Value, null);
 
             return !result.IsSuccess
                 ? Result<FeedbackMessage>.FromError(result)
@@ -98,9 +105,14 @@ public partial class RoleplayCommands
         [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
         public async Task<Result<FeedbackMessage>> SetDefaultUserRole()
         {
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
             var result = await _serverSettings.SetDefaultUserRoleAsync
             (
-                _context.GuildID.Value,
+                guildID.Value,
                 null
             );
 

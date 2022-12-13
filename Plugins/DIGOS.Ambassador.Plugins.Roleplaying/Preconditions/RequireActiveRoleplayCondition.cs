@@ -20,12 +20,14 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Errors;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
 using Remora.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Preconditions;
@@ -53,7 +55,17 @@ public class RequireActiveRoleplayCondition : ICondition<RequireActiveRoleplayAt
     /// <inheritdoc />
     public async ValueTask<Result> CheckAsync(RequireActiveRoleplayAttribute attribute, CancellationToken ct = default)
     {
-        var result = await _roleplayService.GetActiveRoleplayAsync(_context.ChannelID);
+        if (!_context.TryGetChannelID(out var channelID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var result = await _roleplayService.GetActiveRoleplayAsync(channelID.Value);
         if (!result.IsSuccess)
         {
             return Result.FromError(result);
@@ -65,7 +77,7 @@ public class RequireActiveRoleplayCondition : ICondition<RequireActiveRoleplayAt
         }
 
         var roleplay = result.Entity;
-        return roleplay.Owner.DiscordID != _context.User.ID
+        return roleplay.Owner.DiscordID != userID.Value
             ? new UserError("Only the roleplay owner can do that.")
             : Result.FromSuccess();
     }

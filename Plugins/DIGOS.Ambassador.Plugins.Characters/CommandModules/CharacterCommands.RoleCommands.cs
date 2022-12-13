@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -37,6 +38,7 @@ using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Pagination;
@@ -91,6 +93,16 @@ public partial class CharacterCommands
         [RequireContext(ChannelContext.Guild)]
         public async Task<Result> ListAvailableRolesAsync()
         {
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            if (!_context.TryGetUserID(out var userID))
+            {
+                throw new InvalidOperationException();
+            }
+
             var baseEmbed = new Embed
             {
                 Colour = _feedback.Theme.Secondary,
@@ -103,7 +115,7 @@ public partial class CharacterCommands
                               "role name."
             };
 
-            var getCharacterRoles = await _characterRoles.GetCharacterRolesAsync(_context.GuildID.Value);
+            var getCharacterRoles = await _characterRoles.GetCharacterRolesAsync(guildID.Value);
             if (!getCharacterRoles.IsSuccess)
             {
                 return Result.FromError(getCharacterRoles);
@@ -120,13 +132,13 @@ public partial class CharacterCommands
 
                 return (Result)await _feedback.SendContextualPaginatedMessageAsync
                 (
-                    _context.User.ID,
+                    userID.Value,
                     new[] { baseEmbed },
                     ct: this.CancellationToken
                 );
             }
 
-            var getGuildRoles = await _guildAPI.GetGuildRolesAsync(_context.GuildID.Value, this.CancellationToken);
+            var getGuildRoles = await _guildAPI.GetGuildRolesAsync(guildID.Value, this.CancellationToken);
             if (!getGuildRoles.IsSuccess)
             {
                 return Result.FromError(getGuildRoles);
@@ -158,7 +170,7 @@ public partial class CharacterCommands
 
             return (Result)await _feedback.SendContextualPaginatedMessageAsync
             (
-                _context.User.ID,
+                userID.Value,
                 pages,
                 ct: this.CancellationToken
             );
@@ -180,9 +192,14 @@ public partial class CharacterCommands
             RoleAccess access = RoleAccess.Open
         )
         {
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
             var createRoleResult = await _characterRoles.CreateCharacterRoleAsync
             (
-                _context.GuildID.Value,
+                guildID.Value,
                 discordRole.ID,
                 access,
                 this.CancellationToken
@@ -204,9 +221,14 @@ public partial class CharacterCommands
         [RequireDiscordPermission(DiscordPermission.ManageRoles)]
         public async Task<Result<FeedbackMessage>> DeleteCharacterRoleAsync(IRole discordRole)
         {
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
             var getExistingRoleResult = await _characterRoles.GetCharacterRoleAsync
             (
-                _context.GuildID.Value,
+                guildID.Value,
                 discordRole.ID,
                 this.CancellationToken
             );
@@ -239,9 +261,14 @@ public partial class CharacterCommands
         [RequireDiscordPermission(DiscordPermission.ManageRoles)]
         public async Task<Result<FeedbackMessage>> SetCharacterRoleAccessAsync(IRole discordRole, RoleAccess access)
         {
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
             var getExistingRoleResult = await _characterRoles.GetCharacterRoleAsync
             (
-                _context.GuildID.Value,
+                guildID.Value,
                 discordRole.ID,
                 this.CancellationToken
             );
@@ -279,10 +306,20 @@ public partial class CharacterCommands
             Character character
         )
         {
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            if (!_context.TryGetUserID(out var userID))
+            {
+                throw new InvalidOperationException();
+            }
+
             var result = await _characterRoles.ClearCharacterRoleAsync
             (
-                _context.GuildID.Value,
-                _context.User.ID,
+                guildID.Value,
+                userID.Value,
                 character,
                 this.CancellationToken
             );

@@ -32,6 +32,7 @@ using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Rest.Core;
@@ -84,13 +85,23 @@ public class DroneCommands : CommandGroup
     [Description("Drones the target user.")]
     public async Task<Result<FeedbackMessage>> DroneAsync(IGuildMember member)
     {
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         if (!member.User.IsDefined(out var user))
         {
             throw new InvalidOperationException();
         }
 
-        var isAmbyInvoking = _context.User.ID == _ambyID;
-        var droneMessage = user.ID == _context.User.ID
+        var isAmbyInvoking = userID.Value == _ambyID;
+        var droneMessage = user.ID == userID.Value
             ? _content.GetRandomSelfDroneMessage()
             : isAmbyInvoking
                 ? _content.GetRandomTargetedMessage()
@@ -99,7 +110,7 @@ public class DroneCommands : CommandGroup
         var sendMessage = await _feedback.SendContextualNeutralAsync
         (
             droneMessage,
-            _context.User.ID,
+            userID.Value,
             ct: this.CancellationToken
         );
 
@@ -110,11 +121,11 @@ public class DroneCommands : CommandGroup
 
         var targetUser = isAmbyInvoking
             ? user.ID
-            : _context.User.ID;
+            : userID.Value;
 
         var droneResult = await _drone.DroneUserAsync
         (
-            _context.GuildID.Value,
+            guildID.Value,
             targetUser,
             this.CancellationToken
         );

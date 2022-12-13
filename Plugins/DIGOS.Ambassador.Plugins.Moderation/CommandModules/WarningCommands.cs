@@ -38,6 +38,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Pagination;
@@ -101,7 +102,17 @@ public partial class WarningCommands : CommandGroup
     [RequireContext(ChannelContext.Guild)]
     public async Task<IResult> ListWarningsAsync(IUser user)
     {
-        var warnings = await _warnings.GetWarningsAsync(_context.GuildID.Value, user.ID);
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var warnings = await _warnings.GetWarningsAsync(guildID.Value, user.ID);
 
         var createPages = await PaginatedEmbedFactory.PagesFromCollectionAsync
         (
@@ -158,7 +169,7 @@ public partial class WarningCommands : CommandGroup
 
         return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
-            _context.User.ID,
+            userID.Value,
             pages,
             ct: this.CancellationToken
         );
@@ -174,7 +185,17 @@ public partial class WarningCommands : CommandGroup
     [RequireContext(ChannelContext.Guild)]
     public async Task<Result<FeedbackMessage>> DeleteWarningAsync(long warningID)
     {
-        var getWarning = await _warnings.GetWarningAsync(_context.GuildID.Value, warningID);
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var getWarning = await _warnings.GetWarningAsync(guildID.Value, warningID);
         if (!getWarning.IsSuccess)
         {
             return Result<FeedbackMessage>.FromError(getWarning);
@@ -184,7 +205,7 @@ public partial class WarningCommands : CommandGroup
 
         // This has to be done before the warning is actually deleted - otherwise, the lazy loader is removed and
         // navigation properties can't be evaluated
-        var notifyResult = await _logging.NotifyUserWarningRemovedAsync(warning, _context.User.ID);
+        var notifyResult = await _logging.NotifyUserWarningRemovedAsync(warning, userID.Value);
         if (!notifyResult.IsSuccess)
         {
             return Result<FeedbackMessage>.FromError(notifyResult);
@@ -206,13 +227,18 @@ public partial class WarningCommands : CommandGroup
     [Description("Adds a warning to the given user.")]
     [RequirePermission(typeof(ManageWarnings), PermissionTarget.All)]
     [RequireContext(ChannelContext.Guild)]
-    public async Task<Result<FeedbackMessage>> AddWarningAsync
-    (
-        IUser user,
-        string reason,
-        TimeSpan? expiresAfter = null
-    )
+    public async Task<Result<FeedbackMessage>> AddWarningAsync(IUser user, string reason, TimeSpan? expiresAfter = null)
     {
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         DateTimeOffset? expiresOn = null;
         if (expiresAfter is not null)
         {
@@ -221,9 +247,9 @@ public partial class WarningCommands : CommandGroup
 
         var addWarning = await _warnings.CreateWarningAsync
         (
-            _context.User.ID,
+            userID.Value,
             user.ID,
-            _context.GuildID.Value,
+            guildID.Value,
             reason,
             expiresOn: expiresOn
         );
@@ -234,7 +260,7 @@ public partial class WarningCommands : CommandGroup
         }
 
         var warning = addWarning.Entity;
-        var getSettings = await _moderation.GetOrCreateServerSettingsAsync(_context.GuildID.Value);
+        var getSettings = await _moderation.GetOrCreateServerSettingsAsync(guildID.Value);
         if (!getSettings.IsSuccess)
         {
             return Result<FeedbackMessage>.FromError(getSettings);
@@ -260,7 +286,7 @@ public partial class WarningCommands : CommandGroup
         var sendAlert = await _feedback.SendContextualWarningAsync
         (
             $"The warned user now has {warnings.Count} warnings. Consider further action.",
-            _context.User.ID
+            userID.Value
         );
 
         return sendAlert.IsSuccess

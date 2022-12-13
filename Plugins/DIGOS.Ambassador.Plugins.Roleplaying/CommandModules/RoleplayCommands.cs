@@ -45,6 +45,7 @@ using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Pagination;
 using Remora.Discord.Pagination.Extensions;
@@ -71,6 +72,7 @@ public partial class RoleplayCommands : CommandGroup
     private readonly ICommandContext _context;
     private readonly PDFRoleplayExporter _pdfExporter;
     private readonly PlaintextRoleplayExporter _plaintextExporter;
+    private readonly IDiscordRestUserAPI _userAPI;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RoleplayCommands"/> class.
@@ -82,6 +84,7 @@ public partial class RoleplayCommands : CommandGroup
     /// <param name="channelAPI">The channel API.</param>
     /// <param name="pdfExporter">The PDF roleplay exporter.</param>
     /// <param name="plaintextExporter">The plaintext roleplay exporter.</param>
+    /// <param name="userAPI">The user API.</param>
     public RoleplayCommands
     (
         RoleplayDiscordService discordRoleplays,
@@ -90,7 +93,8 @@ public partial class RoleplayCommands : CommandGroup
         ICommandContext context,
         IDiscordRestChannelAPI channelAPI,
         PDFRoleplayExporter pdfExporter,
-        PlaintextRoleplayExporter plaintextExporter
+        PlaintextRoleplayExporter plaintextExporter,
+        IDiscordRestUserAPI userAPI
     )
     {
         _discordRoleplays = discordRoleplays;
@@ -100,6 +104,7 @@ public partial class RoleplayCommands : CommandGroup
         _channelAPI = channelAPI;
         _pdfExporter = pdfExporter;
         _plaintextExporter = plaintextExporter;
+        _userAPI = userAPI;
     }
 
     /// <summary>
@@ -118,7 +123,12 @@ public partial class RoleplayCommands : CommandGroup
     {
         if (roleplay is null)
         {
-            var getCurrentRoleplayResult = await _discordRoleplays.GetActiveRoleplayAsync(_context.ChannelID);
+            if (!_context.TryGetChannelID(out var channelID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            var getCurrentRoleplayResult = await _discordRoleplays.GetActiveRoleplayAsync(channelID.Value);
             if (!getCurrentRoleplayResult.IsSuccess)
             {
                 return getCurrentRoleplayResult;
@@ -172,10 +182,20 @@ public partial class RoleplayCommands : CommandGroup
     [RequireContext(ChannelContext.Guild)]
     public async Task<Result> ListServerRoleplaysAsync()
     {
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var roleplays = await _discordRoleplays.QueryRoleplaysAsync
         (
             q => q
-                .Where(rp => rp.Server.DiscordID == _context.GuildID.Value)
+                .Where(rp => rp.Server.DiscordID == guildID.Value)
                 .Where(rp => rp.IsPublic)
         );
 
@@ -189,7 +209,7 @@ public partial class RoleplayCommands : CommandGroup
 
         return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
-            _context.User.ID,
+            userID.Value,
             pages,
             ct: this.CancellationToken
         );
@@ -205,12 +225,31 @@ public partial class RoleplayCommands : CommandGroup
     [RequireContext(ChannelContext.Guild)]
     public async Task<Result> ListOwnedRoleplaysAsync(IUser? discordUser = null)
     {
-        discordUser ??= _context.User;
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (discordUser is null)
+        {
+            var getUser = await _userAPI.GetUserAsync(userID.Value, this.CancellationToken);
+            if (!getUser.IsSuccess)
+            {
+                return (Result)getUser;
+            }
+
+            discordUser = getUser.Entity;
+        }
 
         var roleplays = await _discordRoleplays.QueryRoleplaysAsync
         (
             q => q
-                .Where(rp => rp.Server.DiscordID == _context.GuildID.Value)
+                .Where(rp => rp.Server.DiscordID == guildID.Value)
                 .Where(rp => rp.Owner.DiscordID == discordUser.ID)
         );
 
@@ -224,7 +263,7 @@ public partial class RoleplayCommands : CommandGroup
 
         return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
-            _context.User.ID,
+            userID.Value,
             pages,
             ct: this.CancellationToken
         );
@@ -250,10 +289,20 @@ public partial class RoleplayCommands : CommandGroup
         bool isPublic = true
     )
     {
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var result = await _discordRoleplays.CreateRoleplayAsync
         (
-            _context.GuildID.Value,
-            _context.User.ID,
+            guildID.Value,
+            userID.Value,
             roleplayName,
             roleplaySummary,
             isNSFW,
@@ -281,13 +330,23 @@ public partial class RoleplayCommands : CommandGroup
         Roleplay roleplay
     )
     {
+        if (!_context.TryGetChannelID(out var channelID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var deletionResult = await _discordRoleplays.DeleteRoleplayAsync(roleplay);
         if (!deletionResult.IsSuccess)
         {
             return deletionResult;
         }
 
-        var canReplyInChannelAfterDeletion = _context.ChannelID != roleplay.DedicatedChannelID;
+        var canReplyInChannelAfterDeletion = channelID.Value != roleplay.DedicatedChannelID;
         if (canReplyInChannelAfterDeletion)
         {
             return Result<FeedbackMessage>.FromSuccess
@@ -302,7 +361,7 @@ public partial class RoleplayCommands : CommandGroup
             Description = $"Roleplay \"{roleplay.Name}\" deleted."
         };
 
-        return await _feedback.SendPrivateEmbedAsync(_context.User.ID, eb);
+        return await _feedback.SendPrivateEmbedAsync(userID.Value, eb);
     }
 
     /// <summary>
@@ -320,7 +379,12 @@ public partial class RoleplayCommands : CommandGroup
         Roleplay roleplay
     )
     {
-        var addUserResult = await _discordRoleplays.AddUserToRoleplayAsync(roleplay, _context.User.ID);
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var addUserResult = await _discordRoleplays.AddUserToRoleplayAsync(roleplay, userID.Value);
         if (!addUserResult.IsSuccess)
         {
             return Result<FeedbackMessage>.FromError(addUserResult);
@@ -391,7 +455,12 @@ public partial class RoleplayCommands : CommandGroup
         Roleplay roleplay
     )
     {
-        var removeUserResult = await _discordRoleplays.RemoveUserFromRoleplayAsync(roleplay, _context.User.ID);
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var removeUserResult = await _discordRoleplays.RemoveUserFromRoleplayAsync(roleplay, userID.Value);
         if (!removeUserResult.IsSuccess)
         {
             return Result<FeedbackMessage>.FromError(removeUserResult);
@@ -422,6 +491,11 @@ public partial class RoleplayCommands : CommandGroup
         Roleplay roleplay
     )
     {
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var kickUserResult = await _discordRoleplays.KickUserFromRoleplayAsync(roleplay, discordUser.ID);
         if (!kickUserResult.IsSuccess)
         {
@@ -432,7 +506,7 @@ public partial class RoleplayCommands : CommandGroup
         {
             Colour = _feedback.Theme.Secondary,
             Description = $"You've been removed from the roleplay \"{roleplay.Name}\" by " +
-                          $"<@{_context.User.ID}>."
+                          $"<@{userID.Value}>."
         };
 
         // It's fine if this one fails
@@ -536,9 +610,14 @@ public partial class RoleplayCommands : CommandGroup
         Roleplay roleplay
     )
     {
+        if (!_context.TryGetChannelID(out var channelID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var startRoleplayResult = await _discordRoleplays.StartRoleplayAsync
         (
-            _context.ChannelID,
+            channelID.Value,
             roleplay
         );
 
@@ -619,6 +698,11 @@ public partial class RoleplayCommands : CommandGroup
         ExportFormat format = ExportFormat.PDF
     )
     {
+        if (!_context.TryGetChannelID(out var channelID))
+        {
+            throw new InvalidOperationException();
+        }
+
         IRoleplayExporter exporter;
         switch (format)
         {
@@ -656,7 +740,7 @@ public partial class RoleplayCommands : CommandGroup
 
         return await _channelAPI.CreateMessageAsync
         (
-            _context.ChannelID,
+            channelID.Value,
             attachments: new List<OneOf<FileData, IPartialAttachment>> { fileData }
         );
     }
@@ -674,6 +758,11 @@ public partial class RoleplayCommands : CommandGroup
         [AutocompleteProvider("roleplay::any")] Roleplay roleplay
     )
     {
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var getDedicatedChannelResult = DedicatedChannelService.GetDedicatedChannel(roleplay);
         if (!getDedicatedChannelResult.IsSuccess)
         {
@@ -683,7 +772,7 @@ public partial class RoleplayCommands : CommandGroup
             );
         }
 
-        if (!roleplay.IsPublic && roleplay.ParticipatingUsers.All(p => p.User.DiscordID != _context.User.ID))
+        if (!roleplay.IsPublic && roleplay.ParticipatingUsers.All(p => p.User.DiscordID != userID.Value))
         {
             return new UserError
             (
@@ -695,7 +784,7 @@ public partial class RoleplayCommands : CommandGroup
         var setVisibility = await _dedicatedChannels.SetChannelVisibilityForUserAsync
         (
             dedicatedChannel,
-            _context.User.ID,
+            userID.Value,
             true
         );
 
@@ -725,6 +814,11 @@ public partial class RoleplayCommands : CommandGroup
         Roleplay roleplay
     )
     {
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var getDedicatedChannelResult = DedicatedChannelService.GetDedicatedChannel
         (
             roleplay
@@ -739,7 +833,7 @@ public partial class RoleplayCommands : CommandGroup
         var setVisibility = await _dedicatedChannels.SetChannelVisibilityForUserAsync
         (
             dedicatedChannel,
-            _context.User.ID,
+            userID.Value,
             false
         );
 
@@ -757,10 +851,20 @@ public partial class RoleplayCommands : CommandGroup
     [RequireContext(ChannelContext.Guild)]
     public async Task<Result<FeedbackMessage>> HideAllRoleplaysAsync()
     {
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var roleplays = await _discordRoleplays.QueryRoleplaysAsync
         (
             q => q
-                .Where(rp => rp.Server.DiscordID == _context.GuildID.Value)
+                .Where(rp => rp.Server.DiscordID == guildID.Value)
                 .Where(rp => rp.DedicatedChannelID.HasValue)
         );
 
@@ -769,7 +873,7 @@ public partial class RoleplayCommands : CommandGroup
             var setVisibility = await _dedicatedChannels.SetChannelVisibilityForUserAsync
             (
                 roleplay.DedicatedChannelID!.Value,
-                _context.User.ID,
+                userID.Value,
                 false
             );
 
@@ -796,8 +900,13 @@ public partial class RoleplayCommands : CommandGroup
         Roleplay roleplay
     )
     {
-        var isOwner = roleplay.IsOwner(_context.User.ID);
-        var isParticipant = roleplay.HasJoined(_context.User);
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var isOwner = roleplay.IsOwner(userID.Value);
+        var isParticipant = roleplay.HasJoined(userID.Value);
 
         if (!(isOwner || isParticipant))
         {
@@ -821,10 +930,20 @@ public partial class RoleplayCommands : CommandGroup
     [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.All)]
     public async Task<Result<FeedbackMessage>> ResetChannelPermissionsAsync()
     {
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var roleplays = await _discordRoleplays.QueryRoleplaysAsync
         (
             q => q
-                .Where(rp => rp.Server.DiscordID == _context.GuildID.Value)
+                .Where(rp => rp.Server.DiscordID == guildID.Value)
                 .Where(rp => rp.DedicatedChannelID.HasValue)
         );
 
@@ -833,7 +952,7 @@ public partial class RoleplayCommands : CommandGroup
             var reset = await _dedicatedChannels.ResetChannelPermissionsAsync(roleplay);
             if (!reset.IsSuccess)
             {
-                await _feedback.SendContextualErrorAsync(reset.Error.Message, _context.User.ID);
+                await _feedback.SendContextualErrorAsync(reset.Error.Message, userID.Value);
             }
         }
 
@@ -853,10 +972,25 @@ public partial class RoleplayCommands : CommandGroup
     [ExcludeFromSlashCommands]
     public async Task<Result> MoveRoleplayIntoChannelAsync(string newName, params IUser[] participants)
     {
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetChannelID(out var channelID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var createRoleplayAsync = await _discordRoleplays.CreateRoleplayAsync
         (
-            _context.GuildID.Value,
-            _context.User.ID,
+            guildID.Value,
+            userID.Value,
             newName,
             "No summary set.",
             false,
@@ -872,7 +1006,7 @@ public partial class RoleplayCommands : CommandGroup
 
         foreach (var participant in participants)
         {
-            if (participant.ID == _context.User.ID)
+            if (participant.ID == userID.Value)
             {
                 // Already added
                 continue;
@@ -891,7 +1025,7 @@ public partial class RoleplayCommands : CommandGroup
             var sendWarning = await _feedback.SendContextualWarningAsync
             (
                 message,
-                _context.User.ID
+                userID.Value
             );
 
             if (!sendWarning.IsSuccess)
@@ -903,12 +1037,12 @@ public partial class RoleplayCommands : CommandGroup
         // Copy the last messages from the participants
         var before = _context switch
         {
-            MessageContext messageContext => messageContext.MessageID,
-            InteractionContext interactionContext => interactionContext.ID,
+            MessageContext messageContext => messageContext.Message.ID,
+            InteractionContext interactionContext => interactionContext.Interaction.Message.Value.ID,
             _ => throw new ArgumentOutOfRangeException(nameof(_context))
         };
 
-        var getMessageBatch = await _channelAPI.GetChannelMessagesAsync(_context.ChannelID, before: before);
+        var getMessageBatch = await _channelAPI.GetChannelMessagesAsync(channelID.Value, before: before);
         if (!getMessageBatch.IsSuccess)
         {
             return Result.FromError(getMessageBatch);
@@ -933,7 +1067,7 @@ public partial class RoleplayCommands : CommandGroup
         foreach (var participantMessage in participantMessages.OrderByDescending(m => m.Timestamp))
         {
             var messageLink = "https://discord.com/channels/" +
-                              $"{_context.GuildID.Value}/{_context.ChannelID}/{participantMessage.ID}";
+                              $"{guildID.Value}/{channelID.Value}/{participantMessage.ID}";
 
             var send = await _channelAPI.CreateMessageAsync(dedicatedChannel, messageLink);
             if (!send.IsSuccess)

@@ -59,23 +59,33 @@ public sealed class RoleplayParser : AbstractTypeParser<Roleplay>
     {
         value = value.Trim();
 
-        if (!_context.GuildID.HasValue)
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetChannelID(out var channelID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
         {
             throw new InvalidOperationException();
         }
 
         if (string.Equals(value, "current", StringComparison.OrdinalIgnoreCase))
         {
-            return await _roleplays.GetActiveRoleplayAsync(_context.ChannelID);
+            return await _roleplays.GetActiveRoleplayAsync(channelID.Value);
         }
 
         if (!value.Contains(':'))
         {
             return await _roleplays.GetBestMatchingRoleplayAsync
             (
-                _context.ChannelID,
-                _context.GuildID.Value,
-                _context.User.ID,
+                channelID.Value,
+                guildID.Value,
+                userID.Value,
                 value
             );
         }
@@ -102,8 +112,8 @@ public sealed class RoleplayParser : AbstractTypeParser<Roleplay>
 
         return await _roleplays.GetBestMatchingRoleplayAsync
         (
-            _context.ChannelID,
-            _context.GuildID.Value,
+            channelID.Value,
+            guildID.Value,
             parsedUser,
             rawName
         );

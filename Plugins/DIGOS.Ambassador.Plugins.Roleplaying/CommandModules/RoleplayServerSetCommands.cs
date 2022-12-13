@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Permissions.Conditions;
@@ -28,6 +29,7 @@ using JetBrains.Annotations;
 using Remora.Commands.Attributes;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Results;
 
@@ -55,9 +57,14 @@ public partial class RoleplayCommands
         [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
         public async Task<Result<FeedbackMessage>> SetDedicatedRoleplayChannelCategory(IChannel category)
         {
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
             var result = await _serverSettings.SetDedicatedChannelCategoryAsync
             (
-                _context.GuildID.Value,
+                guildID.Value,
                 category.ID
             );
 
@@ -77,9 +84,14 @@ public partial class RoleplayCommands
         [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
         public async Task<Result<FeedbackMessage>> SetArchiveChannelAsync(IChannel channel)
         {
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
             var result = await _serverSettings.SetArchiveChannelAsync
             (
-                _context.GuildID.Value,
+                guildID.Value,
                 channel.ID
             );
 
@@ -99,9 +111,14 @@ public partial class RoleplayCommands
         [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
         public async Task<Result<FeedbackMessage>> SetDefaultUserRole(IRole role)
         {
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
             var result = await _serverSettings.SetDefaultUserRoleAsync
             (
-                _context.GuildID.Value,
+                guildID.Value,
                 role.ID
             );
 

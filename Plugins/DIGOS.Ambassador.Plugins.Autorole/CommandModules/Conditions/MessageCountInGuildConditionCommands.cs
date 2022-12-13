@@ -31,6 +31,7 @@ using JetBrains.Annotations;
 using Remora.Commands.Attributes;
 using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
@@ -59,12 +60,17 @@ public partial class AutoroleCommands
             long count
         )
         {
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
             var condition = _autoroles.CreateConditionProxy<MessageCountInGuildCondition>
-                            (
-                                _context.GuildID.Value,
-                                count
-                            )
-                            ?? throw new InvalidOperationException();
+            (
+                guildID.Value,
+                count
+            )
+            ?? throw new InvalidOperationException();
 
             var addCondition = await _autoroles.AddConditionAsync(autorole, condition);
 
@@ -91,6 +97,11 @@ public partial class AutoroleCommands
             long count
         )
         {
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
             var getCondition = Services.AutoroleService.GetCondition<MessageCountInGuildCondition>
             (
                 autorole,
@@ -109,7 +120,7 @@ public partial class AutoroleCommands
                 c =>
                 {
                     c.RequiredCount = count;
-                    c.SourceID = _context.GuildID.Value;
+                    c.SourceID = guildID.Value;
                 }
             );
 

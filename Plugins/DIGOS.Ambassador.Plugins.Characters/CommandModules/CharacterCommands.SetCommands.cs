@@ -39,6 +39,7 @@ using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
@@ -185,10 +186,20 @@ public partial class CharacterCommands
             string newCharacterNickname
         )
         {
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            if (!_context.TryGetUserID(out var userID))
+            {
+                throw new InvalidOperationException();
+            }
+
             var setNickResult = await _characters.SetCharacterNicknameAsync
             (
-                _context.GuildID.Value,
-                _context.User.ID,
+                guildID.Value,
+                userID.Value,
                 character,
                 newCharacterNickname
             );
@@ -320,9 +331,19 @@ public partial class CharacterCommands
             IRole discordRole
         )
         {
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            if (!_context.TryGetUserID(out var userID))
+            {
+                throw new InvalidOperationException();
+            }
+
             var getRoleResult = await _characterRoles.GetCharacterRoleAsync
             (
-                _context.GuildID.Value,
+                guildID.Value,
                 discordRole.ID,
                 this.CancellationToken
             );
@@ -335,8 +356,8 @@ public partial class CharacterCommands
             // Get a bunch of stuff for permission checking...
             var getMember = await _guildAPI.GetGuildMemberAsync
             (
-                _context.GuildID.Value,
-                _context.User.ID,
+                guildID.Value,
+                userID.Value,
                 this.CancellationToken
             );
 
@@ -347,20 +368,20 @@ public partial class CharacterCommands
 
             var member = getMember.Entity;
 
-            var getGuildRoles = await _guildAPI.GetGuildRolesAsync(_context.GuildID.Value, this.CancellationToken);
+            var getGuildRoles = await _guildAPI.GetGuildRolesAsync(guildID.Value, this.CancellationToken);
             if (!getGuildRoles.IsSuccess)
             {
                 return Result<FeedbackMessage>.FromError(getGuildRoles);
             }
 
             var guildRoles = getGuildRoles.Entity;
-            var everyoneRole = guildRoles.First(r => r.ID == _context.GuildID.Value);
+            var everyoneRole = guildRoles.First(r => r.ID == guildID.Value);
             var memberRoles = guildRoles.Where(r => member.Roles.Contains(r.ID)).ToList();
 
             // We ignore channel overrides here; the user should have it on a guild level
             var computedPermissions = DiscordPermissionSet.ComputePermissions
             (
-                _context.User.ID,
+                userID.Value,
                 everyoneRole,
                 memberRoles
             );
@@ -379,8 +400,8 @@ public partial class CharacterCommands
 
             var setRoleResult = await _characterRoles.SetCharacterRoleAsync
             (
-                _context.GuildID.Value,
-                _context.User.ID,
+                guildID.Value,
+                userID.Value,
                 character,
                 characterRole,
                 this.CancellationToken
@@ -400,10 +421,20 @@ public partial class CharacterCommands
         [RequireContext(ChannelContext.Guild)]
         public async Task<Result<FeedbackMessage>> SetDefaultCharacterAsync()
         {
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            if (!_context.TryGetUserID(out var userID))
+            {
+                throw new InvalidOperationException();
+            }
+
             var result = await _characters.GetCurrentCharacterAsync
             (
-                _context.GuildID.Value,
-                _context.User.ID,
+                guildID.Value,
+                userID.Value,
                 this.CancellationToken
             );
 
@@ -430,10 +461,20 @@ public partial class CharacterCommands
             Character character
         )
         {
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            if (!_context.TryGetUserID(out var userID))
+            {
+                throw new InvalidOperationException();
+            }
+
             var result = await _characters.SetDefaultCharacterAsync
             (
-                _context.GuildID.Value,
-                _context.User.ID,
+                guildID.Value,
+                userID.Value,
                 character,
                 this.CancellationToken
             );

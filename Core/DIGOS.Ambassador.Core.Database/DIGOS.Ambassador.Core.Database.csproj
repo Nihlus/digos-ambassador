@@ -13,6 +13,7 @@
         <PackageReference Include="Remora.Rest.Core" />
         <PackageReference Include="Remora.Results" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
     </ItemGroup>
 

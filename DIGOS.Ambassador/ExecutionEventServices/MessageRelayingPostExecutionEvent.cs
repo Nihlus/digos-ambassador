@@ -86,6 +86,11 @@ public class MessageRelayingPostExecutionEvent : IPostExecutionEvent
         CancellationToken ct = default
     )
     {
+        if (!context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         if (commandResult.IsSuccess)
         {
             if (commandResult is not Result<FeedbackMessage> messageResult)
@@ -98,8 +103,8 @@ public class MessageRelayingPostExecutionEvent : IPostExecutionEvent
                 // Erase the original interaction
                 return await _interactionAPI.DeleteOriginalInteractionResponseAsync
                 (
-                    interactionContext.ApplicationID,
-                    interactionContext.Token,
+                    interactionContext.Interaction.ApplicationID,
+                    interactionContext.Interaction.Token,
                     ct
                 );
             }
@@ -108,7 +113,7 @@ public class MessageRelayingPostExecutionEvent : IPostExecutionEvent
             var sendMessage = await _feedback.SendContextualMessageAsync
             (
                 messageResult.Entity,
-                context.User.ID,
+                userID.Value,
                 ct: ct
             );
 
@@ -127,7 +132,7 @@ public class MessageRelayingPostExecutionEvent : IPostExecutionEvent
                 var sendError = await _feedback.SendContextualErrorAsync
                 (
                     "No matching command found.",
-                    context.User.ID,
+                    userID.Value,
                     ct: ct
                 );
 
@@ -146,7 +151,7 @@ public class MessageRelayingPostExecutionEvent : IPostExecutionEvent
                 var sendError = await _feedback.SendContextualErrorAsync
                 (
                     message,
-                    context.User.ID,
+                    userID.Value,
                     ct: ct
                 );
 
@@ -180,7 +185,7 @@ public class MessageRelayingPostExecutionEvent : IPostExecutionEvent
                     Thumbnail = new EmbedThumbnail(_portraits.BrokenAmbyUri.ToString())
                 };
 
-                var sendError = await _feedback.SendPrivateEmbedAsync(context.User.ID, errorEmbed, ct: ct);
+                var sendError = await _feedback.SendPrivateEmbedAsync(userID.Value, errorEmbed, ct: ct);
                 if (!sendError.IsSuccess)
                 {
                     return Result.FromError(sendError);
@@ -220,12 +225,17 @@ public class MessageRelayingPostExecutionEvent : IPostExecutionEvent
                         }
                         case InteractionContext interactionContext:
                         {
-                            if (!interactionContext.Data.TryPickT0(out var data, out _))
+                            if (!interactionContext.Interaction.Data.IsDefined(out var data))
+                            {
+                                throw new InvalidOperationException();
+                            }
+
+                            if (!data.TryPickT0(out var commandData, out _))
                             {
                                 return new InvalidOperationError("Failed to get interaction data.");
                             }
 
-                            data.UnpackInteraction(out var commandPath, out var parameters);
+                            commandData.UnpackInteraction(out var commandPath, out var parameters);
                             command = string.Join(" ", commandPath) +
                                       " " +
                                       string.Join(" ", parameters.Select(kvp => string.Join(" ", kvp.Key, string.Join(" ", kvp.Value))));
@@ -256,7 +266,7 @@ public class MessageRelayingPostExecutionEvent : IPostExecutionEvent
                 var time = now.ToShortTimeString();
                 var sendReport = await _feedback.SendPrivateEmbedAsync
                 (
-                    context.User.ID,
+                    userID.Value,
                     reportEmbed,
                     new FeedbackMessageOptions(Attachments: new List<OneOf<FileData, IPartialAttachment>>
                     {
@@ -278,8 +288,8 @@ public class MessageRelayingPostExecutionEvent : IPostExecutionEvent
                 // Erase the original interaction
                 return await _interactionAPI.DeleteOriginalInteractionResponseAsync
                 (
-                    inter.ApplicationID,
-                    inter.Token,
+                    inter.Interaction.ApplicationID,
+                    inter.Interaction.Token,
                     ct
                 );
             }

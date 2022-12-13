@@ -36,10 +36,12 @@ using JetBrains.Annotations;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
@@ -60,6 +62,7 @@ public partial class TransformationCommands : CommandGroup
     private readonly CharacterDiscordService _characters;
     private readonly TransformationService _transformation;
     private readonly ICommandContext _context;
+    private readonly IDiscordRestUserAPI _userAPI;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TransformationCommands"/> class.
@@ -69,13 +72,15 @@ public partial class TransformationCommands : CommandGroup
     /// <param name="transformation">The transformation service.</param>
     /// <param name="content">The content service.</param>
     /// <param name="context">The command context.</param>
+    /// <param name="userAPI">The user API.</param>
     public TransformationCommands
     (
         FeedbackService feedback,
         CharacterDiscordService characters,
         TransformationService transformation,
         ContentService content,
-        ICommandContext context
+        ICommandContext context,
+        IDiscordRestUserAPI userAPI
     )
     {
         _feedback = feedback;
@@ -83,6 +88,7 @@ public partial class TransformationCommands : CommandGroup
         _transformation = transformation;
         _content = content;
         _context = context;
+        _userAPI = userAPI;
     }
 
     /// <summary>
@@ -104,11 +110,30 @@ public partial class TransformationCommands : CommandGroup
         IUser? target = null
     )
     {
-        target ??= _context.User;
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (target is null)
+        {
+            var getUser = await _userAPI.GetUserAsync(userID.Value, this.CancellationToken);
+            if (!getUser.IsSuccess)
+            {
+                return Result<FeedbackMessage>.FromError(getUser);
+            }
+
+            target = getUser.Entity;
+        }
 
         var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync
         (
-            _context.GuildID.Value,
+            guildID.Value,
             target.ID
         );
 
@@ -122,13 +147,13 @@ public partial class TransformationCommands : CommandGroup
         Result<ShiftBodypartResult> shift;
         if (species.Equals("remove", StringComparison.OrdinalIgnoreCase))
         {
-            shift = await _transformation.RemoveBodypartAsync(_context.User.ID, character, bodyPart, chirality);
+            shift = await _transformation.RemoveBodypartAsync(userID.Value, character, bodyPart, chirality);
         }
         else
         {
             shift = await _transformation.ShiftBodypartAsync
             (
-                _context.User.ID,
+                userID.Value,
                 character,
                 bodyPart,
                 species,
@@ -165,11 +190,30 @@ public partial class TransformationCommands : CommandGroup
         IUser? target = null
     )
     {
-        target ??= _context.User;
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (target is null)
+        {
+            var getUser = await _userAPI.GetUserAsync(userID.Value, this.CancellationToken);
+            if (!getUser.IsSuccess)
+            {
+                return Result<FeedbackMessage>.FromError(getUser);
+            }
+
+            target = getUser.Entity;
+        }
 
         var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync
         (
-            _context.GuildID.Value,
+            guildID.Value,
             target.ID
         );
 
@@ -182,7 +226,7 @@ public partial class TransformationCommands : CommandGroup
 
         var shiftPartResult = await _transformation.ShiftBodypartColourAsync
         (
-            _context.User.ID,
+            userID.Value,
             character,
             bodyPart,
             colour,
@@ -215,11 +259,29 @@ public partial class TransformationCommands : CommandGroup
         IUser? target = null
     )
     {
-        target ??= _context.User;
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (target is null)
+        {
+            var getUser = await _userAPI.GetUserAsync(userID.Value, this.CancellationToken);
+            if (!getUser.IsSuccess)
+            {
+                return Result<FeedbackMessage>.FromError(getUser);
+            }
+
+            target = getUser.Entity;
+        }
 
         var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync
         (
-            _context.GuildID.Value,
+            guildID.Value,
             target.ID
         );
 
@@ -232,7 +294,7 @@ public partial class TransformationCommands : CommandGroup
 
         var shiftPartResult = await _transformation.ShiftBodypartPatternAsync
         (
-            _context.User.ID,
+            userID.Value,
             character,
             bodyPart,
             pattern,
@@ -264,11 +326,30 @@ public partial class TransformationCommands : CommandGroup
         IUser? target = null
     )
     {
-        target ??= _context.User;
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (target is null)
+        {
+            var getUser = await _userAPI.GetUserAsync(userID.Value, this.CancellationToken);
+            if (!getUser.IsSuccess)
+            {
+                return Result<FeedbackMessage>.FromError(getUser);
+            }
+
+            target = getUser.Entity;
+        }
 
         var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync
         (
-            _context.GuildID.Value,
+            guildID.Value,
             target.ID
         );
 
@@ -281,7 +362,7 @@ public partial class TransformationCommands : CommandGroup
 
         var shiftPartResult = await _transformation.ShiftPatternColourAsync
         (
-            _context.User.ID,
+            userID.Value,
             character,
             bodyPart,
             colour,
@@ -303,9 +384,19 @@ public partial class TransformationCommands : CommandGroup
     [RequireContext(ChannelContext.Guild)]
     public async Task<Result> DescribeCharacterAsync([Autocomplete] Character? character = null)
     {
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         if (character is null)
         {
-            var getCurrent = await _characters.GetCurrentCharacterAsync(_context.GuildID.Value, _context.User.ID);
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            var getCurrent = await _characters.GetCurrentCharacterAsync(guildID.Value, userID.Value);
             if (!getCurrent.IsSuccess)
             {
                 return Result.FromError(getCurrent);
@@ -343,7 +434,7 @@ public partial class TransformationCommands : CommandGroup
             Fields = new[] { new EmbedField("Description", character.GetDescriptionOrDefault()) }
         };
 
-        var sendCharacter = await _feedback.SendPrivateEmbedAsync(_context.User.ID, characterEmbed);
+        var sendCharacter = await _feedback.SendPrivateEmbedAsync(userID.Value, characterEmbed);
         if (!sendCharacter.IsSuccess)
         {
             return Result.FromError(sendCharacter);
@@ -351,7 +442,7 @@ public partial class TransformationCommands : CommandGroup
 
         var sendDescription = await _feedback.SendPrivateEmbedAsync
         (
-            _context.User.ID,
+            userID.Value,
             descriptionEmbed
         );
 
@@ -369,10 +460,20 @@ public partial class TransformationCommands : CommandGroup
     [RequireContext(ChannelContext.Guild)]
     public async Task<Result<FeedbackMessage>> ResetFormAsync()
     {
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync
         (
-            _context.GuildID.Value,
-            _context.User.ID
+            guildID.Value,
+            userID.Value
         );
 
         if (!getCurrentCharacterResult.IsSuccess)
@@ -397,7 +498,17 @@ public partial class TransformationCommands : CommandGroup
     [RequireContext(ChannelContext.Guild)]
     public async Task<Result<FeedbackMessage>> OptInToTransformationsAsync()
     {
-        var optInResult = await _transformation.OptInUserAsync(_context.User.ID, _context.GuildID.Value);
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var optInResult = await _transformation.OptInUserAsync(userID.Value, guildID.Value);
 
         return !optInResult.IsSuccess
             ? Result<FeedbackMessage>.FromError(optInResult)
@@ -413,7 +524,17 @@ public partial class TransformationCommands : CommandGroup
     [RequireContext(ChannelContext.Guild)]
     public async Task<Result<FeedbackMessage>> OptOutOfTransformationsAsync()
     {
-        var optOutResult = await _transformation.OptOutUserAsync(_context.User.ID, _context.GuildID.Value);
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var optOutResult = await _transformation.OptOutUserAsync(userID.Value, guildID.Value);
 
         return !optOutResult.IsSuccess
             ? Result<FeedbackMessage>.FromError(optOutResult)
@@ -429,7 +550,12 @@ public partial class TransformationCommands : CommandGroup
     [Description("Whitelists a user, allowing them to transform you.")]
     public async Task<Result<FeedbackMessage>> WhitelistUserAsync(IUser user)
     {
-        var whitelistUserResult = await _transformation.WhitelistUserAsync(_context.User.ID, user.ID);
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var whitelistUserResult = await _transformation.WhitelistUserAsync(userID.Value, user.ID);
         return !whitelistUserResult.IsSuccess
             ? Result<FeedbackMessage>.FromError(whitelistUserResult)
             : new FeedbackMessage("User whitelisted.", _feedback.Theme.Secondary);
@@ -444,7 +570,12 @@ public partial class TransformationCommands : CommandGroup
     [Description("Blacklists a user, preventing them from transforming you.")]
     public async Task<Result<FeedbackMessage>> BlacklistUserAsync(IUser user)
     {
-        var blacklistUserResult = await _transformation.BlacklistUserAsync(_context.User.ID, user.ID);
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var blacklistUserResult = await _transformation.BlacklistUserAsync(userID.Value, user.ID);
 
         return !blacklistUserResult.IsSuccess
             ? Result<FeedbackMessage>.FromError(blacklistUserResult)

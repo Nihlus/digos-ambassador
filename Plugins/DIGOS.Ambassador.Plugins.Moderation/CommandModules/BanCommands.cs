@@ -39,6 +39,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Pagination;
 using Remora.Discord.Pagination.Extensions;
@@ -107,6 +108,16 @@ public partial class BanCommands : CommandGroup
         TimeSpan? expiresAfter = null
     )
     {
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         DateTimeOffset? expiresOn = null;
         if (expiresAfter is not null)
         {
@@ -115,9 +126,9 @@ public partial class BanCommands : CommandGroup
 
         var createBan = await _bans.CreateBanAsync
         (
-            _context.User.ID,
+            userID.Value,
             user.ID,
-            _context.GuildID.Value,
+            guildID.Value,
             reason,
             expiresOn: expiresOn
         );
@@ -135,7 +146,7 @@ public partial class BanCommands : CommandGroup
             return notifyResult;
         }
 
-        return await _guildAPI.CreateGuildBanAsync(_context.GuildID.Value, user.ID, reason: reason);
+        return await _guildAPI.CreateGuildBanAsync(guildID.Value, user.ID, reason: reason);
     }
 
     /// <summary>
@@ -147,7 +158,17 @@ public partial class BanCommands : CommandGroup
     [RequireContext(ChannelContext.Guild)]
     public async Task<IResult> ListBansAsync()
     {
-        var bans = await _bans.GetBansAsync(_context.GuildID.Value);
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var bans = await _bans.GetBansAsync(guildID.Value);
         var createPages = await PaginatedEmbedFactory.PagesFromCollectionAsync
         (
             bans,
@@ -216,7 +237,7 @@ public partial class BanCommands : CommandGroup
 
         return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
-            _context.User.ID,
+            userID.Value,
             pages,
             ct: this.CancellationToken
         );
@@ -232,7 +253,17 @@ public partial class BanCommands : CommandGroup
     [RequireContext(ChannelContext.Guild)]
     public async Task<IResult> DeleteBanAsync(long banID)
     {
-        var getBan = await _bans.GetBanAsync(_context.GuildID.Value, banID);
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var getBan = await _bans.GetBanAsync(guildID.Value, banID);
         if (!getBan.IsSuccess)
         {
             return getBan;
@@ -242,7 +273,7 @@ public partial class BanCommands : CommandGroup
 
         // This has to be done before the warning is actually deleted - otherwise, the lazy loader is removed and
         // navigation properties can't be evaluated
-        var notifyResult = await _logging.NotifyUserUnbannedAsync(ban, _context.User.ID);
+        var notifyResult = await _logging.NotifyUserUnbannedAsync(ban, userID.Value);
         if (!notifyResult.IsSuccess)
         {
             return notifyResult;
@@ -254,6 +285,6 @@ public partial class BanCommands : CommandGroup
             return deleteBan;
         }
 
-        return await _guildAPI.RemoveGuildBanAsync(_context.GuildID.Value, ban.User.DiscordID);
+        return await _guildAPI.RemoveGuildBanAsync(guildID.Value, ban.User.DiscordID);
     }
 }

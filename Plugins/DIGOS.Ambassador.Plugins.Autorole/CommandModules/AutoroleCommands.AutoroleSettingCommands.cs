@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Errors;
@@ -33,6 +34,7 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
@@ -84,7 +86,12 @@ public partial class AutoroleCommands
         [RequirePermission(typeof(ShowAutoroleServerSettings), PermissionTarget.Self)]
         public async Task<Result> ShowSettingsAsync()
         {
-            var getSettings = await _autoroles.GetOrCreateServerSettingsAsync(_context.GuildID.Value);
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            var getSettings = await _autoroles.GetOrCreateServerSettingsAsync(guildID.Value);
             if (!getSettings.IsSuccess)
             {
                 return Result.FromError(getSettings);
@@ -119,10 +126,12 @@ public partial class AutoroleCommands
         [RequirePermission(typeof(EditAutoroleServerSettings), PermissionTarget.Self)]
         public async Task<Result<FeedbackMessage>> ClearAffirmationNotificationChannel()
         {
-            var clearResult = await _autoroles.ClearAffirmationNotificationChannelAsync
-            (
-                _context.GuildID.Value
-            );
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            var clearResult = await _autoroles.ClearAffirmationNotificationChannelAsync(guildID.Value);
 
             return !clearResult.IsSuccess
                 ? Result<FeedbackMessage>.FromError(clearResult)
@@ -140,16 +149,17 @@ public partial class AutoroleCommands
         [RequirePermission(typeof(EditAutoroleServerSettings), PermissionTarget.Self)]
         public async Task<Result<FeedbackMessage>> SetAffirmationNotificationChannel(IChannel channel)
         {
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
             if (channel.Type is not ChannelType.GuildText)
             {
                 return new UserError("That's not a text channel.");
             }
 
-            var setResult = await _autoroles.SetAffirmationNotificationChannelAsync
-            (
-                _context.GuildID.Value,
-                channel.ID
-            );
+            var setResult = await _autoroles.SetAffirmationNotificationChannelAsync(guildID.Value, channel.ID);
 
             return !setResult.IsSuccess
                 ? Result<FeedbackMessage>.FromError(setResult)

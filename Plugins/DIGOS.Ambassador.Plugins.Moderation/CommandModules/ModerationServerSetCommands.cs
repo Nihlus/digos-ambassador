@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Moderation.Permissions;
@@ -31,6 +32,7 @@ using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
@@ -79,7 +81,12 @@ public partial class ModerationCommands
         [RequireContext(ChannelContext.Guild)]
         public async Task<Result<FeedbackMessage>> SetModerationLogChannelAsync(IChannel channel)
         {
-            var setChannel = await _moderation.SetModerationLogChannelAsync(_context.GuildID.Value, channel.ID);
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            var setChannel = await _moderation.SetModerationLogChannelAsync(guildID.Value, channel.ID);
             return setChannel.IsSuccess
                 ? new FeedbackMessage("Channel set.", _feedback.Theme.Secondary)
                 : Result<FeedbackMessage>.FromError(setChannel);
@@ -95,7 +102,12 @@ public partial class ModerationCommands
         [RequireContext(ChannelContext.Guild)]
         public async Task<Result<FeedbackMessage>> SetMonitoringChannelAsync(IChannel channel)
         {
-            var setChannel = await _moderation.SetMonitoringChannelAsync(_context.GuildID.Value, channel.ID);
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            var setChannel = await _moderation.SetMonitoringChannelAsync(guildID.Value, channel.ID);
             return setChannel.IsSuccess
                 ? new FeedbackMessage("Channel set.", _feedback.Theme.Secondary)
                 : Result<FeedbackMessage>.FromError(setChannel);
@@ -111,7 +123,12 @@ public partial class ModerationCommands
         [RequireContext(ChannelContext.Guild)]
         public async Task<Result<FeedbackMessage>> SetWarningThresholdAsync(int threshold)
         {
-            var setChannel = await _moderation.SetWarningThresholdAsync(_context.GuildID.Value, threshold);
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            var setChannel = await _moderation.SetWarningThresholdAsync(guildID.Value, threshold);
             return setChannel.IsSuccess
                 ? new FeedbackMessage("Threshold set.", _feedback.Theme.Secondary)
                 : Result<FeedbackMessage>.FromError(setChannel);

@@ -32,6 +32,7 @@ using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
@@ -81,7 +82,12 @@ public partial class BanCommands
         [RequireContext(ChannelContext.Guild)]
         public async Task<Result<FeedbackMessage>> SetBanReasonAsync(long banID, string newReason)
         {
-            var getBan = await _bans.GetBanAsync(_context.GuildID.Value, banID);
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            var getBan = await _bans.GetBanAsync(guildID.Value, banID);
             if (!getBan.IsSuccess)
             {
                 return Result<FeedbackMessage>.FromError(getBan);
@@ -106,7 +112,12 @@ public partial class BanCommands
         [RequireContext(ChannelContext.Guild)]
         public async Task<Result<FeedbackMessage>> SetBanContextMessageAsync(long banID, IMessage newMessage)
         {
-            var getBan = await _bans.GetBanAsync(_context.GuildID.Value, banID);
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            var getBan = await _bans.GetBanAsync(guildID.Value, banID);
             if (!getBan.IsSuccess)
             {
                 return Result<FeedbackMessage>.FromError(getBan);
@@ -131,7 +142,12 @@ public partial class BanCommands
         [RequireContext(ChannelContext.Guild)]
         public async Task<Result<FeedbackMessage>> SetBanDurationAsync(long banID, TimeSpan newDuration)
         {
-            var getBan = await _bans.GetBanAsync(_context.GuildID.Value, banID);
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            var getBan = await _bans.GetBanAsync(guildID.Value, banID);
             if (!getBan.IsSuccess)
             {
                 return Result<FeedbackMessage>.FromError(getBan);

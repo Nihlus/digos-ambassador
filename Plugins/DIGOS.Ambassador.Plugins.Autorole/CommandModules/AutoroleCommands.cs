@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -37,6 +38,7 @@ using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Pagination;
@@ -93,9 +95,14 @@ public partial class AutoroleCommands : CommandGroup
     [RequirePermission(typeof(CreateAutorole), PermissionTarget.Self)]
     public async Task<Result<FeedbackMessage>> CreateAutoroleAsync(IRole discordRole)
     {
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var create = await _autoroles.CreateAutoroleAsync
         (
-            _context.GuildID.Value,
+            guildID.Value,
             discordRole.ID,
             this.CancellationToken
         );
@@ -181,6 +188,11 @@ public partial class AutoroleCommands : CommandGroup
         [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole
     )
     {
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var embedFields = new List<IEmbedField>();
         var embed = new Embed
         {
@@ -216,7 +228,7 @@ public partial class AutoroleCommands : CommandGroup
 
         return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
-            _context.User.ID,
+            userID.Value,
             pages,
             ct: this.CancellationToken
         );
@@ -232,7 +244,17 @@ public partial class AutoroleCommands : CommandGroup
     [RequirePermission(typeof(ViewAutorole), PermissionTarget.Self)]
     public async Task<Result> ListAutorolesAsync()
     {
-        var autoroles = await _autoroles.GetAutorolesAsync(_context.GuildID.Value, ct: this.CancellationToken);
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var autoroles = await _autoroles.GetAutorolesAsync(guildID.Value, ct: this.CancellationToken);
 
         var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
         (
@@ -244,7 +266,7 @@ public partial class AutoroleCommands : CommandGroup
 
         return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
-            _context.User.ID,
+            userID.Value,
             pages,
             ct: this.CancellationToken
         );
@@ -362,6 +384,16 @@ public partial class AutoroleCommands : CommandGroup
         [DiscordTypeHint(TypeHint.Role)] AutoroleConfiguration autorole
     )
     {
+        if (!_context.TryGetGuildID(out var guildID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
         var getUsers = await _autoroles.GetUnconfirmedUsersAsync(autorole);
         if (!getUsers.IsSuccess)
         {
@@ -371,7 +403,7 @@ public partial class AutoroleCommands : CommandGroup
         var users = getUsers.Entity.ToList();
         var getDiscordUsers = await Task.WhenAll
         (
-            users.Select(u => _guildAPI.GetGuildMemberAsync(_context.GuildID.Value, u.DiscordID))
+            users.Select(u => _guildAPI.GetGuildMemberAsync(guildID.Value, u.DiscordID))
         );
 
         var discordUsers = getDiscordUsers
@@ -392,7 +424,7 @@ public partial class AutoroleCommands : CommandGroup
 
         return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
-            _context.User.ID,
+            userID.Value,
             pages,
             ct: this.CancellationToken
         );

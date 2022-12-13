@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Core.Attributes;
@@ -31,6 +32,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
@@ -84,7 +86,12 @@ public class PrivacyCommands : CommandGroup
     [PrivacyExempt]
     public async Task<IResult> RequestPolicyAsync()
     {
-        await _privacy.SendPrivacyPolicyAsync(_context.ChannelID);
+        if (!_context.TryGetChannelID(out var channelID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        await _privacy.SendPrivacyPolicyAsync(channelID.Value);
         return Result.FromSuccess();
     }
 
@@ -98,7 +105,12 @@ public class PrivacyCommands : CommandGroup
     [PrivacyExempt]
     public async Task<Result<FeedbackMessage>> GrantConsentAsync()
     {
-        var grantResult = await _privacy.GrantUserConsentAsync(_context.User.ID);
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var grantResult = await _privacy.GrantUserConsentAsync(userID.Value);
         return grantResult.IsSuccess
             ? new FeedbackMessage("Thank you! Enjoy using the bot :smiley:", _feedback.Theme.Secondary)
             : Result<FeedbackMessage>.FromError(grantResult);
@@ -114,7 +126,12 @@ public class PrivacyCommands : CommandGroup
     [PrivacyExempt]
     public async Task<Result<FeedbackMessage>> RevokeConsentAsync()
     {
-        var revokeResult = await _privacy.RevokeUserConsentAsync(_context.User.ID);
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var revokeResult = await _privacy.RevokeUserConsentAsync(userID.Value);
         if (!revokeResult.IsSuccess)
         {
             return Result<FeedbackMessage>.FromError(revokeResult);
@@ -139,6 +156,10 @@ public class PrivacyCommands : CommandGroup
     [PrivacyExempt]
     public async Task<IResult> DisplayContactAsync()
     {
+        if (!_context.TryGetChannelID(out var channelID))
+        {
+            throw new InvalidOperationException();
+        }
         const string avatarURL = "https://i.imgur.com/2E334jS.jpg";
         var embed = new Embed
         {
@@ -159,7 +180,7 @@ public class PrivacyCommands : CommandGroup
 
         var sendEmbed = await _channelAPI.CreateMessageAsync
         (
-            _context.ChannelID,
+            channelID.Value,
             embeds: new[] { embed },
             ct: this.CancellationToken
         );

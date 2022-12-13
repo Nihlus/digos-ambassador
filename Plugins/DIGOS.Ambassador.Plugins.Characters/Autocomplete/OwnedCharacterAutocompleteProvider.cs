@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -30,6 +31,7 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Autocomplete;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 
 namespace DIGOS.Ambassador.Plugins.Characters.Autocomplete;
 
@@ -63,12 +65,18 @@ public class OwnedCharacterAutocompleteProvider : IAutocompleteProvider
         CancellationToken ct = default
     )
     {
-        var scopedCharacters = _context.GuildID.HasValue
+        _ = _context.TryGetGuildID(out var guildID);
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var scopedCharacters = guildID is not null
             ? _database.Characters
-                .Where(c => c.Owner.DiscordID == _context.User.ID)
-                .Where(c => c.Server.DiscordID == _context.GuildID.Value)
+                .Where(c => c.Owner.DiscordID == userID)
+                .Where(c => c.Server.DiscordID == guildID)
             : _database.Characters
-                .Where(c => c.Owner.DiscordID == _context.User.ID);
+                .Where(c => c.Owner.DiscordID == userID);
 
         var suggestedCharacters = await scopedCharacters
             .OrderBy(c => EF.Functions.FuzzyStringMatchLevenshtein(c.Name, userInput))

@@ -20,12 +20,14 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
 using JetBrains.Annotations;
 using Remora.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Permissions.Conditions;
@@ -61,7 +63,12 @@ public class RequirePermissionCondition : ICondition<RequirePermissionAttribute>
     /// <inheritdoc />
     public async ValueTask<Result> CheckAsync(RequirePermissionAttribute attribute, CancellationToken ct = default)
     {
-        if (!_context.GuildID.IsDefined(out var guildID))
+        if (!_context.TryGetUserID(out var userID))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!_context.TryGetGuildID(out var guildID))
         {
             return new InvalidOperationError("This condition must be executed in a guild.");
         }
@@ -76,8 +83,8 @@ public class RequirePermissionCondition : ICondition<RequirePermissionAttribute>
 
         return await _permissions.HasPermissionAsync
         (
-            guildID,
-            _context.User.ID,
+            guildID.Value,
+            userID.Value,
             permission,
             attribute.Target,
             ct

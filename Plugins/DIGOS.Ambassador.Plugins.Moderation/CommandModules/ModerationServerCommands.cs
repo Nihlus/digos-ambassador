@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
@@ -32,6 +33,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Rest.Core;
 using Remora.Results;
@@ -83,7 +85,12 @@ public partial class ModerationCommands
         [RequireContext(ChannelContext.Guild)]
         public async Task<IResult> ShowServerSettingsAsync()
         {
-            var getGuild = await _guildAPI.GetGuildAsync(_context.GuildID.Value);
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            var getGuild = await _guildAPI.GetGuildAsync(guildID.Value);
             if (!getGuild.IsSuccess)
             {
                 return getGuild;

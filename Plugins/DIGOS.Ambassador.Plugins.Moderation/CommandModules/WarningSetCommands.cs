@@ -32,6 +32,7 @@ using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Results;
@@ -81,7 +82,12 @@ public partial class WarningCommands
         [RequireContext(ChannelContext.Guild)]
         public async Task<Result<FeedbackMessage>> SetWarningReasonAsync(long warningID, string newReason)
         {
-            var getWarning = await _warnings.GetWarningAsync(_context.GuildID.Value, warningID);
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            var getWarning = await _warnings.GetWarningAsync(guildID.Value, warningID);
             if (!getWarning.IsSuccess)
             {
                 return Result<FeedbackMessage>.FromError(getWarning);
@@ -106,7 +112,12 @@ public partial class WarningCommands
         [RequireContext(ChannelContext.Guild)]
         public async Task<Result<FeedbackMessage>> SetWarningContextMessageAsync(long warningID, IMessage newMessage)
         {
-            var getWarning = await _warnings.GetWarningAsync(_context.GuildID.Value, warningID);
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            var getWarning = await _warnings.GetWarningAsync(guildID.Value, warningID);
             if (!getWarning.IsSuccess)
             {
                 return Result<FeedbackMessage>.FromError(getWarning);
@@ -131,7 +142,12 @@ public partial class WarningCommands
         [RequireContext(ChannelContext.Guild)]
         public async Task<Result<FeedbackMessage>> SetWarningDurationAsync(long warningID, TimeSpan newDuration)
         {
-            var getWarning = await _warnings.GetWarningAsync(_context.GuildID.Value, warningID);
+            if (!_context.TryGetGuildID(out var guildID))
+            {
+                throw new InvalidOperationException();
+            }
+
+            var getWarning = await _warnings.GetWarningAsync(guildID.Value, warningID);
             if (!getWarning.IsSuccess)
             {
                 return Result<FeedbackMessage>.FromError(getWarning);
