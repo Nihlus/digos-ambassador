@@ -53,7 +53,7 @@ internal class KinkWizardInteractions : InteractionGroup
     private readonly InMemoryDataService<Snowflake, KinkWizard> _dataService;
     private readonly FeedbackService _feedback;
     private readonly IDiscordRestInteractionAPI _interactionAPI;
-    private readonly InteractionContext _context;
+    private readonly IInteractionContext _context;
     private readonly IDiscordRestChannelAPI _channelAPI;
 
     /// <summary>
@@ -72,7 +72,7 @@ internal class KinkWizardInteractions : InteractionGroup
         FeedbackService feedback,
         IDiscordRestChannelAPI channelAPI,
         IDiscordRestInteractionAPI interactionAPI,
-        InteractionContext context
+        IInteractionContext context
     )
     {
         _kinks = kinks;

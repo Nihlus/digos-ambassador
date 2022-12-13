@@ -40,7 +40,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Autocomplete;
 /// </summary>
 public class OwnedCharacterAutocompleteProvider : IAutocompleteProvider
 {
-    private readonly InteractionContext _context;
+    private readonly IInteractionContext _context;
     private readonly CharactersDatabaseContext _database;
 
     /// <inheritdoc />
@@ -51,7 +51,7 @@ public class OwnedCharacterAutocompleteProvider : IAutocompleteProvider
     /// </summary>
     /// <param name="context">The interaction context.</param>
     /// <param name="database">The database context.</param>
-    public OwnedCharacterAutocompleteProvider(InteractionContext context, CharactersDatabaseContext database)
+    public OwnedCharacterAutocompleteProvider(IInteractionContext context, CharactersDatabaseContext database)
     {
         _context = context;
         _database = database;

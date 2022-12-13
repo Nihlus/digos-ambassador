@@ -40,7 +40,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Autocomplete;
 /// </summary>
 public class AnyRoleplayAutocompleteProvider : IAutocompleteProvider
 {
-    private readonly InteractionContext _context;
+    private readonly IInteractionContext _context;
     private readonly RoleplayingDatabaseContext _database;
 
     /// <inheritdoc />
@@ -51,7 +51,7 @@ public class AnyRoleplayAutocompleteProvider : IAutocompleteProvider
     /// </summary>
     /// <param name="context">The interaction context.</param>
     /// <param name="database">The database context.</param>
-    public AnyRoleplayAutocompleteProvider(InteractionContext context, RoleplayingDatabaseContext database)
+    public AnyRoleplayAutocompleteProvider(IInteractionContext context, RoleplayingDatabaseContext database)
     {
         _context = context;
         _database = database;
