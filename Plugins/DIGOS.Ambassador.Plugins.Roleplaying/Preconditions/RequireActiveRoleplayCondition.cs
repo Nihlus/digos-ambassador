@@ -38,7 +38,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Preconditions;
 /// </summary>
 public class RequireActiveRoleplayCondition : ICondition<RequireActiveRoleplayAttribute>
 {
-    private readonly ICommandContext _context;
+    private readonly IOperationContext _context;
     private readonly RoleplayDiscordService _roleplayService;
 
     /// <summary>
@@ -46,7 +46,7 @@ public class RequireActiveRoleplayCondition : ICondition<RequireActiveRoleplayAt
     /// </summary>
     /// <param name="context">The command context.</param>
     /// <param name="roleplayService">The roleplay service.</param>
-    public RequireActiveRoleplayCondition(ICommandContext context, RoleplayDiscordService roleplayService)
+    public RequireActiveRoleplayCondition(IOperationContext context, RoleplayDiscordService roleplayService)
     {
         _context = context;
         _roleplayService = roleplayService;

@@ -41,14 +41,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.TypeReaders;
 public sealed class RoleplayParser : AbstractTypeParser<Roleplay>
 {
     private readonly RoleplayDiscordService _roleplays;
-    private readonly ICommandContext _context;
+    private readonly IOperationContext _context;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RoleplayParser"/> class.
     /// </summary>
     /// <param name="roleplays">The roleplaying service.</param>
     /// <param name="context">The command context.</param>
-    public RoleplayParser(RoleplayDiscordService roleplays, ICommandContext context)
+    public RoleplayParser(RoleplayDiscordService roleplays, IOperationContext context)
     {
         _roleplays = roleplays;
         _context = context;

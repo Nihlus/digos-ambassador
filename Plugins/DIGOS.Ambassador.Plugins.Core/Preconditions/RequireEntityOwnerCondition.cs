@@ -39,13 +39,13 @@ namespace DIGOS.Ambassador.Plugins.Core.Preconditions;
 public class RequireEntityOwnerCondition<TEntity> : ICondition<RequireEntityOwnerAttribute, TEntity>
     where TEntity : IOwnedNamedEntity
 {
-    private readonly ICommandContext _context;
+    private readonly IOperationContext _context;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RequireEntityOwnerCondition{TEntity}"/> class.
     /// </summary>
     /// <param name="context">The command context.</param>
-    public RequireEntityOwnerCondition(ICommandContext context)
+    public RequireEntityOwnerCondition(IOperationContext context)
     {
         _context = context;
     }

@@ -40,14 +40,14 @@ namespace DIGOS.Ambassador.Plugins.Characters.Parsers;
 public sealed class CharacterParser : AbstractTypeParser<Character>
 {
     private readonly CharacterDiscordService _characterService;
-    private readonly ICommandContext _context;
+    private readonly IOperationContext _context;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CharacterParser"/> class.
     /// </summary>
     /// <param name="characterService">The character service.</param>
     /// <param name="context">The command context.</param>
-    public CharacterParser(CharacterDiscordService characterService, ICommandContext context)
+    public CharacterParser(CharacterDiscordService characterService, IOperationContext context)
     {
         _characterService = characterService;
         _context = context;
