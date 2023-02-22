@@ -281,7 +281,7 @@ public class CharacterRoleService
                         return removeRole;
                     }
 
-                    if (rre.Error.Code is not DiscordError.UnknownRole)
+                    if (rre.Error.Code.IsDefined(out var code) && code is not DiscordError.UnknownRole)
                     {
                         return removeRole;
                     }
@@ -339,7 +339,7 @@ public class CharacterRoleService
                 return removeRole;
             }
 
-            if (rre.Error.Code is not DiscordError.UnknownRole)
+            if (rre.Error.Code.IsDefined(out var code) && code is not DiscordError.UnknownRole)
             {
                 return removeRole;
             }
@@ -412,7 +412,7 @@ public class CharacterRoleService
             }
 
             // It's probably already removed; that's fine
-            return rre.Error.Code is not DiscordError.UnknownRole
+            return rre.Error.Code.IsDefined(out var code) && code is not DiscordError.UnknownRole
                 ? removeRole
                 : Result.FromSuccess();
         }
@@ -443,7 +443,7 @@ public class CharacterRoleService
                     return removeRole;
                 }
 
-                if (rre.Error.Code is not DiscordError.UnknownRole)
+                if (rre.Error.Code.IsDefined(out var code) && code is not DiscordError.UnknownRole)
                 {
                     return removeRole;
                 }

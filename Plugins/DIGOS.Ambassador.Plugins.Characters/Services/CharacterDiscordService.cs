@@ -761,7 +761,7 @@ public class CharacterDiscordService
 
         if (modifyNickname.Error is RestResultError<RestError> rre)
         {
-            return rre.Error.Code is not DiscordError.MissingPermission
+            return rre.Error.Code.IsDefined(out var code) && code is not DiscordError.MissingPermission
                 ? modifyNickname
                 : Result.FromSuccess(); // squelch missing permission errors
         }

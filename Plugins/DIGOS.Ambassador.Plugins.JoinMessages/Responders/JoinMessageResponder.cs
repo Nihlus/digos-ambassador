@@ -124,7 +124,7 @@ public class JoinMessageResponder : IResponder<IGuildMemberAdd>
             return Result.FromError(sendEmbed);
         }
 
-        if (re.Error.Code is not DiscordError.CannotSendMessageToUser)
+        if (re.Error.Code.IsDefined(out var code) && code is not DiscordError.CannotSendMessageToUser)
         {
             return Result.FromError(sendEmbed);
         }

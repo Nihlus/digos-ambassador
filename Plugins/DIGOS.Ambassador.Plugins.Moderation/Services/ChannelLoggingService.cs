@@ -530,7 +530,7 @@ public sealed class ChannelLoggingService
 
         while (true)
         {
-            var getAuditLogEntries = await _auditLogAPI.GetAuditLogAsync
+            var getAuditLogEntries = await _auditLogAPI.GetGuildAuditLogAsync
             (
                 guildID,
                 actionType: AuditLogEvent.MessageDelete,

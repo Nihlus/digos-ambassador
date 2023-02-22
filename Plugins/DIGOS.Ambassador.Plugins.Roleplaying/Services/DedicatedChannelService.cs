@@ -126,14 +126,15 @@ public class DedicatedChannelService
                 return Result<IChannel>.FromError(createChannel);
             }
 
-            return rre.Error.Code switch
+            if (rre.Error.Code.IsDefined(out var code) && code is DiscordError.MissingPermission)
             {
-                DiscordError.MissingPermission => new UserError
+                return new UserError
                 (
                     "I don't have permission to manage channels, so I can't create dedicated RP channels."
-                ),
-                _ => Result<IChannel>.FromError(createChannel)
-            };
+                );
+            }
+
+            return Result<IChannel>.FromError(createChannel);
         }
 
         var dedicatedChannel = createChannel.Entity;

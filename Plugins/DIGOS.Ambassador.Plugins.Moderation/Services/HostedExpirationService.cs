@@ -235,23 +235,16 @@ internal sealed class HostedExpirationService : BackgroundService
                 {
                     if (removeBan.Error is RestResultError<RestError> dre)
                     {
-                        switch (dre.Error.Code)
+                        if (dre.Error.Code.IsDefined(out var code) && code is MissingPermission)
                         {
-                            case MissingPermission:
-                            {
-                                // Don't save the results, but continue processing expirations
-                                continue;
-                            }
-                            case UnknownBan:
-                            {
-                                // User is probably already unbanned, this is OK
-                                break;
-                            }
-                            default:
-                            {
-                                _log.LogWarning("Failed to rescind ban: {Reason}", removeBan.Error.Message);
-                                continue;
-                            }
+                            // Don't save the results, but continue processing expirations
+                            continue;
+                        }
+
+                        if (dre.Error.Code.IsDefined(out code) && code is not UnknownBan)
+                        {
+                            _log.LogWarning("Failed to rescind ban: {Reason}", removeBan.Error.Message);
+                            continue;
                         }
                     }
                     else
