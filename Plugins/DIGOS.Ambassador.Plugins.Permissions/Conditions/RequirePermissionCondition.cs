@@ -40,7 +40,7 @@ public class RequirePermissionCondition : ICondition<RequirePermissionAttribute>
 {
     private readonly PermissionService _permissions;
     private readonly PermissionRegistryService _permissionRegistry;
-    private readonly ICommandContext _context;
+    private readonly IOperationContext _context;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RequirePermissionCondition"/> class.
@@ -52,7 +52,7 @@ public class RequirePermissionCondition : ICondition<RequirePermissionAttribute>
     (
         PermissionService permissions,
         PermissionRegistryService permissionRegistry,
-        ICommandContext context
+        IOperationContext context
     )
     {
         _permissions = permissions;
