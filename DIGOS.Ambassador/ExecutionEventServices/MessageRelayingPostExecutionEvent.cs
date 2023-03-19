@@ -43,6 +43,7 @@ using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Feedback.Messages;
 using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Commands.Services;
+using Remora.Discord.Interactivity;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.ExecutionEventServices;
@@ -97,6 +98,12 @@ public class MessageRelayingPostExecutionEvent : IPostExecutionEvent
             {
                 if (context is not InteractionContext interactionContext || _feedback.HasEditedOriginalMessage)
                 {
+                    return Result.FromSuccess();
+                }
+
+                if (context is InteractionCommandContext commandContext && commandContext.Command.Command.Node.GroupType.IsSubclassOf(typeof(InteractionGroup)))
+                {
+                    // not something managed by us
                     return Result.FromSuccess();
                 }
 
