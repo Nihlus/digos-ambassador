@@ -91,9 +91,9 @@ public sealed class PronounService
     /// <exception cref="ArgumentException">Thrown if no pronoun provider exists for the character's preference.</exception>
     public IPronounProvider GetPronounProvider(Character character)
     {
-        if (_pronounProviders.ContainsKey(character.PronounProviderFamily))
+        if (_pronounProviders.TryGetValue(character.PronounProviderFamily, out var pronounProvider))
         {
-            return _pronounProviders[character.PronounProviderFamily];
+            return pronounProvider;
         }
 
         throw new KeyNotFoundException("No pronoun provider for that family found.");
