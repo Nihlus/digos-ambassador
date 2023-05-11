@@ -259,6 +259,19 @@ public sealed partial class AuctionCommands : CommandGroup
     }
 
     /// <summary>
+    /// Displays a live-updating view of the specified auction.
+    /// </summary>
+    /// <param name="auction">The auction.</param>
+    /// <returns>An asynchronous result representing the command execution.</returns>
+    [Command("display")]
+    [Description("Displays a live-updating view of the specified auction.")]
+    public Task<Result> DisplayAuctionAsync([Autocomplete] Auction auction)
+    {
+        _ = _context.TryGetChannelID(out var channelID);
+        return _auctionDisplay.DisplayAuctionAsync(auction, channelID!.Value, this.CancellationToken);
+    }
+
+    /// <summary>
     /// Bids on an auction.
     /// </summary>
     /// <param name="auction">The auction to bid on.</param>
