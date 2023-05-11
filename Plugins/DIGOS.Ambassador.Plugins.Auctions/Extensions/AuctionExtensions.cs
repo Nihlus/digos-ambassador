@@ -46,7 +46,7 @@ public static class AuctionExtensions
         var displayColour = auction.State switch
         {
             AuctionState.Closed => Color.SlateGray,
-            AuctionState.Open => Color.LawnGreen,
+            AuctionState.Open => Color.MediumSeaGreen,
             AuctionState.Concluded => Color.DeepSkyBlue,
             _ => throw new ArgumentOutOfRangeException()
         };
