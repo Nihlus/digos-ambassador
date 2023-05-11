@@ -65,8 +65,8 @@ public class AuctionDisplayService
     /// <returns>An asynchronous result representing the operation.</returns>
     public async Task<Result> RefreshDisplaysAsync(CancellationToken ct = default)
     {
-        var query = _database.AuctionDisplays.AsNoTracking();
-        await foreach (var auctionDisplay in query.AsAsyncEnumerable().WithCancellation(ct))
+        var auctionDisplays = await _database.AuctionDisplays.ToArrayAsync(ct);
+        foreach (var auctionDisplay in auctionDisplays)
         {
             var updateDisplay = await UpdateDisplayAsync(auctionDisplay, ct);
             if (updateDisplay.IsSuccess)
@@ -95,8 +95,8 @@ public class AuctionDisplayService
     /// <returns>An asynchronous result representing the operation.</returns>
     public async Task<Result> UpdateDisplaysAsync(Auction auction, CancellationToken ct = default)
     {
-        var query = _database.AuctionDisplays.AsNoTracking().Where(d => d.Auction.ID == auction.ID);
-        await foreach (var auctionDisplay in query.AsAsyncEnumerable().WithCancellation(ct))
+        var auctionDisplays = await _database.AuctionDisplays.Where(d => d.Auction.ID == auction.ID).ToArrayAsync(ct);
+        foreach (var auctionDisplay in auctionDisplays)
         {
             var updateDisplay = await UpdateDisplayAsync(auctionDisplay, ct);
             if (updateDisplay.IsSuccess)
