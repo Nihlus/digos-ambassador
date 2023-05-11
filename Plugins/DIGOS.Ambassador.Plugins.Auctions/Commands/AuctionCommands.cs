@@ -348,17 +348,6 @@ public sealed partial class AuctionCommands : CommandGroup
             );
         }
 
-        _ = _context.TryGetUserID(out var userID);
-
-        if (auction.Bids.MaxBy(b => b.Amount)?.User.DiscordID == userID)
-        {
-            return (Result)await _feedbackService.SendContextualErrorAsync
-            (
-                "You're already the highest bidder.",
-                ct: this.CancellationToken
-            );
-        }
-
         var confirmationMessage = "I UNDERSTAND";
 
         var components = new List<IMessageComponent>

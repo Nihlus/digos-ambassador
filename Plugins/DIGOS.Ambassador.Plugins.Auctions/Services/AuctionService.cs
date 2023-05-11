@@ -96,13 +96,20 @@ public class AuctionService
 
         if (bidAmount < auction.MinimumBid)
         {
-            return new UserError($"Your bid is too low. Please bit at least {auction.MinimumBid} {auction.Currency}.");
+            return new UserError($"Your bid is too low. Please bid at least {auction.MinimumBid} {auction.Currency}.");
         }
 
         // buyouts bypass the maximum bid restrictions
-        if (bidAmount > auction.MaximumBid && (auction.Buyout is null || bidAmount <= auction.Buyout))
+        var isBuyout = auction.Buyout is not null && bidAmount >= auction.Buyout;
+
+        if (bidAmount > auction.MaximumBid && !isBuyout)
         {
-            return new UserError($"Your bid is too high. Please bit at most {auction.MaximumBid} {auction.Currency}.");
+            return new UserError($"Your bid is too high. Please bid at most {auction.MaximumBid} {auction.Currency}.");
+        }
+
+        if (auction.Bids.MaxBy(b => b.Amount)?.User.DiscordID == userID && !isBuyout)
+        {
+            return new UserError("You're already the highest bidder.");
         }
 
         var getUser = await _userService.GetOrRegisterUserAsync(userID, ct);
@@ -115,7 +122,7 @@ public class AuctionService
 
         auction.Bids.Add(new UserBid(auction, user, DateTimeOffset.UtcNow, bidAmount));
 
-        if (bidAmount >= auction.Buyout)
+        if (isBuyout)
         {
             var concludeAuction = await ConcludeAuctionAsync(auction, ct);
             if (!concludeAuction.IsSuccess)
