@@ -89,7 +89,7 @@ public class AuctionService
     )
     {
         var highestBid = auction.GetHighestBid();
-        if (bidAmount <= highestBid)
+        if (bidAmount <= highestBid?.Amount)
         {
             return new UserError($"Your bid is too low. The current leading bid is {highestBid} {auction.Currency}.");
         }
@@ -121,6 +121,19 @@ public class AuctionService
             if (!concludeAuction.IsSuccess)
             {
                 return concludeAuction;
+            }
+        }
+        else if (highestBid is not null)
+        {
+            var notifyOutbid = await NotifyOutbidAsync(auction, highestBid.User.DiscordID, ct);
+            if (!notifyOutbid.IsSuccess)
+            {
+                _log.LogWarning
+                (
+                    "Failed to notify the highest bidder for auction #{AuctionID} that they've been outbid: {Error}",
+                    auction.ID,
+                    notifyOutbid.Error
+                );
             }
         }
 
@@ -158,6 +171,21 @@ public class AuctionService
             _log.LogWarning("Failed to notify the winner of an auction: {Error}", notifyWinner.Error);
         }
 
+        var winner = auction.Bids.MaxBy(b => b.Amount);
+        foreach (var bidder in auction.Bids.Select(b => b.User).DistinctBy(u => u.ID))
+        {
+            if (bidder.ID == winner?.User.ID)
+            {
+                continue;
+            }
+
+            var notifyDidNotWin = await NotifyDidNotWinAsync(auction, bidder.DiscordID, ct);
+            if (!notifyDidNotWin.IsSuccess)
+            {
+                _log.LogWarning("Failed to notify a non-winner of an auction: {Error}", notifyDidNotWin.Error);
+            }
+        }
+
         var notifyOwner = await NotifyOwnerAsync
         (
             auction,
@@ -180,6 +208,45 @@ public class AuctionService
         return Result.FromSuccess();
     }
 
+    private async Task<Result> NotifyDidNotWinAsync
+    (
+        Auction auction,
+        Snowflake outbidUser,
+        CancellationToken ct = default
+    )
+    {
+        var highestBidder = auction.Bids.MaxBy(b => b.Amount) ?? throw new InvalidOperationException();
+        var message = $"Auction #{auction.ID} ({auction.Name}) has now concluded. "
+                      + $"Unfortunately, you did not win the auction, which ended at "
+                      + $"{highestBidder.Amount} {auction.Currency}.";
+
+        return (Result)await _feedbackService.SendPrivateWarningAsync
+        (
+            outbidUser,
+            message,
+            ct: ct
+        );
+    }
+
+    private async Task<Result> NotifyOutbidAsync
+    (
+        Auction auction,
+        Snowflake outbidUser,
+        CancellationToken ct = default
+    )
+    {
+        var highestBidder = auction.Bids.MaxBy(b => b.Amount) ?? throw new InvalidOperationException();
+        var message = $"You've been outbid on auction #{auction.ID} ({auction.Name}). "
+                      + $"The new high bid is {highestBidder.Amount} {auction.Currency}.";
+
+        return (Result)await _feedbackService.SendPrivateWarningAsync
+        (
+            outbidUser,
+            message,
+            ct: ct
+        );
+    }
+
     private async Task<Result> NotifyWinnerAsync
     (
         Auction auction,
@@ -192,7 +259,7 @@ public class AuctionService
             return Result.FromSuccess();
         }
 
-        var winMessage = $"Congratulations! You're the winner of auction #{auction.ID} - {auction.Name}.\n\nPlease "
+        var winMessage = $"Congratulations! You're the winner of auction #{auction.ID} ({auction.Name}).\n\nPlease "
                          + $"contact <@{auction.Owner.DiscordID}> at your earliest convenience for details about the "
                          + $"sale.";
 
