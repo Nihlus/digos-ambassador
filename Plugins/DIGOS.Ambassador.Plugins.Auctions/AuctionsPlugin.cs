@@ -68,6 +68,7 @@ public sealed class AuctionsPlugin : PluginDescriptor, IMigratablePlugin
                 .WithCommandGroup<AuctionCommands>();
 
         serviceCollection
+            .AddInteractivity()
             .AddInteractionGroup<AuctionModals>();
 
         serviceCollection
