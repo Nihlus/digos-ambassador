@@ -278,6 +278,22 @@ public sealed partial class AuctionCommands : CommandGroup
     }
 
     /// <summary>
+    /// Hides the live-updating view of the specified auction.
+    /// </summary>
+    /// <param name="auction">The auction.</param>
+    /// <returns>An asynchronous result representing the command execution.</returns>
+    [Command("hide")]
+    [Description("Hides the live-updating view of the specified auction.")]
+    public Task<Result> HideAuctionAsync
+    (
+        [Autocomplete, Description("The name or ID of the auction.")] Auction auction
+    )
+    {
+        _ = _context.TryGetChannelID(out var channelID);
+        return _auctionDisplay.HideAuctionAsync(auction, channelID!.Value, this.CancellationToken);
+    }
+
+    /// <summary>
     /// Bids on an auction.
     /// </summary>
     /// <param name="auction">The auction to bid on.</param>
