@@ -73,8 +73,9 @@ public class AuctionAutocompleteProvider : IAutocompleteProvider<Auction>
         var auctions = await _database.Auctions
             .AsNoTracking()
             .Where(a => a.Server.DiscordID == guildID)
-            .OrderBy(a => a.Owner.DiscordID == userID)
-            .ThenBy(c => EF.Functions.FuzzyStringMatchLevenshtein(c.Name, userInput))
+            .OrderBy(c => EF.Functions.FuzzyStringMatchLevenshtein(c.Name, userInput))
+            .ThenBy(a => a.Owner.DiscordID == userID)
+            .ThenBy(a => a.State == AuctionState.Open)
             .Take(25)
             .Select(a => new { a.ID, a.Name })
             .ToListAsync(ct);
