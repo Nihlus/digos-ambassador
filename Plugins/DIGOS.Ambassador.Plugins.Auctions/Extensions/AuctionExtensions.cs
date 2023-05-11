@@ -56,21 +56,25 @@ public static class AuctionExtensions
             AuctionState.Closed => new[]
             {
                 new EmbedField("Starting Bid", auction.StartBid.ToString(CultureInfo.InvariantCulture), true),
-                new EmbedField("Currency", auction.Currency, true)
+                new EmbedField("Currency", auction.Currency)
             },
             AuctionState.Open => new[]
             {
                 new EmbedField("Starting Bid", auction.StartBid.ToString(CultureInfo.InvariantCulture), true),
                 new EmbedField("Currency", auction.Currency, true),
+                new EmbedField("\u200b", "\u200b", true),
                 new EmbedField("Leading Bid", leadingBid?.Amount.ToString(CultureInfo.InvariantCulture) ?? "-", true),
-                new EmbedField("By", leadingBid?.GetDisplayIdentity() ?? "nobody", true)
+                new EmbedField("By", leadingBid?.GetDisplayIdentity() ?? "nobody", true),
+                new EmbedField("\u200b", "\u200b", true),
             },
             AuctionState.Concluded => new[]
             {
                 new EmbedField("Starting Bid", auction.StartBid.ToString(CultureInfo.InvariantCulture), true),
                 new EmbedField("Currency", auction.Currency, true),
+                new EmbedField("\u200b", "\u200b", true),
                 new EmbedField("Winning Bid", leadingBid?.Amount.ToString(CultureInfo.InvariantCulture) ?? "-", true),
-                new EmbedField("Winner", leadingBid?.GetDisplayIdentity() ?? "nobody", true)
+                new EmbedField("Winner", leadingBid?.GetDisplayIdentity() ?? "nobody", true),
+                new EmbedField("\u200b", "\u200b", true),
             },
             _ => throw new ArgumentOutOfRangeException()
         };
