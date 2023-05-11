@@ -86,4 +86,15 @@ public sealed class AuctionsPlugin : PluginDescriptor, IMigratablePlugin
 
         return Result.FromSuccess();
     }
+
+    /// <inheritdoc />
+    public override async ValueTask<Result> InitializeAsync
+    (
+        IServiceProvider serviceProvider,
+        CancellationToken ct = default
+    )
+    {
+        var displayService = serviceProvider.GetRequiredService<AuctionDisplayService>();
+        return await displayService.RefreshDisplaysAsync(ct);
+    }
 }
