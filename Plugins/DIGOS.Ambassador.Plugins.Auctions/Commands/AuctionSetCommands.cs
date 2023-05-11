@@ -33,6 +33,7 @@ using Humanizer;
 using Microsoft.EntityFrameworkCore;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
+using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Extensions;
@@ -72,7 +73,7 @@ public partial class AuctionCommands
         /// <returns>An asynchronous result representing the command execution.</returns>
         [Command("name")]
         [Description("Sets the name of the auction.")]
-        public async Task<Result<FeedbackMessage>> SetNameAsync(Auction auction, string name)
+        public async Task<Result<FeedbackMessage>> SetNameAsync([Autocomplete] Auction auction, string name)
         {
             if (auction.State is AuctionState.Concluded)
             {
@@ -110,7 +111,7 @@ public partial class AuctionCommands
         /// <returns>An asynchronous result representing the command execution.</returns>
         [Command("start-bid")]
         [Description("Sets the starting bid of the auction.")]
-        public async Task<Result<FeedbackMessage>> SetStartBidAsync(Auction auction, decimal startBid)
+        public async Task<Result<FeedbackMessage>> SetStartBidAsync([Autocomplete] Auction auction, decimal startBid)
         {
             if (auction.State is not AuctionState.Closed)
             {
@@ -136,7 +137,11 @@ public partial class AuctionCommands
         /// <returns>An asynchronous result representing the command execution.</returns>
         [Command("end-time")]
         [Description("Sets the time at which the auction ends.")]
-        public async Task<Result<FeedbackMessage>> SetEndTimeAsync(Auction auction, DateTimeOffset endTime)
+        public async Task<Result<FeedbackMessage>> SetEndTimeAsync
+        (
+            [Autocomplete] Auction auction,
+            DateTimeOffset endTime
+        )
         {
             endTime = endTime.ToUniversalTime();
 
@@ -170,7 +175,7 @@ public partial class AuctionCommands
         /// <returns>An asynchronous result representing the command execution.</returns>
         [Command("currency")]
         [Description("Sets the currency used when bidding on the auction.")]
-        public async Task<Result<FeedbackMessage>> SetCurrencyAsync(Auction auction, string currency)
+        public async Task<Result<FeedbackMessage>> SetCurrencyAsync([Autocomplete] Auction auction, string currency)
         {
             if (auction.State is not AuctionState.Closed)
             {
@@ -191,7 +196,11 @@ public partial class AuctionCommands
         /// <returns>An asynchronous result representing the command execution.</returns>
         [Command("time-extension")]
         [Description("Sets the time with which the auction is extended when a bid is placed.")]
-        public async Task<Result<FeedbackMessage>> SetTimeExtensionAsync(Auction auction, TimeSpan? timeExtension)
+        public async Task<Result<FeedbackMessage>> SetTimeExtensionAsync
+        (
+            [Autocomplete] Auction auction,
+            TimeSpan? timeExtension
+        )
         {
             if (auction.State is AuctionState.Concluded)
             {
@@ -212,7 +221,11 @@ public partial class AuctionCommands
         /// <returns>An asynchronous result representing the command execution.</returns>
         [Command("minimum-bid")]
         [Description("Sets the minimum bid.")]
-        public async Task<Result<FeedbackMessage>> SetMinimumBidAsync(Auction auction, decimal? minimumBid)
+        public async Task<Result<FeedbackMessage>> SetMinimumBidAsync
+        (
+            [Autocomplete] Auction auction,
+            decimal? minimumBid
+        )
         {
             if (auction.State is not AuctionState.Closed)
             {
@@ -238,7 +251,11 @@ public partial class AuctionCommands
         /// <returns>An asynchronous result representing the command execution.</returns>
         [Command("maximum-bid")]
         [Description("Sets the maximum bid.")]
-        public async Task<Result<FeedbackMessage>> SetMaximumBidAsync(Auction auction, decimal? maximumBid)
+        public async Task<Result<FeedbackMessage>> SetMaximumBidAsync
+        (
+            [Autocomplete] Auction auction,
+            decimal? maximumBid
+        )
         {
             if (auction.State is not AuctionState.Closed)
             {
@@ -269,7 +286,7 @@ public partial class AuctionCommands
         /// <returns>An asynchronous result representing the command execution.</returns>
         [Command("bid-cap")]
         [Description("Sets the bidding cap at which the auction automatically closes.")]
-        public async Task<Result<FeedbackMessage>> SetBidCapAsync(Auction auction, decimal? bidCap)
+        public async Task<Result<FeedbackMessage>> SetBidCapAsync([Autocomplete] Auction auction, decimal? bidCap)
         {
             if (auction.State is not AuctionState.Closed)
             {
@@ -300,7 +317,7 @@ public partial class AuctionCommands
         /// <returns>An asynchronous result representing the command execution.</returns>
         [Command("buyout")]
         [Description("Sets the buyout price of the auction.")]
-        public async Task<Result<FeedbackMessage>> SetBuyoutAsync(Auction auction, decimal? buyout)
+        public async Task<Result<FeedbackMessage>> SetBuyoutAsync([Autocomplete] Auction auction, decimal? buyout)
         {
             if (auction.State is not AuctionState.Closed)
             {
@@ -331,7 +348,11 @@ public partial class AuctionCommands
         /// <returns>An asynchronous result representing the command execution.</returns>
         [Command("binding-bids")]
         [Description("Sets whether bids on the auction are binding.")]
-        public async Task<Result<FeedbackMessage>> SetAreBidsBindingAsync(Auction auction, bool areBidsBinding)
+        public async Task<Result<FeedbackMessage>> SetAreBidsBindingAsync
+        (
+            [Autocomplete] Auction auction,
+            bool areBidsBinding
+        )
         {
             if (auction.State is not AuctionState.Closed)
             {
@@ -361,7 +382,11 @@ public partial class AuctionCommands
         /// <returns>An asynchronous result representing the command execution.</returns>
         [Command("privacy")]
         [Description("Sets the privacy options for the auction.")]
-        public async Task<Result<FeedbackMessage>> SetPrivacyAsync(Auction auction, AuctionPrivacy privacy)
+        public async Task<Result<FeedbackMessage>> SetPrivacyAsync
+        (
+            [Autocomplete] Auction auction,
+            AuctionPrivacy privacy
+        )
         {
             if (auction.State is not AuctionState.Closed)
             {

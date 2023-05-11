@@ -230,7 +230,7 @@ public sealed partial class AuctionCommands : CommandGroup
     /// <returns>An asynchronous result representing the command execution.</returns>
     [Command("open")]
     [Description("Opens an auction for bids.")]
-    public async Task<Result<FeedbackMessage>> OpenAuctionAsync(Auction auction)
+    public async Task<Result<FeedbackMessage>> OpenAuctionAsync([Autocomplete] Auction auction)
     {
         if (auction.State is AuctionState.Open)
         {
@@ -266,7 +266,7 @@ public sealed partial class AuctionCommands : CommandGroup
     [Command("bid")]
     [Description("Bids on the given auction.")]
     [SuppressInteractionResponse(true)]
-    public async Task<Result> SubmitAuctionBidAsync(Auction auction)
+    public async Task<Result> SubmitAuctionBidAsync([Autocomplete] Auction auction)
     {
         if (_context is not InteractionCommandContext interactionContext)
         {
@@ -357,7 +357,7 @@ public sealed partial class AuctionCommands : CommandGroup
     /// <returns>An asynchronous result representing the command execution.</returns>
     [Command("extend")]
     [Description("Manually extends the auction by the given amount of time.")]
-    public async Task<Result<FeedbackMessage>> ExtendAuctionAsync(Auction auction, TimeSpan time)
+    public async Task<Result<FeedbackMessage>> ExtendAuctionAsync([Autocomplete] Auction auction, TimeSpan time)
     {
         if (auction.State is not AuctionState.Open)
         {
@@ -397,7 +397,7 @@ public sealed partial class AuctionCommands : CommandGroup
     /// <returns>An asynchronous result representing the command execution.</returns>
     [Command("close")]
     [Description("Closes an auction.")]
-    public async Task<Result<FeedbackMessage>> CloseAuctionAsync(Auction auction)
+    public async Task<Result<FeedbackMessage>> CloseAuctionAsync([Autocomplete] Auction auction)
     {
         if (auction.State is not AuctionState.Open)
         {
@@ -432,7 +432,7 @@ public sealed partial class AuctionCommands : CommandGroup
     /// <returns>An asynchronous result representing the command execution.</returns>
     [Command("delete")]
     [Description("Deletes the given auction.")]
-    public async Task<Result<FeedbackMessage>> DeleteAuctionAsync(Auction auction)
+    public async Task<Result<FeedbackMessage>> DeleteAuctionAsync([Autocomplete] Auction auction)
     {
         _database.Auctions.Remove(auction);
 
