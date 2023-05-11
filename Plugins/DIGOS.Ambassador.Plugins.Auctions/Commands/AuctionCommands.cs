@@ -137,7 +137,7 @@ public sealed partial class AuctionCommands : CommandGroup
 
         if (endTime < now)
         {
-            return new UserError("The new end time cannot be in the past.");
+            return new UserError("The end time cannot be in the past.");
         }
 
         if (minimumBid < 0)
