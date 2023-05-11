@@ -67,7 +67,7 @@ public class AuctionFinishingService : BackgroundService
                 var now = DateTimeOffset.UtcNow;
                 var finishedAuctions = await database.Auctions
                     .Where(a => a.State == AuctionState.Open)
-                    .Where(a => a.EndTime >= now)
+                    .Where(a => a.EndTime <= now)
                     .ToListAsync(ct);
 
                 foreach (var finishedAuction in finishedAuctions)
