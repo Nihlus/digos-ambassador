@@ -186,10 +186,10 @@ public class Auction : EFEntity
     /// Gets the highest bid in the auction.
     /// </summary>
     /// <returns>The highest bid.</returns>
-    public decimal? GetHighestBid()
+    public UserBid? GetHighestBid()
     {
         var highestBid = this.Bids.MaxBy(b => b.Amount);
-        return highestBid?.Amount;
+        return highestBid;
     }
 
     /// <summary>
@@ -204,6 +204,6 @@ public class Auction : EFEntity
             return this.StartBid;
         }
 
-        return highestBid.Value + (this.MinimumBid ?? 1);
+        return highestBid.Amount + (this.MinimumBid ?? 1);
     }
 }
