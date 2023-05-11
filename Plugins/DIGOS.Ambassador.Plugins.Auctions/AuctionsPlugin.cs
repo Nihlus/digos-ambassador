@@ -61,6 +61,9 @@ public sealed class AuctionsPlugin : PluginDescriptor, IMigratablePlugin
         serviceCollection.AddConfiguredSchemaAwareDbContextPool<AuctionsDatabaseContext>();
 
         serviceCollection
+            .AddHostedService<AuctionFinishingService>();
+
+        serviceCollection
             .AddCommandTree()
                 .WithCommandGroup<AuctionCommands>();
 
