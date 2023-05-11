@@ -1,5 +1,5 @@
 //
-//  MessageRelayingPostExecutionEvent.cs
+//  MessageRelayingPreparationErrorEvent.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -30,26 +30,26 @@ using Remora.Results;
 namespace DIGOS.Ambassador.ExecutionEventServices;
 
 /// <summary>
-/// Relays returned messages to the user upon completion of a command.
+/// Displays some error messages directly to the user.
 /// </summary>
-public class MessageRelayingPostExecutionEvent : IPostExecutionEvent
+public class MessageRelayingPreparationErrorEvent : IPreparationErrorEvent
 {
     private readonly MessageRelayService _messageRelay;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MessageRelayingPostExecutionEvent"/> class.
+    /// Initializes a new instance of the <see cref="MessageRelayingPreparationErrorEvent"/> class.
     /// </summary>
     /// <param name="messageRelay">The message relay service.</param>
-    public MessageRelayingPostExecutionEvent(MessageRelayService messageRelay)
+    public MessageRelayingPreparationErrorEvent(MessageRelayService messageRelay)
     {
         _messageRelay = messageRelay;
     }
 
     /// <inheritdoc />
-    public Task<Result> AfterExecutionAsync
+    public Task<Result> PreparationFailed
     (
-        ICommandContext context,
-        IResult commandResult,
+        IOperationContext context,
+        IResult preparationResult,
         CancellationToken ct = default
-    ) => _messageRelay.RelayResultAsync(context, commandResult, ct);
+    ) => _messageRelay.RelayResultAsync(context, preparationResult, ct);
 }

@@ -31,6 +31,7 @@ using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.ExecutionEventServices;
 using DIGOS.Ambassador.Responders;
+using DIGOS.Ambassador.Services;
 using log4net;
 using log4net.Config;
 using log4net.Repository.Hierarchy;
@@ -130,6 +131,7 @@ internal class Program
                     .AddSingleton(pluginService)
                     .AddSingleton(contentService)
                     .AddSingleton(contentFileSystem)
+                    .AddScoped<MessageRelayService>()
                     .AddSingleton<Random>();
 
                 services
@@ -154,6 +156,7 @@ internal class Program
                 // Add execution events
                 services
                     .AddPreExecutionEvent<ConsentCheckingPreExecutionEvent>()
+                    .AddPreparationErrorEvent<MessageRelayingPreparationErrorEvent>()
                     .AddPostExecutionEvent<MessageRelayingPostExecutionEvent>();
 
                 // Ensure we're automatically joining created threads
