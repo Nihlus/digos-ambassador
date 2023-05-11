@@ -76,6 +76,7 @@ public sealed class AuctionsPlugin : PluginDescriptor, IMigratablePlugin
             .AddParser<AuctionParser>();
 
         serviceCollection
+            .AddScoped<AuctionService>()
             .AddScoped<AuctionDisplayService>();
 
         return Result.FromSuccess();
