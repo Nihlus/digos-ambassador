@@ -204,6 +204,6 @@ public class Auction : EFEntity
             return this.StartBid;
         }
 
-        return highestBid + this.MinimumBid ?? 1;
+        return highestBid.Value + (this.MinimumBid ?? 1);
     }
 }
