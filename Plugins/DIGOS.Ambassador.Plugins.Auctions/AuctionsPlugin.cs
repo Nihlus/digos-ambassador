@@ -53,7 +53,7 @@ public sealed class AuctionsPlugin : PluginDescriptor, IMigratablePlugin
     public override string Name => "Auctions";
 
     /// <inheritdoc />
-    public override string Description => "Contains various Auctions-specific commands.";
+    public override string Description => "Contains various auction-specific commands.";
 
     /// <inheritdoc/>
     public override Result ConfigureServices(IServiceCollection serviceCollection)
