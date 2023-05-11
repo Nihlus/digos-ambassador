@@ -268,13 +268,22 @@ public sealed partial class AuctionCommands : CommandGroup
     /// <returns>An asynchronous result representing the command execution.</returns>
     [Command("display")]
     [Description("Displays a live-updating view of the specified auction.")]
-    public Task<Result> DisplayAuctionAsync
+    public async Task<Result<FeedbackMessage>> DisplayAuctionAsync
     (
         [Autocomplete, Description("The name or ID of the auction.")] Auction auction
     )
     {
         _ = _context.TryGetChannelID(out var channelID);
-        return _auctionDisplay.DisplayAuctionAsync(auction, channelID!.Value, this.CancellationToken);
+        var displayAuction = await _auctionDisplay.DisplayAuctionAsync
+        (
+            auction,
+            channelID!.Value,
+            this.CancellationToken
+        );
+
+        return displayAuction.IsSuccess
+            ? new FeedbackMessage("Auction displayed.", Color.MediumPurple)
+            : Result<FeedbackMessage>.FromError(displayAuction);
     }
 
     /// <summary>
@@ -284,13 +293,17 @@ public sealed partial class AuctionCommands : CommandGroup
     /// <returns>An asynchronous result representing the command execution.</returns>
     [Command("hide")]
     [Description("Hides the live-updating view of the specified auction.")]
-    public Task<Result> HideAuctionAsync
+    public async Task<Result<FeedbackMessage>> HideAuctionAsync
     (
         [Autocomplete, Description("The name or ID of the auction.")] Auction auction
     )
     {
         _ = _context.TryGetChannelID(out var channelID);
-        return _auctionDisplay.HideAuctionAsync(auction, channelID!.Value, this.CancellationToken);
+        var hideAuction = await _auctionDisplay.HideAuctionAsync(auction, channelID!.Value, this.CancellationToken);
+
+        return hideAuction.IsSuccess
+            ? new FeedbackMessage("Auction hidden.", Color.MediumPurple)
+            : Result<FeedbackMessage>.FromError(hideAuction);
     }
 
     /// <summary>
