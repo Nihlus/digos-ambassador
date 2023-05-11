@@ -20,14 +20,19 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Database.Extensions;
+using DIGOS.Ambassador.Core.Errors;
 using DIGOS.Ambassador.Plugins.Auctions.Model;
 using DIGOS.Ambassador.Plugins.Auctions.Model.Data;
+using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.Commands.Feedback.Services;
+using Remora.Rest.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Auctions.Services;
@@ -41,6 +46,7 @@ public class AuctionService
     private readonly AuctionsDatabaseContext _database;
     private readonly FeedbackService _feedbackService;
     private readonly AuctionDisplayService _displayService;
+    private readonly UserService _userService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AuctionService"/> class.
@@ -49,18 +55,88 @@ public class AuctionService
     /// <param name="database">The auction database.</param>
     /// <param name="feedbackService">The feedback service.</param>
     /// <param name="displayService">The auction display service.</param>
+    /// <param name="userService">The user service.</param>
     public AuctionService
     (
         ILogger<AuctionService> log,
         AuctionsDatabaseContext database,
         FeedbackService feedbackService,
-        AuctionDisplayService displayService
+        AuctionDisplayService displayService,
+        UserService userService
     )
     {
         _log = log;
         _database = database;
         _feedbackService = feedbackService;
         _displayService = displayService;
+        _userService = userService;
+    }
+
+    /// <summary>
+    /// Places a bid on the given auction.
+    /// </summary>
+    /// <param name="auction">The auction.</param>
+    /// <param name="userID">The user placing the bid.</param>
+    /// <param name="bidAmount">The amount the user is bidding.</param>
+    /// <param name="ct">The cancellation token for this operation.</param>
+    /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+    public async Task<Result> PlaceBidAsync
+    (
+        Auction auction,
+        Snowflake userID,
+        decimal bidAmount,
+        CancellationToken ct = default
+    )
+    {
+        var highestBid = auction.GetHighestBid();
+        if (bidAmount <= highestBid)
+        {
+            return new UserError($"Your bid is too low. The current leading bid is {highestBid} {auction.Currency}.");
+        }
+
+        if (bidAmount < auction.MinimumBid)
+        {
+            return new UserError($"Your bid is too low. Please bit at least {auction.MinimumBid} {auction.Currency}.");
+        }
+
+        // buyouts bypass the maximum bid restrictions
+        if (bidAmount > auction.MaximumBid && (auction.Buyout is null || bidAmount <= auction.Buyout))
+        {
+            return new UserError($"Your bid is too high. Please bit at most {auction.MaximumBid} {auction.Currency}.");
+        }
+
+        var getUser = await _userService.GetOrRegisterUserAsync(userID, ct);
+        if (!getUser.IsDefined(out var user))
+        {
+            return (Result)getUser;
+        }
+
+        user = _database.NormalizeReference(user);
+
+        auction.Bids.Add(new UserBid(auction, user, DateTimeOffset.UtcNow, bidAmount));
+
+        if (bidAmount >= auction.Buyout)
+        {
+            var concludeAuction = await ConcludeAuctionAsync(auction, ct);
+            if (!concludeAuction.IsSuccess)
+            {
+                return concludeAuction;
+            }
+        }
+
+        var updateDisplays = await _displayService.UpdateDisplaysAsync(auction, ct);
+        if (!updateDisplays.IsSuccess)
+        {
+            _log.LogWarning
+            (
+                "Failed to update auction displays for auction #{AuctionID}: {Error}",
+                auction.ID,
+                updateDisplays.Error
+            );
+        }
+
+        await _database.SaveChangesAsync(ct);
+        return Result.FromSuccess();
     }
 
     /// <summary>

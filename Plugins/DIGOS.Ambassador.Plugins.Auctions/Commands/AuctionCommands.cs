@@ -279,6 +279,7 @@ public sealed partial class AuctionCommands : CommandGroup
     [Command("bid")]
     [Description("Bids on the given auction.")]
     [SuppressInteractionResponse(true)]
+    [Ephemeral]
     public async Task<Result> SubmitAuctionBidAsync([Autocomplete] Auction auction)
     {
         if (_context is not InteractionCommandContext interactionContext)
@@ -299,6 +300,16 @@ public sealed partial class AuctionCommands : CommandGroup
             );
         }
 
+        var now = DateTimeOffset.UtcNow;
+        if (auction.EndTime <= now )
+        {
+            return (Result)await _feedbackService.SendContextualErrorAsync
+            (
+                "The auction has concluded.",
+                ct: this.CancellationToken
+            );
+        }
+
         _ = _context.TryGetUserID(out var userID);
 
         if (auction.Bids.MaxBy(b => b.Amount)?.User.DiscordID == userID)
@@ -306,7 +317,6 @@ public sealed partial class AuctionCommands : CommandGroup
             return (Result)await _feedbackService.SendContextualErrorAsync
             (
                 "You're already the highest bidder.",
-                options: new FeedbackMessageOptions(MessageFlags: MessageFlags.Ephemeral),
                 ct: this.CancellationToken
             );
         }
