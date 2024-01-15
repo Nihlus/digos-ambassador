@@ -28,7 +28,5 @@ namespace DIGOS.Ambassador.Tests.Plugins.Roleplaying;
 
 public partial class RoleplayServiceTests
 {
-    public class GetRoleplays : RoleplayServiceTestBase
-    {
-    }
+    public class GetRoleplays : RoleplayServiceTestBase;
 }

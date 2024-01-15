@@ -28,7 +28,5 @@ namespace DIGOS.Ambassador.Tests.Plugins.Roleplaying;
 
 public partial class RoleplayServiceTests
 {
-    public class KickUserFromRoleplayAsync : RoleplayServiceTestBase
-    {
-    }
+    public class KickUserFromRoleplayAsync : RoleplayServiceTestBase;
 }

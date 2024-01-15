@@ -29,6 +29,4 @@ namespace DIGOS.Ambassador.Plugins.Core.Attributes;
 /// access any user data.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
-public sealed class PrivacyExemptAttribute : Attribute
-{
-}
+public sealed class PrivacyExemptAttribute : Attribute;

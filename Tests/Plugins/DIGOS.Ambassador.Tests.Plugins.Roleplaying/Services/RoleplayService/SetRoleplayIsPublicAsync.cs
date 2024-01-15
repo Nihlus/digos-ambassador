@@ -28,7 +28,5 @@ namespace DIGOS.Ambassador.Tests.Plugins.Roleplaying;
 
 public partial class RoleplayServiceTests
 {
-    public class SetRoleplayIsPublicAsync : RoleplayServiceTestBase
-    {
-    }
+    public class SetRoleplayIsPublicAsync : RoleplayServiceTestBase;
 }

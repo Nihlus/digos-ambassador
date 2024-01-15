@@ -33,6 +33,4 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules;
 /// </summary>
 [Group("moderation")]
 [Description("Moderation-related commands for viewing, editing, and performing moderation actions on users.")]
-public partial class ModerationCommands : CommandGroup
-{
-}
+public partial class ModerationCommands : CommandGroup;

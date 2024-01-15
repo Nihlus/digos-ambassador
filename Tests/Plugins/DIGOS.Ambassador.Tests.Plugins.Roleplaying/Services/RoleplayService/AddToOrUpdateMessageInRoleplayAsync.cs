@@ -28,7 +28,5 @@ namespace DIGOS.Ambassador.Tests.Plugins.Roleplaying;
 
 public partial class RoleplayServiceTests
 {
-    public class AddToOrUpdateMessageInRoleplayAsync : RoleplayServiceTestBase
-    {
-    }
+    public class AddToOrUpdateMessageInRoleplayAsync : RoleplayServiceTestBase;
 }
