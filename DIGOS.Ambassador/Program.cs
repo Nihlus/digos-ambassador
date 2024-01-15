@@ -191,32 +191,6 @@ internal class Program
             log.LogWarning("Failed to update slash commands: {Reason}", updateSlash.Error.Message);
         }
 
-        log.LogInformation("Initializing plugins...");
-        var initializePlugins = await plugins.InitializeAsync(hostServices, cancellationSource.Token);
-        if (!initializePlugins.IsSuccess)
-        {
-            log.LogError("Failed to initialize the plugin tree");
-
-            if (initializePlugins.Error is AggregateError a)
-            {
-                foreach (var error in a.Errors)
-                {
-                    if (error.IsSuccess)
-                    {
-                        continue;
-                    }
-
-                    log.LogError("Initialization error: {Error}", error.Error!.Message);
-                }
-            }
-            else
-            {
-                log.LogError("Initialization error: {Error}", initializePlugins.Error);
-            }
-
-            return;
-        }
-
         log.LogInformation("Migrating plugins...");
         var migratePlugins = await plugins.MigrateAsync(hostServices, cancellationSource.Token);
         if (!migratePlugins.IsSuccess)
@@ -238,6 +212,32 @@ internal class Program
             else
             {
                 log.LogError("Migration error: {Error}", migratePlugins.Error);
+            }
+
+            return;
+        }
+
+        log.LogInformation("Initializing plugins...");
+        var initializePlugins = await plugins.InitializeAsync(hostServices, cancellationSource.Token);
+        if (!initializePlugins.IsSuccess)
+        {
+            log.LogError("Failed to initialize the plugin tree");
+
+            if (initializePlugins.Error is AggregateError a)
+            {
+                foreach (var error in a.Errors)
+                {
+                    if (error.IsSuccess)
+                    {
+                        continue;
+                    }
+
+                    log.LogError("Initialization error: {Error}", error.Error!.Message);
+                }
+            }
+            else
+            {
+                log.LogError("Initialization error: {Error}", initializePlugins.Error);
             }
 
             return;

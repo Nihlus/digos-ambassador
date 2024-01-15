@@ -1,9 +1,10 @@
 ﻿<Project Sdk="Remora.Sdk">
 
   <PropertyGroup>
-    <Version>6.3.4</Version>
+    <Version>7.0.0</Version>
     <IsPackable>false</IsPackable>
     <UserSecretsId>ea62db66-1c87-4fd2-b1ed-74a9ae94e81c</UserSecretsId>
+    <AssemblyName>digos-ambassador</AssemblyName>
   </PropertyGroup>
 
   <PropertyGroup>
