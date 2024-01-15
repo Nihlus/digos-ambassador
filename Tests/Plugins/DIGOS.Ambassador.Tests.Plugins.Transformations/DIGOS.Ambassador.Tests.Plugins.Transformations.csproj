@@ -1,14 +1,14 @@
-<Project Sdk="Remora.Tests.Sdk/2.0.3">
+<Project Sdk="Remora.Tests.Sdk">
 
     <PropertyGroup>
         <IsPackable>false</IsPackable>
     </PropertyGroup>
-    
+
     <ItemGroup>
       <ProjectReference Include="..\..\..\Plugins\DIGOS.Ambassador.Plugins.Transformations\DIGOS.Ambassador.Plugins.Transformations.csproj" />
       <ProjectReference Include="..\..\DIGOS.Ambassador.Tests\DIGOS.Ambassador.Tests.csproj" />
     </ItemGroup>
-    
+
     <ItemGroup>
       <PackageReference Include="Moq" />
       <PackageReference Include="Remora.Results" />
