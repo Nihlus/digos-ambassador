@@ -140,7 +140,7 @@ public class UserCommands : CommandGroup
         {
             var getMember = await _guildAPI.GetGuildMemberAsync
             (
-                guildID.Value,
+                guildID,
                 discordUser.ID,
                 this.CancellationToken
             );
@@ -153,7 +153,7 @@ public class UserCommands : CommandGroup
             var member = getMember.Entity;
             if (member.Roles.Count > 0)
             {
-                var getRoles = await _guildAPI.GetGuildRolesAsync(guildID.Value, this.CancellationToken);
+                var getRoles = await _guildAPI.GetGuildRolesAsync(guildID, this.CancellationToken);
                 if (!getRoles.IsSuccess)
                 {
                     return Result.FromError(getRoles);
@@ -216,7 +216,7 @@ public class UserCommands : CommandGroup
 
         var sendEmbed = await _channelAPI.CreateMessageAsync
         (
-            channelID.Value,
+            channelID,
             embeds: new[] { embed },
             ct: this.CancellationToken
         );

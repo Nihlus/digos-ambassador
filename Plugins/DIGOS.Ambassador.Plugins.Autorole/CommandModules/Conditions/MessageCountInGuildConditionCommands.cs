@@ -67,7 +67,7 @@ public partial class AutoroleCommands
 
             var condition = _autoroles.CreateConditionProxy<MessageCountInGuildCondition>
             (
-                guildID.Value,
+                guildID,
                 count
             )
             ?? throw new InvalidOperationException();
@@ -120,7 +120,7 @@ public partial class AutoroleCommands
                 c =>
                 {
                     c.RequiredCount = count;
-                    c.SourceID = guildID.Value;
+                    c.SourceID = guildID;
                 }
             );
 

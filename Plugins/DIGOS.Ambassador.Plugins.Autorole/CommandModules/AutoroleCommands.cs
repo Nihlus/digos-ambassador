@@ -102,7 +102,7 @@ public partial class AutoroleCommands : CommandGroup
 
         var create = await _autoroles.CreateAutoroleAsync
         (
-            guildID.Value,
+            guildID,
             discordRole.ID,
             this.CancellationToken
         );
@@ -228,7 +228,7 @@ public partial class AutoroleCommands : CommandGroup
 
         return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
-            userID.Value,
+            userID,
             pages,
             ct: this.CancellationToken
         );
@@ -254,7 +254,7 @@ public partial class AutoroleCommands : CommandGroup
             throw new InvalidOperationException();
         }
 
-        var autoroles = await _autoroles.GetAutorolesAsync(guildID.Value, ct: this.CancellationToken);
+        var autoroles = await _autoroles.GetAutorolesAsync(guildID, ct: this.CancellationToken);
 
         var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
         (
@@ -266,7 +266,7 @@ public partial class AutoroleCommands : CommandGroup
 
         return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
-            userID.Value,
+            userID,
             pages,
             ct: this.CancellationToken
         );
@@ -403,7 +403,7 @@ public partial class AutoroleCommands : CommandGroup
         var users = getUsers.Entity.ToList();
         var getDiscordUsers = await Task.WhenAll
         (
-            users.Select(u => _guildAPI.GetGuildMemberAsync(guildID.Value, u.DiscordID))
+            users.Select(u => _guildAPI.GetGuildMemberAsync(guildID, u.DiscordID))
         );
 
         var discordUsers = getDiscordUsers
@@ -424,7 +424,7 @@ public partial class AutoroleCommands : CommandGroup
 
         return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
-            userID.Value,
+            userID,
             pages,
             ct: this.CancellationToken
         );

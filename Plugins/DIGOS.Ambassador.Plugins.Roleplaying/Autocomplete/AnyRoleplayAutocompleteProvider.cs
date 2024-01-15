@@ -65,19 +65,18 @@ public class AnyRoleplayAutocompleteProvider : IAutocompleteProvider
         CancellationToken ct = default
     )
     {
-        _ = _context.TryGetGuildID(out var guildID);
         if (!_context.TryGetUserID(out var userID))
         {
             throw new InvalidOperationException();
         }
 
-        var scopedRoleplays = guildID is not null
+        var scopedRoleplays = _context.TryGetGuildID(out var guildID)
             ? _database.Roleplays
-                .Where(r => r.Server.DiscordID == guildID.Value)
+                .Where(r => r.Server.DiscordID == guildID)
             : _database.Roleplays;
 
         var suggestedRoleplays = await scopedRoleplays
-            .OrderByDescending(r => r.Owner.DiscordID == userID.Value)
+            .OrderByDescending(r => r.Owner.DiscordID == userID)
             .ThenBy(r => EF.Functions.FuzzyStringMatchLevenshtein(r.Name, userInput))
             .Take(25)
             .Select(r => r.Name)

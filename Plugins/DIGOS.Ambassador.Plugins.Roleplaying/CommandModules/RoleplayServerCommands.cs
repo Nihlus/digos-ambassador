@@ -88,7 +88,7 @@ public partial class RoleplayCommands
                 throw new InvalidOperationException();
             }
 
-            var result = await _serverSettings.SetDedicatedChannelCategoryAsync(guildID.Value, null);
+            var result = await _serverSettings.SetDedicatedChannelCategoryAsync(guildID, null);
 
             return !result.IsSuccess
                 ? Result<FeedbackMessage>.FromError(result)
@@ -112,7 +112,7 @@ public partial class RoleplayCommands
 
             var result = await _serverSettings.SetDefaultUserRoleAsync
             (
-                guildID.Value,
+                guildID,
                 null
             );
 

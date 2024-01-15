@@ -162,7 +162,7 @@ public partial class CharacterCommands : CommandGroup
 
         return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
-            userID.Value,
+            userID,
             pages,
             ct: this.CancellationToken
         );
@@ -189,8 +189,8 @@ public partial class CharacterCommands : CommandGroup
 
         var retrieveCurrentCharacterResult = await _characters.GetCurrentCharacterAsync
         (
-            guildID.Value,
-            userID.Value,
+            guildID,
+            userID,
             this.CancellationToken
         );
 
@@ -219,7 +219,7 @@ public partial class CharacterCommands : CommandGroup
         }
 
         // NSFW check
-        var getChannel = await _channelAPI.GetChannelAsync(channelID.Value, this.CancellationToken);
+        var getChannel = await _channelAPI.GetChannelAsync(channelID, this.CancellationToken);
         if (!getChannel.IsSuccess)
         {
             return Result.FromError(getChannel);
@@ -257,7 +257,7 @@ public partial class CharacterCommands : CommandGroup
             throw new InvalidOperationException();
         }
 
-        var getUser = await _userAPI.GetUserAsync(userID.Value, this.CancellationToken);
+        var getUser = await _userAPI.GetUserAsync(userID, this.CancellationToken);
         if (!getUser.IsSuccess)
         {
             return (Result)getUser;
@@ -293,7 +293,7 @@ public partial class CharacterCommands : CommandGroup
 
         var getCharacters = await _characters.GetUserCharactersAsync
         (
-            guildID.Value,
+            guildID,
             discordUser.ID,
             this.CancellationToken
         );
@@ -303,7 +303,7 @@ public partial class CharacterCommands : CommandGroup
             return Result.FromError(getCharacters);
         }
 
-        var getChannel = await _channelAPI.GetChannelAsync(channelID.Value, this.CancellationToken);
+        var getChannel = await _channelAPI.GetChannelAsync(channelID, this.CancellationToken);
         if (!getChannel.IsSuccess)
         {
             return Result.FromError(getChannel);
@@ -345,7 +345,7 @@ public partial class CharacterCommands : CommandGroup
 
         return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
-            userID.Value,
+            userID,
             pages.Where(p => p.IsSuccess).Select(p => p.Entity).ToList(),
             ct: this.CancellationToken
         );
@@ -365,7 +365,7 @@ public partial class CharacterCommands : CommandGroup
         var eb = new Embed { Colour = _feedback.Theme.Secondary };
 
         Optional<IEmbedAuthor> author = default;
-        var getOwner = await _guildAPI.GetGuildMemberAsync(guildID.Value, character.Owner.DiscordID, ct);
+        var getOwner = await _guildAPI.GetGuildMemberAsync(guildID, character.Owner.DiscordID, ct);
         if (getOwner.IsSuccess)
         {
             var owner = getOwner.Entity;
@@ -424,7 +424,7 @@ public partial class CharacterCommands : CommandGroup
         // Override the colour if a role is set
         if (character.Role is not null)
         {
-            var getGuildRoles = await _guildAPI.GetGuildRolesAsync(guildID.Value, this.CancellationToken);
+            var getGuildRoles = await _guildAPI.GetGuildRolesAsync(guildID, this.CancellationToken);
             if (!getGuildRoles.IsSuccess)
             {
                 return Result<Embed>.FromError(getGuildRoles);
@@ -485,8 +485,8 @@ public partial class CharacterCommands : CommandGroup
 
         var createCharacterResult = await _characters.CreateCharacterAsync
         (
-            guildID.Value,
-            userID.Value,
+            guildID,
+            userID,
             characterName,
             characterAvatarUrl,
             characterNickname,
@@ -532,8 +532,8 @@ public partial class CharacterCommands : CommandGroup
 
         var deleteResult = await _characters.DeleteCharacterAsync
         (
-            guildID.Value,
-            userID.Value,
+            guildID,
+            userID,
             character,
             this.CancellationToken
         );
@@ -565,7 +565,7 @@ public partial class CharacterCommands : CommandGroup
 
         if (discordUser is null)
         {
-            var getUser = await _userAPI.GetUserAsync(userID.Value, this.CancellationToken);
+            var getUser = await _userAPI.GetUserAsync(userID, this.CancellationToken);
             if (!getUser.IsSuccess)
             {
                 return (Result)getUser;
@@ -576,7 +576,7 @@ public partial class CharacterCommands : CommandGroup
 
         var getCharacters = await _characters.GetUserCharactersAsync
         (
-            guildID.Value,
+            guildID,
             discordUser.ID,
             this.CancellationToken
         );
@@ -600,7 +600,7 @@ public partial class CharacterCommands : CommandGroup
 
         return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
-            userID.Value,
+            userID,
             pages,
             ct: this.CancellationToken
         );
@@ -627,8 +627,8 @@ public partial class CharacterCommands : CommandGroup
 
         var getRandom = await _characters.GetRandomUserCharacterAsync
         (
-            guildID.Value,
-            userID.Value,
+            guildID,
+            userID,
             this.CancellationToken
         );
 
@@ -667,7 +667,7 @@ public partial class CharacterCommands : CommandGroup
             throw new InvalidOperationException();
         }
 
-        var getUser = await _userAPI.GetUserAsync(userID.Value, this.CancellationToken);
+        var getUser = await _userAPI.GetUserAsync(userID, this.CancellationToken);
         if (!getUser.IsSuccess)
         {
             return Result<FeedbackMessage>.FromError(getUser);
@@ -677,8 +677,8 @@ public partial class CharacterCommands : CommandGroup
 
         var makeCurrent = await _characters.MakeCharacterCurrentAsync
         (
-            guildID.Value,
-            userID.Value,
+            guildID,
+            userID,
             character,
             this.CancellationToken
         );
@@ -716,8 +716,8 @@ public partial class CharacterCommands : CommandGroup
 
         var result = await _characters.ClearDefaultCharacterAsync
         (
-            guildID.Value,
-            userID.Value,
+            guildID,
+            userID,
             this.CancellationToken
         );
 
@@ -748,8 +748,8 @@ public partial class CharacterCommands : CommandGroup
         // First, let's try dropping to a default form instead.
         var getDefaultCharacter = await _characters.GetDefaultCharacterAsync
         (
-            guildID.Value,
-            userID.Value,
+            guildID,
+            userID,
             this.CancellationToken
         );
 
@@ -761,8 +761,8 @@ public partial class CharacterCommands : CommandGroup
 
         var result = await _characters.ClearCurrentCharacterAsync
         (
-            guildID.Value,
-            userID.Value,
+            guildID,
+            userID,
             this.CancellationToken
         );
 
@@ -808,7 +808,7 @@ public partial class CharacterCommands : CommandGroup
 
         return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
-            userID.Value,
+            userID,
             pages.ToList(),
             appearance,
             ct: this.CancellationToken
@@ -842,7 +842,7 @@ public partial class CharacterCommands : CommandGroup
 
         return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
-            userID.Value,
+            userID,
             pages,
             ct: this.CancellationToken
         );
@@ -995,8 +995,8 @@ public partial class CharacterCommands : CommandGroup
 
         var transferResult = await _characters.TransferCharacterOwnershipAsync
         (
-            guildID.Value,
-            userID.Value,
+            guildID,
+            userID,
             character,
             this.CancellationToken
         );

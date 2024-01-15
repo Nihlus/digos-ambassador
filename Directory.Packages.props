@@ -18,21 +18,21 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" Version="6.1.0" />
     <PackageVersion Include="Moq" Version="4.18.4" />
-    <PackageVersion Include="NLua" Version="1.6.2" />
+    <PackageVersion Include="NLua" Version="1.6.3" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.4" />
-    <PackageVersion Include="Remora.Discord.Caching" Version="36.0.0" />
-    <PackageVersion Include="Remora.Discord.Commands" Version="27.0.0" />
-    <PackageVersion Include="Remora.Discord.Gateway" Version="11.0.7" />
-    <PackageVersion Include="Remora.Discord.Hosting" Version="6.0.6" />
-    <PackageVersion Include="Remora.Discord.Pagination" Version="3.0.17" />
-    <PackageVersion Include="Remora.Plugins" Version="3.0.6" />
-    <PackageVersion Include="Remora.Plugins.Abstractions" Version="4.0.6" />
-    <PackageVersion Include="Remora.Rest.Core" Version="2.2.0" />
-    <PackageVersion Include="Remora.Results" Version="7.2.3" />
-    <PackageVersion Include="YamlDotNet" Version="13.1.0" />
-    <PackageVersion Include="Zio" Version="0.16.2" />
-    <PackageVersion Include="iTextSharp.LGPLv2.Core" Version="3.4.0" />
-    <PackageVersion Include="morelinq" Version="3.4.2" />
+    <PackageVersion Include="Remora.Discord.Caching" Version="38.0.0" />
+    <PackageVersion Include="Remora.Discord.Commands" Version="28.0.1" />
+    <PackageVersion Include="Remora.Discord.Gateway" Version="12.0.0" />
+    <PackageVersion Include="Remora.Discord.Hosting" Version="6.0.8" />
+    <PackageVersion Include="Remora.Discord.Pagination" Version="3.0.19" />
+    <PackageVersion Include="Remora.Plugins" Version="3.0.7" />
+    <PackageVersion Include="Remora.Plugins.Abstractions" Version="4.0.7" />
+    <PackageVersion Include="Remora.Rest.Core" Version="2.2.1" />
+    <PackageVersion Include="Remora.Results" Version="7.4.1" />
+    <PackageVersion Include="YamlDotNet" Version="13.7.1" />
+    <PackageVersion Include="Zio" Version="0.17.0" />
+    <PackageVersion Include="iTextSharp.LGPLv2.Core" Version="3.4.15" />
+    <PackageVersion Include="morelinq" Version="4.1.0" />
     <!-- transitive dependency pinning -->
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.5" />
   </ItemGroup>

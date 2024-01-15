@@ -91,7 +91,7 @@ public class PrivacyCommands : CommandGroup
             throw new InvalidOperationException();
         }
 
-        await _privacy.SendPrivacyPolicyAsync(channelID.Value);
+        await _privacy.SendPrivacyPolicyAsync(channelID);
         return Result.FromSuccess();
     }
 
@@ -110,7 +110,7 @@ public class PrivacyCommands : CommandGroup
             throw new InvalidOperationException();
         }
 
-        var grantResult = await _privacy.GrantUserConsentAsync(userID.Value);
+        var grantResult = await _privacy.GrantUserConsentAsync(userID);
         return grantResult.IsSuccess
             ? new FeedbackMessage("Thank you! Enjoy using the bot :smiley:", _feedback.Theme.Secondary)
             : Result<FeedbackMessage>.FromError(grantResult);
@@ -131,7 +131,7 @@ public class PrivacyCommands : CommandGroup
             throw new InvalidOperationException();
         }
 
-        var revokeResult = await _privacy.RevokeUserConsentAsync(userID.Value);
+        var revokeResult = await _privacy.RevokeUserConsentAsync(userID);
         if (!revokeResult.IsSuccess)
         {
             return Result<FeedbackMessage>.FromError(revokeResult);
@@ -180,7 +180,7 @@ public class PrivacyCommands : CommandGroup
 
         var sendEmbed = await _channelAPI.CreateMessageAsync
         (
-            channelID.Value,
+            channelID,
             embeds: new[] { embed },
             ct: this.CancellationToken
         );

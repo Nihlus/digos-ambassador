@@ -91,7 +91,7 @@ public partial class AutoroleCommands
                 throw new InvalidOperationException();
             }
 
-            var getSettings = await _autoroles.GetOrCreateServerSettingsAsync(guildID.Value);
+            var getSettings = await _autoroles.GetOrCreateServerSettingsAsync(guildID);
             if (!getSettings.IsSuccess)
             {
                 return Result.FromError(getSettings);
@@ -131,7 +131,7 @@ public partial class AutoroleCommands
                 throw new InvalidOperationException();
             }
 
-            var clearResult = await _autoroles.ClearAffirmationNotificationChannelAsync(guildID.Value);
+            var clearResult = await _autoroles.ClearAffirmationNotificationChannelAsync(guildID);
 
             return !clearResult.IsSuccess
                 ? Result<FeedbackMessage>.FromError(clearResult)
@@ -159,7 +159,7 @@ public partial class AutoroleCommands
                 return new UserError("That's not a text channel.");
             }
 
-            var setResult = await _autoroles.SetAffirmationNotificationChannelAsync(guildID.Value, channel.ID);
+            var setResult = await _autoroles.SetAffirmationNotificationChannelAsync(guildID, channel.ID);
 
             return !setResult.IsSuccess
                 ? Result<FeedbackMessage>.FromError(setResult)

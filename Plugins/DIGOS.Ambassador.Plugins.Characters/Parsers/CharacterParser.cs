@@ -71,15 +71,15 @@ public sealed class CharacterParser : AbstractTypeParser<Character>
         // Special case
         if (string.Equals(value, "current", StringComparison.OrdinalIgnoreCase))
         {
-            return await _characterService.GetCurrentCharacterAsync(guildID.Value, userID.Value, ct);
+            return await _characterService.GetCurrentCharacterAsync(guildID, userID, ct);
         }
 
         if (!value.Contains(':'))
         {
             return await _characterService.GetBestMatchingCharacterAsync
             (
-                guildID.Value,
-                userID.Value,
+                guildID,
+                userID,
                 value,
                 ct
             );
@@ -107,7 +107,7 @@ public sealed class CharacterParser : AbstractTypeParser<Character>
 
         return await _characterService.GetBestMatchingCharacterAsync
         (
-            guildID.Value,
+            guildID,
             parsedUser,
             rawName,
             ct

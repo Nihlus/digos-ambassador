@@ -97,7 +97,7 @@ public class AmbyCommands : CommandGroup
             throw new InvalidOperationException();
         }
 
-        var getUser = await _userAPI.GetUserAsync(userID.Value, this.CancellationToken);
+        var getUser = await _userAPI.GetUserAsync(userID, this.CancellationToken);
         if (!getUser.IsSuccess)
         {
             return Result<FeedbackMessage>.FromError(getUser);
@@ -167,7 +167,7 @@ public class AmbyCommands : CommandGroup
             throw new InvalidOperationException();
         }
 
-        var getChannel = await _channelAPI.GetChannelAsync(channelID.Value, this.CancellationToken);
+        var getChannel = await _channelAPI.GetChannelAsync(channelID, this.CancellationToken);
         if (!getChannel.IsSuccess)
         {
             return Result<FeedbackMessage>.FromError(getChannel);
@@ -272,7 +272,7 @@ public class AmbyCommands : CommandGroup
         var sendAnnoyed = await _feedback.SendContextualNeutralAsync
         (
             "...seriously?",
-            userID.Value,
+            userID,
             ct: this.CancellationToken
         );
 
@@ -311,7 +311,7 @@ public class AmbyCommands : CommandGroup
         var sendAnnoyed = await _feedback.SendContextualNeutralAsync
         (
             "...seriously?",
-            userID.Value,
+            userID,
             ct: this.CancellationToken
         );
 
@@ -361,6 +361,6 @@ public class AmbyCommands : CommandGroup
                 "- Amby"
         };
 
-        return await _feedback.SendPrivateEmbedAsync(userID.Value, eb);
+        return await _feedback.SendPrivateEmbedAsync(userID, eb);
     }
 }

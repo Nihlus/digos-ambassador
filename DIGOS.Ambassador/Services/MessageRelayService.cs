@@ -98,7 +98,7 @@ public class MessageRelayService
 
         if (result.IsSuccess)
         {
-            return await SendMessageAsync(context, result, userID.Value, ct);
+            return await SendMessageAsync(context, result, userID, ct);
         }
 
         var mostRelevantResult = result.GetMostRelevantResult();
@@ -111,7 +111,7 @@ public class MessageRelayService
                 var sendError = await _feedback.SendContextualErrorAsync
                 (
                     "No matching command found.",
-                    userID.Value,
+                    userID,
                     ct: ct
                 );
 
@@ -130,7 +130,7 @@ public class MessageRelayService
                 var sendError = await _feedback.SendContextualErrorAsync
                 (
                     message,
-                    userID.Value,
+                    userID,
                     ct: ct
                 );
 
@@ -148,7 +148,7 @@ public class MessageRelayService
             }
             default:
             {
-                return await SendInternalErrorAsync(context, result, userID.Value, ct);
+                return await SendInternalErrorAsync(context, result, userID, ct);
             }
         }
 

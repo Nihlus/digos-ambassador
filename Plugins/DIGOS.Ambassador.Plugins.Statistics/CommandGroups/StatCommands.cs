@@ -91,7 +91,7 @@ public class StatCommands : CommandGroup
             throw new InvalidOperationException();
         }
 
-        var getGuild = await _guildAPI.GetGuildAsync(guildID.Value, ct: this.CancellationToken);
+        var getGuild = await _guildAPI.GetGuildAsync(guildID, ct: this.CancellationToken);
         if (!getGuild.IsSuccess)
         {
             return getGuild;
@@ -132,7 +132,7 @@ public class StatCommands : CommandGroup
 
         return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
-            userID.Value,
+            userID,
             pages,
             ct: this.CancellationToken
         );

@@ -126,9 +126,9 @@ public partial class BanCommands : CommandGroup
 
         var createBan = await _bans.CreateBanAsync
         (
-            userID.Value,
+            userID,
             user.ID,
-            guildID.Value,
+            guildID,
             reason,
             expiresOn: expiresOn
         );
@@ -146,7 +146,7 @@ public partial class BanCommands : CommandGroup
             return notifyResult;
         }
 
-        return await _guildAPI.CreateGuildBanAsync(guildID.Value, user.ID, reason: reason);
+        return await _guildAPI.CreateGuildBanAsync(guildID, user.ID, reason: reason);
     }
 
     /// <summary>
@@ -168,7 +168,7 @@ public partial class BanCommands : CommandGroup
             throw new InvalidOperationException();
         }
 
-        var bans = await _bans.GetBansAsync(guildID.Value);
+        var bans = await _bans.GetBansAsync(guildID);
         var createPages = await PaginatedEmbedFactory.PagesFromCollectionAsync
         (
             bans,
@@ -237,7 +237,7 @@ public partial class BanCommands : CommandGroup
 
         return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
-            userID.Value,
+            userID,
             pages,
             ct: this.CancellationToken
         );
@@ -263,7 +263,7 @@ public partial class BanCommands : CommandGroup
             throw new InvalidOperationException();
         }
 
-        var getBan = await _bans.GetBanAsync(guildID.Value, banID);
+        var getBan = await _bans.GetBanAsync(guildID, banID);
         if (!getBan.IsSuccess)
         {
             return getBan;
@@ -273,7 +273,7 @@ public partial class BanCommands : CommandGroup
 
         // This has to be done before the warning is actually deleted - otherwise, the lazy loader is removed and
         // navigation properties can't be evaluated
-        var notifyResult = await _logging.NotifyUserUnbannedAsync(ban, userID.Value);
+        var notifyResult = await _logging.NotifyUserUnbannedAsync(ban, userID);
         if (!notifyResult.IsSuccess)
         {
             return notifyResult;
@@ -285,6 +285,6 @@ public partial class BanCommands : CommandGroup
             return deleteBan;
         }
 
-        return await _guildAPI.RemoveGuildBanAsync(guildID.Value, ban.User.DiscordID);
+        return await _guildAPI.RemoveGuildBanAsync(guildID, ban.User.DiscordID);
     }
 }

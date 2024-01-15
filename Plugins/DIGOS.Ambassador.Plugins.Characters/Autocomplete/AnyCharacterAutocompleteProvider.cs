@@ -70,9 +70,7 @@ public class AnyCharacterAutocompleteProvider : IAutocompleteProvider
             throw new NotSupportedException();
         }
 
-        _ = _context.TryGetGuildID(out var guildID);
-
-        var scopedCharacters = guildID is not null
+        var scopedCharacters = _context.TryGetGuildID(out var guildID)
             ? _database.Characters
                 .Where(c => c.Server.DiscordID == guildID)
             : _database.Characters;

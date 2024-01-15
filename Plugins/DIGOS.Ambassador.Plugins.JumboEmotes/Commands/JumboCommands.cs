@@ -155,7 +155,7 @@ public class JumboCommands : CommandGroup
 
         var sendEmoji = await _channelAPI.CreateMessageAsync
         (
-            channelID.Value,
+            channelID,
             embeds: new[] { embed },
             ct: this.CancellationToken
         );

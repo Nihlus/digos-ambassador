@@ -65,13 +65,12 @@ public class OwnedCharacterAutocompleteProvider : IAutocompleteProvider
         CancellationToken ct = default
     )
     {
-        _ = _context.TryGetGuildID(out var guildID);
         if (!_context.TryGetUserID(out var userID))
         {
             throw new InvalidOperationException();
         }
 
-        var scopedCharacters = guildID is not null
+        var scopedCharacters = _context.TryGetGuildID(out var guildID)
             ? _database.Characters
                 .Where(c => c.Owner.DiscordID == userID)
                 .Where(c => c.Server.DiscordID == guildID)

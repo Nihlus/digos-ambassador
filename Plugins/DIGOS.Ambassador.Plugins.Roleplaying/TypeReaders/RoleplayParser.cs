@@ -76,16 +76,16 @@ public sealed class RoleplayParser : AbstractTypeParser<Roleplay>
 
         if (string.Equals(value, "current", StringComparison.OrdinalIgnoreCase))
         {
-            return await _roleplays.GetActiveRoleplayAsync(channelID.Value);
+            return await _roleplays.GetActiveRoleplayAsync(channelID);
         }
 
         if (!value.Contains(':'))
         {
             return await _roleplays.GetBestMatchingRoleplayAsync
             (
-                channelID.Value,
-                guildID.Value,
-                userID.Value,
+                channelID,
+                guildID,
+                userID,
                 value
             );
         }
@@ -112,8 +112,8 @@ public sealed class RoleplayParser : AbstractTypeParser<Roleplay>
 
         return await _roleplays.GetBestMatchingRoleplayAsync
         (
-            channelID.Value,
-            guildID.Value,
+            channelID,
+            guildID,
             parsedUser,
             rawName
         );

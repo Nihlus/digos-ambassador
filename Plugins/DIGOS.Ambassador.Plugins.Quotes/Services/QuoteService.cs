@@ -246,7 +246,7 @@ public class QuoteService
 
     private static string GetJumpUrl(IMessage message, Snowflake? guildID = null)
     {
-        var location = guildID.HasValue ? guildID.Value.ToString() : "@me";
+        var location = guildID.HasValue ? guildID.ToString() : "@me";
         return $"https://discord.com/channels/{location}/{message.ChannelID}/{message.ID}";
     }
 

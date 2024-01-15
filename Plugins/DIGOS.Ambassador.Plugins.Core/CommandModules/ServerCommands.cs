@@ -103,13 +103,13 @@ public class ServerCommands : CommandGroup
             throw new InvalidOperationException();
         }
 
-        var getServerResult = await _servers.GetOrRegisterServerAsync(guildID.Value);
+        var getServerResult = await _servers.GetOrRegisterServerAsync(guildID);
         if (!getServerResult.IsSuccess)
         {
             return getServerResult;
         }
 
-        var getGuild = await _guildAPI.GetGuildAsync(guildID.Value, ct: this.CancellationToken);
+        var getGuild = await _guildAPI.GetGuildAsync(guildID, ct: this.CancellationToken);
         if (!getGuild.IsSuccess)
         {
             return getGuild;
@@ -168,7 +168,7 @@ public class ServerCommands : CommandGroup
 
         var sendResult = await _channelAPI.CreateMessageAsync
         (
-            channelID.Value,
+            channelID,
             embeds: new[] { embed },
             ct: this.CancellationToken
         );
@@ -198,7 +198,7 @@ public class ServerCommands : CommandGroup
             throw new InvalidOperationException();
         }
 
-        var getServerResult = await _servers.GetOrRegisterServerAsync(guildID.Value);
+        var getServerResult = await _servers.GetOrRegisterServerAsync(guildID);
         if (!getServerResult.IsSuccess)
         {
             return getServerResult;
@@ -221,7 +221,7 @@ public class ServerCommands : CommandGroup
 
         var sendResult = await _channelAPI.CreateMessageAsync
         (
-            channelID.Value,
+            channelID,
             embeds: new[] { embed },
             ct: this.CancellationToken
         );
@@ -246,7 +246,7 @@ public class ServerCommands : CommandGroup
             throw new InvalidOperationException();
         }
 
-        var getServerResult = await _servers.GetOrRegisterServerAsync(guildID.Value);
+        var getServerResult = await _servers.GetOrRegisterServerAsync(guildID);
         if (!getServerResult.IsSuccess)
         {
             return Result<FeedbackMessage>.FromError(getServerResult);
@@ -299,7 +299,7 @@ public class ServerCommands : CommandGroup
                 throw new InvalidOperationException();
             }
 
-            var getServerResult = await _servers.GetOrRegisterServerAsync(guildID.Value);
+            var getServerResult = await _servers.GetOrRegisterServerAsync(guildID);
             if (!getServerResult.IsSuccess)
             {
                 return Result<FeedbackMessage>.FromError(getServerResult);
@@ -328,7 +328,7 @@ public class ServerCommands : CommandGroup
                 throw new InvalidOperationException();
             }
 
-            var getServerResult = await _servers.GetOrRegisterServerAsync(guildID.Value);
+            var getServerResult = await _servers.GetOrRegisterServerAsync(guildID);
             if (!getServerResult.IsSuccess)
             {
                 return Result<FeedbackMessage>.FromError(getServerResult);
@@ -357,7 +357,7 @@ public class ServerCommands : CommandGroup
                 throw new InvalidOperationException();
             }
 
-            var getServerResult = await _servers.GetOrRegisterServerAsync(guildID.Value);
+            var getServerResult = await _servers.GetOrRegisterServerAsync(guildID);
             if (!getServerResult.IsSuccess)
             {
                 return Result<FeedbackMessage>.FromError(getServerResult);
@@ -393,7 +393,7 @@ public class ServerCommands : CommandGroup
                 throw new InvalidOperationException();
             }
 
-            var getServerResult = await _servers.GetOrRegisterServerAsync(guildID.Value);
+            var getServerResult = await _servers.GetOrRegisterServerAsync(guildID);
             if (!getServerResult.IsSuccess)
             {
                 return Result<FeedbackMessage>.FromError(getServerResult);

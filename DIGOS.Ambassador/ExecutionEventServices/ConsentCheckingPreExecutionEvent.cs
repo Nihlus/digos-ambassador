@@ -95,7 +95,7 @@ public class ConsentCheckingPreExecutionEvent : IPreExecutionEvent
             throw new InvalidOperationException();
         }
 
-        var hasConsented = await _privacy.HasUserConsentedAsync(userID.Value, ct);
+        var hasConsented = await _privacy.HasUserConsentedAsync(userID, ct);
 
         IReadOnlyList<BoundCommandNode> potentialCommands;
         switch (context)
@@ -168,7 +168,7 @@ public class ConsentCheckingPreExecutionEvent : IPreExecutionEvent
             return Result.FromSuccess();
         }
 
-        var requestConsent = await _privacy.RequestConsentAsync(userID.Value, ct);
+        var requestConsent = await _privacy.RequestConsentAsync(userID, ct);
         if (!requestConsent.IsSuccess)
         {
             return requestConsent;

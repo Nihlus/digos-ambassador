@@ -90,7 +90,7 @@ public partial class ModerationCommands
                 throw new InvalidOperationException();
             }
 
-            var getGuild = await _guildAPI.GetGuildAsync(guildID.Value);
+            var getGuild = await _guildAPI.GetGuildAsync(guildID);
             if (!getGuild.IsSuccess)
             {
                 return getGuild;

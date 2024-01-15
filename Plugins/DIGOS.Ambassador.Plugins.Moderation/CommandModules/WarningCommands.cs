@@ -112,7 +112,7 @@ public partial class WarningCommands : CommandGroup
             throw new InvalidOperationException();
         }
 
-        var warnings = await _warnings.GetWarningsAsync(guildID.Value, user.ID);
+        var warnings = await _warnings.GetWarningsAsync(guildID, user.ID);
 
         var createPages = await PaginatedEmbedFactory.PagesFromCollectionAsync
         (
@@ -169,7 +169,7 @@ public partial class WarningCommands : CommandGroup
 
         return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
-            userID.Value,
+            userID,
             pages,
             ct: this.CancellationToken
         );
@@ -195,7 +195,7 @@ public partial class WarningCommands : CommandGroup
             throw new InvalidOperationException();
         }
 
-        var getWarning = await _warnings.GetWarningAsync(guildID.Value, warningID);
+        var getWarning = await _warnings.GetWarningAsync(guildID, warningID);
         if (!getWarning.IsSuccess)
         {
             return Result<FeedbackMessage>.FromError(getWarning);
@@ -205,7 +205,7 @@ public partial class WarningCommands : CommandGroup
 
         // This has to be done before the warning is actually deleted - otherwise, the lazy loader is removed and
         // navigation properties can't be evaluated
-        var notifyResult = await _logging.NotifyUserWarningRemovedAsync(warning, userID.Value);
+        var notifyResult = await _logging.NotifyUserWarningRemovedAsync(warning, userID);
         if (!notifyResult.IsSuccess)
         {
             return Result<FeedbackMessage>.FromError(notifyResult);
@@ -247,9 +247,9 @@ public partial class WarningCommands : CommandGroup
 
         var addWarning = await _warnings.CreateWarningAsync
         (
-            userID.Value,
+            userID,
             user.ID,
-            guildID.Value,
+            guildID,
             reason,
             expiresOn: expiresOn
         );
@@ -260,7 +260,7 @@ public partial class WarningCommands : CommandGroup
         }
 
         var warning = addWarning.Entity;
-        var getSettings = await _moderation.GetOrCreateServerSettingsAsync(guildID.Value);
+        var getSettings = await _moderation.GetOrCreateServerSettingsAsync(guildID);
         if (!getSettings.IsSuccess)
         {
             return Result<FeedbackMessage>.FromError(getSettings);
@@ -286,7 +286,7 @@ public partial class WarningCommands : CommandGroup
         var sendAlert = await _feedback.SendContextualWarningAsync
         (
             $"The warned user now has {warnings.Count} warnings. Consider further action.",
-            userID.Value
+            userID
         );
 
         return sendAlert.IsSuccess

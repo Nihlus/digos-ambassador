@@ -86,7 +86,7 @@ public partial class ModerationCommands
                 throw new InvalidOperationException();
             }
 
-            var setChannel = await _moderation.SetModerationLogChannelAsync(guildID.Value, channel.ID);
+            var setChannel = await _moderation.SetModerationLogChannelAsync(guildID, channel.ID);
             return setChannel.IsSuccess
                 ? new FeedbackMessage("Channel set.", _feedback.Theme.Secondary)
                 : Result<FeedbackMessage>.FromError(setChannel);
@@ -107,7 +107,7 @@ public partial class ModerationCommands
                 throw new InvalidOperationException();
             }
 
-            var setChannel = await _moderation.SetMonitoringChannelAsync(guildID.Value, channel.ID);
+            var setChannel = await _moderation.SetMonitoringChannelAsync(guildID, channel.ID);
             return setChannel.IsSuccess
                 ? new FeedbackMessage("Channel set.", _feedback.Theme.Secondary)
                 : Result<FeedbackMessage>.FromError(setChannel);
@@ -128,7 +128,7 @@ public partial class ModerationCommands
                 throw new InvalidOperationException();
             }
 
-            var setChannel = await _moderation.SetWarningThresholdAsync(guildID.Value, threshold);
+            var setChannel = await _moderation.SetWarningThresholdAsync(guildID, threshold);
             return setChannel.IsSuccess
                 ? new FeedbackMessage("Threshold set.", _feedback.Theme.Secondary)
                 : Result<FeedbackMessage>.FromError(setChannel);

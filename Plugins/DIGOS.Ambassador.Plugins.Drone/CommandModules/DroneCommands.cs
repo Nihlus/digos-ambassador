@@ -100,8 +100,8 @@ public class DroneCommands : CommandGroup
             throw new InvalidOperationException();
         }
 
-        var isAmbyInvoking = userID.Value == _ambyID;
-        var droneMessage = user.ID == userID.Value
+        var isAmbyInvoking = userID == _ambyID;
+        var droneMessage = user.ID == userID
             ? _content.GetRandomSelfDroneMessage()
             : isAmbyInvoking
                 ? _content.GetRandomTargetedMessage()
@@ -110,7 +110,7 @@ public class DroneCommands : CommandGroup
         var sendMessage = await _feedback.SendContextualNeutralAsync
         (
             droneMessage,
-            userID.Value,
+            userID,
             ct: this.CancellationToken
         );
 
@@ -121,11 +121,11 @@ public class DroneCommands : CommandGroup
 
         var targetUser = isAmbyInvoking
             ? user.ID
-            : userID.Value;
+            : userID;
 
         var droneResult = await _drone.DroneUserAsync
         (
-            guildID.Value,
+            guildID,
             targetUser,
             this.CancellationToken
         );

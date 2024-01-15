@@ -112,7 +112,7 @@ public class PermissionCommands : CommandGroup
 
         return await _feedback.SendContextualPaginatedMessageAsync
         (
-            userID.Value,
+            userID,
             pages,
             appearance,
             ct: this.CancellationToken
@@ -141,7 +141,7 @@ public class PermissionCommands : CommandGroup
 
         var userPermissions = await _permissions.GetApplicableUserPermissionsAsync
         (
-            guildID.Value,
+            guildID,
             discordUser.ID
         );
 
@@ -185,7 +185,7 @@ public class PermissionCommands : CommandGroup
 
         return await _feedback.SendContextualPaginatedMessageAsync
         (
-            userID.Value,
+            userID,
             pages,
             appearance,
             ct: this.CancellationToken
@@ -224,7 +224,7 @@ public class PermissionCommands : CommandGroup
         var permission = getPermissionResult.Entity;
         var grantPermissionResult = await _permissions.GrantPermissionAsync
         (
-            guildID.Value,
+            guildID,
             discordUser.ID,
             permission,
             grantedTarget,
@@ -318,7 +318,7 @@ public class PermissionCommands : CommandGroup
         var permission = getPermissionResult.Entity;
         var revokePermissionResult = await _permissions.RevokePermissionAsync
         (
-            guildID.Value,
+            guildID,
             discordUser.ID,
             permission,
             revokedTarget

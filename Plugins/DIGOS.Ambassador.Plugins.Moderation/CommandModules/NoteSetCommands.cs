@@ -86,7 +86,7 @@ public partial class NoteCommands
                 throw new InvalidOperationException();
             }
 
-            var getNote = await _notes.GetNoteAsync(guildID.Value, noteID);
+            var getNote = await _notes.GetNoteAsync(guildID, noteID);
             if (!getNote.IsSuccess)
             {
                 return Result<FeedbackMessage>.FromError(getNote);

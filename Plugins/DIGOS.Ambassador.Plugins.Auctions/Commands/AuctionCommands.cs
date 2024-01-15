@@ -172,7 +172,7 @@ public sealed partial class AuctionCommands : CommandGroup
 
         _ = _context.TryGetGuildID(out var guildID);
 
-        var getServer = await _serverService.GetOrRegisterServerAsync(guildID!.Value, this.CancellationToken);
+        var getServer = await _serverService.GetOrRegisterServerAsync(guildID, this.CancellationToken);
         if (!getServer.IsDefined(out var server))
         {
             return Result<FeedbackMessage>.FromError(getServer);
@@ -192,7 +192,7 @@ public sealed partial class AuctionCommands : CommandGroup
 
         _ = _context.TryGetUserID(out var userID);
 
-        var getUser = await _userService.GetOrRegisterUserAsync(userID!.Value, this.CancellationToken);
+        var getUser = await _userService.GetOrRegisterUserAsync(userID, this.CancellationToken);
         if (!getUser.IsDefined(out var user))
         {
             return Result<FeedbackMessage>.FromError(getUser);
@@ -277,7 +277,7 @@ public sealed partial class AuctionCommands : CommandGroup
         var displayAuction = await _auctionDisplay.DisplayAuctionAsync
         (
             auction,
-            channelID!.Value,
+            channelID,
             this.CancellationToken
         );
 
@@ -299,7 +299,7 @@ public sealed partial class AuctionCommands : CommandGroup
     )
     {
         _ = _context.TryGetChannelID(out var channelID);
-        var hideAuction = await _auctionDisplay.HideAuctionAsync(auction, channelID!.Value, this.CancellationToken);
+        var hideAuction = await _auctionDisplay.HideAuctionAsync(auction, channelID, this.CancellationToken);
 
         return hideAuction.IsSuccess
             ? new FeedbackMessage("Auction hidden.", Color.MediumPurple)

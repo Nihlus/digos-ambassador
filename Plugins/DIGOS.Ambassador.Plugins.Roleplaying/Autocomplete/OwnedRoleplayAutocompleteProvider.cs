@@ -65,18 +65,17 @@ public class OwnedRoleplayAutocompleteProvider : IAutocompleteProvider
         CancellationToken ct = default
     )
     {
-        _ = _context.TryGetGuildID(out var guildID);
         if (!_context.TryGetUserID(out var userID))
         {
             throw new InvalidOperationException();
         }
 
-        var scopedRoleplays = guildID is not null
+        var scopedRoleplays = _context.TryGetGuildID(out var guildID)
             ? _database.Roleplays
-                .Where(c => c.Owner.DiscordID == userID.Value)
-                .Where(c => c.Server.DiscordID == guildID.Value)
+                .Where(c => c.Owner.DiscordID == userID)
+                .Where(c => c.Server.DiscordID == guildID)
             : _database.Roleplays
-                .Where(c => c.Owner.DiscordID == userID.Value);
+                .Where(c => c.Owner.DiscordID == userID);
 
         var suggestedRoleplays = await scopedRoleplays
             .OrderBy(c => EF.Functions.FuzzyStringMatchLevenshtein(c.Name, userInput))

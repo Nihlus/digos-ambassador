@@ -115,7 +115,7 @@ public partial class CharacterCommands
                               "role name."
             };
 
-            var getCharacterRoles = await _characterRoles.GetCharacterRolesAsync(guildID.Value);
+            var getCharacterRoles = await _characterRoles.GetCharacterRolesAsync(guildID);
             if (!getCharacterRoles.IsSuccess)
             {
                 return Result.FromError(getCharacterRoles);
@@ -132,13 +132,13 @@ public partial class CharacterCommands
 
                 return (Result)await _feedback.SendContextualPaginatedMessageAsync
                 (
-                    userID.Value,
+                    userID,
                     new[] { baseEmbed },
                     ct: this.CancellationToken
                 );
             }
 
-            var getGuildRoles = await _guildAPI.GetGuildRolesAsync(guildID.Value, this.CancellationToken);
+            var getGuildRoles = await _guildAPI.GetGuildRolesAsync(guildID, this.CancellationToken);
             if (!getGuildRoles.IsSuccess)
             {
                 return Result.FromError(getGuildRoles);
@@ -170,7 +170,7 @@ public partial class CharacterCommands
 
             return (Result)await _feedback.SendContextualPaginatedMessageAsync
             (
-                userID.Value,
+                userID,
                 pages,
                 ct: this.CancellationToken
             );
@@ -199,7 +199,7 @@ public partial class CharacterCommands
 
             var createRoleResult = await _characterRoles.CreateCharacterRoleAsync
             (
-                guildID.Value,
+                guildID,
                 discordRole.ID,
                 access,
                 this.CancellationToken
@@ -228,7 +228,7 @@ public partial class CharacterCommands
 
             var getExistingRoleResult = await _characterRoles.GetCharacterRoleAsync
             (
-                guildID.Value,
+                guildID,
                 discordRole.ID,
                 this.CancellationToken
             );
@@ -268,7 +268,7 @@ public partial class CharacterCommands
 
             var getExistingRoleResult = await _characterRoles.GetCharacterRoleAsync
             (
-                guildID.Value,
+                guildID,
                 discordRole.ID,
                 this.CancellationToken
             );
@@ -318,8 +318,8 @@ public partial class CharacterCommands
 
             var result = await _characterRoles.ClearCharacterRoleAsync
             (
-                guildID.Value,
-                userID.Value,
+                guildID,
+                userID,
                 character,
                 this.CancellationToken
             );

@@ -97,8 +97,8 @@ public partial class TransformationCommands
 
             var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync
             (
-                guildID.Value,
-                userID.Value
+                guildID,
+                userID
             );
 
             if (!getCurrentCharacterResult.IsSuccess)
@@ -137,7 +137,7 @@ public partial class TransformationCommands
                 throw new InvalidOperationException();
             }
 
-            var setDefaultOptInResult = await _transformation.SetDefaultOptInAsync(userID.Value, shouldOptIn);
+            var setDefaultOptInResult = await _transformation.SetDefaultOptInAsync(userID, shouldOptIn);
             if (!setDefaultOptInResult.IsSuccess)
             {
                 return Result<FeedbackMessage>.FromError(setDefaultOptInResult);
@@ -166,7 +166,7 @@ public partial class TransformationCommands
 
             var setProtectionTypeResult = await _transformation.SetDefaultProtectionTypeAsync
             (
-                userID.Value,
+                userID,
                 protectionType
             );
 
@@ -204,8 +204,8 @@ public partial class TransformationCommands
 
             var setProtectionTypeResult = await _transformation.SetServerProtectionTypeAsync
             (
-                userID.Value,
-                guildID.Value,
+                userID,
+                guildID,
                 protectionType
             );
 

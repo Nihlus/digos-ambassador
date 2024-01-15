@@ -63,7 +63,7 @@ public class RequireEntityOwnerCondition<TEntity> : ICondition<RequireEntityOwne
             throw new InvalidOperationException();
         }
 
-        return data.IsOwner(userID.Value)
+        return data.IsOwner(userID)
             ? new ValueTask<Result>(Result.FromSuccess())
             : new ValueTask<Result>(new UserError("You don't have permission to do that."));
     }

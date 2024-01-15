@@ -80,7 +80,7 @@ public class AuctionModals : InteractionGroup
 
         _ = _context.TryGetUserID(out var userID);
 
-        var placeBid = await _auctionService.PlaceBidAsync(state, userID!.Value, bidAmount, this.CancellationToken);
+        var placeBid = await _auctionService.PlaceBidAsync(state, userID, bidAmount, this.CancellationToken);
 
         return placeBid.IsSuccess
             ? new FeedbackMessage("Bid confirmed - good luck!", Color.MediumSeaGreen)

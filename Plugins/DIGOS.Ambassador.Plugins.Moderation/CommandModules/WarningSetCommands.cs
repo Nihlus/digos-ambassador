@@ -87,7 +87,7 @@ public partial class WarningCommands
                 throw new InvalidOperationException();
             }
 
-            var getWarning = await _warnings.GetWarningAsync(guildID.Value, warningID);
+            var getWarning = await _warnings.GetWarningAsync(guildID, warningID);
             if (!getWarning.IsSuccess)
             {
                 return Result<FeedbackMessage>.FromError(getWarning);
@@ -117,7 +117,7 @@ public partial class WarningCommands
                 throw new InvalidOperationException();
             }
 
-            var getWarning = await _warnings.GetWarningAsync(guildID.Value, warningID);
+            var getWarning = await _warnings.GetWarningAsync(guildID, warningID);
             if (!getWarning.IsSuccess)
             {
                 return Result<FeedbackMessage>.FromError(getWarning);
@@ -147,7 +147,7 @@ public partial class WarningCommands
                 throw new InvalidOperationException();
             }
 
-            var getWarning = await _warnings.GetWarningAsync(guildID.Value, warningID);
+            var getWarning = await _warnings.GetWarningAsync(guildID, warningID);
             if (!getWarning.IsSuccess)
             {
                 return Result<FeedbackMessage>.FromError(getWarning);

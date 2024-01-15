@@ -198,8 +198,8 @@ public partial class CharacterCommands
 
             var setNickResult = await _characters.SetCharacterNicknameAsync
             (
-                guildID.Value,
-                userID.Value,
+                guildID,
+                userID,
                 character,
                 newCharacterNickname
             );
@@ -343,7 +343,7 @@ public partial class CharacterCommands
 
             var getRoleResult = await _characterRoles.GetCharacterRoleAsync
             (
-                guildID.Value,
+                guildID,
                 discordRole.ID,
                 this.CancellationToken
             );
@@ -356,8 +356,8 @@ public partial class CharacterCommands
             // Get a bunch of stuff for permission checking...
             var getMember = await _guildAPI.GetGuildMemberAsync
             (
-                guildID.Value,
-                userID.Value,
+                guildID,
+                userID,
                 this.CancellationToken
             );
 
@@ -368,20 +368,20 @@ public partial class CharacterCommands
 
             var member = getMember.Entity;
 
-            var getGuildRoles = await _guildAPI.GetGuildRolesAsync(guildID.Value, this.CancellationToken);
+            var getGuildRoles = await _guildAPI.GetGuildRolesAsync(guildID, this.CancellationToken);
             if (!getGuildRoles.IsSuccess)
             {
                 return Result<FeedbackMessage>.FromError(getGuildRoles);
             }
 
             var guildRoles = getGuildRoles.Entity;
-            var everyoneRole = guildRoles.First(r => r.ID == guildID.Value);
+            var everyoneRole = guildRoles.First(r => r.ID == guildID);
             var memberRoles = guildRoles.Where(r => member.Roles.Contains(r.ID)).ToList();
 
             // We ignore channel overrides here; the user should have it on a guild level
             var computedPermissions = DiscordPermissionSet.ComputePermissions
             (
-                userID.Value,
+                userID,
                 everyoneRole,
                 memberRoles
             );
@@ -400,8 +400,8 @@ public partial class CharacterCommands
 
             var setRoleResult = await _characterRoles.SetCharacterRoleAsync
             (
-                guildID.Value,
-                userID.Value,
+                guildID,
+                userID,
                 character,
                 characterRole,
                 this.CancellationToken
@@ -433,8 +433,8 @@ public partial class CharacterCommands
 
             var result = await _characters.GetCurrentCharacterAsync
             (
-                guildID.Value,
-                userID.Value,
+                guildID,
+                userID,
                 this.CancellationToken
             );
 
@@ -473,8 +473,8 @@ public partial class CharacterCommands
 
             var result = await _characters.SetDefaultCharacterAsync
             (
-                guildID.Value,
-                userID.Value,
+                guildID,
+                userID,
                 character,
                 this.CancellationToken
             );

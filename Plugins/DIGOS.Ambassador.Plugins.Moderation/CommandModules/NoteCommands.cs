@@ -108,7 +108,7 @@ public partial class NoteCommands : CommandGroup
             throw new InvalidOperationException();
         }
 
-        var notes = await _notes.GetNotesAsync(guildID.Value, user.ID);
+        var notes = await _notes.GetNotesAsync(guildID, user.ID);
 
         var createPages = await PaginatedEmbedFactory.PagesFromCollectionAsync
         (
@@ -160,7 +160,7 @@ public partial class NoteCommands : CommandGroup
 
         return (Result)await _feedback.SendContextualPaginatedMessageAsync
         (
-            userID.Value,
+            userID,
             pages,
             ct: this.CancellationToken
         );
@@ -187,7 +187,7 @@ public partial class NoteCommands : CommandGroup
             throw new InvalidOperationException();
         }
 
-        var addNote = await _notes.CreateNoteAsync(userID.Value, user.ID, guildID.Value, content);
+        var addNote = await _notes.CreateNoteAsync(userID, user.ID, guildID, content);
         if (!addNote.IsSuccess)
         {
             return Result<FeedbackMessage>.FromError(addNote);
@@ -219,7 +219,7 @@ public partial class NoteCommands : CommandGroup
             throw new InvalidOperationException();
         }
 
-        var getNote = await _notes.GetNoteAsync(guildID.Value, noteID);
+        var getNote = await _notes.GetNoteAsync(guildID, noteID);
         if (!getNote.IsSuccess)
         {
             return Result<FeedbackMessage>.FromError(getNote);
@@ -229,7 +229,7 @@ public partial class NoteCommands : CommandGroup
 
         // This has to be done before the warning is actually deleted - otherwise, the lazy loader is removed and
         // navigation properties can't be evaluated
-        var notifyResult = await _logging.NotifyUserNoteRemovedAsync(note, userID.Value);
+        var notifyResult = await _logging.NotifyUserNoteRemovedAsync(note, userID);
         if (!notifyResult.IsSuccess)
         {
             return Result<FeedbackMessage>.FromError(notifyResult);

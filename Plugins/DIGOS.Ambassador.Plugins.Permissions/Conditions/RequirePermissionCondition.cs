@@ -83,8 +83,8 @@ public class RequirePermissionCondition : ICondition<RequirePermissionAttribute>
 
         return await _permissions.HasPermissionAsync
         (
-            guildID.Value,
-            userID.Value,
+            guildID,
+            userID,
             permission,
             attribute.Target,
             ct

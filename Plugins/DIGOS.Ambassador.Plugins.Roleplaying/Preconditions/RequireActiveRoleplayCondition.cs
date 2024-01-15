@@ -65,7 +65,7 @@ public class RequireActiveRoleplayCondition : ICondition<RequireActiveRoleplayAt
             throw new InvalidOperationException();
         }
 
-        var result = await _roleplayService.GetActiveRoleplayAsync(channelID.Value);
+        var result = await _roleplayService.GetActiveRoleplayAsync(channelID);
         if (!result.IsSuccess)
         {
             return Result.FromError(result);
@@ -77,7 +77,7 @@ public class RequireActiveRoleplayCondition : ICondition<RequireActiveRoleplayAt
         }
 
         var roleplay = result.Entity;
-        return roleplay.Owner.DiscordID != userID.Value
+        return roleplay.Owner.DiscordID != userID
             ? new UserError("Only the roleplay owner can do that.")
             : Result.FromSuccess();
     }

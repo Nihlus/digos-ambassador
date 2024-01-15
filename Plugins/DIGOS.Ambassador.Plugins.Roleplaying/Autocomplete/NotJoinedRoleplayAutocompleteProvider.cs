@@ -65,27 +65,26 @@ public class NotJoinedRoleplayAutocompleteProvider : IAutocompleteProvider
         CancellationToken ct = default
     )
     {
-        _ = _context.TryGetGuildID(out var guildID);
         if (!_context.TryGetUserID(out var userID))
         {
             throw new InvalidOperationException();
         }
 
-        var scopedRoleplays = guildID is not null
+        var scopedRoleplays = _context.TryGetGuildID(out var guildID)
             ? _database.Roleplays
-                .Where(r => r.Server.DiscordID == guildID.Value)
+                .Where(r => r.Server.DiscordID == guildID)
                 .Where
                 (
                     r => r.ParticipatingUsers
                         .Where(pu => pu.Status == ParticipantStatus.Joined)
-                        .All(ju => ju.User.DiscordID != userID.Value)
+                        .All(ju => ju.User.DiscordID != userID)
                 )
             : _database.Roleplays
                 .Where
                 (
                     r => r.ParticipatingUsers
                         .Where(pu => pu.Status == ParticipantStatus.Joined)
-                        .All(ju => ju.User.DiscordID != userID.Value)
+                        .All(ju => ju.User.DiscordID != userID)
                 );
 
         var suggestedRoleplays = await scopedRoleplays

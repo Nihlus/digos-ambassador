@@ -87,7 +87,7 @@ public partial class BanCommands
                 throw new InvalidOperationException();
             }
 
-            var getBan = await _bans.GetBanAsync(guildID.Value, banID);
+            var getBan = await _bans.GetBanAsync(guildID, banID);
             if (!getBan.IsSuccess)
             {
                 return Result<FeedbackMessage>.FromError(getBan);
@@ -117,7 +117,7 @@ public partial class BanCommands
                 throw new InvalidOperationException();
             }
 
-            var getBan = await _bans.GetBanAsync(guildID.Value, banID);
+            var getBan = await _bans.GetBanAsync(guildID, banID);
             if (!getBan.IsSuccess)
             {
                 return Result<FeedbackMessage>.FromError(getBan);
@@ -147,7 +147,7 @@ public partial class BanCommands
                 throw new InvalidOperationException();
             }
 
-            var getBan = await _bans.GetBanAsync(guildID.Value, banID);
+            var getBan = await _bans.GetBanAsync(guildID, banID);
             if (!getBan.IsSuccess)
             {
                 return Result<FeedbackMessage>.FromError(getBan);

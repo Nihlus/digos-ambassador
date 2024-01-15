@@ -124,7 +124,7 @@ public partial class TransformationCommands
 
             return (Result)await _feedback.SendContextualPaginatedMessageAsync
             (
-                userID.Value,
+                userID,
                 pages,
                 ct: this.CancellationToken
             );
@@ -183,7 +183,7 @@ public partial class TransformationCommands
 
             return (Result)await _feedback.SendContextualPaginatedMessageAsync
             (
-                userID.Value,
+                userID,
                 pages,
                 ct: this.CancellationToken
             );
@@ -227,7 +227,7 @@ public partial class TransformationCommands
 
             return (Result)await _feedback.SendContextualPaginatedMessageAsync
             (
-                userID.Value,
+                userID,
                 pages,
                 ct: this.CancellationToken
             );
@@ -271,7 +271,7 @@ public partial class TransformationCommands
 
             return (Result)await _feedback.SendContextualPaginatedMessageAsync
             (
-                userID.Value,
+                userID,
                 pages,
                 ct: this.CancellationToken
             );
@@ -315,7 +315,7 @@ public partial class TransformationCommands
 
             return (Result)await _feedback.SendContextualPaginatedMessageAsync
             (
-                userID.Value,
+                userID,
                 pages,
                 ct: this.CancellationToken
             );
@@ -358,7 +358,7 @@ public partial class TransformationCommands
 
             return (Result)await _feedback.SendContextualPaginatedMessageAsync
             (
-                userID.Value,
+                userID,
                 pages,
                 ct: this.CancellationToken
             );

@@ -64,7 +64,7 @@ public partial class RoleplayCommands
 
             var result = await _serverSettings.SetDedicatedChannelCategoryAsync
             (
-                guildID.Value,
+                guildID,
                 category.ID
             );
 
@@ -91,7 +91,7 @@ public partial class RoleplayCommands
 
             var result = await _serverSettings.SetArchiveChannelAsync
             (
-                guildID.Value,
+                guildID,
                 channel.ID
             );
 
@@ -118,7 +118,7 @@ public partial class RoleplayCommands
 
             var result = await _serverSettings.SetDefaultUserRoleAsync
             (
-                guildID.Value,
+                guildID,
                 role.ID
             );
 

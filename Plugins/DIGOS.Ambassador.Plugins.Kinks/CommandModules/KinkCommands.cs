@@ -112,7 +112,7 @@ internal class KinkCommands : CommandGroup
         var kink = getKinkInfoResult.Entity;
         var display = _kinks.BuildKinkInfoEmbed(kink);
 
-        return await _feedback.SendPrivateEmbedAsync(channelID.Value, display);
+        return await _feedback.SendPrivateEmbedAsync(channelID, display);
     }
 
     /// <summary>
@@ -137,7 +137,7 @@ internal class KinkCommands : CommandGroup
                 throw new InvalidOperationException();
             }
 
-            var getUser = await _userAPI.GetUserAsync(userID.Value, this.CancellationToken);
+            var getUser = await _userAPI.GetUserAsync(userID, this.CancellationToken);
             if (!getUser.IsSuccess)
             {
                 return getUser;
@@ -155,7 +155,7 @@ internal class KinkCommands : CommandGroup
         var userKink = getUserKinkResult.Entity;
         var display = _kinks.BuildUserKinkInfoEmbedBase(userKink);
 
-        return await _feedback.SendPrivateEmbedAsync(channelID.Value, display);
+        return await _feedback.SendPrivateEmbedAsync(channelID, display);
     }
 
     /// <summary>
@@ -180,7 +180,7 @@ internal class KinkCommands : CommandGroup
                     .Where(k => k.User.DiscordID == otherUser.ID);
 
                 return q
-                    .Where(k => k.User.DiscordID == userID.Value)
+                    .Where(k => k.User.DiscordID == userID)
                     .Where
                     (
                         k => otherUserKinks
@@ -201,8 +201,8 @@ internal class KinkCommands : CommandGroup
             );
         }
 
-        var pages = _kinks.BuildKinkOverlapEmbeds(userID.Value, otherUser.ID, overlappingKinks);
-        return await _feedback.SendContextualPaginatedMessageAsync(userID.Value, pages, ct: this.CancellationToken);
+        var pages = _kinks.BuildKinkOverlapEmbeds(userID, otherUser.ID, overlappingKinks);
+        return await _feedback.SendContextualPaginatedMessageAsync(userID, pages, ct: this.CancellationToken);
     }
 
     /// <summary>
@@ -226,7 +226,7 @@ internal class KinkCommands : CommandGroup
 
         if (user is null)
         {
-            var getUser = await _userAPI.GetUserAsync(userID.Value, this.CancellationToken);
+            var getUser = await _userAPI.GetUserAsync(userID, this.CancellationToken);
             if (!getUser.IsSuccess)
             {
                 return getUser;
@@ -257,7 +257,7 @@ internal class KinkCommands : CommandGroup
         var pages = _kinks.BuildPaginatedUserKinkEmbeds(kinksWithPreference);
         return await _feedback.SendContextualPaginatedMessageAsync
         (
-            userID.Value,
+            userID,
             pages,
             ct: this.CancellationToken
         );
@@ -282,7 +282,7 @@ internal class KinkCommands : CommandGroup
             throw new InvalidOperationException();
         }
 
-        var getUserKinkResult = await _kinks.GetUserKinkByNameAsync(userID.Value, kinkName);
+        var getUserKinkResult = await _kinks.GetUserKinkByNameAsync(userID, kinkName);
         if (!getUserKinkResult.IsSuccess)
         {
             return Result<FeedbackMessage>.FromError(getUserKinkResult);
@@ -312,7 +312,7 @@ internal class KinkCommands : CommandGroup
         var categories = await _kinks.GetKinkCategoriesAsync(this.CancellationToken);
         var initialWizard = new KinkWizard
         (
-            userID.Value,
+            userID,
             categories.ToList(),
             _context is InteractionContext
         );
@@ -359,7 +359,7 @@ internal class KinkCommands : CommandGroup
             throw new InvalidOperationException();
         }
 
-        var send = await _feedback.SendContextualNeutralAsync("Updating kinks...", userID.Value);
+        var send = await _feedback.SendContextualNeutralAsync("Updating kinks...", userID);
         if (!send.IsSuccess)
         {
             return Result<FeedbackMessage>.FromError(send);
@@ -431,7 +431,7 @@ internal class KinkCommands : CommandGroup
             throw new InvalidOperationException();
         }
 
-        var resetResult = await _kinks.ResetUserKinksAsync(userID.Value);
+        var resetResult = await _kinks.ResetUserKinksAsync(userID);
         return resetResult.IsSuccess
             ? new FeedbackMessage("Preferences reset.", _feedback.Theme.Secondary)
             : Result<FeedbackMessage>.FromError(resetResult);
