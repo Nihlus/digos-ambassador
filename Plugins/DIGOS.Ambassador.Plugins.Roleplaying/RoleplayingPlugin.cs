@@ -122,7 +122,8 @@ public sealed class RoleplayingPlugin : PluginDescriptor, IMigratablePlugin
     /// <inheritdoc />
     public async Task<Result> MigrateAsync(IServiceProvider serviceProvider, CancellationToken ct = default)
     {
-        var context = serviceProvider.GetRequiredService<RoleplayingDatabaseContext>();
+        await using var scope = serviceProvider.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<RoleplayingDatabaseContext>();
 
         await context.Database.MigrateAsync(ct);
 

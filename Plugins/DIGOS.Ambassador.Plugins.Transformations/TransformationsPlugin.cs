@@ -102,7 +102,8 @@ public sealed class TransformationsPlugin : PluginDescriptor, IMigratablePlugin
     /// <inheritdoc />
     public async Task<Result> MigrateAsync(IServiceProvider serviceProvider, CancellationToken ct = default)
     {
-        var context = serviceProvider.GetRequiredService<TransformationsDatabaseContext>();
+        await using var scope = serviceProvider.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<TransformationsDatabaseContext>();
 
         await context.Database.MigrateAsync(ct);
         return Result.FromSuccess();

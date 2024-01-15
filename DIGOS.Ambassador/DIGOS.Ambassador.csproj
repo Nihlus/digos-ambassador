@@ -3,21 +3,19 @@
   <PropertyGroup>
     <Version>6.3.4</Version>
     <IsPackable>false</IsPackable>
+    <UserSecretsId>ea62db66-1c87-4fd2-b1ed-74a9ae94e81c</UserSecretsId>
   </PropertyGroup>
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="log4net.config" />
-    <Content Include="log4net.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
+  
   <ItemGroup>
     <Content Include="Content\**\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    
+    <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -25,12 +23,12 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" />
     <PackageReference Include="Remora.Discord.Caching" />
     <PackageReference Include="Remora.Discord.Commands" />
     <PackageReference Include="Remora.Discord.Hosting" />
     <PackageReference Include="Remora.Plugins" />
     <PackageReference Include="Remora.Results" />
+    <PackageReference Include="Serilog.AspNetCore" />
   </ItemGroup>
 
   <ItemGroup>
@@ -165,10 +163,6 @@
       <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
       -->
     </ProjectReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Content\Database" />
   </ItemGroup>
 
 </Project>

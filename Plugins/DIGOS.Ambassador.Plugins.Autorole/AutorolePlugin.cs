@@ -98,7 +98,8 @@ public sealed class AutorolePlugin : PluginDescriptor, IMigratablePlugin
     /// <inheritdoc />
     public async Task<Result> MigrateAsync(IServiceProvider serviceProvider, CancellationToken ct = default)
     {
-        var context = serviceProvider.GetRequiredService<AutoroleDatabaseContext>();
+        await using var scope = serviceProvider.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<AutoroleDatabaseContext>();
 
         await context.Database.MigrateAsync(ct);
 

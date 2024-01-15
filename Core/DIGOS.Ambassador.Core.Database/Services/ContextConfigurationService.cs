@@ -22,12 +22,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using DIGOS.Ambassador.Core.Database.Context;
-using DIGOS.Ambassador.Core.Database.Credentials;
 using DIGOS.Ambassador.Core.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.Extensions.Configuration;
 
 namespace DIGOS.Ambassador.Core.Database.Services;
 
@@ -37,15 +36,20 @@ namespace DIGOS.Ambassador.Core.Database.Services;
 public class ContextConfigurationService
 {
     private readonly ContentService _content;
+    private readonly IConfiguration _configuration;
+
     private readonly Dictionary<Type, string> _knownSchemas;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ContextConfigurationService"/> class.
     /// </summary>
     /// <param name="content">The content service.</param>
-    public ContextConfigurationService(ContentService content)
+    /// <param name="configuration">The application configuration.</param>
+    public ContextConfigurationService(ContentService content, IConfiguration configuration)
     {
         _content = content;
+        _configuration = configuration;
+
         _knownSchemas = new Dictionary<Type, string>();
     }
 
@@ -77,27 +81,11 @@ public class ContextConfigurationService
         EnsureSchemaIsCached<TContext>();
         var schema = _knownSchemas[typeof(TContext)];
 
-        var getCredentialStream = _content.GetDatabaseCredentialStream();
-        if (!getCredentialStream.IsSuccess)
-        {
-            throw new InvalidOperationException("Failed to get the database credential stream.");
-        }
-
-        DatabaseCredentials? credentials;
-        using (var credentialStream = new StreamReader(getCredentialStream.Entity))
-        {
-            var content = credentialStream.ReadToEnd();
-            if (!DatabaseCredentials.TryParse(content, out credentials))
-            {
-                throw new InvalidOperationException("Failed to parse the database credentials.");
-            }
-        }
-
         optionsBuilder
             .UseLazyLoadingProxies()
             .UseNpgsql
             (
-                credentials.GetConnectionString(),
+                _configuration.GetConnectionString("Amby"),
                 b => b.MigrationsHistoryTable(HistoryRepository.DefaultTableName + schema)
             )
             .UseSnakeCaseNamingConvention();

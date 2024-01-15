@@ -88,7 +88,8 @@ public sealed class KinksPlugin : PluginDescriptor, IMigratablePlugin
     /// <inheritdoc />
     public async Task<Result> MigrateAsync(IServiceProvider serviceProvider, CancellationToken ct = default)
     {
-        var context = serviceProvider.GetRequiredService<KinksDatabaseContext>();
+        await using var scope = serviceProvider.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<KinksDatabaseContext>();
 
         await context.Database.MigrateAsync(ct);
 

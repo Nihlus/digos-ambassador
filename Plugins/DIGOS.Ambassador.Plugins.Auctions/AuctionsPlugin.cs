@@ -85,7 +85,8 @@ public sealed class AuctionsPlugin : PluginDescriptor, IMigratablePlugin
     /// <inheritdoc />
     public async Task<Result> MigrateAsync(IServiceProvider serviceProvider, CancellationToken ct = default)
     {
-        var context = serviceProvider.GetRequiredService<AuctionsDatabaseContext>();
+        await using var scope = serviceProvider.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<AuctionsDatabaseContext>();
 
         await context.Database.MigrateAsync(ct);
 
@@ -99,7 +100,9 @@ public sealed class AuctionsPlugin : PluginDescriptor, IMigratablePlugin
         CancellationToken ct = default
     )
     {
-        var displayService = serviceProvider.GetRequiredService<AuctionDisplayService>();
+        await using var scope = serviceProvider.CreateAsyncScope();
+        var displayService = scope.ServiceProvider.GetRequiredService<AuctionDisplayService>();
+
         return await displayService.RefreshDisplaysAsync(ct);
     }
 }

@@ -94,10 +94,10 @@ public sealed class PermissionsPlugin : PluginDescriptor, IMigratablePlugin
     /// <inheritdoc />
     public async Task<Result> MigrateAsync(IServiceProvider serviceProvider, CancellationToken ct = default)
     {
-        var context = serviceProvider.GetRequiredService<PermissionsDatabaseContext>();
+        await using var scope = serviceProvider.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<PermissionsDatabaseContext>();
 
         await context.Database.MigrateAsync(ct);
-
         return Result.FromSuccess();
     }
 }

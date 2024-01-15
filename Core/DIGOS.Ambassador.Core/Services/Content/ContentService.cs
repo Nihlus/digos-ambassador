@@ -22,8 +22,6 @@
 
 using System;
 using System.IO;
-using System.Threading.Tasks;
-using DIGOS.Ambassador.Core.Async;
 using JetBrains.Annotations;
 using Remora.Results;
 using Zio;
@@ -78,44 +76,6 @@ public class ContentService
         this.PrivacyPolicyUri = new Uri(this.BaseCDNUri, "privacy/PrivacyPolicy.pdf");
 
         this.DatabaseCredentialsPath = UPath.Combine(UPath.Root, "Database", "database.credentials");
-    }
-
-    /// <summary>
-    /// Retrieves the database credentials.
-    /// </summary>
-    /// <returns>A retrieval result which may or may not have succeeded.</returns>
-    public Result<Stream> GetDatabaseCredentialStream()
-    {
-        return OpenLocalStream(this.DatabaseCredentialsPath);
-    }
-
-    /// <summary>
-    /// Loads the bot token from disk.
-    /// </summary>
-    /// <exception cref="FileNotFoundException">Thrown if the bot token file can't be found.</exception>
-    /// <exception cref="InvalidDataException">Thrown if no token exists in the file.</exception>
-    /// <returns>A retrieval result which may or may not have succeeded.</returns>
-    public async Task<Result<string>> GetBotTokenAsync()
-    {
-        var tokenPath = UPath.Combine(UPath.Root, "Discord", "bot.token");
-
-        if (!this.FileSystem.FileExists(tokenPath))
-        {
-            return new InvalidOperationError("The token file could not be found.");
-        }
-
-        var getTokenStream = OpenLocalStream(tokenPath);
-        if (!getTokenStream.IsSuccess)
-        {
-            return new InvalidOperationError("The token file could not be opened.");
-        }
-
-        await using var tokenStream = getTokenStream.Entity;
-        var token = await AsyncIO.ReadAllTextAsync(tokenStream);
-
-        return string.IsNullOrEmpty(token)
-            ? new InvalidOperationError("The token file did not contain a valid token.")
-            : Result<string>.FromSuccess(token);
     }
 
     /// <summary>

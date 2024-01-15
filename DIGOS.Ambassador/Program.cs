@@ -22,19 +22,16 @@
 
 using System;
 using System.Drawing;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml;
+using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.ExecutionEventServices;
 using DIGOS.Ambassador.Responders;
 using DIGOS.Ambassador.Services;
-using log4net;
-using log4net.Config;
-using log4net.Repository.Hierarchy;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
@@ -55,6 +52,7 @@ using Remora.Discord.Hosting.Extensions;
 using Remora.Plugins.Services;
 using Remora.Rest.Core;
 using Remora.Results;
+using Serilog;
 
 namespace DIGOS.Ambassador;
 
@@ -77,113 +75,94 @@ internal class Program
             cancellationSource.Cancel();
         };
 
-        // Configure logging
-        const string configurationName = "DIGOS.Ambassador.log4net.config";
-        var logConfig = new XmlDocument();
-        await using (var configStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(configurationName))
-        {
-            if (configStream is null)
-            {
-                throw new InvalidOperationException("The log4net configuration stream could not be found.");
-            }
-
-            logConfig.Load(configStream);
-        }
-
-        var repo = LogManager.CreateRepository(Assembly.GetEntryAssembly(), typeof(Hierarchy));
-        XmlConfigurator.Configure(repo, logConfig["log4net"]);
-
         var contentFileSystem = FileSystemFactory.CreateContentFileSystem();
         var contentService = new ContentService(contentFileSystem);
-
-        var getBotToken = await contentService.GetBotTokenAsync();
-        if (!getBotToken.IsSuccess)
-        {
-            throw new InvalidOperationException("No bot token available.");
-        }
-
-        var token = getBotToken.Entity.Trim();
 
         var options = Options.Create(new PluginServiceOptions(Array.Empty<string>()));
         var pluginService = new PluginService(options);
 
         var plugins = pluginService.LoadPluginTree();
 
-        var hostBuilder = Host.CreateDefaultBuilder()
-            .AddDiscordService(_ => token)
-            .UseSystemd()
-            .ConfigureServices(services =>
-            {
-                services.Configure<DiscordGatewayClientOptions>(o =>
-                {
-                    o.Intents |= GatewayIntents.MessageContents;
-                });
+        var hostBuilder = Host.CreateApplicationBuilder();
 
-                services.Configure<ServiceProviderOptions>(s =>
-                {
-                    s.ValidateScopes = true;
-                    s.ValidateOnBuild = true;
-                });
+        hostBuilder.Configuration
+            .AddAmbassadorConfigurationFiles();
 
-                services.Configure<CommandResponderOptions>(o => o.Prefix = "!");
+        hostBuilder.Services
+            .AddDiscordService
+            (
+                _ => hostBuilder.Configuration.GetValue<string>("Discord:Token")
+                     ?? throw new InvalidOperationException("No bot token set")
+            );
 
-                services
-                    .AddSingleton(pluginService)
-                    .AddSingleton(contentService)
-                    .AddSingleton(contentFileSystem)
-                    .AddScoped<MessageRelayService>()
-                    .AddSingleton<Random>();
+        hostBuilder.Services.AddSystemd();
 
-                services
-                    .AddDiscordCommands(true)
-                    .AddDiscordCaching();
+        hostBuilder.Services.Configure<DiscordGatewayClientOptions>(o =>
+        {
+            o.Intents |= GatewayIntents.MessageContents;
+        });
 
-                // Configure cache times
-                services.Configure<CacheSettings>(settings =>
-                {
-                    settings.SetAbsoluteExpiration<IGuildMember>(TimeSpan.FromDays(1));
-                    settings.SetAbsoluteExpiration<IMessage>(TimeSpan.FromDays(1));
-                });
+        hostBuilder.Services.Configure<ServiceProviderOptions>(s =>
+        {
+            s.ValidateScopes = true;
+            s.ValidateOnBuild = true;
+        });
 
-                // Set up the feedback theme
-                var theme = (FeedbackTheme)FeedbackTheme.DiscordDark with
-                {
-                    Secondary = Color.MediumPurple
-                };
+        hostBuilder.Services.Configure<CommandResponderOptions>(o => o.Prefix = "!");
 
-                services.AddSingleton<IFeedbackTheme>(theme);
+        hostBuilder.Services
+            .AddSingleton(pluginService)
+            .AddSingleton(contentService)
+            .AddSingleton(contentFileSystem)
+            .AddScoped<MessageRelayService>()
+            .AddSingleton<Random>();
 
-                // Add execution events
-                services
-                    .AddPreExecutionEvent<ConsentCheckingPreExecutionEvent>()
-                    .AddPreparationErrorEvent<MessageRelayingPreparationErrorEvent>()
-                    .AddPostExecutionEvent<MessageRelayingPostExecutionEvent>();
+        hostBuilder.Services
+            .AddDiscordCommands(true)
+            .AddDiscordCaching();
 
-                // Ensure we're automatically joining created threads
-                services.AddResponder<ThreadJoinResponder>();
+        // Configure cache times
+        hostBuilder.Services.Configure<CacheSettings>(settings =>
+        {
+            settings.SetAbsoluteExpiration<IGuildMember>(TimeSpan.FromDays(1));
+            settings.SetAbsoluteExpiration<IMessage>(TimeSpan.FromDays(1));
+        });
 
-                // Override the default responders
-                services.Replace(ServiceDescriptor.Scoped<CommandResponder, AmbassadorCommandResponder>());
-                services.Replace(ServiceDescriptor.Scoped<InteractionResponder, AmbassadorInteractionResponder>());
+        // Set up the feedback theme
+        var theme = (FeedbackTheme)FeedbackTheme.DiscordDark with
+        {
+            Secondary = Color.MediumPurple
+        };
 
-                services.AddParser<HumanTimeSpanReader>();
+        hostBuilder.Services.AddSingleton<IFeedbackTheme>(theme);
 
-                var configurePlugins = plugins.ConfigureServices(services);
-                if (!configurePlugins.IsSuccess)
-                {
-                    throw new InvalidOperationException();
-                }
-            })
-            .ConfigureLogging(l =>
-            {
-                l.ClearProviders();
+        // Add execution events
+        hostBuilder.Services
+            .AddPreExecutionEvent<ConsentCheckingPreExecutionEvent>()
+            .AddPreparationErrorEvent<MessageRelayingPreparationErrorEvent>()
+            .AddPostExecutionEvent<MessageRelayingPostExecutionEvent>();
 
-                l.AddLog4Net()
-                    .AddFilter("Microsoft.EntityFrameworkCore.Infrastructure", LogLevel.Warning)
-                    .AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Critical)
-                    .AddFilter("Microsoft.EntityFrameworkCore.Migrations", LogLevel.Warning)
-                    .AddFilter("Microsoft.EntityFrameworkCore.Update", LogLevel.Critical);
-            });
+        // Ensure we're automatically joining created threads
+        hostBuilder.Services.AddResponder<ThreadJoinResponder>();
+
+        // Override the default responders
+        hostBuilder.Services.Replace(ServiceDescriptor.Scoped<CommandResponder, AmbassadorCommandResponder>());
+        hostBuilder.Services.Replace(ServiceDescriptor.Scoped<InteractionResponder, AmbassadorInteractionResponder>());
+
+        hostBuilder.Services.AddParser<HumanTimeSpanReader>();
+
+        var configurePlugins = plugins.ConfigureServices(hostBuilder.Services);
+        if (!configurePlugins.IsSuccess)
+        {
+            throw new InvalidOperationException();
+        }
+
+        var logger = new LoggerConfiguration();
+        logger.ReadFrom.Configuration(hostBuilder.Configuration);
+
+        hostBuilder.Logging
+            .ClearProviders()
+            .AddSerilog(logger.CreateLogger());
 
         var host = hostBuilder.Build();
         var hostServices = host.Services;
@@ -192,7 +171,10 @@ internal class Program
         log.LogInformation("Running on {Framework}", RuntimeInformation.FrameworkDescription);
 
         Snowflake? debugServer = null;
-        var debugServerString = Environment.GetEnvironmentVariable("REMORA_DEBUG_SERVER");
+
+        var debugServerString = hostBuilder.Configuration.GetValue<string>("REMORA_DEBUG_SERVER")
+                                ?? hostBuilder.Configuration.GetValue<string>("Remora:DebugServer");
+
         if (debugServerString is not null)
         {
             if (!Snowflake.TryParse(debugServerString, out debugServer))
