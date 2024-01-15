@@ -24,7 +24,6 @@ using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
-using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using JetBrains.Annotations;
 using Remora.Rest.Core;
 
