@@ -244,21 +244,20 @@ public sealed partial class AuctionCommands : CommandGroup
         await _database.SaveChangesAsync(this.CancellationToken);
 
         var updateDisplays = await _auctionDisplay.UpdateDisplaysAsync(auction, this.CancellationToken);
-        if (!updateDisplays.IsSuccess)
+        if (updateDisplays.IsSuccess)
         {
-            var warnUser = await _feedbackService.SendContextualWarningAsync
-            (
-                "Failed to update auction displays. Some information may be out of date.",
-                ct: this.CancellationToken
-            );
-
-            if (!warnUser.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(warnUser);
-            }
+            return new FeedbackMessage("Auction opened.", Color.MediumPurple);
         }
 
-        return new FeedbackMessage("Auction opened.", Color.MediumPurple);
+        var warnUser = await _feedbackService.SendContextualWarningAsync
+        (
+            "Failed to update auction displays. Some information may be out of date.",
+            ct: this.CancellationToken
+        );
+
+        return warnUser.IsSuccess
+            ? new FeedbackMessage("Auction opened.", Color.MediumPurple)
+            : Result<FeedbackMessage>.FromError(warnUser);
     }
 
     /// <summary>
@@ -439,21 +438,20 @@ public sealed partial class AuctionCommands : CommandGroup
         await _database.SaveChangesAsync(this.CancellationToken);
 
         var updateDisplays = await _auctionDisplay.UpdateDisplaysAsync(auction, this.CancellationToken);
-        if (!updateDisplays.IsSuccess)
+        if (updateDisplays.IsSuccess)
         {
-            var warnUser = await _feedbackService.SendContextualWarningAsync
-            (
-                "Failed to update auction displays. Some information may be out of date.",
-                ct: this.CancellationToken
-            );
-
-            if (!warnUser.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(warnUser);
-            }
+            return new FeedbackMessage("Time extended.", Color.MediumPurple);
         }
 
-        return new FeedbackMessage("Time extended.", Color.MediumPurple);
+        var warnUser = await _feedbackService.SendContextualWarningAsync
+        (
+            "Failed to update auction displays. Some information may be out of date.",
+            ct: this.CancellationToken
+        );
+
+        return warnUser.IsSuccess ?
+            new FeedbackMessage("Time extended.", Color.MediumPurple)
+            : Result<FeedbackMessage>.FromError(warnUser);
     }
 
     /// <summary>
@@ -477,21 +475,20 @@ public sealed partial class AuctionCommands : CommandGroup
         await _database.SaveChangesAsync(this.CancellationToken);
 
         var updateDisplays = await _auctionDisplay.UpdateDisplaysAsync(auction, this.CancellationToken);
-        if (!updateDisplays.IsSuccess)
+        if (updateDisplays.IsSuccess)
         {
-            var warnUser = await _feedbackService.SendContextualWarningAsync
-            (
-                "Failed to update auction displays. Some information may be out of date.",
-                ct: this.CancellationToken
-            );
-
-            if (!warnUser.IsSuccess)
-            {
-                return Result<FeedbackMessage>.FromError(warnUser);
-            }
+            return new FeedbackMessage("Auction closed.", Color.MediumPurple);
         }
 
-        return new FeedbackMessage("Auction closed.", Color.MediumPurple);
+        var warnUser = await _feedbackService.SendContextualWarningAsync
+        (
+            "Failed to update auction displays. Some information may be out of date.",
+            ct: this.CancellationToken
+        );
+
+        return warnUser.IsSuccess
+            ? new FeedbackMessage("Auction closed.", Color.MediumPurple)
+            : Result<FeedbackMessage>.FromError(warnUser);
     }
 
     /// <summary>
