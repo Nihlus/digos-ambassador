@@ -1,0 +1,7 @@
+.debhelper/
+digos-ambassador/
+
+debhelper-build-stamp
+files
+*.substvars
+*.debhelper

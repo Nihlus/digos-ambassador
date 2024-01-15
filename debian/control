@@ -1,0 +1,25 @@
+Source: digos-ambassador
+Section: misc
+Priority: optional
+Maintainer: Jarl Gullberg <jarl.gullberg@gmail.com>
+Build-Depends:
+ debhelper-compat (= 13),
+ dotnet-sdk-8.0:amd64,
+ ronn (>=0.9),
+ bash-completion (>= 1:2.11)
+Standards-Version: 4.6.0
+Homepage: https://github.com/Nihlus/digos-ambassador
+Vcs-Browser: https://github.com/Nihlus/digos-ambassador
+Vcs-Git: https://github.com/Nihlus/digos-ambassador.git
+Rules-Requires-Root: no
+
+Package: digos-ambassador
+Architecture: any
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+ dotnet-runtime-8.0,
+ aspnetcore-runtime-8.0
+Description: Discord bot for the DIGOS community
+ The DIGOS Ambassador is a Discord bot for the DIGOS community, providing many
+ useful features and tools.

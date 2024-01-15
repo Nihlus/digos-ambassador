@@ -1,0 +1,29 @@
+#!/usr/bin/make -f
+
+export DOTNET_NOLOGO=true
+export DOTNET_CLI_TELEMETRY_OPTOUT=true
+export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true
+
+ifeq ($(BUILD_HOST_ARCH), amd64)
+	export RID=linux-amd64
+else ifeq ($(BUILD_HOST_ARCH), arm64)
+	export RID=linux-arm64
+else
+$(error unsupported runtime architecture - consult the .NET documentation)
+endif
+
+%:
+	dh $@ --with bash-completion
+
+override_dh_auto_clean:
+	dotnet clean
+
+override_dh_auto_build:
+	dotnet publish -f net8.0 -c Release -r $(RID) --self-contained false -o bin/digos-ambassador DIGOS.Ambassador/DIGOS.Ambassador.csproj
+	ronn -r -o bin/digos-ambassador/ DIGOS.Ambassador/digos-ambassador.1.ronn
+	chmod -x bin/digos-ambassador/*.dll
+	chmod 640 bin/digos-ambassador/appsettings.json
+
+override_dh_installsystemd:
+	dh_installsysusers
+	dh_installsystemd --no-start --no-enable

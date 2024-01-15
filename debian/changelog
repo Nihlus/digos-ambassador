@@ -1,0 +1,5 @@
+digos-ambassador (7.0.0+deb12) stable; urgency=medium
+
+  * Initial Debian 12 release.
+
+ -- Jarl Gullberg <jarl.gullberg@gmail.com>  Mon, 15 Jan 2024 20:20:00 +0200

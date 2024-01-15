@@ -1,0 +1,44 @@
+[Unit]
+Description=Discord bot for the DIGOS community
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+Type=notify
+ExecStart=/usr/lib/digos-ambassador/digos-ambassador
+Restart=always
+
+User=digos-ambassador
+Group=digos-ambassador
+
+WorkingDirectory=/usr/lib/digos-ambassador
+
+# Various security options. These are mainly recommended becase digos-ambassador contains a complete code execution
+# engine that runs in-process, and is by its very nature sometimes running unknown external user code. Lua is
+# theoretically already sandboxed, but better safe than sorry.
+#
+# In summary, everything including the kitchen sink is restricted, and the only thing that is allowed is network
+# communication.
+NoNewPrivileges=true
+LockPersonality=true
+SystemCallArchitectures=native
+
+PrivateTmp=true
+PrivateIPC=true
+
+ProtectHome=true
+ProtectSystem=strict
+PrivateUsers=true
+ProtectHostname=true
+ProtectClock=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX AF_NETLINK
+RestrictNamespaces=mnt
+RestrictRealtime=true
+
+[Install]
+WantedBy=multi-user.target

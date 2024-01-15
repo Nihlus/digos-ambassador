@@ -1,0 +1,7 @@
+bin/digos-ambassador/appsettings.json etc/digos-ambassador/
+bin/digos-ambassador/*.dll usr/lib/digos-ambassador/
+bin/digos-ambassador/*.deps.json usr/lib/digos-ambassador/
+bin/digos-ambassador/*.runtimeconfig.json usr/lib/digos-ambassador/
+bin/digos-ambassador/Content usr/lib/digos-ambassador/
+bin/digos-ambassador/*.so usr/lib/digos-ambassador/
+bin/digos-ambassador/digos-ambassador usr/lib/digos-ambassador/

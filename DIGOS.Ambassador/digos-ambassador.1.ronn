@@ -1,0 +1,35 @@
+digos-ambassador(1) -- Discord bot for the DIGOS community
+================================================================================
+
+## SYNOPSIS
+
+`digos-ambassador` [<flag>...]
+
+## DESCRIPTION
+ The DIGOS Ambassador is a Discord bot for the DIGOS community, providing many
+ useful features and tools.
+
+ The core binary is meant to run as a service, and has no user-facing flags or
+ options on the command line. All configuration is done through the
+ configuration files mentioned below.
+
+## EXIT STATUS
+0 on success; otherwise, a nonzero value. Error information is printed to
+standard output and to the configured log files.
+
+## ENVIRONMENT
+digos-ambassador loads configuration options from the environment via
+[Microsoft.Extensions.Configuration][1], meaning that any configuration key in
+a file on disk can be overridden by a corresponding environment variable.
+
+Beyond these, digos-ambassador does not read any specific environment variables.
+
+## FILES
+* /etc/digos-ambassador/appsettings.json:
+  The main system-wide configuration file.
+* /etc/digos-ambassador/conf.d/*.json:
+  Drop-in configuration files; overrides the main configuration file on a
+  key-by-key basis in lexicographical order.
+
+
+[1]: https://learn.microsoft.com/en-us/aspnet/core/fundamentals/configuration

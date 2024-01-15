@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -e
+
+#DEBHELPER#
+
+case "${1}" in
+  configure)
+    chown root:digos-ambassador /etc/digos-ambassador/appsettings.json
+    ;;
+  *)
+    ;;
+esac
